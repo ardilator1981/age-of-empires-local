@@ -20,6 +20,8 @@ interface MenuState {
   popLimit: number;
   speed: number;
   mods: string[];
+  /** Mods que ya existían la última vez que se guardó el menú (los nuevos se activan solos si son por defecto). */
+  knownMods?: string[];
 }
 
 const STORAGE_KEY = 'aoe-local-menu-v1';
@@ -68,6 +70,10 @@ export class Menu {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) this.state = { ...DEFAULTS, ...JSON.parse(raw) };
     } catch { /* sin almacenamiento */ }
+    const known = this.state.knownMods ?? this.state.mods;
+    const added = ALL_MODS.filter(m => !m.core && m.defaultEnabled && !known.includes(m.id)).map(m => m.id);
+    this.state.mods = [...new Set([...this.state.mods, ...added])];
+    this.state.knownMods = ALL_MODS.map(m => m.id);
   }
 
   private save() {

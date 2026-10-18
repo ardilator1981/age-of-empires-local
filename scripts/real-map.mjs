@@ -480,7 +480,7 @@ async function main() {
     const queries = {
       agua: `[out:json][timeout:180];(way["waterway"~"^(river|stream|canal)$"](${bb});way["natural"="water"](${bb});relation["natural"="water"](${bb});way["landuse"~"^(reservoir|basin)$"](${bb});relation["landuse"="reservoir"](${bb});way["waterway"="riverbank"](${bb});relation["waterway"="riverbank"](${bb}););out geom;`,
       vegetación: `[out:json][timeout:180];(way["landuse"~"^(forest|meadow|grass|farmland|orchard|vineyard|allotments)$"](${bb});relation["landuse"~"^(forest|meadow|grass|farmland)$"](${bb});way["natural"~"^(wood|scrub|heath|grassland)$"](${bb});relation["natural"~"^(wood|scrub|heath|grassland)$"](${bb}););out geom;`,
-      'roca y núcleos': `[out:json][timeout:180];(way["natural"~"^(bare_rock|scree|shingle|glacier|cliff)$"](${bb});relation["natural"~"^(bare_rock|scree|glacier)$"](${bb});way["landuse"~"^(residential|industrial|commercial|retail)$"](${bb});node["place"~"^(city|town|village|hamlet)$"](${bb}););out geom;`,
+      'roca y núcleos': `[out:json][timeout:180];(way["natural"~"^(bare_rock|scree|shingle|glacier|cliff)$"](${bb});relation["natural"~"^(bare_rock|scree|glacier)$"](${bb});way["landuse"~"^(residential|industrial|commercial|retail)$"](${bb});relation["landuse"~"^(residential|industrial)$"](${bb});node["place"~"^(city|town|village|hamlet)$"](${bb}););out geom;`,
     };
     const elements = [];
     try {
@@ -496,6 +496,12 @@ async function main() {
     }
     const proj = p => frame.toTile(...toUtm(p.lat, p.lon, zone));
     const inside = (pts, m) => pts.some(([x, y]) => x >= -m && y >= -m && x <= tiles + m && y <= tiles + m);
+    // Un polígono puede envolver el mapa entero sin tener vértices dentro: basta con que su recuadro lo toque
+    const overlaps = pts => {
+      let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+      for (const [x, y] of pts) { x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y); }
+      return x1 >= 0 && y1 >= 0 && x0 <= tiles && y0 <= tiles;
+    };
     // Polígonos por capas
     const polys = Object.fromEntries(LAYERS.map(l => [l, []]));
     for (const el of elements) {
@@ -525,7 +531,7 @@ async function main() {
       else if (el.type === 'relation' && el.members) rings = assembleRings(el.members.filter(m => m.type === 'way' && m.geometry).map(m => m.geometry));
       else continue;
       const tr = rings.map(r => r.map(proj));
-      if (tr.some(r => inside(r, 0))) polys[cls].push(tr);
+      if (tr.some(overlaps)) polys[cls].push(tr);
     }
     for (const cls of LAYERS) for (const rings of polys[cls]) fillRings(rings, tiles, (u, v) => { terrain[v][u] = cls; });
     // Los acantilados son roca
