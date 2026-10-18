@@ -1,0 +1,387 @@
+import type { Cost, Pt, System } from '../../core/types';
+import { isAccessible, nearestDrop, nearestNode, isFarmTaken, setOrder } from '../actions';
+import { Commands } from '../commands';
+import type { Entity } from '../Entity';
+import type { Game } from '../Game';
+import type { Player } from '../Player';
+import { buildingAvail, researchablesAt, techAvail, trainablesAt, unitAvail } from '../rules';
+
+interface Difficulty {
+  gather: number;
+  maxVillagers: number;
+  firstAttack: number;
+  wave: number;
+  waveGrow: number;
+  villagersForAge: number[];
+  think: number;
+}
+
+export const AI_DIFFICULTY: Record<string, Difficulty> = {
+  easy: { gather: 0.75, maxVillagers: 18, firstAttack: 900, wave: 5, waveGrow: 1, villagersForAge: [14, 20, 26], think: 2 },
+  normal: { gather: 1.0, maxVillagers: 28, firstAttack: 600, wave: 8, waveGrow: 2, villagersForAge: [18, 24, 30], think: 1 },
+  hard: { gather: 1.15, maxVillagers: 40, firstAttack: 420, wave: 10, waveGrow: 3, villagersForAge: [20, 26, 32], think: 0.6 },
+};
+
+const RATIOS: Record<string, number>[] = [
+  { food: 0.55, wood: 0.4, gold: 0.05, stone: 0 },
+  { food: 0.45, wood: 0.35, gold: 0.15, stone: 0.05 },
+  { food: 0.4, wood: 0.3, gold: 0.25, stone: 0.05 },
+  { food: 0.38, wood: 0.27, gold: 0.28, stone: 0.07 },
+];
+
+/**
+ * IA de un jugador. Lee las definiciones del Registry (no conoce unidades
+ * concretas salvo por clases), así que usa también el contenido de los mods.
+ */
+export class AIController {
+  private nextThink = 0;
+  private waveSize: number;
+  private rebalanceAt = 60;
+  private cfg: Difficulty;
+  private home: Pt = { x: 0, y: 0 };
+  private nodes: Entity[] = [];
+
+  constructor(private game: Game, private p: Player) {
+    this.cfg = AI_DIFFICULTY[p.difficulty] ?? AI_DIFFICULTY.normal;
+    if (this.cfg.gather !== 1) p.addEffects([{ type: 'gatherRate', resource: '*', op: 'mul', value: this.cfg.gather }], game);
+    this.waveSize = this.cfg.wave;
+    this.nextThink = game.rng() * this.cfg.think;
+  }
+
+  update() {
+    const g = this.game;
+    if (g.time < this.nextThink || this.p.defeated) return;
+    this.nextThink = g.time + this.cfg.think;
+    this.think();
+  }
+
+  private isTC(e: Entity) { return e.kind === 'building' && this.game.buildingDef(e).classes.includes('townCenter'); }
+
+  private think() {
+    const g = this.game, p = this.p;
+    const mine = g.actors.filter(e => e.owner === p.id && !e.dead);
+    const vills = mine.filter(e => e.kind === 'unit' && g.unitDef(e).gatherer);
+    const army = mine.filter(e => e.kind === 'unit' && !g.unitDef(e).gatherer && (g.unitDef(e).attack ?? 0) > 0);
+    const blds = mine.filter(e => e.kind === 'building');
+    const tcs = blds.filter(b => this.isTC(b) && b.complete);
+    const tc = tcs[0];
+    if (tc) this.home = { x: tc.x, y: tc.y };
+    else if (vills[0]) this.home = { x: vills[0].x, y: vills[0].y };
+    else if (!army.length) return;
+    this.nodes = g.nodes.filter(e => !e.dead);
+
+    // ¿Toca avanzar de edad?
+    const ageTech = [...g.reg.techs.values()].find(t => t.setsAge === p.age + 1 && techAvail(g, p, t.id).visible);
+    const agingUp = blds.some(b => b.queue.some(q => q.kind === 'tech' && g.reg.tech(q.id).setsAge !== undefined));
+    const wantAge = !!ageTech && !agingUp && vills.length >= (this.cfg.villagersForAge[p.age] ?? 99);
+    const reserve: Cost = wantAge && ageTech ? p.getCost(ageTech) : {};
+    const canSpend = (cost: Cost) => Object.entries(cost).every(([r, v]) => (p.res[r] ?? 0) - (reserve[r] ?? 0) >= (v ?? 0));
+
+    // 1. Aldeanos
+    const queuedVills = tcs.reduce((n, b) => n + b.queue.filter(q => q.kind === 'unit' && g.reg.unit(q.id).gatherer).length, 0);
+    for (const b of tcs) {
+      if (vills.length + queuedVills >= this.cfg.maxVillagers || b.queue.length >= 2) continue;
+      const vid = trainablesAt(g, p, b.defId).find(id => g.reg.unit(id).gatherer);
+      if (vid && canSpend(p.getCost(g.reg.unit(vid)))) Commands.train(g, b, vid);
+    }
+
+    // 2. Casas
+    const house = [...g.reg.buildings.values()].find(b => (b.popProvided ?? 0) > 0 && b.category === 'economy' && !b.classes.includes('townCenter'));
+    if (house && p.popCap < g.opts.popLimit && p.popCap - p.popUsed <= (p.age >= 2 ? 6 : 3) && (p.pending.get(house.id) ?? 0) === 0) {
+      this.build(house.id, this.home, 1, vills);
+    }
+
+    // 3. Edificios de depósito y militares
+    this.ensureDropSites(vills);
+    this.ensureFoodBuilding(vills);
+    this.resumeFoundations(blds, vills);
+    if (vills.length >= 10) this.buildOne(['barracks'], vills);
+    if (p.age >= 1 && vills.length >= 16) this.buildOne(['blacksmith', 'archeryRange', 'stable'], vills, canSpend);
+    if (p.age >= 1 && (p.res.stone ?? 0) >= 200 && p.countAll('watchTower') < 2) this.buildOne(['watchTower'], vills, canSpend);
+    if (p.age >= 2) {
+      this.buildOne(['siegeWorkshop'], vills, canSpend);
+      if ((p.res.stone ?? 0) >= 650) this.buildOne(['castle'], vills, canSpend);
+      if (vills.length > 25 && p.countAll('barracks') < 2) this.buildOne(['barracks'], vills, canSpend, true);
+    }
+
+    // 4. Edad
+    if (wantAge && ageTech && tc && techAvail(g, p, ageTech.id).ok) Commands.research(g, tc, ageTech.id);
+
+    // 5. Tecnologías (cualquiera disponible, incluidas las de mods)
+    if (g.rng() < 0.5) {
+      for (const b of blds) {
+        if (!b.complete || b.queue.length) continue;
+        const opts = researchablesAt(g, p, b.defId).filter(t => g.reg.tech(t).setsAge === undefined && techAvail(g, p, t).ok && canSpend(p.getCost(g.reg.tech(t))));
+        if (!opts.length) continue;
+        if (!this.isTC(b) && army.length < 5 && g.buildingDef(b).category === 'military' && g.rng() < 0.7) continue;
+        Commands.research(g, b, opts[Math.floor(g.rng() * opts.length)]);
+        break;
+      }
+    }
+
+    // 6. Ejército
+    if (vills.length >= 8) {
+      for (const b of blds) {
+        if (!b.complete || b.queue.length >= 2) continue;
+        const units = trainablesAt(g, p, b.defId).filter(id => {
+          const d = g.reg.unit(id);
+          return !d.gatherer && (d.attack ?? 0) > 0 && unitAvail(g, p, id).ok && canSpend(p.getCost(d));
+        });
+        if (!units.length) continue;
+        // Prefiere unidades de edades más avanzadas
+        units.sort((a, c) => g.reg.unit(c).age - g.reg.unit(a).age);
+        const pick = g.rng() < 0.6 ? units[0] : units[Math.floor(g.rng() * units.length)];
+        if (g.reg.unit(pick).classes.includes('siege') && army.filter(a => g.unitDef(a).classes.includes('siege')).length >= 2) continue;
+        Commands.train(g, b, pick);
+      }
+    }
+
+    // 7. Recolección
+    this.assignVillagers(vills);
+
+    // 8. Defensa y ataque
+    this.controlArmy(army, blds);
+  }
+
+  // ------------------------------------------------------------ construcción
+
+  private buildOne(ids: string[], vills: Entity[], canSpend: (c: Cost) => boolean = () => true, allowMore = false) {
+    const g = this.game, p = this.p;
+    for (const id of ids) {
+      if (!g.reg.buildings.has(id)) continue;
+      if (!allowMore && p.countAll(id) > 0) continue;
+      if ((p.pending.get(id) ?? 0) > 0) continue;
+      if (!canSpend(p.getCost(g.reg.building(id)))) continue;
+      if (this.build(id, this.home, 1, vills)) return;
+    }
+  }
+
+  private build(defId: string, near: Pt, n: number, vills: Entity[], minR = 4, maxR = 18): boolean {
+    const g = this.game, p = this.p;
+    if (!buildingAvail(g, p, defId).ok || !vills.length) return false;
+    const spot = this.findSpot(defId, near, minR, maxR);
+    if (!spot) return false;
+    const center = { x: spot.x + g.reg.building(defId).size / 2, y: spot.y + g.reg.building(defId).size / 2 };
+    const free = vills.filter(v => v.order?.type !== 'build');
+    const pool = free.length ? free : vills;
+    const builders = [...pool].sort((a, b) => Math.hypot(a.x - center.x, a.y - center.y) - Math.hypot(b.x - center.x, b.y - center.y)).slice(0, n);
+    return !!Commands.placeBuilding(g, p.id, defId, spot.x, spot.y, builders);
+  }
+
+  private findSpot(defId: string, near: Pt, minR: number, maxR: number): Pt | null {
+    const g = this.game, m = g.map;
+    const def = g.reg.building(defId);
+    const s = def.size;
+    const isDrop = !!def.dropSite && !def.classes.includes('townCenter');
+    const isFarm = !!def.gatherable;
+    const cx = Math.round(near.x - s / 2), cy = Math.round(near.y - s / 2);
+    const start = Math.floor(g.rng() * 8);
+    const free = g.findFreeTile(this.home.x, this.home.y, 8);
+    const homeRegion = free ? m.region(Math.floor(free.x), Math.floor(free.y)) : -1;
+    for (let r = minR; r <= maxR; r++) {
+      const ring: Pt[] = [];
+      for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) {
+        if (Math.max(Math.abs(dx), Math.abs(dy)) === r) ring.push({ x: cx + dx, y: cy + dy });
+      }
+      for (let i = 0; i < ring.length; i++) {
+        const t = ring[(i + start * r) % ring.length];
+        if (!g.canPlace(defId, t.x, t.y)) continue;
+        // Tiene que ser alcanzable desde la base
+        if (!m.rectTouchesRegion(t.x, t.y, t.x + s - 1, t.y + s - 1, homeRegion, false)) continue;
+        if (isFarm) return t;
+        // Deja un pasillo libre alrededor
+        let ok = true;
+        for (let y = t.y - 1; y <= t.y + s && ok; y++) for (let x = t.x - 1; x <= t.x + s; x++) {
+          if (x >= t.x && x < t.x + s && y >= t.y && y < t.y + s) continue;
+          if (!m.inBounds(x, y)) { ok = false; break; }
+          const occ = m.occupant[y * m.w + x];
+          if (!occ) continue;
+          const e = g.entities.get(occ);
+          if (!e) continue;
+          if (e.kind === 'building' || (!isDrop && g.nodeDef(e)?.resource !== 'wood')) { ok = false; break; }
+        }
+        if (ok) return t;
+      }
+    }
+    return null;
+  }
+
+  private dropBuildingFor(res: string): string | null {
+    for (const b of this.game.reg.buildings.values()) {
+      if (b.dropSite?.includes(res) && !b.classes.includes('townCenter') && b.category === 'economy') return b.id;
+    }
+    return null;
+  }
+
+  private ensureDropSites(vills: Entity[]) {
+    const g = this.game, p = this.p;
+    const byRes = new Map<string, Entity[]>();
+    for (const v of vills) {
+      if (v.order?.type !== 'gather') continue;
+      const t = g.get(v.order.targetId);
+      if (!t || t.kind !== 'resource') continue;
+      const l = byRes.get(t.resType!) ?? [];
+      l.push(t);
+      byRes.set(t.resType!, l);
+    }
+    for (const [res, targets] of byRes) {
+      if (targets.length < (res === 'wood' ? 3 : 2)) continue;
+      const dropId = this.dropBuildingFor(res);
+      if (!dropId || (p.pending.get(dropId) ?? 0) > 0) continue;
+      const node = targets[0];
+      const drop = nearestDrop(g, p, res, node.x, node.y);
+      const d = drop ? Math.hypot(drop.x - node.x, drop.y - node.y) - drop.size / 2 : Infinity;
+      if (d > 6) this.build(dropId, node, 1, vills, 1, 6);
+    }
+  }
+
+  /** El edificio que habilita las granjas (molino), cerca de las bayas o de casa. */
+  private ensureFoodBuilding(vills: Entity[]) {
+    const g = this.game, p = this.p;
+    const farm = [...g.reg.buildings.values()].find(b => b.gatherable?.resource === 'food');
+    for (const req of farm?.requiresBuildings ?? []) {
+      if (p.countAll(req) > 0 || vills.length < 7) continue;
+      const berries = nearestNode(g, this.home.x, this.home.y, 16, e => e.kind === 'resource' && e.resType === 'food');
+      this.build(req, berries ?? this.home, 1, vills, berries ? 1 : 4, berries ? 6 : 14);
+    }
+  }
+
+  /** Cimientos sin nadie construyéndolos: envía al aldeano libre más cercano. */
+  private resumeFoundations(blds: Entity[], vills: Entity[]) {
+    const g = this.game;
+    for (const b of blds) {
+      if (b.complete) continue;
+      if (vills.some(v => v.order?.type === 'build' && v.order.targetId === b.id)) continue;
+      const free = vills.filter(v => v.order?.type !== 'build');
+      const v = free.sort((x, y) => Math.hypot(x.x - b.x, x.y - b.y) - Math.hypot(y.x - b.x, y.y - b.y))[0];
+      if (v) Commands.build(g, [v], b);
+    }
+  }
+
+  // ------------------------------------------------------------ economía
+
+  private resourceOf(v: Entity): string | null {
+    if (v.order?.type !== 'gather') return null;
+    const t = this.game.get(v.order.targetId);
+    return t?.resType ?? v.order.resType ?? v.carry?.type ?? null;
+  }
+
+  private assignVillagers(vills: Entity[]) {
+    const g = this.game, p = this.p;
+    const ratio = RATIOS[Math.min(p.age, RATIOS.length - 1)];
+    const counts: Record<string, number> = {};
+    for (const r of Object.keys(ratio)) counts[r] = 0;
+    for (const v of vills) { const r = this.resourceOf(v); if (r) counts[r] = (counts[r] ?? 0) + 1; }
+    const total = vills.length;
+    const deficit = (r: string) => (ratio[r] ?? 0) * total - (counts[r] ?? 0);
+
+    for (const v of vills) {
+      if (v.order) continue;
+      const order = Object.keys(ratio).sort((a, b) => deficit(b) - deficit(a));
+      for (const r of order) {
+        if ((ratio[r] ?? 0) <= 0) continue;
+        if (this.sendToResource(v, r, vills)) { counts[r] = (counts[r] ?? 0) + 1; break; }
+      }
+    }
+
+    // Reequilibrio ocasional
+    if (g.time >= this.rebalanceAt) {
+      this.rebalanceAt = g.time + 25;
+      const keys = Object.keys(ratio);
+      const under = keys.sort((a, b) => deficit(b) - deficit(a))[0];
+      const over = keys.sort((a, b) => deficit(a) - deficit(b))[0];
+      if (under !== over && deficit(under) > 1.5 && deficit(over) < -1.5) {
+        const v = vills.find(x => this.resourceOf(x) === over && (!x.carry || x.carry.amount < 1));
+        if (v && this.sendToResource(v, under, vills)) { /* reasignado */ }
+      }
+    }
+  }
+
+  private sendToResource(v: Entity, res: string, vills: Entity[]): boolean {
+    const g = this.game, p = this.p, h = this.home;
+    let best: Entity | null = null, bestD = res === 'food' ? 22 : 40;
+    for (const n of this.nodes) {
+      if (n.dead || n.resType !== res || n.amount <= 0) continue;
+      const dh = Math.hypot(n.x - h.x, n.y - h.y);
+      if (dh > bestD + 10) continue;
+      const d = dh * 0.6 + Math.hypot(n.x - v.x, n.y - v.y) * 0.4;
+      if (d < bestD && isAccessible(g, n, v)) { bestD = d; best = n; }
+    }
+    if (best) { setOrder(v, { type: 'gather', targetId: best.id, phase: 'gather' }); return true; }
+    if (res !== 'food') return false;
+    // Sin bayas: granjas
+    const farm = nearestNode(g, h.x, h.y, 25, e => e.kind === 'building' && e.owner === p.id && e.complete && !isFarmTaken(g, e));
+    if (farm) { setOrder(v, { type: 'gather', targetId: farm.id, phase: 'gather' }); return true; }
+    const farmDef = [...g.reg.buildings.values()].find(b => b.gatherable?.resource === 'food');
+    if (!farmDef) return false;
+    const mill = g.buildings.find(e => e.owner === p.id && !e.dead && g.buildingDef(e).dropSite?.includes('food') && !this.isTC(e));
+    const near = g.rng() < 0.6 || !mill ? h : { x: mill.x, y: mill.y };
+    return this.build(farmDef.id, near, 1, [v], 2, 10);
+  }
+
+  // ------------------------------------------------------------ ejército
+
+  private controlArmy(army: Entity[], blds: Entity[]) {
+    const g = this.game, p = this.p;
+    if (!army.length) return;
+    // Amenazas cerca de la base
+    const threats: Entity[] = [];
+    for (const e of g.units) {
+      if (e.dead || !g.isEnemy(p.id, e.owner)) continue;
+      for (const b of blds) {
+        if (Math.hypot(e.x - b.x, e.y - b.y) < 12) { threats.push(e); break; }
+      }
+    }
+    if (threats.length) {
+      for (const a of army) {
+        if (a.order?.type === 'attack' && !a.order.auto) continue;
+        if (Math.hypot(a.x - this.home.x, a.y - this.home.y) > 35) continue;
+        let best = threats[0], bd = Infinity;
+        for (const t of threats) { const d = Math.hypot(t.x - a.x, t.y - a.y); if (d < bd) { bd = d; best = t; } }
+        setOrder(a, { type: 'attack', targetId: best.id });
+      }
+      return;
+    }
+
+    const idle = army.filter(a => !a.order);
+    // Las tropas que ya están en territorio enemigo siguen atacando
+    const deep = idle.filter(a => Math.hypot(a.x - this.home.x, a.y - this.home.y) > 25);
+    if (deep.length) {
+      const t = this.enemyTarget(deep[0]);
+      if (t) Commands.attackMove(g, deep, t.x, t.y);
+    }
+    const atHome = idle.filter(a => !deep.includes(a));
+    if (g.time >= this.cfg.firstAttack && atHome.length >= this.waveSize) {
+      const t = this.enemyTarget(atHome[0]);
+      if (t) {
+        Commands.attackMove(g, atHome, t.x, t.y);
+        this.waveSize += this.cfg.waveGrow;
+      }
+    }
+  }
+
+  private enemyTarget(from: Entity): Entity | null {
+    const g = this.game;
+    let best: Entity | null = null, bd = Infinity;
+    for (const e of g.buildings) {
+      if (e.dead || !g.isEnemy(this.p.id, e.owner)) continue;
+      const d = Math.hypot(e.x - from.x, e.y - from.y) * (this.isTC(e) ? 0.7 : 1);
+      if (d < bd) { bd = d; best = e; }
+    }
+    if (best) return best;
+    for (const e of g.units) {
+      if (e.dead || !g.isEnemy(this.p.id, e.owner)) continue;
+      const d = Math.hypot(e.x - from.x, e.y - from.y);
+      if (d < bd) { bd = d; best = e; }
+    }
+    return best;
+  }
+}
+
+export class AISystem implements System {
+  private ais: AIController[];
+  constructor(game: Game) {
+    this.ais = game.players.slice(1).filter(p => !p.isHuman).map(p => new AIController(game, p));
+  }
+  update() { for (const ai of this.ais) ai.update(); }
+}

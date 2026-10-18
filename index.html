@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Age of Empires II · Edición local</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏰</text></svg>" />
+  </head>
+  <body>
+    <canvas id="game"></canvas>
+    <div id="hud">
+      <div id="topbar">
+        <div id="resources"></div>
+        <div id="age"></div>
+        <div class="spacer"></div>
+        <div id="clock">00:00</div>
+        <button id="btn-menu">Menú (F10)</button>
+      </div>
+      <div id="notices"></div>
+      <div id="bottombar">
+        <div id="commands"></div>
+        <div id="selection"></div>
+        <div id="minimap-wrap"><canvas id="minimap"></canvas></div>
+      </div>
+    </div>
+    <div id="tooltip"></div>
+    <div id="overlay"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

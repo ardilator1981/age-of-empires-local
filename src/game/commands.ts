@@ -1,0 +1,158 @@
+import type { Pt } from '../core/types';
+import { setOrder } from './actions';
+import type { Entity } from './Entity';
+import type { Game } from './Game';
+import { buildingAvail, techAvail, unitAvail } from './rules';
+
+/**
+ * Todas las acciones de los jugadores (humano o IA) pasan por aquí.
+ * Tener un único punto de entrada facilita añadir repeticiones, multijugador o
+ * guardado de partida en el futuro.
+ */
+
+function formation(n: number, x: number, y: number): Pt[] {
+  const cols = Math.ceil(Math.sqrt(n)), rows = Math.ceil(n / cols), sp = 0.75;
+  const out: Pt[] = [];
+  for (let i = 0; i < n; i++) {
+    const c = i % cols, r = Math.floor(i / cols);
+    out.push({ x: x + (c - (cols - 1) / 2) * sp, y: y + (r - (rows - 1) / 2) * sp });
+  }
+  return out;
+}
+
+function ownUnits(units: Entity[], pid: number) {
+  return units.filter(u => u.kind === 'unit' && !u.dead && u.owner === pid);
+}
+
+export const Commands = {
+  move(game: Game, units: Entity[], x: number, y: number) {
+    const spots = formation(units.length, x, y);
+    // Asigna los huecos por orden de cercanía para que no se crucen
+    const sorted = [...units].sort((a, b) => (a.x + a.y) - (b.x + b.y));
+    const ss = [...spots].sort((a, b) => (a.x + a.y) - (b.x + b.y));
+    sorted.forEach((u, i) => {
+      const s = ss[i];
+      const ok = game.map.walkable(Math.floor(s.x), Math.floor(s.y));
+      setOrder(u, { type: 'move', x: ok ? s.x : x, y: ok ? s.y : y });
+    });
+  },
+
+  attack(game: Game, units: Entity[], target: Entity) {
+    for (const u of units) if ((game.unitDef(u).attack ?? 0) > 0) setOrder(u, { type: 'attack', targetId: target.id });
+  },
+
+  attackMove(game: Game, units: Entity[], x: number, y: number) {
+    const spots = formation(units.length, x, y);
+    units.forEach((u, i) => setOrder(u, { type: 'attackMove', x: spots[i].x, y: spots[i].y, scanAt: 0 }));
+  },
+
+  gather(game: Game, units: Entity[], target: Entity) {
+    for (const u of units) {
+      if (!game.unitDef(u).gatherer) continue;
+      setOrder(u, { type: 'gather', targetId: target.id, phase: 'gather' });
+    }
+  },
+
+  build(game: Game, units: Entity[], target: Entity) {
+    for (const u of units) if (game.unitDef(u).builder) setOrder(u, { type: 'build', targetId: target.id });
+  },
+
+  stop(game: Game, units: Entity[]) {
+    for (const u of units) if (u.kind === 'unit') setOrder(u, null);
+  },
+
+  /** Clic derecho: decide qué hacer según el objetivo. Devuelve el tipo de acción. */
+  smart(game: Game, pid: number, units: Entity[], x: number, y: number, target: Entity | null): 'attack' | 'gather' | 'build' | 'move' | null {
+    const mine = ownUnits(units, pid);
+    if (!mine.length) return null;
+    if (target && !target.dead) {
+      if (game.isEnemy(pid, target.owner) && target.kind !== 'resource') {
+        const fighters = mine.filter(u => (game.unitDef(u).attack ?? 0) > 0);
+        Commands.attack(game, fighters, target);
+        const rest = mine.filter(u => !fighters.includes(u));
+        if (rest.length) Commands.move(game, rest, x, y);
+        return 'attack';
+      }
+      const gatherable = target.kind === 'resource' || (target.kind === 'building' && !!target.resType && target.owner === pid && target.complete);
+      if (gatherable) {
+        const g = mine.filter(u => game.unitDef(u).gatherer);
+        Commands.gather(game, g, target);
+        const rest = mine.filter(u => !g.includes(u));
+        if (rest.length) Commands.move(game, rest, target.x, target.y);
+        return 'gather';
+      }
+      if (target.kind === 'building' && target.owner === pid) {
+        const builders = mine.filter(u => game.unitDef(u).builder);
+        const rest = mine.filter(u => !builders.includes(u));
+        if (!target.complete || target.hp < target.maxHp) {
+          Commands.build(game, builders, target);
+        } else {
+          const def = game.buildingDef(target);
+          for (const u of builders) {
+            if (u.carry && u.carry.amount > 0 && def.dropSite?.includes(u.carry.type)) {
+              setOrder(u, { type: 'gather', phase: 'return', targetId: 0, lastX: u.data.lastNodeX ?? u.x, lastY: u.data.lastNodeY ?? u.y, nodeKind: u.data.lastNodeKind });
+            } else rest.push(u);
+          }
+        }
+        if (rest.length) Commands.move(game, rest, x, y);
+        return 'build';
+      }
+    }
+    Commands.move(game, mine, x, y);
+    return 'move';
+  },
+
+  placeBuilding(game: Game, pid: number, defId: string, tx: number, ty: number, builders: Entity[]): Entity | null {
+    const p = game.players[pid];
+    const def = game.reg.building(defId);
+    if (!buildingAvail(game, p, defId).ok || !game.canPlace(defId, tx, ty, pid)) return null;
+    p.pay(p.getCost(def));
+    const b = game.placeBuilding(defId, pid, tx, ty, false);
+    Commands.build(game, ownUnits(builders, pid), b);
+    return b;
+  },
+
+  train(game: Game, building: Entity, unitId: string): boolean {
+    const p = game.players[building.owner];
+    if (!building.complete || building.queue.length >= 15) return false;
+    const id = p.resolveUnit(unitId);
+    if (!unitAvail(game, p, id).ok) return false;
+    const def = game.reg.unit(id);
+    const cost = p.getCost(def);
+    p.pay(cost);
+    building.queue.push({ kind: 'unit', id, time: p.getStat(def, 'trainTime'), progress: 0, cost });
+    return true;
+  },
+
+  research(game: Game, building: Entity, techId: string): boolean {
+    const p = game.players[building.owner];
+    if (!building.complete || building.queue.length >= 15) return false;
+    if (!techAvail(game, p, techId).ok) return false;
+    const def = game.reg.tech(techId);
+    const cost = p.getCost(def);
+    p.pay(cost);
+    building.queue.push({ kind: 'tech', id: techId, time: def.researchTime, progress: 0, cost });
+    return true;
+  },
+
+  cancel(game: Game, building: Entity, index: number) {
+    const item = building.queue[index];
+    if (!item) return;
+    building.queue.splice(index, 1);
+    game.players[building.owner].refund(item.cost);
+  },
+
+  setRally(game: Game, building: Entity, x: number, y: number, target?: Entity | null) {
+    building.rally = { x, y, targetId: target?.id };
+  },
+
+  delete(game: Game, e: Entity) {
+    if (e.kind === 'building' && !e.complete) {
+      // Devuelve lo que no se ha llegado a construir
+      game.players[e.owner].refund(game.players[e.owner].getCost(game.buildingDef(e)), 1 - e.progress);
+    }
+    for (const q of e.queue) game.players[e.owner].refund(q.cost);
+    e.queue = [];
+    game.kill(e);
+  },
+};

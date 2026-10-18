@@ -1,0 +1,17 @@
+{
+  "name": "age-of-empires-local",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "simulate": "vite build --ssr scripts/simulate.ts --outDir .sim --emptyOutDir --logLevel warn && node .sim/simulate.js"
+  },
+  "devDependencies": {
+    "typescript": "^7.0.2",
+    "vite": "^8.3.4"
+  }
+}

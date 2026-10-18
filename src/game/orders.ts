@@ -1,0 +1,204 @@
+import { BUILD_RANGE, DROP_RANGE, GATHER_RANGE, MELEE_RANGE } from '../core/constants';
+import type { Order, OrderHandler } from '../core/types';
+import {
+  ARRIVED, UNREACHABLE, approach, edgeDist, face, isFarmTaken, moveTo, nearestDrop, nearestNode, setOrder,
+} from './actions';
+import { findEnemyNear, performAttack } from './combat';
+import type { Entity } from './Entity';
+import type { Game } from './Game';
+
+/**
+ * Manejadores de órdenes básicos. Cada uno se registra en el Registry con un
+ * `type`; un mod puede añadir órdenes nuevas (patrullar, curar, convertir...) o
+ * reemplazar estas.
+ */
+
+export const moveOrder: OrderHandler = {
+  update(game, u, o) {
+    if (!o.started) { moveTo(game, u, o.x, o.y); o.started = true; }
+    if (!u.path.length) setOrder(u, null);
+  },
+};
+
+/** Un paso de ataque contra `t`. Devuelve false si hay que abandonar. */
+function attackStep(game: Game, u: Entity, o: Order, t: Entity): boolean {
+  const p = game.players[u.owner];
+  const def = game.unitDef(u);
+  const range = p.getStat(def, 'range');
+  const r = range >= 1 ? range : MELEE_RANGE + (t.kind === 'unit' ? 0 : 0.25);
+  const st = approach(game, u, t, r);
+  if (st === ARRIVED) {
+    face(u, t);
+    if (u.cooldown <= 0) {
+      performAttack(game, u, t);
+      u.cooldown = p.getStat(def, 'reloadTime');
+    }
+    o.fails = 0;
+  } else if (st === UNREACHABLE) {
+    o.fails = (o.fails ?? 0) + 1;
+    if (o.fails > 3) return false;
+  }
+  return true;
+}
+
+export const attackOrder: OrderHandler = {
+  update(game, u, o) {
+    const t = game.get(o.targetId);
+    if (!t || t.kind === 'resource') { setOrder(u, null); return; }
+    if (o.auto) {
+      const los = game.players[u.owner].getStat(game.unitDef(u), 'los');
+      if (edgeDist(u, t) > los + 2) { setOrder(u, null); return; }
+    }
+    if (!attackStep(game, u, o, t)) setOrder(u, null);
+  },
+};
+
+/** Avanza hacia un punto atacando a cualquier enemigo que encuentre. */
+export const attackMoveOrder: OrderHandler = {
+  update(game, u, o) {
+    const def = game.unitDef(u);
+    const los = game.players[u.owner].getStat(def, 'los');
+    let t = game.get(o.targetId);
+    if (t && edgeDist(u, t) > los + 3) t = undefined;
+    if (!t && game.time >= (o.scanAt ?? 0)) {
+      o.scanAt = game.time + 0.5;
+      const siege = def.classes.includes('siege');
+      t = findEnemyNear(game, u, los, true, siege) ?? undefined;
+      if (t) { o.targetId = t.id; o.moving = false; u.path = []; }
+    }
+    if (t) {
+      if (!attackStep(game, u, o, t)) { o.targetId = 0; o.fails = 0; }
+      return;
+    }
+    o.targetId = 0;
+    if (!o.moving) { moveTo(game, u, o.x, o.y); o.moving = true; }
+    if (!u.path.length) setOrder(u, null);
+  },
+};
+
+function findNextNode(game: Game, u: Entity, o: Order): Entity | null {
+  const x = o.lastX ?? u.x, y = o.lastY ?? u.y;
+  const kind = o.nodeKind;
+  const res = o.resType;
+  return nearestNode(game, x, y, 10, e => {
+    if (e.kind === 'resource') return kind ? e.defId === kind : e.resType === res;
+    // Granjas propias libres
+    return e.kind === 'building' && e.owner === u.owner && e.complete && e.defId === kind && !isFarmTaken(game, e, u);
+  }, u);
+}
+
+export const gatherOrder: OrderHandler = {
+  update(game, u, o, dt) {
+    const p = game.players[u.owner];
+    const def = game.unitDef(u);
+    const cap = p.getStat(def, 'carryCapacity');
+    u.working = false;
+
+    if (o.phase === 'return') {
+      if (!u.carry || u.carry.amount <= 0) { o.phase = 'gather'; return; }
+      const drop = nearestDrop(game, p, u.carry.type, u.x, u.y);
+      if (!drop) {
+        if (p.isHuman) game.warn(p, 'nodrop', 'Construye un edificio donde depositar recursos', 15);
+        setOrder(u, null);
+        return;
+      }
+      const st = approach(game, u, drop, DROP_RANGE);
+      if (st === ARRIVED) {
+        p.res[u.carry.type] = (p.res[u.carry.type] ?? 0) + u.carry.amount;
+        p.stats.gathered += u.carry.amount;
+        u.carry.amount = 0;
+        if (o.idleAfter) setOrder(u, null);
+        else o.phase = 'gather';
+      } else if (st === UNREACHABLE) setOrder(u, null);
+      return;
+    }
+
+    let t = game.get(o.targetId);
+    const valid = t && t.resType && t.amount > 0 && (t.kind === 'resource' || (t.owner === u.owner && t.complete));
+    if (!valid) {
+      const next = findNextNode(game, u, o);
+      if (next) { o.targetId = next.id; t = next; }
+      else {
+        if (u.carry && u.carry.amount > 0) { o.phase = 'return'; o.idleAfter = true; }
+        else setOrder(u, null);
+        return;
+      }
+    }
+    const target = t!;
+    o.resType = target.resType;
+    if (!u.carry || u.carry.type !== target.resType) u.carry = { type: target.resType!, amount: 0 };
+    if (u.carry.amount >= cap) { o.phase = 'return'; return; }
+
+    const st = approach(game, u, target, GATHER_RANGE);
+    if (st === UNREACHABLE) {
+      o.fails = (o.fails ?? 0) + 1;
+      if (o.fails > 3) {
+        // Prueba con otro nodo del mismo tipo
+        o.lastX = u.x; o.lastY = u.y; o.nodeKind = target.defId;
+        const alt = nearestNode(game, u.x, u.y, 10, e => e !== target && e.defId === target.defId && e.kind === 'resource');
+        if (alt) { o.targetId = alt.id; o.fails = 0; } else setOrder(u, null);
+      }
+      return;
+    }
+    if (st !== ARRIVED) return;
+
+    o.fails = 0;
+    o.lastX = target.x; o.lastY = target.y; o.nodeKind = target.defId;
+    u.data.lastNodeX = target.x; u.data.lastNodeY = target.y; u.data.lastNodeKind = target.defId;
+    face(u, target);
+    u.working = true;
+    const rate = target.gatherRate * p.gatherMult(target.resType!);
+    const amt = Math.min(rate * dt, target.amount, cap - u.carry.amount);
+    target.amount -= amt;
+    u.carry.amount += amt;
+    if (target.amount <= 0.001) game.deplete(target);
+  },
+};
+
+/** Al terminar de construir: los aldeanos se ponen a trabajar en algo lógico. */
+function afterBuild(game: Game, u: Entity, b: Entity) {
+  const def = game.buildingDef(b);
+  if (def.gatherable && !isFarmTaken(game, b, u)) {
+    setOrder(u, { type: 'gather', targetId: b.id, phase: 'gather' });
+    return;
+  }
+  if (def.dropSite) {
+    const node = nearestNode(game, b.x, b.y, 9, e => e.kind === 'resource' && def.dropSite!.includes(e.resType!));
+    if (node) { setOrder(u, { type: 'gather', targetId: node.id, phase: 'gather' }); return; }
+  }
+  let other: Entity | null = null, best = 12;
+  for (const e of game.buildings) {
+    if (e.owner !== u.owner || e.complete || e.dead) continue;
+    const d = Math.hypot(e.x - u.x, e.y - u.y);
+    if (d < best) { best = d; other = e; }
+  }
+  setOrder(u, other ? { type: 'build', targetId: other.id } : null);
+}
+
+export const buildOrder: OrderHandler = {
+  update(game, u, o, dt) {
+    const b = game.get(o.targetId);
+    u.working = false;
+    if (!b || b.kind !== 'building' || b.owner !== u.owner) { setOrder(u, null); return; }
+    if (b.complete && b.hp >= b.maxHp) { afterBuild(game, u, b); return; }
+    const st = approach(game, u, b, BUILD_RANGE);
+    if (st === UNREACHABLE) {
+      o.fails = (o.fails ?? 0) + 1;
+      if (o.fails > 3) setOrder(u, null);
+      return;
+    }
+    if (st !== ARRIVED) return;
+    face(u, b);
+    u.working = true;
+    const p = game.players[u.owner];
+    const bt = Math.max(1, p.getStat(game.buildingDef(b), 'buildTime'));
+    if (!b.complete) {
+      const dp = dt / bt;
+      b.progress = Math.min(1, b.progress + dp);
+      b.hp = Math.min(b.maxHp, b.hp + b.maxHp * dp);
+      if (b.progress >= 1) game.completeBuilding(b);
+    } else {
+      b.hp = Math.min(b.maxHp, b.hp + (b.maxHp / (bt * 1.5)) * dt);
+    }
+  },
+};
