@@ -781,9 +781,19 @@ export const farm: SpriteFn = s => {
 
 // ================================================================ naturaleza
 
+/** Sombra alargada y difusa hacia abajo a la derecha. */
+function softShadow(c: CanvasRenderingContext2D, x: number, y: number, rx: number, ry: number, a = 0.32) {
+  c.save();
+  c.translate(x, y); c.scale(1, ry / rx);
+  const g = c.createRadialGradient(0, 0, rx * 0.15, 0, 0, rx);
+  g.addColorStop(0, `rgba(10,6,0,${a})`); g.addColorStop(0.6, `rgba(10,6,0,${a * 0.7})`); g.addColorStop(1, 'rgba(10,6,0,0)');
+  c.fillStyle = g;
+  c.beginPath(); c.arc(0, 0, rx, 0, Math.PI * 2); c.fill();
+  c.restore();
+}
+
 function oak(c: CanvasRenderingContext2D, rnd: () => number, big: number) {
-  c.fillStyle = 'rgba(0,0,0,0.28)';
-  ellipse(c, 6, -1, 15 * big, 5.5 * big); c.fill();
+  softShadow(c, 13, 1, 22 * big, 7 * big);
   c.fillStyle = '#4e321a';
   c.beginPath(); c.moveTo(-2.4, 0); c.lineTo(-1.6, -22); c.lineTo(1.8, -22); c.lineTo(2.6, 0); c.closePath(); c.fill();
   c.strokeStyle = OUTLINE; c.lineWidth = 0.9; c.stroke();
@@ -798,18 +808,22 @@ function oak(c: CanvasRenderingContext2D, rnd: () => number, big: number) {
   for (const [x, y, r] of blobs) { ellipse(c, x, y, r + 1.2, r * 0.92 + 1.2); c.fill(); }
   const tones = ['#2e5a1e', '#3a6c24', '#4a7e2c'];
   blobs.forEach(([x, y, r], i) => { c.fillStyle = tones[i % 3]; ellipse(c, x, y, r, r * 0.92); c.fill(); });
-  // luces arriba a la izquierda
-  for (const [x, y, r] of blobs) {
-    c.fillStyle = 'rgba(170,210,100,0.32)';
-    ellipse(c, x - r * 0.35, y - r * 0.35, r * 0.5, r * 0.4); c.fill();
+  // sombra interior abajo a la derecha
+  c.fillStyle = 'rgba(10,30,5,0.28)';
+  ellipse(c, 5, -27, 10, 7); c.fill();
+  // hojas sueltas: luces y sombras
+  for (let i = 0; i < 70; i++) {
+    const [bx, by, r] = blobs[Math.floor(rnd() * blobs.length)];
+    const a = rnd() * Math.PI * 2, d = rnd() * r;
+    const x = bx + Math.cos(a) * d, y = by + Math.sin(a) * d * 0.9;
+    const lit = x - bx + y - by < 0;
+    c.fillStyle = lit ? (rnd() < 0.5 ? 'rgba(178,214,108,0.55)' : 'rgba(120,170,70,0.6)') : 'rgba(18,40,10,0.45)';
+    ellipse(c, x, y, 1.6, 1.1); c.fill();
   }
-  c.fillStyle = 'rgba(0,0,0,0.18)';
-  ellipse(c, 5, -27, 9, 6); c.fill();
 }
 
 function pine(c: CanvasRenderingContext2D, rnd: () => number, snow: boolean, big: number) {
-  c.fillStyle = 'rgba(0,0,0,0.28)';
-  ellipse(c, 6, -1, 12 * big, 4.5 * big); c.fill();
+  softShadow(c, 12, 1, 20 * big, 6 * big);
   c.fillStyle = '#4a2e18';
   c.fillRect(-1.8, -12, 3.6, 12);
   const tiers = 5;
@@ -822,6 +836,11 @@ function pine(c: CanvasRenderingContext2D, rnd: () => number, snow: boolean, big
     c.strokeStyle = OUTLINE; c.lineWidth = 0.8; c.stroke();
     c.fillStyle = '#245a2c';
     poly(c, [{ x: -w * 0.8, y: yb - 0.5 }, { x: 0, y: yb - h + 1 }, { x: 0, y: yb + 1 }]); c.fill();
+    for (let k = 0; k < 10; k++) {
+      const t = rnd(), sx = (rnd() - 0.5) * 2 * w * (1 - t);
+      c.fillStyle = sx < 0 ? 'rgba(90,140,70,0.5)' : 'rgba(8,24,10,0.45)';
+      ellipse(c, sx, yb - t * h * 0.9, 1.4, 0.9); c.fill();
+    }
     if (snow) {
       c.fillStyle = 'rgba(246,250,255,0.95)';
       poly(c, [{ x: -w * 0.55, y: yb - h * 0.42 }, { x: 0, y: yb - h + 0.5 }, { x: w * 0.5, y: yb - h * 0.45 }, { x: 0, y: yb - h * 0.6 }]); c.fill();
@@ -835,7 +854,7 @@ export const tree: SpriteFn = s => {
   const snow = !!s.params.snow;
   const v = Math.floor((s.entity?.variant ?? 0.3) * 5);
   const big = 0.92 + (v % 3) * 0.08;
-  cache.draw(s.ctx, `tree-${species}-${snow ? 1 : 0}-${v}`, 50, 80, 22, 72, s.x, s.y + 3 * s.z, s.z, c => {
+  cache.draw(s.ctx, `tree-${species}-${snow ? 1 : 0}-${v}`, 68, 80, 24, 72, s.x, s.y + 3 * s.z, s.z, c => {
     const rnd = seeded(v * 13 + 7);
     if (species === 'pine') pine(c, rnd, snow, big);
     else oak(c, rnd, big);

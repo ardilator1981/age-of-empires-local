@@ -97,11 +97,12 @@ function pebble(p: PatternCtx, x: number, y: number, r: number, color: RGB) {
 export const terrainPatterns = new Map<string, PatternFn>();
 
 terrainPatterns.set('grass', (_t, p) => {
-  const dark: RGB = [66, 102, 30], mid: RGB = [104, 140, 46], light: RGB = [146, 162, 66];
+  const dark: RGB = [74, 98, 34], mid: RGB = [116, 134, 52], light: RGB = [158, 150, 76], dry: RGB = [176, 150, 88];
   fill(p, (u, v) => {
-    const n = p.fbm(u, v, 8, 5), m = p.fbm(u + 0.37, v + 0.11, 4, 3);
+    const n = p.fbm(u, v, 8, 5), m = p.fbm(u + 0.37, v + 0.11, 4, 3), d = p.fbm(u + 0.7, v + 0.4, 4, 4);
     let c = mix(dark, mid, sstep(0.25, 0.7, n));
-    c = mix(c, light, sstep(0.58, 0.82, m) * 0.55);
+    c = mix(c, light, sstep(0.55, 0.8, m) * 0.6);
+    c = mix(c, dry, sstep(0.6, 0.78, d) * 0.65);
     return c;
   });
   for (let i = 0; i < 5200; i++) {
@@ -118,7 +119,7 @@ terrainPatterns.set('grass', (_t, p) => {
 });
 
 terrainPatterns.set('dirt', (_t, p) => {
-  const c1: RGB = [122, 92, 56], c2: RGB = [160, 126, 80], c3: RGB = [184, 152, 104];
+  const c1: RGB = [136, 96, 56], c2: RGB = [172, 128, 80], c3: RGB = [198, 160, 108];
   fill(p, (u, v) => {
     const n = p.fbm(u, v, 8, 5), m = p.fbm(u + 0.5, v + 0.2, 16, 3);
     return mix(mix(c1, c2, sstep(0.2, 0.75, n)), c3, sstep(0.6, 0.85, m) * 0.5);

@@ -80,6 +80,8 @@ void main() {
     c = mix(c, vec3(0.84, 0.88, 0.86), foam * 0.4);
   }
   c *= v_light;
+  // Gradación cálida, como en AoE2 DE
+  c = pow(max(c, 0.0), vec3(0.96)) * vec3(1.05, 1.0, 0.9);
   float fog = texture(u_fog, uv).r;
   o = vec4(c * (1.0 - fog), 1.0);
 }`;

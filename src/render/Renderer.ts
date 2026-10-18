@@ -6,6 +6,7 @@ import type { UIState } from '../ui/UIState';
 import { Camera } from './Camera';
 import { ellipse, poly, up } from './draw';
 import { TerrainGL } from './TerrainGL';
+import { type Deco, drawDecoration, generateDecorations } from './decorations';
 
 interface Drawn { e: Entity; sx: number; sy: number; hb: number }
 
@@ -35,6 +36,8 @@ export class Renderer {
   private fogVersion = -1;
   /** Entidades dibujadas en el último frame (para seleccionar con el ratón). */
   drawn: Drawn[] = [];
+  private decos: Deco[] = [];
+  private decoVersion = -1;
 
   constructor(public canvas: HTMLCanvasElement, terrainCanvas: HTMLCanvasElement, public game: Game, public ui: UIState) {
     this.ctx = canvas.getContext('2d')!;
@@ -177,6 +180,43 @@ export class Renderer {
     if (fogged) this.ctx.filter = 'none';
   }
 
+  /** Matas, flores, piedras... (solo decorativo). */
+  private drawDecorations() {
+    const { ctx, cam, game } = this;
+    const m = game.map;
+    if (this.decoVersion !== m.version) { this.decoVersion = m.version; this.decos = generateDecorations(game); }
+    const z = cam.zoom;
+    if (z < 0.42) return;
+    const W = cam.viewW, H = cam.viewH, hw = W / 2, hh = H / 2;
+    const p = game.human, elev = cam.elev;
+    const all = game.opts.visibility === 'revealed';
+    for (const d of this.decos) {
+      const sx = (d.ix - cam.x) * z + hw;
+      if (sx < -30 || sx > W + 30) continue;
+      let sy = (d.iy - cam.y) * z + hh;
+      if (sy < -30 || sy > H + 140 * z) continue;
+      if (m.occupant[d.tile] || !p.explored[d.tile]) continue;
+      if (elev) sy -= m.heightAt(d.x, d.y) * elev * z;
+      const lit = all || p.visible[d.tile];
+      if (!lit) ctx.globalAlpha = 0.4;
+      drawDecoration(ctx, d, sx, sy, z);
+      if (!lit) ctx.globalAlpha = 1;
+    }
+  }
+
+  /** Sombra suave de un edificio hacia abajo a la derecha. */
+  private buildingShadow(d: Drawn) {
+    const e = d.e, ctx = this.ctx, z = this.cam.zoom;
+    if (this.game.reg.building(e.defId).walkable) return;
+    const h = buildingHeight(e) * (e.complete ? 1 : 0.3 + 0.7 * e.progress);
+    const ox = h * 0.5 * z, oy = h * 0.2 * z;
+    const fp = this.footprint(e, d.hb);
+    const pts = [...fp, ...fp.map(q => ({ x: q.x + ox, y: q.y + oy }))];
+    const hull = convexHull(pts);
+    ctx.fillStyle = this.inFog(e) ? 'rgba(0,0,0,0.12)' : 'rgba(10,6,0,0.24)';
+    poly(ctx, hull); ctx.fill();
+  }
+
   /** Esquinas en pantalla de la huella de un edificio a su altura base. */
   footprint(e: { tx: number; ty: number; size: number }, hb: number): Pt[] {
     const c = this.cam;
@@ -226,6 +266,8 @@ export class Renderer {
     }
     ctx.globalAlpha = 1;
 
+    this.drawDecorations();
+
     // Clasificar entidades visibles
     const sel = new Set(ui.selection);
     const ground: Drawn[] = [], items: (Drawn & { depth: number })[] = [];
@@ -244,6 +286,8 @@ export class Renderer {
     items.sort((a, b) => a.depth - b.depth);
 
     for (const d of ground) this.drawEntity(d);
+    // Sombras proyectadas de los edificios (la luz viene de arriba a la izquierda)
+    for (const d of items) if (d.e.kind === 'building') this.buildingShadow(d);
 
     // Anillos de selección (debajo de los sprites)
     for (const d of [...ground, ...items]) {
@@ -403,6 +447,15 @@ export class Renderer {
       .filter(d => d.e.kind === 'unit' && d.e.owner === owner && d.sx >= minX && d.sx <= maxX && d.sy - 16 * z >= minY - 12 * z && d.sy - 16 * z <= maxY + 12 * z)
       .map(d => d.e);
   }
+}
+
+function convexHull(pts: Pt[]): Pt[] {
+  const p = [...pts].sort((a, b) => a.x - b.x || a.y - b.y);
+  const cross = (o: Pt, a: Pt, b: Pt) => (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
+  const lower: Pt[] = [], upper: Pt[] = [];
+  for (const q of p) { while (lower.length >= 2 && cross(lower[lower.length - 2], lower[lower.length - 1], q) <= 0) lower.pop(); lower.push(q); }
+  for (let i = p.length - 1; i >= 0; i--) { const q = p[i]; while (upper.length >= 2 && cross(upper[upper.length - 2], upper[upper.length - 1], q) <= 0) upper.pop(); upper.push(q); }
+  return [...lower.slice(0, -1), ...upper.slice(0, -1)];
 }
 
 function pointInPoly(x: number, y: number, pts: Pt[]): boolean {
