@@ -56,6 +56,8 @@ export class HUD {
     this.on(document.getElementById('hud')!, 'mousemove', e => this.onHover(e as MouseEvent));
     this.on(document.getElementById('hud')!, 'mouseleave', () => { this.el.tooltip.style.display = 'none'; });
     this.on(document.getElementById('btn-menu')!, 'click', () => s.app.togglePause());
+    this.on(document.getElementById('btn-music')!, 'click', () => { s.app.music.toggleMute(); this.updateMusicButton(); });
+    this.updateMusicButton();
 
     this.off.push(g.events.on('notify', n => {
       if (n.playerId !== undefined && n.playerId !== g.humanId) return;
@@ -74,6 +76,14 @@ export class HUD {
   private on(t: EventTarget, type: string, fn: (e: Event) => void) {
     t.addEventListener(type, fn);
     this.off.push(() => t.removeEventListener(type, fn));
+  }
+
+  /** Refleja en la barra superior si la música suena o está silenciada. */
+  updateMusicButton() {
+    const b = document.getElementById('btn-music')!, m = this.s.app.music;
+    const off = m.muted || m.volume === 0;
+    b.textContent = off ? '🔇' : '🎵';
+    b.classList.toggle('off', off);
   }
 
   dispose() { this.off.forEach(f => f()); this.el.notices.innerHTML = ''; this.el.tooltip.style.display = 'none'; }

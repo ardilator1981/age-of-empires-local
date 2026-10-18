@@ -36,6 +36,7 @@ Abre <http://localhost:5173>.
 - Mapas: Arabia, Selva Negra, Lagos y **Pirineos** (cordillera nevada con puertos de montaña, ríos con vados y pinares), más Oasis (en el mod de ejemplo).
 - Relieve: colinas y montañas con iluminación, y ventaja de altura en combate (+25 % desde arriba, -25 % desde abajo).
 - Estética inspirada en el original: terreno con texturas detalladas y agua animada, edificios que cambian con la edad (madera y paja → entramado y tejas → piedra), retratos de unidades e interfaz de piedra y oro.
+- Música medieval generativa (laúd, flauta dulce, viela, zanfona, arpa y tambores) que se compone sobre la marcha: nunca se repite, suma instrumentos con cada edad, cambia a un tema de batalla en combate y tiene fanfarrias al subir de edad, ganar o perder.
 - Niebla de guerra, minimapa, grupos de unidades, puntos de reunión, ataque-movimiento y colas de producción.
 - Opciones de partida: rivales (hasta 5), mapa, tamaño, recursos, edad inicial, victoria, visibilidad, población y velocidad.
 
@@ -55,6 +56,7 @@ Abre <http://localhost:5173>.
 | Centrar en la selección | `Espacio` |
 | Eliminar | `Supr` |
 | Pausa | `P`, `F10` o `Esc` |
+| Activar / silenciar la música | `M` (volumen en el menú) |
 
 ## Estructura del proyecto
 
@@ -64,6 +66,7 @@ src/
   game/        Simulación: Game, entidades, jugadores, mapa, caminos (A*), combate,
                órdenes de unidades, comandos y reglas de disponibilidad
     systems/   Sistemas que se ejecutan cada tick (movimiento, producción, combate, IA...)
+  audio/       Música generativa con Web Audio (sin archivos de sonido)
   render/      Cámara isométrica con relieve, terreno en WebGL (TerrainGL), texturas procedurales,
                sprites, retratos de la interfaz y minimapa
   ui/          HUD, menús y entrada de ratón y teclado
@@ -257,5 +260,5 @@ referencia a algo que no existe (un edificio, una tecnología o un sprite).
 - Caza (ciervos, jabalíes) y pastoreo de ovejas
 - Formaciones y posturas de combate
 - Guardado y carga de partida (todas las acciones pasan por `Commands`)
-- Sonido y música
+- Efectos de sonido (golpes, flechas, construcción)
 - Multijugador en red local

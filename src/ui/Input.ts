@@ -232,6 +232,12 @@ export class Input {
       }
       return;
     }
+    if ((e.key === 'm' || e.key === 'M') && !e.ctrlKey && !e.metaKey) {
+      const muted = app.music.toggleMute();
+      this.s.hud.updateMusicButton();
+      game.notify(muted ? 'Música desactivada' : 'Música activada', game.humanId);
+      return;
+    }
     if (e.key === ' ') { e.preventDefault(); this.centerOnSelection(); return; }
     if (e.key === 'h' || e.key === 'H') {
       const tc = game.buildings.find(x => !x.dead && x.owner === game.humanId && game.buildingDef(x).classes.includes('townCenter'));

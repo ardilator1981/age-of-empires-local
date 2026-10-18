@@ -54,7 +54,7 @@ const HELP = `
     <span>Flechas, bordes o botón central: mover la cámara · Rueda: zoom</span>
     <span>Q W E R T / A S D F G / Z X C V B: botones de comando</span>
     <span>H: centro urbano · .: aldeano inactivo · ,: ejército inactivo · Espacio: centrar</span>
-    <span>Ctrl+1..9: crear grupo · 1..9: seleccionar grupo · Supr: eliminar · P/F10/Esc: pausa</span>
+    <span>Ctrl+1..9: crear grupo · 1..9: seleccionar grupo · Supr: eliminar · P/F10/Esc: pausa · M: música</span>
   </div>`;
 
 export class Menu {
@@ -158,6 +158,7 @@ export class Menu {
           </section>
         </div>
         <button class="start" data-start>⚔️ ¡Comenzar partida!</button>
+        ${this.volumeHtml()}
         ${HELP}
       </div>`);
 
@@ -199,6 +200,7 @@ export class Menu {
       this.showMain();
     });
     root.querySelector('[data-start]')!.addEventListener('click', () => this.app.start(this.buildOptions()));
+    this.bindVolume();
   }
 
   buildOptions(): GameOptions {
@@ -236,6 +238,7 @@ export class Menu {
           <button data-a="restart">↻ Reiniciar partida</button>
           <button data-a="menu">☰ Menú principal</button>
         </div>
+        ${this.volumeHtml()}
         ${HELP}
       </div>`);
     this.bindButtons();
@@ -264,7 +267,20 @@ export class Menu {
     this.bindButtons();
   }
 
+  private volumeHtml() {
+    const m = this.app.music;
+    return `<label class="vol">🎵 Música <input type="range" min="0" max="100" step="1" value="${m.muted ? 0 : Math.round(m.volume * 100)}" data-vol></label>`;
+  }
+
+  private bindVolume() {
+    this.overlay.querySelector<HTMLInputElement>('[data-vol]')?.addEventListener('input', e => {
+      this.app.music.setVolume(Number((e.target as HTMLInputElement).value) / 100);
+      this.app.session?.hud.updateMusicButton();
+    });
+  }
+
   private bindButtons() {
+    this.bindVolume();
     this.overlay.querySelectorAll<HTMLButtonElement>('[data-a]').forEach(b => {
       b.addEventListener('click', () => {
         const a = b.dataset.a;

@@ -1,5 +1,6 @@
 import { TICK_DT } from '../core/constants';
 import { buildRegistry } from '../core/Registry';
+import { Music } from '../audio/Music';
 import { Game, type GameOptions } from '../game/Game';
 import { ALL_MODS } from '../mods';
 import { Menu } from '../ui/Menu';
@@ -10,6 +11,7 @@ export class App {
   session: Session | null = null;
   paused = false;
   menuOpen = true;
+  readonly music = new Music();
   readonly menu: Menu;
   private acc = 0;
   private last = 0;
@@ -31,9 +33,11 @@ export class App {
     const game = new Game(reg, opts);
     this.hud.style.display = '';
     this.session = new Session(this, game);
+    this.music.attach(game);
     game.events.on('gameOver', ({ won }) => setTimeout(() => { if (this.session?.game === game) this.menu.showGameOver(won); }, 1500));
     this.lastOptions = opts;
     this.paused = false;
+    this.music.setPaused(false);
     this.menuOpen = false;
     this.acc = 0;
     this.menu.hide();
@@ -49,6 +53,8 @@ export class App {
     this.session?.dispose();
     this.session = null;
     this.paused = false;
+    this.music.setPaused(false);
+    this.music.detach();
     this.menuOpen = true;
     this.hud.style.display = 'none';
     const c = document.getElementById('game') as HTMLCanvasElement;
@@ -62,6 +68,7 @@ export class App {
     if (this.menuOpen && !this.paused) return;
     this.paused = !this.paused;
     this.menuOpen = this.paused;
+    this.music.setPaused(this.paused);
     if (this.paused) this.menu.showPause();
     else this.menu.hide();
   }

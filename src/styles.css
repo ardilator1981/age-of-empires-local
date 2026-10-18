@@ -53,12 +53,16 @@ button { font-family: var(--font); cursor: pointer; }
 #age { color: var(--gold); margin-left: 10px; text-shadow: 1px 1px 0 #000; letter-spacing: 0.5px; }
 #topbar .spacer { flex: 1; }
 #clock { font-variant-numeric: tabular-nums; color: var(--parchment); text-shadow: 1px 1px 0 #000; }
-#btn-menu {
+#btn-music, #btn-menu {
   background: var(--grain), linear-gradient(#7a6a58, #4a4036); color: var(--text);
   border: 1px solid var(--gold-dark); padding: 3px 12px; border-radius: 2px; box-shadow: var(--bevel-out);
   text-shadow: 1px 1px 0 #000;
 }
-#btn-menu:hover { filter: brightness(1.2); }
+#btn-music:hover, #btn-menu:hover { filter: brightness(1.2); }
+#btn-music { padding: 3px 8px; min-width: 34px; }
+#btn-music.off { opacity: 0.55; }
+.vol { display: flex; align-items: center; gap: 8px; justify-content: center; color: var(--parchment); text-shadow: 1px 1px 0 #000; }
+.vol input { accent-color: var(--gold); width: 160px; }
 
 /* ---------------------------------------------------------------- avisos */
 #notices {
