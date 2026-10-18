@@ -1,23 +1,29 @@
+import { ICONS } from '../../ui/svgIcons';
 import type { AgeDef, ResourceDef, ResourceNodeDef, SetupConfig, TerrainDef } from '../../core/types';
 
 export const resources: ResourceDef[] = [
-  { id: 'food', name: 'Alimento', icon: '🍖', color: '#e05c4f', start: { low: 100, standard: 200, high: 1000 } },
-  { id: 'wood', name: 'Madera', icon: '🪵', color: '#a8743d', start: { low: 100, standard: 200, high: 1000 } },
-  { id: 'gold', name: 'Oro', icon: '🪙', color: '#f1c40f', start: { low: 0, standard: 100, high: 1000 } },
-  { id: 'stone', name: 'Piedra', icon: '🪨', color: '#a0a0a0', start: { low: 0, standard: 200, high: 1000 } },
+  { id: 'food', name: 'Alimento', icon: ICONS.food, color: '#e05c4f', start: { low: 100, standard: 200, high: 1000 } },
+  { id: 'wood', name: 'Madera', icon: ICONS.wood, color: '#a8743d', start: { low: 100, standard: 200, high: 1000 } },
+  { id: 'gold', name: 'Oro', icon: ICONS.gold, color: '#f1c40f', start: { low: 0, standard: 100, high: 1000 } },
+  { id: 'stone', name: 'Piedra', icon: ICONS.stone, color: '#a0a0a0', start: { low: 0, standard: 200, high: 1000 } },
 ];
 
 export const terrains: TerrainDef[] = [
-  { id: 'grass', name: 'Hierba', color: [104, 146, 58], variance: 14, walkable: true, buildable: true },
-  { id: 'dirt', name: 'Tierra', color: [150, 124, 78], variance: 12, walkable: true, buildable: true },
-  { id: 'forest', name: 'Suelo de bosque', color: [66, 98, 42], variance: 12, walkable: true, buildable: true },
-  { id: 'sand', name: 'Arena', color: [206, 186, 128], variance: 8, walkable: true, buildable: true },
-  { id: 'water', name: 'Agua', color: [46, 98, 158], variance: 8, walkable: false, buildable: false },
-  { id: 'desert', name: 'Desierto', color: [214, 180, 112], variance: 10, walkable: true, buildable: true },
+  { id: 'grass', name: 'Hierba', color: [96, 134, 46], variance: 14, walkable: true, buildable: true, pattern: 'grass' },
+  { id: 'dirt', name: 'Tierra', color: [150, 120, 76], variance: 12, walkable: true, buildable: true, pattern: 'dirt' },
+  { id: 'forest', name: 'Suelo de bosque', color: [66, 88, 38], variance: 12, walkable: true, buildable: true, pattern: 'forest' },
+  { id: 'sand', name: 'Arena', color: [212, 190, 136], variance: 8, walkable: true, buildable: true, pattern: 'sand' },
+  { id: 'water', name: 'Agua', color: [44, 92, 148], variance: 8, walkable: false, buildable: false, pattern: 'water', water: true },
+  { id: 'shallows', name: 'Vado', color: [86, 140, 150], variance: 8, walkable: true, buildable: false, pattern: 'shallows', water: true },
+  { id: 'desert', name: 'Desierto', color: [208, 172, 108], variance: 10, walkable: true, buildable: true, pattern: 'desert' },
+  { id: 'snow', name: 'Nieve', color: [226, 232, 240], variance: 6, walkable: true, buildable: true, pattern: 'snow' },
+  { id: 'rock', name: 'Roca', color: [118, 112, 104], variance: 10, walkable: false, buildable: false, pattern: 'rock' },
 ];
 
 export const resourceNodes: ResourceNodeDef[] = [
   { id: 'tree', name: 'Árbol', icon: '🌳', resource: 'wood', amount: 100, gatherRate: 0.39, sprite: 'tree', groundTerrain: 'forest', minimapColor: '#1f4d1f' },
+  { id: 'pineTree', name: 'Pino', icon: '🌲', resource: 'wood', amount: 100, gatherRate: 0.39, sprite: 'tree', spriteParams: { species: 'pine' }, groundTerrain: 'forest', minimapColor: '#173f22' },
+  { id: 'snowPine', name: 'Pino nevado', icon: '🌲', resource: 'wood', amount: 100, gatherRate: 0.39, sprite: 'tree', spriteParams: { species: 'pine', snow: true }, minimapColor: '#2c4a3c' },
   { id: 'goldMine', name: 'Mina de oro', icon: '🪙', resource: 'gold', amount: 800, gatherRate: 0.38, sprite: 'rocks', spriteParams: { color: '#e6c13a' }, minimapColor: '#f5d442' },
   { id: 'stoneMine', name: 'Cantera de piedra', icon: '🪨', resource: 'stone', amount: 350, gatherRate: 0.36, sprite: 'rocks', spriteParams: { color: '#a9a9a9' }, minimapColor: '#c8c8c8' },
   { id: 'berries', name: 'Arbusto de bayas', icon: '🫐', resource: 'food', amount: 125, gatherRate: 0.31, sprite: 'bush', minimapColor: '#d24a6a' },

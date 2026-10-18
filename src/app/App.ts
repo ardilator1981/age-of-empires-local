@@ -53,6 +53,7 @@ export class App {
     this.hud.style.display = 'none';
     const c = document.getElementById('game') as HTMLCanvasElement;
     c.getContext('2d')!.clearRect(0, 0, c.width, c.height);
+    (document.getElementById('terrain') as HTMLCanvasElement).style.display = 'none';
     this.menu.showMain();
   }
 

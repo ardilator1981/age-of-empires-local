@@ -9,6 +9,8 @@ export interface DamageInfo {
   bonus: Bonus[];
   owner: number;
   attackerId: number;
+  /** Altura del terreno del atacante. */
+  fromHeight?: number;
 }
 
 export interface Projectile {
@@ -34,6 +36,7 @@ export function performAttack(game: Game, a: Entity, t: Entity) {
     bonus: def.bonus ?? [],
     owner: a.owner,
     attackerId: a.id,
+    fromHeight: game.map.heightAt(a.x, a.y),
   };
   a.attackAnim = 0.35;
   if (p.getStat(def, 'range') >= 1) {
@@ -54,7 +57,13 @@ export function computeDamage(game: Game, t: Entity, info: DamageInfo): number {
   const armor = tp.getStat(tdef, info.type === 'melee' ? 'armorMelee' : 'armorPierce');
   let dmg = Math.max(0, info.attack - armor);
   for (const b of info.bonus) if (tdef.classes.includes(b.vs)) dmg += b.amount;
-  return Math.max(1, dmg);
+  // Ventaja de altura, como en AoE2: +25% desde arriba, -25% desde abajo
+  if (info.fromHeight !== undefined) {
+    const dh = info.fromHeight - game.map.heightAt(t.x, t.y);
+    if (dh > 0.6) dmg *= 1.25;
+    else if (dh < -0.6) dmg *= 0.75;
+  }
+  return Math.max(1, Math.round(dmg * 10) / 10);
 }
 
 export function dealDamage(game: Game, t: Entity, info: DamageInfo) {

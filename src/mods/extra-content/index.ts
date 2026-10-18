@@ -15,7 +15,7 @@ const elephant: SpriteFn = s => {
   const swing = e && e.attackAnim > 0 ? Math.sin(((0.35 - e.attackAnim) / 0.35) * Math.PI) : 0;
   ctx.save();
   ctx.translate(x, y);
-  ctx.scale(z * facing, z);
+  ctx.scale(z * facing * 1.3, z * 1.3);
   ctx.fillStyle = 'rgba(0,0,0,0.3)';
   ellipse(ctx, 0, 0, 17, 5); ctx.fill();
   const skin = '#8e8a86';
@@ -79,9 +79,12 @@ export const extraContentMod: GameMod = {
         const starts = gen.startPositions(0.36);
         starts.forEach(s => gen.protectCircle(s.x, s.y, 11));
         const cx = gen.w / 2, cy = gen.h / 2, r = Math.min(gen.w, gen.h) * 0.12;
+        gen.hills(Math.round(8 * (gen.w * gen.h) / (96 * 96)), 4, 9, 0.8, 2, [...starts, { x: cx, y: cy }], 16);
+        gen.smoothHeights(1);
         gen.blob(cx, cy, r + 6, (x, y) => gen.set(x, y, 'grass'));
         gen.blob(cx, cy, r, (x, y) => gen.set(x, y, 'water'), 0.3);
         gen.shores();
+        gen.levelWater();
         gen.players.forEach((p, i) => gen.base(p, starts[i]));
         // Anillo de palmeras alrededor del agua
         for (let a = 0; a < Math.PI * 2; a += 0.04) {

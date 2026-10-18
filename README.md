@@ -33,7 +33,9 @@ Abre <http://localhost:5173>.
 - 4 civilizaciones (británicos, francos, godos y mongoles) con bonificaciones propias.
 - Combate con tipos de ataque (cuerpo a cuerpo y perforante), armaduras, bonificaciones contra clases y proyectiles.
 - IA enemiga en tres dificultades, que gestiona la economía, avanza de edad, investiga, se defiende y ataca en oleadas.
-- Mapas: Arabia, Selva Negra y Lagos, más Oasis (en el mod de ejemplo).
+- Mapas: Arabia, Selva Negra, Lagos y **Pirineos** (cordillera nevada con puertos de montaña, ríos con vados y pinares), más Oasis (en el mod de ejemplo).
+- Relieve: colinas y montañas con iluminación, y ventaja de altura en combate (+25 % desde arriba, -25 % desde abajo).
+- Estética inspirada en el original: terreno con texturas detalladas y agua animada, edificios que cambian con la edad (madera y paja → entramado y tejas → piedra), retratos de unidades e interfaz de piedra y oro.
 - Niebla de guerra, minimapa, grupos de unidades, puntos de reunión, ataque-movimiento y colas de producción.
 - Opciones de partida: rivales (hasta 5), mapa, tamaño, recursos, edad inicial, victoria, visibilidad, población y velocidad.
 
@@ -62,7 +64,8 @@ src/
   game/        Simulación: Game, entidades, jugadores, mapa, caminos (A*), combate,
                órdenes de unidades, comandos y reglas de disponibilidad
     systems/   Sistemas que se ejecutan cada tick (movimiento, producción, combate, IA...)
-  render/      Cámara isométrica, render del mapa, sprites procedurales y minimapa
+  render/      Cámara isométrica con relieve, terreno en WebGL (TerrainGL), texturas procedurales,
+               sprites, retratos de la interfaz y minimapa
   ui/          HUD, menús y entrada de ratón y teclado
   app/         Ciclo de vida: menú → partida → menú
   mods/
@@ -137,7 +140,8 @@ reg.addBuilding({
 });
 ```
 
-Estilos de edificio disponibles: `tc`, `house`, `hall`, `smithy`, `shed`, `mill`, `tower`, `castle`.
+Estilos de edificio disponibles: `tc`, `house`, `hall` (con `stable`, `target` o `weapons`), `smithy`, `shed` (con `pile: 'wood' | 'stone'`),
+`mill`, `tower` y `castle`. Los materiales cambian solos con la edad del jugador; `material: 'stone'` fuerza la piedra.
 
 ### 4. Una tecnología
 
@@ -184,7 +188,20 @@ reg.addMapType({
 ```
 
 `MapGenerator` (`src/game/MapGenerator.ts`) ofrece utilidades como `blob`, `forest`, `cluster`, `scatter`,
-`protectCircle`, `protectLine`, `shores` o `base`.
+`protectCircle`, `protectLine`, `shores` o `base`, y para el relieve `hill`, `hills`, `addHeight`, `flatten`,
+`smoothHeights` y `levelWater` (deja horizontal la superficie del agua). Mira `pyrenees` en
+`src/mods/core/maps.ts` para un ejemplo completo con montañas, puertos y ríos.
+
+### Un terreno nuevo
+
+```ts
+reg.addTerrain({ id: 'lava', name: 'Lava', color: [180, 60, 20], variance: 20, walkable: false, buildable: false, pattern: 'lava' });
+```
+
+La textura sale de `pattern`. Los patrones incluidos son `grass`, `dirt`, `forest`, `sand`, `desert`, `water`,
+`shallows`, `snow` y `rock`; si el patrón no existe, se genera una textura a partir de `color`. Puedes registrar
+patrones nuevos con `terrainPatterns.set('lava', (t, p) => { ... })` (ver `src/render/terrainPatterns.ts`). Con
+`water: true` el terreno se anima como agua.
 
 ### 7. Reglas nuevas (sistemas y eventos)
 

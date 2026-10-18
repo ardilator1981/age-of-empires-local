@@ -1,5 +1,6 @@
 import { EventBus } from '../core/EventBus';
 import type { Registry } from '../core/Registry';
+import { MAX_BUILD_SLOPE } from '../core/constants';
 import type { AnyDef, BuildingDef, CivDef, Pt, ResourceNodeDef, System, UnitDef } from '../core/types';
 import { Entity } from './Entity';
 import { GameMap } from './GameMap';
@@ -280,7 +281,7 @@ export class Game {
         if (p?.isHuman && !p.explored[y * this.map.w + x]) return false;
       }
     }
-    return true;
+    return this.map.slopeOf(tx, ty, def.size) <= MAX_BUILD_SLOPE;
   }
 
   /** Casilla caminable más cercana (búsqueda en anillos). */

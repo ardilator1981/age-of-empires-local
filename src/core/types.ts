@@ -47,11 +47,16 @@ export interface ResourceNodeDef {
 export interface TerrainDef {
   id: string;
   name: string;
+  /** Color medio (minimapa y render sin WebGL). */
   color: [number, number, number];
   /** Variación aleatoria de brillo por casilla (0-40). */
   variance: number;
   walkable: boolean;
   buildable: boolean;
+  /** Textura procedural ('grass', 'dirt', 'forest', 'sand', 'water', 'shallows', 'snow', 'rock', 'desert'...). */
+  pattern?: string;
+  /** Se anima como agua (olas, reflejos, espuma). */
+  water?: boolean;
 }
 
 // ---------------------------------------------------------------- unidades y edificios
@@ -240,6 +245,8 @@ export interface SpriteContext {
   project: (wx: number, wy: number) => Pt;
   /** Huella del edificio en casillas. */
   foot?: { tx: number; ty: number; size: number };
+  /** Edad del propietario (los edificios cambian de aspecto con la edad). */
+  age: number;
 }
 export type SpriteFn = (s: SpriteContext) => void;
 

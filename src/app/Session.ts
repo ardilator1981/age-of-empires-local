@@ -16,7 +16,7 @@ export class Session {
   private onResize: () => void;
 
   constructor(public app: App, public game: Game) {
-    this.renderer = new Renderer(document.getElementById('game') as HTMLCanvasElement, game, this.ui);
+    this.renderer = new Renderer(document.getElementById('game') as HTMLCanvasElement, document.getElementById('terrain') as HTMLCanvasElement, game, this.ui);
     this.minimap = new Minimap(document.getElementById('minimap') as HTMLCanvasElement, game, this.renderer, this.ui);
     this.hud = new HUD(this);
     this.input = new Input(this);

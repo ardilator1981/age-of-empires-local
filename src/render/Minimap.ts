@@ -42,7 +42,8 @@ export class Minimap {
 
   private rebuildBase() {
     const g = this.game, m = g.map;
-    const src = this.renderer.terrainPixels;
+    const src = this.renderer.minimapPixels;
+    if (!src) return;
     const img = new ImageData(new Uint8ClampedArray(src.data), m.w, m.h);
     const d = img.data;
     for (const e of g.nodes) {
@@ -58,7 +59,6 @@ export class Minimap {
 
   render() {
     const g = this.game, ctx = this.ctx, k = this.k, S = this.size, dpr = window.devicePixelRatio || 1;
-    if (!this.renderer.terrainLow) return;
     if (g.time - this.baseAt > 2 || this.baseAt > g.time) { this.baseAt = g.time; this.rebuildBase(); }
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, S, S);

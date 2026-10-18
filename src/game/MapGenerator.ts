@@ -94,7 +94,7 @@ export class MapGenerator {
     const m = this.game.map, water = this.game.reg.terrain(waterId);
     const toSand: number[] = [];
     for (let y = 0; y < m.h; y++) for (let x = 0; x < m.w; x++) {
-      if (m.terrain[y * m.w + x] === water) continue;
+      if (m.terrain[y * m.w + x] === water || !m.terrainDef(x, y).buildable || this.terrainAt(x, y) === 'snow') continue;
       let near = false;
       for (let dy = -1; dy <= 1 && !near; dy++) for (let dx = -1; dx <= 1; dx++) {
         const nx = x + dx, ny = y + dy;
@@ -106,6 +106,115 @@ export class MapGenerator {
     for (const i of toSand) m.terrain[i] = sand;
     m.version++;
   }
+
+  // ------------------------------------------------------------ relieve
+
+  /** Suma fn(vx, vy) a la altura de cada vértice (las alturas nunca bajan de 0). */
+  addHeight(fn: (vx: number, vy: number) => number) {
+    const m = this.game.map, W = m.w + 1;
+    for (let vy = 0; vy <= m.h; vy++) for (let vx = 0; vx <= m.w; vx++) {
+      const i = vy * W + vx;
+      m.heights[i] = Math.max(0, m.heights[i] + fn(vx, vy));
+    }
+    m.heightVersion++;
+  }
+
+  /** Colina irregular de radio r y altura h. */
+  hill(cx: number, cy: number, r: number, h: number) {
+    const x0 = Math.floor(cx - r), x1 = Math.ceil(cx + r), y0 = Math.floor(cy - r), y1 = Math.ceil(cy + r);
+    const m = this.game.map, W = m.w + 1;
+    for (let vy = Math.max(0, y0); vy <= Math.min(m.h, y1); vy++) for (let vx = Math.max(0, x0); vx <= Math.min(m.w, x1); vx++) {
+      const d = Math.hypot(vx - cx, vy - cy) / (r * (0.8 + 0.4 * this.noise(vx, vy, 4)));
+      if (d >= 1) continue;
+      const k = 1 - d * d;
+      m.heights[vy * W + vx] += h * k * k;
+    }
+    m.heightVersion++;
+  }
+
+  /** Varias colinas repartidas, lejos de los puntos indicados. */
+  hills(count: number, minR: number, maxR: number, minH: number, maxH: number, avoid: Pt[] = [], avoidR = 0) {
+    for (let i = 0; i < count; i++) {
+      for (let t = 0; t < 30; t++) {
+        const x = this.rand(0, this.w), y = this.rand(0, this.h);
+        if (avoid.some(s => Math.hypot(s.x - x, s.y - y) < avoidR)) continue;
+        this.hill(x, y, this.rand(minR, maxR), this.rand(minH, maxH));
+        break;
+      }
+    }
+  }
+
+  /** Allana el terreno en un círculo (para las bases). */
+  flatten(cx: number, cy: number, r: number) {
+    const m = this.game.map, W = m.w + 1;
+    let sum = 0, n = 0;
+    for (let vy = Math.floor(cy - r / 2); vy <= cy + r / 2; vy++) for (let vx = Math.floor(cx - r / 2); vx <= cx + r / 2; vx++) {
+      if (vx < 0 || vy < 0 || vx > m.w || vy > m.h) continue;
+      sum += m.heights[vy * W + vx]; n++;
+    }
+    const target = n ? sum / n : 0;
+    for (let vy = Math.floor(cy - r); vy <= cy + r; vy++) for (let vx = Math.floor(cx - r); vx <= cx + r; vx++) {
+      if (vx < 0 || vy < 0 || vx > m.w || vy > m.h) continue;
+      const d = Math.hypot(vx - cx, vy - cy) / r;
+      if (d >= 1) continue;
+      const k = d < 0.6 ? 1 : 1 - (d - 0.6) / 0.4;
+      const i = vy * W + vx;
+      m.heights[i] += (target - m.heights[i]) * k * k * (3 - 2 * k);
+    }
+    m.heightVersion++;
+  }
+
+  /** Suaviza el relieve. */
+  smoothHeights(iterations = 1) {
+    const m = this.game.map, W = m.w + 1, H = m.h + 1;
+    for (let it = 0; it < iterations; it++) {
+      const src = m.heights.slice();
+      for (let vy = 0; vy < H; vy++) for (let vx = 0; vx < W; vx++) {
+        let s = 0, n = 0;
+        for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+          const x = vx + dx, y = vy + dy;
+          if (x < 0 || y < 0 || x >= W || y >= H) continue;
+          s += src[y * W + x]; n++;
+        }
+        m.heights[vy * W + vx] = s / n;
+      }
+    }
+    m.heightVersion++;
+  }
+
+  /** Deja las superficies de agua horizontales (los vértices del agua toman la altura más baja de su entorno). */
+  levelWater() {
+    const m = this.game.map, W = m.w + 1, reg = this.game.reg;
+    const water = reg.terrains.map(t => !!t.water);
+    for (let pass = 0; pass < 3; pass++) {
+      const src = m.heights.slice();
+      for (let vy = 0; vy <= m.h; vy++) for (let vx = 0; vx <= m.w; vx++) {
+        let touches = false, lo = Infinity;
+        for (let dy = -1; dy <= 0; dy++) for (let dx = -1; dx <= 0; dx++) {
+          const tx = vx + dx, ty = vy + dy;
+          if (tx < 0 || ty < 0 || tx >= m.w || ty >= m.h) continue;
+          if (water[m.terrain[ty * m.w + tx]]) touches = true;
+        }
+        if (!touches) continue;
+        for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+          const x = vx + dx, y = vy + dy;
+          if (x < 0 || y < 0 || x > m.w || y > m.h) continue;
+          lo = Math.min(lo, src[y * W + x]);
+        }
+        m.heights[vy * W + vx] = lo;
+      }
+    }
+    m.heightVersion++;
+  }
+
+  /** Altura media de una casilla. */
+  tileHeight(x: number, y: number): number {
+    const m = this.game.map;
+    return (m.vh(x, y) + m.vh(x + 1, y) + m.vh(x, y + 1) + m.vh(x + 1, y + 1)) / 4;
+  }
+
+  /** Pendiente de una casilla (diferencia entre su vértice más alto y el más bajo). */
+  tileSlope(x: number, y: number): number { return this.game.map.slopeOf(x, y, 1); }
 
   // ------------------------------------------------------------ posiciones de inicio
 
@@ -215,7 +324,8 @@ export class MapGenerator {
       const m = g.map;
       if (m.inBounds(x, y) && m.occupant[y * m.w + x]) g.remove(g.entities.get(m.occupant[y * m.w + x])!);
     }
-    this.blob(at.x, at.y, 6, (x, y) => { if (this.terrainAt(x, y) !== 'water') this.set(x, y, 'dirt'); }, 0.6);
+    this.flatten(at.x, at.y, 11);
+    this.blob(at.x, at.y, 6, (x, y) => { if (g.map.terrainDef(x, y).walkable) this.set(x, y, 'dirt'); }, 0.6);
     const tc = g.placeBuilding(setup.townCenter, player.id, tx, ty, true);
 
     for (const su of setup.startingUnits) {

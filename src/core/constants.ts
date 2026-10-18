@@ -7,6 +7,10 @@ export const TILE_W = 64;
 export const TILE_H = 32;
 export const HALF_W = TILE_W / 2;
 export const HALF_H = TILE_H / 2;
+/** Píxeles (a zoom 1) que sube el terreno por cada nivel de elevación. */
+export const ELEV_PX = 12;
+/** Pendiente máxima (diferencia de niveles) para poder construir. */
+export const MAX_BUILD_SLOPE = 1.6;
 
 /** Jugador 0 = naturaleza (árboles, minas, arbustos...). */
 export const GAIA = 0;

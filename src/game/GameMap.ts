@@ -10,6 +10,10 @@ export class GameMap {
   occupant: Int32Array;
   /** Se incrementa cuando cambia el terreno (para regenerar cachés de render). */
   version = 0;
+  /** Altura de cada vértice de la rejilla ((w+1) x (h+1)), en niveles de elevación. */
+  heights: Float32Array;
+  /** Se incrementa cuando cambian las alturas. */
+  heightVersion = 0;
   private walk: boolean[];
   private build: boolean[];
   /** Región conectada de cada casilla caminable (-1 = no caminable). */
@@ -23,6 +27,42 @@ export class GameMap {
     this.walk = reg.terrains.map(t => t.walkable);
     this.build = reg.terrains.map(t => t.buildable);
     this.regions = new Int32Array(w * h);
+    this.heights = new Float32Array((w + 1) * (h + 1));
+  }
+
+  /** Altura del vértice (vx, vy). */
+  vh(vx: number, vy: number): number {
+    vx = vx < 0 ? 0 : vx > this.w ? this.w : vx;
+    vy = vy < 0 ? 0 : vy > this.h ? this.h : vy;
+    return this.heights[vy * (this.w + 1) + vx];
+  }
+
+  /** Altura del terreno en un punto (misma triangulación que el render). */
+  heightAt(x: number, y: number): number {
+    if (x < 0) x = 0; else if (x > this.w - 0.001) x = this.w - 0.001;
+    if (y < 0) y = 0; else if (y > this.h - 0.001) y = this.h - 0.001;
+    const ix = Math.floor(x), iy = Math.floor(y), fx = x - ix, fy = y - iy;
+    const W = this.w + 1, H = this.heights;
+    const h00 = H[iy * W + ix], h10 = H[iy * W + ix + 1], h01 = H[(iy + 1) * W + ix], h11 = H[(iy + 1) * W + ix + 1];
+    return fx >= fy ? h00 + (h10 - h00) * fx + (h11 - h10) * fy : h00 + (h11 - h01) * fx + (h01 - h00) * fy;
+  }
+
+  /** Diferencia entre el vértice más alto y el más bajo de un rectángulo de casillas. */
+  slopeOf(tx: number, ty: number, size: number): number {
+    let lo = Infinity, hi = -Infinity;
+    for (let y = ty; y <= ty + size; y++) for (let x = tx; x <= tx + size; x++) {
+      const h = this.vh(x, y);
+      if (h < lo) lo = h;
+      if (h > hi) hi = h;
+    }
+    return hi - lo;
+  }
+
+  /** Altura media de un rectángulo de casillas (base de los edificios). */
+  baseHeight(tx: number, ty: number, size: number): number {
+    let s = 0, n = 0;
+    for (let y = ty; y <= ty + size; y++) for (let x = tx; x <= tx + size; x++) { s += this.vh(x, y); n++; }
+    return s / n;
   }
 
   /** Avisa de que han cambiado los obstáculos (edificio nuevo, árbol talado...). */

@@ -5,6 +5,8 @@ import {
   buildablesFor, buildingAvail, costText, researchablesAt, techAvail, trainablesAt, unitAvail, type Avail,
 } from '../game/rules';
 import type { Session } from '../app/Session';
+import { portrait } from '../render/icons';
+import { ICONS } from './svgIcons';
 
 const HOTKEYS = 'QWERTASDFGZXCVB';
 
@@ -44,7 +46,7 @@ export class HUD {
     const g = s.game;
     this.el.resources.innerHTML = [...g.reg.resources.values()].map(r =>
       `<div class="res" data-tip="${esc(r.name)}"><span class="ic">${r.icon}</span><b id="res-${r.id}">0</b><small id="resv-${r.id}"></small></div>`,
-    ).join('') + `<div class="res" data-tip="Población"><span class="ic">👥</span><b id="res-pop">0/0</b></div>`;
+    ).join('') + `<div class="res" data-tip="Población"><span class="ic">${ICONS.pop}</span><b id="res-pop">0/0</b></div>`;
 
     this.on(this.el.commands, 'click', e => {
       const b = (e.target as HTMLElement).closest('[data-i]') as HTMLElement | null;
@@ -61,6 +63,12 @@ export class HUD {
       if (n.at && n.tone === 'warn') s.ui.pings.push({ x: n.at.x, y: n.at.y, t: g.time });
     }));
     this.el.notices.innerHTML = '';
+  }
+
+  /** Retrato (imagen) de una unidad, edificio o recurso, con el color del jugador. */
+  private pic(kind: 'unit' | 'building' | 'resource', defId: string, owner: number): string {
+    const g = this.s.game, p = g.players[owner];
+    return `<img class="pic" alt="" decoding="sync" src="${portrait(g.reg, kind, defId, p?.color ?? '#aaa', p?.age ?? 0)}">`;
   }
 
   private on(t: EventTarget, type: string, fn: (e: Event) => void) {
@@ -159,7 +167,7 @@ export class HUD {
           const def = g.reg.building(id);
           const a = buildingAvail(g, p, id);
           out[i] = {
-            icon: def.icon, label: def.name, avail: a,
+            icon: this.pic('building', id, p.id), label: def.name, avail: a,
             tip: this.tip(def.name, costText(g, p.getCost(def)), def.description, a),
             action: () => {
               const av = buildingAvail(g, p, id);
@@ -172,8 +180,10 @@ export class HUD {
         return out;
       }
       if (builders.length) {
-        out[0] = { icon: '🏠', label: 'Construir', avail: OK, tip: '<b>Construir edificio económico</b>', action: () => { ui.page = 'economy'; } };
-        out[1] = { icon: '⚔️', label: 'Construir', avail: OK, tip: '<b>Construir edificio militar</b>', action: () => { ui.page = 'military'; } };
+        const eco = g.reg.buildings.has('house') ? this.pic('building', 'house', p.id) : '🏠';
+        const mil = g.reg.buildings.has('barracks') ? this.pic('building', 'barracks', p.id) : '⚔️';
+        out[0] = { icon: eco, label: 'Construir eco', avail: OK, tip: '<b>Construir edificio económico</b>', action: () => { ui.page = 'economy'; } };
+        out[1] = { icon: mil, label: 'Construir mil', avail: OK, tip: '<b>Construir edificio militar</b>', action: () => { ui.page = 'military'; } };
       }
       if (units.some(u => (g.unitDef(u).attack ?? 0) > 0 && !g.unitDef(u).gatherer)) {
         out[5] = {
@@ -203,7 +213,7 @@ export class HUD {
         const def = g.reg.unit(id);
         const queued = blds.reduce((n, x) => n + x.queue.filter(q => q.id === id).length, 0);
         items.push({
-          icon: def.icon, label: def.name, avail: a, badge: queued ? String(queued) : undefined,
+          icon: this.pic('unit', id, p.id), label: def.name, avail: a, badge: queued ? String(queued) : undefined,
           tip: this.tip(def.name, costText(g, p.getCost(def)), def.description, a, this.statsLine(def)) + '<br><small>Mayús+clic: 5 unidades</small>',
           action: shift => {
             for (let i = 0; i < (shift ? 5 : 1); i++) {
@@ -238,7 +248,7 @@ export class HUD {
 
   private refreshCommands() {
     this.cmds = this.computeCommands();
-    const sig = this.cmds.map(c => (c ? `${c.icon}${c.avail.ok ? 1 : 0}${c.badge ?? ''}` : '_')).join('|') + this.s.ui.page;
+    const sig = this.cmds.map(c => (c ? `${c.label}${c.avail.ok ? 1 : 0}${c.badge ?? ''}` : '_')).join('|') + this.s.ui.page + this.s.game.human.age;
     if (sig === this.cmdSig) return;
     this.cmdSig = sig;
     this.el.commands.innerHTML = this.cmds.map((c, i) => c
@@ -291,13 +301,13 @@ export class HUD {
     const g = this.s.game, ui = this.s.ui;
     const sel = ui.selected(g);
     if (sel.length !== ui.selection.length) ui.selection = sel.map(e => e.id);
-    if (!sel.length) { this.el.selection.innerHTML = `<div class="sel-empty">Selecciona unidades o edificios.<br><small>Clic izquierdo: seleccionar · Clic derecho: ordenar · Rueda: zoom</small></div>`; return; }
+    if (!sel.length) { this.setSelectionHtml(`<div class="sel-empty">Selecciona unidades o edificios.<br><small>Clic izquierdo: seleccionar · Clic derecho: ordenar · Rueda: zoom</small></div>`); return; }
     if (sel.length > 1) {
-      this.el.selection.innerHTML = `<div class="sel-multi">${sel.slice(0, 40).map(e => {
+      this.setSelectionHtml(`<div class="sel-multi">${sel.slice(0, 40).map(e => {
         const def = g.defOf(e);
         const pct = Math.max(0, e.hp / e.maxHp) * 100;
-        return `<div class="mini" data-select="${e.id}" data-tip="${esc(def.name)}" style="border-color:${g.players[e.owner].color}"><span>${def.icon}</span><i style="width:${pct}%"></i></div>`;
-      }).join('')}</div>`;
+        return `<div class="mini" data-select="${e.id}" data-tip="${esc(def.name)}" style="border-color:${g.players[e.owner].color}">${this.pic(e.kind === 'unit' ? 'unit' : 'building', e.defId, e.owner)}<i style="width:${pct}%"></i></div>`;
+      }).join('')}</div>`);
       return;
     }
     const e = sel[0];
@@ -306,11 +316,11 @@ export class HUD {
     if (e.kind === 'resource') {
       const nd = g.reg.resourceNodes.get(e.defId)!;
       const r = g.reg.resources.get(nd.resource);
-      icon = nd.icon; name = nd.name;
+      icon = this.pic('resource', e.defId, 0); name = nd.name;
       body = `<div class="line">${r?.icon ?? ''} ${Math.ceil(e.amount)} de ${(r?.name ?? '').toLowerCase()}</div>`;
     } else {
       const def = g.defOf(e);
-      icon = def.icon; name = def.name;
+      icon = this.pic(e.kind === 'unit' ? 'unit' : 'building', e.defId, e.owner); name = def.name;
       const pct = Math.max(0, e.hp / e.maxHp) * 100;
       body += `<div class="hp"><i style="width:${pct}%"></i><span>${Math.ceil(e.hp)} / ${Math.round(e.maxHp)}</span></div>`;
       body += `<div class="line stats">${this.statsLine(def)}</div>`;
@@ -330,15 +340,24 @@ export class HUD {
         if (e.queue.length && e.owner === g.humanId) {
           body += `<div class="queue">${e.queue.map((q, i) => {
             const d = q.kind === 'unit' ? g.reg.unit(q.id) : g.reg.tech(q.id);
-            return `<div class="qi" data-cancel="${i}" data-tip="${esc(d.name)} — clic para cancelar"><span>${d.icon}</span>${i === 0 ? `<i style="width:${q.progress * 100}%"></i>` : ''}</div>`;
+            const ic = q.kind === 'unit' ? this.pic('unit', q.id, e.owner) : `<span>${d.icon}</span>`;
+            return `<div class="qi" data-cancel="${i}" data-tip="${esc(d.name)} — clic para cancelar">${ic}${i === 0 ? `<i style="width:${q.progress * 100}%"></i>` : ''}</div>`;
           }).join('')}</div>`;
         }
       }
     }
-    this.el.selection.innerHTML = `<div class="sel-single">
+    this.setSelectionHtml(`<div class="sel-single">
       <div class="portrait" style="border-color:${owner.color}">${icon}</div>
       <div class="info"><div class="name">${esc(name)}</div><div class="owner" style="color:${owner.color}">${esc(owner.name)}${e.owner ? ' · ' + esc(owner.civ.name) : ''}</div>${body}</div>
-    </div>`;
+    </div>`);
+  }
+
+  private lastSelHtml = '';
+  /** Solo toca el DOM si el contenido ha cambiado (evita parpadeos de las imágenes). */
+  private setSelectionHtml(html: string) {
+    if (html === this.lastSelHtml) return;
+    this.lastSelHtml = html;
+    this.el.selection.innerHTML = html;
   }
 
   private onSelectionClick(e: MouseEvent) {
