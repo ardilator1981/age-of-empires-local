@@ -1,4 +1,4 @@
-import { PLAYER_COLORS, PLAYER_COLOR_NAMES } from '../core/constants';
+import { isTouchDevice, PLAYER_COLORS, PLAYER_COLOR_NAMES } from '../core/constants';
 import { buildRegistry, type Registry } from '../core/Registry';
 import type { GameOptions } from '../game/Game';
 import { ALL_MODS } from '../mods';
@@ -29,7 +29,8 @@ const STORAGE_KEY = 'aoe-local-menu-v1';
 const DEFAULTS: MenuState = {
   name: 'Jugador', civ: 'franks', color: 0,
   rivals: [{ civ: 'random', difficulty: 'normal', color: 1 }],
-  mapType: 'arabia', mapSize: 96, startingResources: 'standard', startAge: 0, victory: 'conquest',
+  // En móviles, mapa pequeño por defecto (menos trabajo para la CPU y la GPU)
+  mapType: 'arabia', mapSize: isTouchDevice() ? 80 : 96, startingResources: 'standard', startAge: 0, victory: 'conquest',
   visibility: 'normal', popLimit: 125, speed: 1.5,
   mods: ALL_MODS.filter(m => !m.core && m.defaultEnabled).map(m => m.id),
 };
@@ -46,7 +47,7 @@ function opt<T extends string | number>(value: T, label: string, cur: T) {
   return `<option value="${value}"${value === cur ? ' selected' : ''}>${esc(label)}</option>`;
 }
 
-const HELP = `
+const HELP_MOUSE = `
   <div class="help">
     <b>Controles</b>
     <span>Clic izq.: seleccionar / arrastrar para seleccionar varias</span>
@@ -58,6 +59,19 @@ const HELP = `
     <span>H: centro urbano · .: aldeano inactivo · ,: ejército inactivo · Espacio: centrar</span>
     <span>Ctrl+1..9: crear grupo · 1..9: seleccionar grupo · Supr: eliminar · P/F10/Esc: pausa</span>
   </div>`;
+
+const HELP_TOUCH = `
+  <div class="help">
+    <b>Controles táctiles</b>
+    <span>Tocar: seleccionar · Tocar dos veces: todas las unidades de ese tipo en pantalla</span>
+    <span>Arrastrar con un dedo: recuadro de selección</span>
+    <span>Mantener pulsado (o botón 🎯 Ordenar y tocar): mover, atacar, recolectar, construir, punto de reunión</span>
+    <span>Dos dedos: mover la cámara · Pellizcar: zoom · Minimapa: saltar a un punto</span>
+    <span>Construir: elige el edificio, arrastra el fantasma con el dedo y suelta para colocarlo</span>
+    <span>Mantener pulsado un botón: ver su descripción · 💤: aldeano inactivo · ▾: plegar el panel</span>
+  </div>`;
+
+const help = () => (isTouchDevice() || document.documentElement.classList.contains('touch') ? HELP_TOUCH : HELP_MOUSE);
 
 export class Menu {
   private state: MenuState;
@@ -164,7 +178,7 @@ export class Menu {
           </section>
         </div>
         <button class="start" data-start>⚔️ ¡Comenzar partida!</button>
-        ${HELP}
+        ${help()}
       </div>`);
 
     const root = this.overlay;
@@ -242,7 +256,7 @@ export class Menu {
           <button data-a="restart">↻ Reiniciar partida</button>
           <button data-a="menu">☰ Menú principal</button>
         </div>
-        ${HELP}
+        ${help()}
       </div>`);
     this.bindButtons();
   }

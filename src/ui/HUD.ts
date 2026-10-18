@@ -6,6 +6,7 @@ import {
 } from '../game/rules';
 import type { Session } from '../app/Session';
 import { portrait } from '../render/icons';
+import { LONG_PRESS_MS } from './Input';
 import { ICONS } from './svgIcons';
 
 const HOTKEYS = 'QWERTASDFGZXCVB';
@@ -32,6 +33,9 @@ export class HUD {
   private acc = 1;
   private selVersion = -1;
   private off: (() => void)[] = [];
+  private lastTouch = -1e9;
+  private tip0: { x: number; y: number; timer: number; shown: boolean } | null = null;
+  private tipHide = 0;
   private el = {
     resources: document.getElementById('resources')!,
     age: document.getElementById('age')!,
@@ -53,9 +57,17 @@ export class HUD {
       if (b) this.run(Number(b.dataset.i), (e as MouseEvent).shiftKey);
     });
     this.on(this.el.selection, 'click', e => this.onSelectionClick(e as MouseEvent));
-    this.on(document.getElementById('hud')!, 'mousemove', e => this.onHover(e as MouseEvent));
-    this.on(document.getElementById('hud')!, 'mouseleave', () => { this.el.tooltip.style.display = 'none'; });
+    const hud = document.getElementById('hud')!;
+    this.on(hud, 'mousemove', e => this.onHover(e as MouseEvent));
+    this.on(hud, 'mouseleave', () => { this.el.tooltip.style.display = 'none'; });
     this.on(document.getElementById('btn-menu')!, 'click', () => s.app.togglePause());
+    // Tooltips con pulsación larga en pantallas táctiles
+    this.on(hud, 'touchstart', e => this.onTouchTipStart(e as TouchEvent));
+    this.on(hud, 'touchmove', e => this.onTouchTipMove(e as TouchEvent));
+    this.on(hud, 'touchend', e => this.onTouchTipEnd(e as TouchEvent));
+    this.on(hud, 'touchcancel', () => this.onTouchTipEnd(null));
+    this.on(hud, 'contextmenu', e => e.preventDefault());
+    this.on(document.getElementById('btn-rotate-ok')!, 'click', () => hud.classList.add('portrait-ok'));
 
     this.off.push(g.events.on('notify', n => {
       if (n.playerId !== undefined && n.playerId !== g.humanId) return;
@@ -76,7 +88,13 @@ export class HUD {
     this.off.push(() => t.removeEventListener(type, fn));
   }
 
-  dispose() { this.off.forEach(f => f()); this.el.notices.innerHTML = ''; this.el.tooltip.style.display = 'none'; }
+  dispose() {
+    this.off.forEach(f => f());
+    if (this.tip0) clearTimeout(this.tip0.timer);
+    clearTimeout(this.tipHide);
+    this.el.notices.innerHTML = '';
+    this.el.tooltip.style.display = 'none';
+  }
 
   notice(text: string, tone: string, at?: { x: number; y: number }) {
     // No apilar avisos idénticos seguidos
@@ -301,7 +319,9 @@ export class HUD {
     const g = this.s.game, ui = this.s.ui;
     const sel = ui.selected(g);
     if (sel.length !== ui.selection.length) ui.selection = sel.map(e => e.id);
-    if (!sel.length) { this.setSelectionHtml(`<div class="sel-empty">Selecciona unidades o edificios.<br><small>Clic izquierdo: seleccionar · Clic derecho: ordenar · Rueda: zoom</small></div>`); return; }
+    if (!sel.length) { this.setSelectionHtml(`<div class="sel-empty">Selecciona unidades o edificios.<br><small>${document.documentElement.classList.contains('touch')
+      ? 'Toca: seleccionar · Mantén pulsado: ordenar · Dos dedos: mover y zoom'
+      : 'Clic izquierdo: seleccionar · Clic derecho: ordenar · Rueda: zoom'}</small></div>`); return; }
     if (sel.length > 1) {
       this.setSelectionHtml(`<div class="sel-multi">${sel.slice(0, 40).map(e => {
         const def = g.defOf(e);
@@ -378,19 +398,65 @@ export class HUD {
     }
   }
 
-  private onHover(e: MouseEvent) {
-    const tt = this.el.tooltip;
-    const t = e.target as HTMLElement;
+  /** Texto del tooltip del elemento (botón de comando o cualquier cosa con data-tip). */
+  private tipFor(t: HTMLElement): string {
     const ci = t.closest('[data-tipi]') as HTMLElement | null;
     const ti = t.closest('[data-tip]') as HTMLElement | null;
-    let html = '';
-    if (ci) html = this.cmds[Number(ci.dataset.tipi)]?.tip ?? '';
-    else if (ti) html = esc(ti.dataset.tip ?? '');
+    if (ci) return this.cmds[Number(ci.dataset.tipi)]?.tip ?? '';
+    if (ti) return esc(ti.dataset.tip ?? '');
+    return '';
+  }
+
+  private showTip(html: string, x: number, y: number, gap: number) {
+    const tt = this.el.tooltip;
     if (!html) { tt.style.display = 'none'; return; }
     tt.innerHTML = html;
     tt.style.display = 'block';
     const w = tt.offsetWidth, h = tt.offsetHeight;
-    tt.style.left = Math.min(window.innerWidth - w - 8, e.clientX + 14) + 'px';
-    tt.style.top = Math.max(8, e.clientY - h - 12) + 'px';
+    tt.style.left = Math.max(8, Math.min(window.innerWidth - w - 8, x + 14)) + 'px';
+    tt.style.top = Math.max(8, y - h - gap) + 'px';
+  }
+
+  private onHover(e: MouseEvent) {
+    // Los navegadores móviles generan eventos de ratón tras cada toque: se ignoran
+    if (performance.now() - this.lastTouch < 1000) return;
+    this.showTip(this.tipFor(e.target as HTMLElement), e.clientX, e.clientY, 12);
+  }
+
+  private onTouchTipStart(e: TouchEvent) {
+    this.lastTouch = performance.now();
+    if (this.tip0) clearTimeout(this.tip0.timer);
+    clearTimeout(this.tipHide);
+    this.el.tooltip.style.display = 'none';
+    this.tip0 = null;
+    const t = e.touches[0];
+    const html = t && e.touches.length === 1 ? this.tipFor(e.target as HTMLElement) : '';
+    if (!html) return;
+    const tip = { x: t.clientX, y: t.clientY, shown: false, timer: 0 };
+    tip.timer = window.setTimeout(() => {
+      tip.shown = true;
+      navigator.vibrate?.(10);
+      // Por encima del dedo para que no lo tape
+      this.showTip(html, tip.x - 60, tip.y, 36);
+    }, LONG_PRESS_MS);
+    this.tip0 = tip;
+  }
+
+  private onTouchTipMove(e: TouchEvent) {
+    const t = e.touches[0], tip = this.tip0;
+    if (!t || !tip || tip.shown) return;
+    if (Math.hypot(t.clientX - tip.x, t.clientY - tip.y) > 12) { clearTimeout(tip.timer); this.tip0 = null; }
+  }
+
+  private onTouchTipEnd(e: TouchEvent | null) {
+    this.lastTouch = performance.now();
+    const tip = this.tip0;
+    this.tip0 = null;
+    if (!tip) return;
+    clearTimeout(tip.timer);
+    if (!tip.shown) return;
+    // La pulsación larga solo muestra la información: no ejecuta el botón
+    e?.preventDefault();
+    this.tipHide = window.setTimeout(() => { this.el.tooltip.style.display = 'none'; }, 1800);
   }
 }

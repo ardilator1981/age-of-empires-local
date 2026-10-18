@@ -23,3 +23,11 @@ export const MELEE_RANGE = 0.35;
 
 export const PLAYER_COLORS = ['#3b6fe0', '#d63a3a', '#3fae4a', '#e2c13a', '#3ec9c9', '#9b54d6', '#e88a2e', '#8c8c8c'];
 export const PLAYER_COLOR_NAMES = ['Azul', 'Rojo', 'Verde', 'Amarillo', 'Cian', 'Morado', 'Naranja', 'Gris'];
+
+/** Densidad de píxeles máxima del render (en móviles con pantallas de 3x se limita a 2x). */
+export const MAX_DPR = 2;
+export const pixelRatio = () => Math.min(MAX_DPR, window.devicePixelRatio || 1);
+
+/** Pantalla táctil (móvil o tableta). */
+export const isTouchDevice = () =>
+  typeof window !== 'undefined' && (window.matchMedia?.('(pointer: coarse)').matches || navigator.maxTouchPoints > 0);
