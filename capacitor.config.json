@@ -1,0 +1,8 @@
+{
+  "appId": "io.github.aoelocal.game",
+  "appName": "AoE II Local",
+  "webDir": "dist",
+  "android": {
+    "backgroundColor": "#1a140e"
+  }
+}

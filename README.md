@@ -56,6 +56,41 @@ Abre <http://localhost:5173>.
 | Eliminar | `Supr` |
 | Pausa | `P`, `F10` o `Esc` |
 
+## Jugar en el móvil (iPhone y Android)
+
+El juego es una **PWA**: se instala desde el navegador y funciona sin conexión.
+
+- **iPhone / iPad:** abre la página en **Safari** › botón **Compartir** › **Añadir a pantalla de inicio**.
+- **Android:** abre la página en **Chrome** › menú **⋮** › **Instalar app** (o *Añadir a pantalla de inicio*).
+  También puedes instalar el **APK** que se adjunta a las Releases (activa *Instalar apps desconocidas*).
+- **En local (misma wifi):** `npm run dev -- --host` y abre en el móvil la dirección `http://<IP-del-ordenador>:5173`.
+  Para probar la instalación y el modo sin conexión usa el build: `npm run build` y `npm run preview -- --host`.
+
+Se juega en horizontal. En pantallas táctiles el mapa por defecto es *Pequeño*.
+
+| Acción | Gesto |
+| --- | --- |
+| Seleccionar | Tocar |
+| Todas las unidades de un tipo en pantalla | Tocar dos veces |
+| Seleccionar varias | Arrastrar con un dedo |
+| Ordenar (mover / atacar / recolectar / construir / reunión) | Mantener pulsado, o activar 🎯 **Ordenar** y tocar |
+| Mover la cámara / zoom | Dos dedos / pellizcar (o tocar el minimapa) |
+| Construir | Elegir el edificio, arrastrar el fantasma y soltar para colocarlo (✖ cancela) |
+| Ver la descripción de un botón | Mantenerlo pulsado |
+| Aldeano inactivo / plegar el panel | 💤 / ▾ |
+
+### Publicar en GitHub Pages
+
+1. Crea un repositorio en GitHub y sube el proyecto (`git remote add origin …` y `git push -u origin main`).
+2. En **Settings › Pages › Build and deployment › Source** elige **GitHub Actions**.
+3. Cada push a `main` ejecuta `.github/workflows/pages.yml`, que construye y publica el juego en
+   `https://<usuario>.github.io/<repositorio>/` (el build usa rutas relativas, así que funciona en cualquier subcarpeta).
+
+**APK de Android (opcional):** `.github/workflows/android.yml` lo genera con Capacitor al subir una etiqueta
+(`git tag v1.0.0` y `git push origin v1.0.0`) y lo adjunta a la Release; también se puede lanzar a mano desde *Actions*.
+
+Los iconos de la app están en `public/icons/` y se regeneran con `node scripts/make-icons.mjs`.
+
 ## Estructura del proyecto
 
 ```

@@ -1,4 +1,4 @@
-import { ELEV_PX, HALF_H, HALF_W } from '../core/constants';
+import { ELEV_PX, HALF_H, HALF_W, pixelRatio } from '../core/constants';
 import type { Pt, SpriteContext } from '../core/types';
 import type { Entity } from '../game/Entity';
 import type { Game } from '../game/Game';
@@ -56,7 +56,7 @@ export class Renderer {
   }
 
   resize() {
-    this.dpr = window.devicePixelRatio || 1;
+    this.dpr = pixelRatio();
     const w = window.innerWidth, h = window.innerHeight;
     this.canvas.width = Math.floor(w * this.dpr);
     this.canvas.height = Math.floor(h * this.dpr);
