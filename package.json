@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "simulate": "vite build --ssr scripts/simulate.ts --outDir .sim --emptyOutDir --logLevel warn && node .sim/simulate.js",
-    "real-map": "node scripts/real-map.mjs"
+    "real-map": "node scripts/real-map.mjs",
+    "shots:movil": "node scripts/mobile-shots.mjs"
   },
   "devDependencies": {
     "geotiff": "^3.0.5",
