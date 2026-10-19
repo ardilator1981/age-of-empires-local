@@ -1,3 +1,4 @@
+import { BALANCE } from '../config/balance';
 import { isTouchDevice, PLAYER_COLORS, PLAYER_COLOR_NAMES } from '../core/constants';
 import { buildRegistry, type Registry } from '../core/Registry';
 import type { GameOptions } from '../game/Game';
@@ -21,6 +22,8 @@ interface MenuState {
   popLimit: number;
   speed: number;
   mods: string[];
+  /** Guerra declarada: minutos de preparación. */
+  warPrepMinutes: number;
   /** Mods que ya existían la última vez que se guardó el menú (los nuevos se activan solos si son por defecto). */
   knownMods?: string[];
 }
@@ -32,7 +35,7 @@ const DEFAULTS: MenuState = {
   rivals: [{ civ: 'random', difficulty: 'normal', color: 1 }],
   // En móviles, mapa pequeño por defecto (menos trabajo para la CPU y la GPU)
   mapType: 'arabia', mapSize: isTouchDevice() ? 80 : 96, startingResources: 'standard', startAge: 0, victory: 'conquest',
-  visibility: 'normal', popLimit: 125, speed: 1.5,
+  visibility: 'normal', popLimit: 125, speed: 1.5, warPrepMinutes: BALANCE.war.prepMinutes,
   mods: ALL_MODS.filter(m => !m.core && m.defaultEnabled).map(m => m.id),
 };
 
@@ -173,6 +176,8 @@ export class Menu {
               <label>Visibilidad</label><select data-k="visibility">${opt('normal', 'Normal', st.visibility)}${opt('explored', 'Explorado', st.visibility)}${opt('revealed', 'Todo visible', st.visibility)}</select>
               <label>Población</label><select data-k="popLimit">${[50, 75, 125, 200].map(v => opt(v, String(v), st.popLimit)).join('')}</select>
               <label>Velocidad</label><select data-k="speed">${SPEEDS.map(([v, l]) => opt(v, l, st.speed)).join('')}</select>
+              ${st.mods.includes('declared-war') ? `<label>Preparación</label><select data-k="warPrepMinutes">${[2, 5, 10, 15, 20, 30, 45, 60].map(v => opt(v, `${v} min hasta la batalla`, st.warPrepMinutes)).join('')}</select>
+              <span></span><small>Guerra declarada: tiempo entre la declaración y la batalla.</small>` : ''}
             </div>
           </section>
           <section>
@@ -191,7 +196,7 @@ export class Menu {
     root.querySelectorAll<HTMLInputElement | HTMLSelectElement>('[data-k]').forEach(el => {
       el.addEventListener('change', () => {
         const k = el.dataset.k as keyof MenuState;
-        const num = ['color', 'mapSize', 'startAge', 'popLimit', 'speed'].includes(k);
+        const num = ['color', 'mapSize', 'startAge', 'popLimit', 'speed', 'warPrepMinutes'].includes(k);
         (st as any)[k] = num ? Number(el.value) : el.value;
         this.save();
         this.showMain();
@@ -251,6 +256,7 @@ export class Menu {
       players: [{ name: st.name || 'Jugador', civ: pick(st.civ), color: PLAYER_COLORS[st.color], human: true, difficulty: 'normal' }, ...rivals],
       startingResources: st.startingResources, startAge: st.startAge, victory: st.victory, visibility: st.visibility,
       popLimit: st.popLimit, speed: st.speed, seed: this.pinnedSeed?.map === st.mapType ? this.pinnedSeed.seed : Math.floor(Math.random() * 1e9), mods: st.mods,
+      warPrepMinutes: st.warPrepMinutes,
     };
   }
 

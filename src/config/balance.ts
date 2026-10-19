@@ -77,6 +77,44 @@ export const BALANCE = {
     repairTimeFactor: 1.5,
   },
 
+  /** Modo "Guerra declarada" (mod declared-war). */
+  war: {
+    /** Edad necesaria para declarar la guerra (índice: 2 = Edad de los Castillos). */
+    requiredAge: 2,
+    /** Cuenta atrás de preparación por defecto (minutos de juego; se elige al crear la partida). */
+    prepMinutes: 30,
+    /** Radio del círculo de combate, en casillas. */
+    circleRadius: 12,
+    /** Distancia mínima del punto de batalla a cualquier centro urbano. */
+    minDistFromTownCenter: 20,
+    /** Duración máxima de la batalla (minutos). Al acabar gana quien tenga más ejército en el círculo. */
+    battleMaxMinutes: 12,
+    /** Segundos seguidos sin tropas en el círculo para perder la batalla por abandono. */
+    abandonSeconds: 30,
+    /** Conquista: si el ganador de la batalla pasa estos segundos sin ejército, fracasa y vuelve la paz. */
+    conquestFailSeconds: 120,
+    /** Conquista: si en estos minutos no ha caído el pueblo, fracasa y vuelve la paz. */
+    conquestMaxMinutes: 20,
+    /** Tras unas tablas, segundos hasta poder declarar otra guerra. */
+    redeclareCooldown: 300,
+    general: {
+      /** Radio del aura del General (casillas). */
+      auraRadius: 7,
+      /** Multiplicador de ataque de las tropas propias dentro del aura. */
+      auraAttackMul: 1.2,
+      /** Moral: armadura extra (cuerpo a cuerpo y a distancia) dentro del aura. */
+      auraArmorAdd: 1,
+      /** Segundos de espera para entrenar otro General si muere. */
+      retrainCooldown: 180,
+    },
+    /** IA: en paz no pasa de este ejército (fracción del límite de población), para seguir creciendo y avanzando de edad. */
+    aiPeaceArmyShare: 0.5,
+    /** IA: tropas mínimas (con el General) para declarar la guerra. */
+    aiMinArmy: 14,
+    /** IA: si espera más que esto (s) con las condiciones cumplidas, declara igualmente. */
+    aiMaxWait: 420,
+  },
+
   ai: {
     difficulty: {
       easy: { gather: 0.75, maxVillagers: 18, firstAttack: 900, wave: 5, waveGrow: 1, villagersForAge: [14, 20, 26], think: 2 },
