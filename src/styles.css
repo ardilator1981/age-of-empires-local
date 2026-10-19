@@ -402,3 +402,19 @@ table.stats td { padding: 4px; text-shadow: 1px 1px 0 #000; }
 .credits ul { text-align: left; font-size: 13px; }
 .credits .small-list { font-size: 11px; color: var(--parchment); }
 .credits p { font-size: 13px; text-align: left; }
+/* Zona táctil generosa para los marcadores del mapamundi */
+.world .mark::before { content: ''; position: absolute; inset: -14px; border-radius: 50%; }
+/* Móvil en horizontal: lista y vista previa lado a lado; el mapamundi sobra */
+@media (max-height: 560px) {
+  .menu.regions { padding: 10px 12px; }
+  .menu.regions h1 { font-size: 24px; }
+  .menu.regions .sub { margin-bottom: 6px; font-size: 12px; }
+  .region-cols { grid-template-columns: 1fr 1.2fr; gap: 10px; }
+  .world { display: none; }
+  .region-list { max-height: none; margin-top: 0; }
+  .region { min-width: 0; width: calc(50% - 6px); }
+  .rp-legend { display: none; }
+  .rp-desc { font-size: 12px; margin: 4px 0; }
+  .buttons.row { margin: 6px 0; gap: 6px; }
+  .buttons.row button { min-width: 0; font-size: 13px; }
+}
