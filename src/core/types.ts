@@ -111,6 +111,8 @@ export interface UnitDef extends BaseDef {
   builder?: boolean;
   carryCapacity?: number;
   radius?: number;
+  /** Puede explorar sola el mapa (orden 'explore'), si se tienen estos edificios. */
+  autoExplore?: { requiresBuildings?: string[] };
 }
 
 export interface BuildingDef extends BaseDef {

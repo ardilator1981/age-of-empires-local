@@ -2,7 +2,7 @@ import type { AnyDef, TechDef } from '../core/types';
 import { Commands } from '../game/commands';
 import type { Entity } from '../game/Entity';
 import {
-  buildablesFor, buildingAvail, costText, researchablesAt, techAvail, trainablesAt, unitAvail, type Avail,
+  buildablesFor, buildingAvail, costText, exploreAvail, researchablesAt, techAvail, trainablesAt, unitAvail, type Avail,
 } from '../game/rules';
 import type { Session } from '../app/Session';
 import { portrait } from '../render/icons';
@@ -221,6 +221,19 @@ export class HUD {
           action: () => { ui.targeting = 'attackMove'; },
         };
       }
+      const scouts = units.filter(u => g.unitDef(u).autoExplore);
+      if (scouts.length) {
+        const a = exploreAvail(g, p, scouts[0].defId);
+        out[6] = {
+          icon: '🧭', label: 'Auto-exploración', avail: a,
+          tip: this.tip('Auto-exploración', '', 'Explora el mapa sola, zona por zona, hasta que no quede nada por descubrir. Cualquier otra orden la detiene.', a),
+          action: () => {
+            const av = exploreAvail(g, p, scouts[0].defId);
+            if (!av.ok) { g.notify(av.reason ?? 'No disponible', p.id, 'warn'); return; }
+            Commands.explore(g, scouts);
+          },
+        };
+      }
       out[10] = { icon: '✋', label: 'Detener', avail: OK, tip: '<b>Detener</b>', action: () => Commands.stop(g, units) };
       out[14] = del;
       return out;
@@ -321,6 +334,7 @@ export class HUD {
       }
       case 'attack': return 'Atacando';
       case 'attackMove': return 'Ataque-movimiento';
+      case 'explore': return 'Explorando';
       case 'move': return 'Moviéndose';
       default: return o.type;
     }

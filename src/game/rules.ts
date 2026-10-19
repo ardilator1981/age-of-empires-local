@@ -60,6 +60,16 @@ export function buildingAvail(game: Game, p: Player, id: string): Avail {
   return affordCheck(game, p, p.getCost(def)) ?? OK;
 }
 
+/** ¿Pueden estas unidades explorar solas? (`autoExplore` en la definición) */
+export function exploreAvail(game: Game, p: Player, unitId: string): Avail {
+  const ae = game.reg.units.get(unitId)?.autoExplore;
+  if (!ae) return HIDDEN;
+  for (const b of ae.requiresBuildings ?? []) {
+    if (p.count(b) === 0) return { visible: true, ok: false, reason: `Requiere ${game.reg.buildings.get(b)?.name ?? b}` };
+  }
+  return OK;
+}
+
 export function techInProgress(game: Game, p: Player, techId: string): boolean {
   for (const e of game.buildings) {
     if (e.owner !== p.id || e.dead) continue;
