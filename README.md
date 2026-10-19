@@ -34,6 +34,7 @@ Abre <http://localhost:5173>.
 - Combate con tipos de ataque (cuerpo a cuerpo y perforante), armaduras, bonificaciones contra clases y proyectiles.
 - IA enemiga en tres dificultades, que gestiona la economía, avanza de edad, investiga, se defiende y ataca en oleadas.
 - Mapas: Arabia, Selva Negra, Lagos y **Pirineos** (cordillera nevada con puertos de montaña, ríos con vados y pinares), más Oasis (en el mod de ejemplo).
+- **Mapas reales** con el relieve, los ríos, los bosques y los pueblos de verdad: **Val d'Aran** y **Plana de Vic**, y un script para crear el de cualquier zona (ver «Un mapa de una zona real»).
 - Relieve: colinas y montañas con iluminación, y ventaja de altura en combate (+25 % desde arriba, -25 % desde abajo).
 - Estética inspirada en el original: terreno con texturas detalladas y agua animada, edificios que cambian con la edad (madera y paja → entramado y tejas → piedra), retratos de unidades e interfaz de piedra y oro.
 - Música medieval generativa (laúd, flauta dulce, viela, zanfona, arpa y tambores) que se compone sobre la marcha: nunca se repite, suma instrumentos con cada edad, cambia a un tema de batalla en combate y tiene fanfarrias al subir de edad, ganar o perder.
@@ -58,6 +59,41 @@ Abre <http://localhost:5173>.
 | Pausa | `P`, `F10` o `Esc` |
 | Activar / silenciar la música | `M` (volumen en el menú) |
 
+## Jugar en el móvil (iPhone y Android)
+
+El juego es una **PWA**: se instala desde el navegador y funciona sin conexión.
+
+- **iPhone / iPad:** abre la página en **Safari** › botón **Compartir** › **Añadir a pantalla de inicio**.
+- **Android:** abre la página en **Chrome** › menú **⋮** › **Instalar app** (o *Añadir a pantalla de inicio*).
+  También puedes instalar el **APK** que se adjunta a las Releases (activa *Instalar apps desconocidas*).
+- **En local (misma wifi):** `npm run dev -- --host` y abre en el móvil la dirección `http://<IP-del-ordenador>:5173`.
+  Para probar la instalación y el modo sin conexión usa el build: `npm run build` y `npm run preview -- --host`.
+
+Se juega en horizontal. En pantallas táctiles el mapa por defecto es *Pequeño*.
+
+| Acción | Gesto |
+| --- | --- |
+| Seleccionar | Tocar |
+| Todas las unidades de un tipo en pantalla | Tocar dos veces |
+| Seleccionar varias | Arrastrar con un dedo |
+| Ordenar (mover / atacar / recolectar / construir / reunión) | Mantener pulsado, o activar 🎯 **Ordenar** y tocar |
+| Mover la cámara / zoom | Dos dedos / pellizcar (o tocar el minimapa) |
+| Construir | Elegir el edificio, arrastrar el fantasma y soltar para colocarlo (✖ cancela) |
+| Ver la descripción de un botón | Mantenerlo pulsado |
+| Aldeano inactivo / plegar el panel | 💤 / ▾ |
+
+### Publicar en GitHub Pages
+
+1. Crea un repositorio en GitHub y sube el proyecto (`git remote add origin …` y `git push -u origin main`).
+2. En **Settings › Pages › Build and deployment › Source** elige **GitHub Actions**.
+3. Cada push a `main` ejecuta `.github/workflows/pages.yml`, que construye y publica el juego en
+   `https://<usuario>.github.io/<repositorio>/` (el build usa rutas relativas, así que funciona en cualquier subcarpeta).
+
+**APK de Android (opcional):** `.github/workflows/android.yml` lo genera con Capacitor al subir una etiqueta
+(`git tag v1.0.0` y `git push origin v1.0.0`) y lo adjunta a la Release; también se puede lanzar a mano desde *Actions*.
+
+Los iconos de la app están en `public/icons/` y se regeneran con `node scripts/make-icons.mjs`.
+
 ## Estructura del proyecto
 
 ```
@@ -75,8 +111,10 @@ src/
     core/            Todo el contenido base (datos puros, fácil de leer y editar)
     extra-content/   Mod de ejemplo: unidad, tecnología, sprite y mapa nuevos
     treasure-hunt/   Mod de ejemplo: reglas nuevas mediante un sistema propio
+    real-maps/       Mapas de zonas reales (data/*.json generados con scripts/real-map.mjs)
 scripts/
   simulate.ts  Partida IA contra IA sin gráficos, para probar cambios rápidamente
+  real-map.mjs Genera un mapa a partir de datos geográficos reales (ICGC / Copernicus + OpenStreetMap)
 ```
 
 ## Arquitectura en 1 minuto
@@ -194,6 +232,62 @@ reg.addMapType({
 `protectCircle`, `protectLine`, `shores` o `base`, y para el relieve `hill`, `hills`, `addHeight`, `flatten`,
 `smoothHeights` y `levelWater` (deja horizontal la superficie del agua). Mira `pyrenees` en
 `src/mods/core/maps.ts` para un ejemplo completo con montañas, puertos y ríos.
+
+### Un mapa de una zona real
+
+El mod **Mapas reales** (`src/mods/real-maps/`) convierte datos geográficos reales en mapas jugables. Incluye
+**Val d'Aran** (8×8 km alrededor de Vielha) y **Plana de Vic** (8×8 km alrededor de Vic). Para crear el de
+cualquier otra zona:
+
+```bash
+npm run real-map -- --id montserrat --name "Montserrat" --center 41.5933,1.8375 --size-km 8
+```
+
+El script (`scripts/real-map.mjs`) descarga el relieve y OpenStreetMap, y escribe
+`src/mods/real-maps/data/<id>.json`. El mapa aparece en el menú en cuanto se recarga el juego (no hay que
+tocar código). Opciones principales (`npm run real-map -- --help` para todas):
+
+| Opción | Qué hace | Por defecto |
+| --- | --- | --- |
+| `--center LAT,LON` + `--size-km KM` | Centro y lado del cuadrado jugable | — / 8 |
+| `--bbox S,W,N,E` o `--utm MINE,MINN,MAXE,MAXN` | Recuadro exacto en grados o en metros UTM (`--zone`, 31 por defecto) | — |
+| `--tiles N` | Lado del mapa en casillas; el juego lo reescala al tamaño elegido en el menú | 144 |
+| `--rotate 45` / `0` | 45 = el norte queda arriba en pantalla (por defecto con `--center`); 0 = recuadro exacto, norte arriba a la derecha | 45 |
+| `--exaggeration X` | Exageración vertical respecto a la escala real | 1.5 |
+| `--max-level L` | Altura máxima del juego; si el relieve no cabe se comprime | 10 |
+| `--snow-line M` / `--pine-line M` | Cota de la nieve y de los pinares (m) | 2300 / 1400 |
+| `--rock-slope GRADOS` | Pendiente real a partir de la que hay roca infranqueable | 40 |
+| `--starts "A,B,C"` | Pueblos preferidos para colocar a los jugadores | los más grandes |
+| `--dem auto\|icgc\|copernicus` | Fuente del relieve (auto = ICGC dentro de Cataluña) | auto |
+| `--no-osm`, `--refresh` | Sin OpenStreetMap / ignorar la caché `.cache/real-maps/` | — |
+
+**Escala recomendada:** de 40 a 80 m por casilla, es decir, zonas de 6 a 12 km para el tamaño de 144
+casillas. Con zonas más grandes los pueblos quedan demasiado juntos y los ríos se vuelven muy anchos; con
+zonas más pequeñas casi no hay relieve. En el tamaño 96 del menú cada casilla mide 1,5 veces más.
+
+**Cómo se interpreta:** cotas por encima de la línea de nieve → nieve; pendientes reales fuertes y roca
+desnuda o acantilados de OSM → roca infranqueable; bosques de OSM → árboles (pinos según `leaf_type` o la cota,
+pinos nevados cerca de la nieve, frondosos abajo); ríos → agua con vados cada cierto trecho; arroyos con
+nombre → vados; lagos y embalses → agua; cultivos y zonas urbanas → tierra. Los jugadores empiezan en los
+pueblos reales (los demás pueblos quedan como recursos), unidos por caminos que siguen los valles, y el mod
+comprueba que todas las bases se pueden alcanzar.
+
+**Si falla una descarga:** el servidor público de Overpass se satura a menudo; el script reintenta con espera
+creciente y otros servidores (`--overpass URL` para elegir uno). Lo descargado se guarda en caché, así que
+basta con volver a ejecutar el comando. Si no hay forma de obtener OSM, `--no-osm` genera el mapa solo con el
+relieve (los bosques se reparten según la altura).
+
+**Licencias y atribución** (cada JSON guarda la suya y se muestra en la descripción del mapa):
+
+- Relieve de Cataluña: [Model d'Elevacions del Terreny](https://www.icgc.cat/ca/Descarregues/Elevacions/Model-d-Elevacions-del-Terreny-de-Catalunya)
+  del **Institut Cartogràfic i Geològic de Catalunya (ICGC)**, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/),
+  servido por su WCS (`geoserveis.icgc.cat/icc_mdt/wcs/service`).
+- Relieve fuera de Cataluña: **Copernicus DEM GLO-30** © DLR e.V. 2010-2014 y © Airbus Defence and Space GmbH
+  2014-2018, proporcionado bajo el programa COPERNICUS de la Unión Europea y la Agencia Espacial Europea
+  (licencia de uso libre del DEM de Copernicus), leído del bucket público `copernicus-dem-30m` de AWS.
+- Ríos, bosques, usos del suelo y núcleos de población: © colaboradores de
+  [OpenStreetMap](https://www.openstreetmap.org/copyright), [ODbL 1.0](https://opendatacommons.org/licenses/odbl/).
+  Los JSON son una base de datos derivada y se distribuyen con la misma licencia.
 
 ### Un terreno nuevo
 

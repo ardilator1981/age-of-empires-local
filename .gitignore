@@ -3,3 +3,6 @@ dist/
 .sim/
 .DS_Store
 *.pkg
+.cache/
+dev-dist/
+android/

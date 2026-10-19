@@ -1,3 +1,4 @@
+import { pixelRatio } from '../core/constants';
 import type { Pt } from '../core/types';
 import type { Game } from '../game/Game';
 import type { UIState } from '../ui/UIState';
@@ -21,8 +22,8 @@ export class Minimap {
 
   resize() {
     const r = this.canvas.getBoundingClientRect();
-    this.size = Math.max(100, Math.floor(Math.min(r.width, r.height)) || 200);
-    const dpr = window.devicePixelRatio || 1;
+    this.size = Math.max(60, Math.floor(Math.min(r.width, r.height)) || 200);
+    const dpr = pixelRatio();
     this.canvas.width = this.size * dpr;
     this.canvas.height = this.size * dpr;
   }
@@ -58,7 +59,7 @@ export class Minimap {
   }
 
   render() {
-    const g = this.game, ctx = this.ctx, k = this.k, S = this.size, dpr = window.devicePixelRatio || 1;
+    const g = this.game, ctx = this.ctx, k = this.k, S = this.size, dpr = pixelRatio();
     if (g.time - this.baseAt > 2 || this.baseAt > g.time) { this.baseAt = g.time; this.rebuildBase(); }
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, S, S);
