@@ -360,3 +360,7 @@ table.stats td { padding: 4px; text-shadow: 1px 1px 0 #000; }
   #selection { flex: 1 1 0; height: 100px; }
   #age { display: none; }
 }
+
+/* Relieve: ventaja / desventaja de altura en el panel de selección */
+.info .hg-up { color: #ffd24a; }
+.info .hg-down { color: #ff8a7a; }

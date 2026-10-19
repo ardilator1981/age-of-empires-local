@@ -19,6 +19,7 @@ uniform vec2 u_view;
 uniform float u_elev;
 out vec2 v_tile;
 out float v_light;
+out float v_h;
 void main() {
   float ix = (a_pos.x - a_pos.y) * ${HALF_W.toFixed(1)};
   float iy = (a_pos.x + a_pos.y) * ${HALF_H.toFixed(1)} - a_h * u_elev;
@@ -26,6 +27,7 @@ void main() {
   gl_Position = vec4(s.x / u_view.x * 2.0 - 1.0, 1.0 - s.y / u_view.y * 2.0, 0.0, 1.0);
   v_tile = a_pos;
   v_light = a_light;
+  v_h = a_h;
 }`;
 
 const FS = `#version 300 es
@@ -39,8 +41,11 @@ uniform sampler2D u_water;
 uniform sampler2D u_noise;
 uniform vec2 u_map;
 uniform float u_time;
+uniform int u_rock;
+uniform float u_contours;
 in vec2 v_tile;
 in float v_light;
+in float v_h;
 out vec4 o;
 
 vec3 layer(int id, vec2 p) {
@@ -66,6 +71,14 @@ void main() {
   else c = mix(mix(layer(i00, p), layer(i10, p), f.x), mix(layer(i01, p), layer(i11, p), f.x), f.y);
   c *= texture(u_tint, uv).rgb * 2.0;
 
+  // Cantiles: borde oscuro entre la roca y el suelo transitable (se reconocen los pasos de un vistazo)
+  if (u_rock >= 0) {
+    float r = mix(mix(float(i00 == u_rock), float(i10 == u_rock), f.x), mix(float(i01 == u_rock), float(i11 == u_rock), f.x), f.y);
+    float edge = r * (1.0 - r) * 4.0;
+    c *= 1.0 - 0.45 * edge;
+    c = mix(c, c * vec3(0.9, 0.88, 0.86), r * 0.4);
+  }
+
   vec2 wv = texture(u_water, uv).rg;
   if (wv.r > 0.01) {
     float t = u_time;
@@ -80,6 +93,11 @@ void main() {
     c = mix(c, vec3(0.84, 0.88, 0.86), foam * 0.4);
   }
   c *= v_light;
+  // Curvas de nivel suaves (una por nivel de elevación), fuera del agua
+  if (u_contours > 0.0 && wv.r < 0.5) {
+    float lv = abs(fract(v_h + 0.5) - 0.5) / max(fwidth(v_h), 1e-4);
+    c *= 1.0 - u_contours * (1.0 - smoothstep(0.0, 1.2, lv));
+  }
   // Gradación cálida, como en AoE2 DE
   c = pow(max(c, 0.0), vec3(0.96)) * vec3(1.05, 1.0, 0.9);
   float fog = texture(u_fog, uv).r;
@@ -148,7 +166,7 @@ export class TerrainGL {
     gl.linkProgram(p);
     if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error('Programa: ' + gl.getProgramInfoLog(p));
     this.prog = p;
-    for (const n of ['u_cam', 'u_zoom', 'u_view', 'u_elev', 'u_detail', 'u_ids', 'u_tint', 'u_fog', 'u_water', 'u_noise', 'u_map', 'u_time']) {
+    for (const n of ['u_cam', 'u_zoom', 'u_view', 'u_elev', 'u_detail', 'u_ids', 'u_tint', 'u_fog', 'u_water', 'u_noise', 'u_map', 'u_time', 'u_rock', 'u_contours']) {
       this.u[n] = gl.getUniformLocation(p, n);
     }
     this.vao = gl.createVertexArray()!;
@@ -336,6 +354,8 @@ export class TerrainGL {
     gl.uniform1f(this.u.u_elev, cam.elev);
     gl.uniform2f(this.u.u_map, m.w, m.h);
     gl.uniform1f(this.u.u_time, time);
+    gl.uniform1i(this.u.u_rock, this.game.reg.terrains.findIndex(t => t.id === 'rock'));
+    gl.uniform1f(this.u.u_contours, 0.1);
     const bind = (unit: number, name: string, target: number = gl.TEXTURE_2D) => {
       gl.activeTexture(gl.TEXTURE0 + unit);
       gl.bindTexture(target, this.tex[name]);

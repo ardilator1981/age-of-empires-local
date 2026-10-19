@@ -169,6 +169,9 @@ export class AIController {
     const start = Math.floor(g.rng() * 8);
     const free = g.findFreeTile(this.home.x, this.home.y, 8);
     const homeRegion = free ? m.region(Math.floor(free.x), Math.floor(free.y)) : -1;
+    // Torres y castillos: el sitio válido más alto (la altura les da alcance y daño)
+    const defensive = (def.attack ?? 0) > 0;
+    let best: Pt | null = null, bestScore = -Infinity;
     for (let r = minR; r <= maxR; r++) {
       const ring: Pt[] = [];
       for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) {
@@ -191,10 +194,42 @@ export class AIController {
           if (!e) continue;
           if (e.kind === 'building' || (!isDrop && g.nodeDef(e)?.resource !== 'wood')) { ok = false; break; }
         }
-        if (ok) return t;
+        if (!ok) continue;
+        if (!defensive) return t;
+        const score = m.baseHeight(t.x, t.y, s) - r * 0.08;
+        if (score > bestScore) { bestScore = score; best = t; }
       }
     }
-    return null;
+    return best;
+  }
+
+  private postAt = -999;
+  private post: Pt | null = null;
+
+  /** Punto alto cerca de la base, de cara al enemigo más cercano, para esperar defendiendo. */
+  private defensePost(): Pt | null {
+    const g = this.game, m = g.map, h = this.home;
+    if (g.time - this.postAt < 60 && this.post) return this.post;
+    this.postAt = g.time;
+    let foe: Pt | null = null, fd = Infinity;
+    for (const b of g.buildings) {
+      if (b.dead || !g.isEnemy(this.p.id, b.owner)) continue;
+      const d = Math.hypot(b.x - h.x, b.y - h.y);
+      if (d < fd) { fd = d; foe = b; }
+    }
+    if (!foe) return (this.post = null);
+    const dirX = (foe.x - h.x) / fd, dirY = (foe.y - h.y) / fd;
+    const reg = m.regionAt(h.x + dirX * 4, h.y + dirY * 4);
+    const th = m.tileHeights();
+    let best: Pt | null = null, bs = -Infinity;
+    for (let r = 6; r <= 14; r++) for (let a = -0.9; a <= 0.9; a += 0.15) {
+      const ca = Math.cos(a), sa = Math.sin(a);
+      const x = Math.floor(h.x + (dirX * ca - dirY * sa) * r), y = Math.floor(h.y + (dirX * sa + dirY * ca) * r);
+      if (!m.walkable(x, y) || (reg >= 0 && m.region(x, y) !== reg)) continue;
+      const score = th[y * m.w + x] - r * 0.05;
+      if (score > bs) { bs = score; best = { x: x + 0.5, y: y + 0.5 }; }
+    }
+    return (this.post = best);
   }
 
   private dropBuildingFor(res: string): string | null {
@@ -347,6 +382,13 @@ export class AIController {
       if (t) {
         Commands.attackMove(g, atHome, t.x, t.y);
         this.waveSize += this.cfg.waveGrow;
+      }
+    } else {
+      // Mientras se reúne la oleada, el ejército espera en un punto alto de cara al enemigo
+      const post = this.defensePost();
+      if (post) {
+        const away = atHome.filter(a => Math.hypot(a.x - post.x, a.y - post.y) > 4);
+        if (away.length) Commands.move(g, away, post.x, post.y);
       }
     }
   }
