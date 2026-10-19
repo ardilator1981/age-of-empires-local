@@ -28,10 +28,11 @@ docs/          decisiones.md (decisiones de diseño), riesgos.md (riesgos técni
 
 ## Estado de las ramas (actualizar al fusionar)
 
-- `feat/relieve-mapas-reales`: relieve con roca y pasos, reglas de altura, visión con crestas, 12 regiones reales con selector. Pendiente de fusionar.
-- `main`: juego base, relieve y Pirineos, terreno orgánico, música, **versión móvil** y mapas reales (fusionados desde `feat/fusion-movil-mapas`).
-- `feat/fusion-movil-mapas` (ya en `main`): **versión móvil** (controles táctiles, interfaz adaptable, PWA con `vite-plugin-pwa`, despliegue en GitHub Pages y APK con Capacitor) + **mapas reales** (`scripts/real-map.mjs` + mod `src/mods/real-maps/`). Pendiente de fusionar en `main`. La rama de origen era `claude/upbeat-ishizaka-5d23f0`; de ella salieron la web publicada y la Release v0.1.0.
-- Remoto: `origin` = github.com/ardilator1981/age-of-empires-local.
+- `main`: juego base, terreno orgánico, música, **versión móvil** (controles táctiles, interfaz adaptable, PWA con `vite-plugin-pwa`, Pages y APK con Capacitor) y **relieve con mapas reales**: roca infranqueable y pasos garantizados, reglas de altura, visión con crestas y 12 regiones reales sin conexión con selector en mapamundi (fusionado desde `feat/relieve-mapas-reales`).
+- `feat/fusion-movil-mapas` y `feat/relieve-mapas-reales`: ya están en `main`.
+- `feat/interfaz-movil`: capa táctil de interfaz (otra sesión, en curso).
+- `claude/arte-ia`: gráficos con sprites generados por IA (otra sesión).
+- Remoto: `origin` = github.com/ardilator1981/age-of-empires-local. La web publicada y la Release v0.1.0 salieron de `claude/upbeat-ishizaka-5d23f0`.
 
 ## Comandos
 
