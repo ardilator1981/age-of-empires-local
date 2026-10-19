@@ -266,6 +266,12 @@ export class Renderer {
     }
     ctx.globalAlpha = 1;
 
+    // Dibujos de los mods sobre el suelo (p. ej. el círculo de batalla)
+    if (game.reg.worldOverlays.length) {
+      const o = { ctx, game, ui, zoom: z, project: (x: number, y: number) => this.project(x, y), unproject: (x: number, y: number) => cam.screenToWorld(x, y) };
+      for (const fn of game.reg.worldOverlays) fn(o);
+    }
+
     this.drawDecorations();
 
     // Clasificar entidades visibles

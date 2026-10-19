@@ -256,6 +256,20 @@ export const cavalry: SpriteFn = s => {
     ctx.fillStyle = '#5a3a1e';
     ctx.beginPath(); ctx.arc(0, -28.9, 3.5, Math.PI * 1.05, Math.PI * 1.95); ctx.fill();
   }
+  if (P.plume) {
+    ctx.fillStyle = '#c8302a';
+    ctx.beginPath(); ctx.moveTo(-1, -32); ctx.quadraticCurveTo(-7, -37, -9, -30); ctx.quadraticCurveTo(-5, -33, -1, -31); ctx.fill(); outline(ctx, 0.6);
+  }
+  if (P.banner) {
+    // Estandarte del General: asta a la espalda con la bandera del color del jugador
+    ctx.strokeStyle = '#4a3420'; ctx.lineWidth = 1.6;
+    line(ctx, { x: -5, y: -16 }, { x: -5, y: -50 });
+    const wave = Math.sin(time * 5 + id) * 1.5;
+    ctx.fillStyle = color;
+    ctx.beginPath(); ctx.moveTo(-5, -50); ctx.lineTo(-19, -47 + wave); ctx.lineTo(-17, -42 + wave); ctx.lineTo(-19, -37 + wave); ctx.lineTo(-5, -39); ctx.closePath();
+    ctx.fill(); outline(ctx, 0.7);
+    ctx.fillStyle = '#f2d36b'; ellipse(ctx, -11, -44 + wave / 2, 2.2, 2.2); ctx.fill();
+  }
   ctx.save();
   ctx.translate(0, -9.5);
   drawWeapon(ctx, P.weapon, swing);

@@ -32,10 +32,11 @@ export interface Projectile {
 
 /** Ataca a `t`: cuerpo a cuerpo aplica el daño ya; a distancia lanza un proyectil. */
 export function performAttack(game: Game, a: Entity, t: Entity) {
+  if (!game.canAttack(a, t, true)) return;
   const p = game.players[a.owner];
   const def = game.defOf(a);
   const info: DamageInfo = {
-    attack: p.getStat(def, 'attack'),
+    attack: p.getStat(def, 'attack') * auraOf(game, a).attackMul,
     type: def.attackType ?? 'melee',
     bonus: def.bonus ?? [],
     owner: a.owner,
@@ -60,10 +61,16 @@ export function performAttack(game: Game, a: Entity, t: Entity) {
   }
 }
 
+/** Bonificación del aura de una unidad propia cercana (p. ej. el General), si la tiene ahora. */
+export function auraOf(game: Game, e: Entity): { attackMul: number; armorAdd: number } {
+  const a = e.data.aura as { attackMul: number; armorAdd: number; until: number } | undefined;
+  return a && a.until >= game.time ? a : { attackMul: 1, armorAdd: 0 };
+}
+
 export function computeDamage(game: Game, t: Entity, info: DamageInfo): number {
   const tp = game.players[t.owner];
   const tdef = game.defOf(t);
-  const armor = tp.getStat(tdef, info.type === 'melee' ? 'armorMelee' : 'armorPierce');
+  const armor = tp.getStat(tdef, info.type === 'melee' ? 'armorMelee' : 'armorPierce') + auraOf(game, t).armorAdd;
   let dmg = Math.max(0, info.attack - armor);
   for (const b of info.bonus) if (tdef.classes.includes(b.vs)) dmg += b.amount;
   // Ventaja de altura (valores en BALANCE.highGround)
@@ -89,7 +96,7 @@ export function dealDamage(game: Game, t: Entity, info: DamageInfo) {
   // Contraataque de unidades militares desocupadas
   if (attacker && t.kind === 'unit' && !t.order) {
     const def = game.unitDef(t);
-    if (!def.gatherer && (def.attack ?? 0) > 0) setOrder(t, { type: 'attack', targetId: attacker.id, auto: true });
+    if (!def.gatherer && (def.attack ?? 0) > 0 && game.canAttack(t, attacker, false)) setOrder(t, { type: 'attack', targetId: attacker.id, auto: true });
   }
   if (t.hp <= 0) game.kill(t, attacker);
 }
@@ -116,6 +123,8 @@ export function findEnemyNear(game: Game, from: Entity, radius: number, includeB
   let bestB: Entity | null = null, bestBD = radius;
   for (const e of game.actors) {
     if (e.dead || !game.isEnemy(from.owner, e.owner)) continue;
+    // Reglas de los mods (zona de batalla, tregua...); los edificios no se mueven: tienen que poder golpear ya
+    if (game.reg.combatRules.length && !game.canAttack(from, e, from.kind === 'building')) continue;
     if (e.kind === 'unit') {
       if (buildingsOnly) continue;
       const d = Math.hypot(e.x - from.x, e.y - from.y) - (from.kind === 'building' ? from.size / 2 : 0);

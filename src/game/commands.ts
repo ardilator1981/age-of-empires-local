@@ -73,7 +73,7 @@ export const Commands = {
     const mine = ownUnits(units, pid);
     if (!mine.length) return null;
     if (target && !target.dead) {
-      if (game.isEnemy(pid, target.owner) && target.kind !== 'resource') {
+      if (game.isEnemy(pid, target.owner) && target.kind !== 'resource' && mine.some(u => game.canAttack(u, target, false))) {
         const fighters = mine.filter(u => (game.unitDef(u).attack ?? 0) > 0);
         Commands.attack(game, fighters, target);
         const rest = mine.filter(u => !fighters.includes(u));

@@ -1,7 +1,7 @@
 import type { Game } from '../game/Game';
 import type {
-  AgeDef, BuildingDef, CivDef, GameMod, MapTypeDef, OrderHandler, ResourceDef, ResourceNodeDef,
-  SetupConfig, SpriteFn, SystemFactory, TechDef, TerrainDef, UnitDef, VictoryDef,
+  AgeDef, AIPlugin, BuildingDef, CivDef, CombatRule, GameMod, HudPanelDef, MapTypeDef, OrderHandler, OverlayFn,
+  ResourceDef, ResourceNodeDef, SetupConfig, SpriteFn, SystemFactory, TechDef, TerrainDef, UnitDef, VictoryDef,
 } from './types';
 
 /**
@@ -24,6 +24,13 @@ export class Registry {
   orders = new Map<string, OrderHandler>();
   systems: { id: string; priority: number; factory: SystemFactory }[] = [];
   gameStartHooks: ((game: Game) => void)[] = [];
+  /** Reglas extra sobre quién puede atacar a quién (p. ej. tregua o zona de batalla). */
+  combatRules: CombatRule[] = [];
+  aiPlugins: AIPlugin[] = [];
+  hudPanels: HudPanelDef[] = [];
+  /** Dibujos de mods sobre el suelo del mapa y sobre el minimapa. */
+  worldOverlays: OverlayFn[] = [];
+  minimapOverlays: OverlayFn[] = [];
   setup: SetupConfig = { townCenter: 'townCenter', startingUnits: [], baseResources: [] };
   private _upgradeTargets: Set<string> | null = null;
 
@@ -54,6 +61,11 @@ export class Registry {
   }
   removeSystem(id: string) { this.systems = this.systems.filter(s => s.id !== id); }
   onGameStart(fn: (game: Game) => void) { this.gameStartHooks.push(fn); }
+  addCombatRule(rule: CombatRule) { this.combatRules.push(rule); }
+  addAIPlugin(p: AIPlugin) { this.aiPlugins = this.aiPlugins.filter(x => x.id !== p.id); this.aiPlugins.push(p); }
+  addHudPanel(p: HudPanelDef) { this.hudPanels = this.hudPanels.filter(x => x.id !== p.id); this.hudPanels.push(p); }
+  addWorldOverlay(fn: OverlayFn) { this.worldOverlays.push(fn); }
+  addMinimapOverlay(fn: OverlayFn) { this.minimapOverlays.push(fn); }
 
   /** Modifica una definición ya registrada (útil para mods de balance). */
   patchUnit(id: string, fn: (d: UnitDef) => void) { fn(this.unit(id)); }

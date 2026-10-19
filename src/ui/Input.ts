@@ -124,7 +124,7 @@ export class Input {
     const w = this.s.renderer.cam.screenToWorld(sx, sy);
     const units = this.ownSelected().filter(u => u.kind === 'unit');
     const target = this.pick(sx, sy, touch);
-    if (target && game.isEnemy(game.humanId, target.owner) && target.kind !== 'resource') Commands.attack(game, units, target);
+    if (target && target.kind !== 'resource' && units.some(u => game.canAttack(u, target, false))) Commands.attack(game, units, target);
     else Commands.attackMove(game, units, w.x, w.y);
     this.marker(w.x, w.y, '#ff6b6b');
     if (!keep) ui.targeting = null;
@@ -133,7 +133,7 @@ export class Input {
   /** Orden contextual en un punto de la pantalla (clic derecho o pulsación larga). */
   private orderAt(sx: number, sy: number, touch: boolean) {
     const { ui } = this;
-    if (ui.placing || ui.targeting) { ui.placing = null; ui.targeting = null; return; }
+    if (ui.placing || ui.targeting || ui.pickPoint) { ui.placing = null; ui.targeting = null; ui.pickPoint = null; return; }
     const w = this.s.renderer.cam.screenToWorld(sx, sy);
     this.command(w.x, w.y, this.pick(sx, sy, touch));
   }
@@ -191,6 +191,7 @@ export class Input {
     if (e.button === 2) { this.orderAt(e.clientX, e.clientY, false); return; }
     if (e.button !== 0) return;
 
+    if (ui.pickPoint) { ui.pickPoint.onPick(this.s.renderer.cam.screenToWorld(e.clientX, e.clientY)); return; }
     if (ui.placing) { this.placeBuilding(e.shiftKey); return; }
     if (ui.targeting === 'attackMove') { this.attackMoveAt(e.clientX, e.clientY, e.shiftKey, false); return; }
     this.drag = { x: e.clientX, y: e.clientY };
@@ -339,7 +340,8 @@ export class Input {
     if (gesture === 'place') { this.setGhost(x, y); this.placeBuilding(false); }
     else if (gesture === 'box' && box) this.boxSelect(box, false);
     else if (gesture === 'tap') {
-      if (ui.targeting === 'attackMove') this.attackMoveAt(x, y, false, true);
+      if (ui.pickPoint) ui.pickPoint.onPick(this.s.renderer.cam.screenToWorld(x, y));
+      else if (ui.targeting === 'attackMove') this.attackMoveAt(x, y, false, true);
       else if (this.orderMode) this.orderAt(x, y, true);
       else this.selectAt(x, y, false, true);
     }
@@ -368,14 +370,14 @@ export class Input {
 
   private toggleOrderMode() {
     const { ui } = this;
-    if (ui.placing || ui.targeting) { ui.placing = null; ui.targeting = null; return; }
+    if (ui.placing || ui.targeting || ui.pickPoint) { ui.placing = null; ui.targeting = null; ui.pickPoint = null; return; }
     this.orderMode = !this.orderMode;
   }
 
   /** Botón "Ordenar" de la barra táctil: refleja el modo actual. */
   private refreshTouchButtons() {
     const { ui } = this;
-    const st = ui.placing || ui.targeting ? 'cancel' : this.orderMode ? 'on' : 'off';
+    const st = ui.placing || ui.targeting || ui.pickPoint ? 'cancel' : this.orderMode ? 'on' : 'off';
     if (st === this.orderBtnState) return;
     this.orderBtnState = st;
     const b = document.getElementById('btn-order');
@@ -404,6 +406,7 @@ export class Input {
 
     if (e.key === 'Escape') {
       if (ui.placing) ui.placing = null;
+      else if (ui.pickPoint) ui.pickPoint = null;
       else if (ui.targeting) ui.targeting = null;
       else if (ui.page !== 'main') ui.page = 'main';
       else if (ui.selection.length) ui.setSelection([]);

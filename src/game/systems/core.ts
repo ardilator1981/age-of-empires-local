@@ -290,6 +290,35 @@ export class VisionSystem implements System {
   update() { if (this.game.tick % 5 === 0) this.recompute(); }
 }
 
+/**
+ * Auras (`aura` en la definición de una unidad, p. ej. el General): cada medio segundo
+ * marca a las unidades propias cercanas con la bonificación. Combate la lee en `auraOf`.
+ */
+export class AuraSystem implements System {
+  private next = 0;
+  private any: boolean;
+  constructor(private game: Game) {
+    this.any = [...game.reg.units.values()].some(d => d.aura);
+  }
+  update() {
+    const g = this.game;
+    if (!this.any || g.time < this.next) return;
+    this.next = g.time + 0.5;
+    for (const src of g.units) {
+      if (src.dead) continue;
+      const aura = g.unitDef(src).aura;
+      if (!aura) continue;
+      const r2 = aura.radius * aura.radius;
+      for (const u of g.units) {
+        if (u.dead || u === src || u.owner !== src.owner) continue;
+        const dx = u.x - src.x, dy = u.y - src.y;
+        if (dx * dx + dy * dy > r2) continue;
+        u.data.aura = { attackMul: aura.attackMul ?? 1, armorAdd: aura.armorAdd ?? 0, until: g.time + 0.75, from: src.id };
+      }
+    }
+  }
+}
+
 /** Comprueba derrotas y fin de partida según la condición de victoria elegida. */
 export class VictorySystem implements System {
   constructor(private game: Game) {}

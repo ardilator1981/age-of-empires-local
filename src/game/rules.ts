@@ -1,4 +1,4 @@
-import type { Cost } from '../core/types';
+import type { Cost, UnitDef } from '../core/types';
 import type { Game } from './Game';
 import type { Player } from './Player';
 
@@ -46,7 +46,30 @@ function affordCheck(game: Game, p: Player, cost: Cost): Avail | null {
 export function unitAvail(game: Game, p: Player, unitId: string): Avail {
   const def = game.reg.units.get(unitId);
   if (!def || !civAllowed(def, p)) return HIDDEN;
-  return ageCheck(game, p, def.age) ?? techsCheck(game, p, def.requiresTechs) ?? affordCheck(game, p, p.getCost(def)) ?? OK;
+  return ageCheck(game, p, def.age) ?? techsCheck(game, p, def.requiresTechs) ?? limitCheck(game, p, def) ?? affordCheck(game, p, p.getCost(def)) ?? OK;
+}
+
+/** Unidades de este tipo en cola de entrenamiento. */
+export function queuedUnits(game: Game, p: Player, unitId: string): number {
+  let n = 0;
+  for (const b of game.buildings) {
+    if (b.dead || b.owner !== p.id) continue;
+    for (const q of b.queue) if (q.kind === 'unit' && q.id === unitId) n++;
+  }
+  return n;
+}
+
+/** Límite de unidades vivas (`maxAlive`) y espera tras su muerte (`retrainCooldown`). */
+function limitCheck(game: Game, p: Player, def: UnitDef): Avail | null {
+  if (def.maxAlive !== undefined && p.count(def.id) + queuedUnits(game, p, def.id) >= def.maxAlive) {
+    return { visible: true, ok: false, reason: def.maxAlive === 1 ? `Solo puedes tener un ${def.name}` : `Máximo ${def.maxAlive}` };
+  }
+  const died = p.lastDeath[def.id];
+  if (def.retrainCooldown && died !== undefined && game.time - died < def.retrainCooldown) {
+    const s = Math.ceil(def.retrainCooldown - (game.time - died));
+    return { visible: true, ok: false, reason: `Disponible en ${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}` };
+  }
+  return null;
 }
 
 export function buildingAvail(game: Game, p: Player, id: string): Avail {

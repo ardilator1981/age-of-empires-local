@@ -32,6 +32,8 @@ export class AIController {
   private cfg: Difficulty;
   private home: Pt = { x: 0, y: 0 };
   private nodes: Entity[] = [];
+  /** Recursos que las extensiones de los mods piden no gastar (del turno anterior). */
+  private pluginReserve: Cost = {};
 
   constructor(private game: Game, private p: Player) {
     this.cfg = AI_DIFFICULTY[p.difficulty] ?? AI_DIFFICULTY.normal;
@@ -66,13 +68,15 @@ export class AIController {
     const ageTech = [...g.reg.techs.values()].find(t => t.setsAge === p.age + 1 && techAvail(g, p, t.id).visible);
     const agingUp = blds.some(b => b.queue.some(q => q.kind === 'tech' && g.reg.tech(q.id).setsAge !== undefined));
     const wantAge = !!ageTech && !agingUp && vills.length >= (this.cfg.villagersForAge[p.age] ?? 99);
-    const reserve: Cost = wantAge && ageTech ? p.getCost(ageTech) : {};
+    const reserve: Cost = { ...this.pluginReserve };
+    if (wantAge && ageTech) for (const [r, v] of Object.entries(p.getCost(ageTech))) reserve[r] = (reserve[r] ?? 0) + (v ?? 0);
     const canSpend = (cost: Cost) => Object.entries(cost).every(([r, v]) => (p.res[r] ?? 0) - (reserve[r] ?? 0) >= (v ?? 0));
 
     // 1. Aldeanos
     const queuedVills = tcs.reduce((n, b) => n + b.queue.filter(q => q.kind === 'unit' && g.reg.unit(q.id).gatherer).length, 0);
     for (const b of tcs) {
-      if (vills.length + queuedVills >= this.cfg.maxVillagers || b.queue.length >= 2) continue;
+      // Sin población libre no se encola (un aldeano esperando bloquearía la cola, también la edad)
+      if (vills.length + queuedVills >= this.cfg.maxVillagers || b.queue.length >= 2 || p.popUsed >= p.popCap) continue;
       const vid = trainablesAt(g, p, b.defId).find(id => g.reg.unit(id).gatherer);
       if (vid && canSpend(p.getCost(g.reg.unit(vid)))) Commands.train(g, b, vid);
     }
@@ -111,8 +115,28 @@ export class AIController {
       }
     }
 
-    // 6. Ejército
-    if (vills.length >= 8) {
+    // 6. Extensiones de los mods: pueden pedir edificios y unidades, frenar el entrenamiento
+    //    del ejército para ahorrar (holdTraining) o encargarse del ejército (armyHandled)
+    let armyHandled = false, holdTraining = false;
+    const nextReserve: Cost = {};
+    for (const plugin of g.reg.aiPlugins) {
+      const r = plugin.think({
+        game: g, player: p, home: this.home, army, villagers: vills, buildings: blds, canSpend,
+        build: (defId, near) => this.build(defId, near ?? this.home, 1, vills),
+        train: unitId => {
+          if (!unitAvail(g, p, unitId).ok) return false;
+          const b = blds.find(x => x.complete && x.queue.length < 5 && trainablesAt(g, p, x.defId).includes(unitId));
+          return !!b && !!Commands.train(g, b, unitId);
+        },
+      });
+      if (r?.armyHandled) armyHandled = true;
+      if (r?.holdTraining) holdTraining = true;
+      for (const [k, v] of Object.entries(r?.reserve ?? {})) nextReserve[k] = (nextReserve[k] ?? 0) + (v ?? 0);
+    }
+    this.pluginReserve = nextReserve;
+
+    // 7. Ejército
+    if (vills.length >= 8 && !holdTraining) {
       for (const b of blds) {
         if (!b.complete || b.queue.length >= 2) continue;
         const units = trainablesAt(g, p, b.defId).filter(id => {
@@ -128,11 +152,11 @@ export class AIController {
       }
     }
 
-    // 7. Recolección
+    // 8. Recolección
     this.assignVillagers(vills);
 
-    // 8. Defensa y ataque
-    this.controlArmy(army, blds);
+    // 9. Defensa y ataque
+    if (!armyHandled) this.controlArmy(army, blds);
   }
 
   // ------------------------------------------------------------ construcción
@@ -377,7 +401,7 @@ export class AIController {
     for (const e of g.units) {
       if (e.dead || !g.isEnemy(p.id, e.owner)) continue;
       for (const b of blds) {
-        if (Math.hypot(e.x - b.x, e.y - b.y) < 12) { threats.push(e); break; }
+        if (Math.hypot(e.x - b.x, e.y - b.y) < 12) { if (g.canAttack(army[0], e, false)) threats.push(e); break; }
       }
     }
     if (threats.length) {
@@ -419,13 +443,13 @@ export class AIController {
     const g = this.game;
     let best: Entity | null = null, bd = Infinity;
     for (const e of g.buildings) {
-      if (e.dead || !g.isEnemy(this.p.id, e.owner)) continue;
+      if (e.dead || !g.canAttack(from, e, false)) continue;
       const d = Math.hypot(e.x - from.x, e.y - from.y) * (this.isTC(e) ? 0.7 : 1);
       if (d < bd) { bd = d; best = e; }
     }
     if (best) return best;
     for (const e of g.units) {
-      if (e.dead || !g.isEnemy(this.p.id, e.owner)) continue;
+      if (e.dead || !g.canAttack(from, e, false)) continue;
       const d = Math.hypot(e.x - from.x, e.y - from.y);
       if (d < bd) { bd = d; best = e; }
     }

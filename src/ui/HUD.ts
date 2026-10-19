@@ -37,6 +37,9 @@ export class HUD {
   private lastTouch = -1e9;
   private tip0: { x: number; y: number; timer: number; shown: boolean } | null = null;
   private tipHide = 0;
+  /** Paneles de los mods (p. ej. Guerra declarada). */
+  private panels: { el: HTMLElement; update(): void; dispose?(): void }[] = [];
+  private panelBox: HTMLElement | null = null;
   private el = {
     resources: document.getElementById('resources')!,
     age: document.getElementById('age')!,
@@ -78,6 +81,16 @@ export class HUD {
       if (n.at && n.tone === 'warn') s.ui.pings.push({ x: n.at.x, y: n.at.y, t: g.time });
     }));
     this.el.notices.innerHTML = '';
+
+    if (g.reg.hudPanels.length) {
+      this.panelBox = document.createElement('div');
+      this.panelBox.id = 'mod-panels';
+      hud.appendChild(this.panelBox);
+      for (const def of g.reg.hudPanels) {
+        const panel = def.create(s);
+        if (panel) { this.panelBox.appendChild(panel.el); this.panels.push(panel); }
+      }
+    }
   }
 
   /** Retrato (imagen) de una unidad, edificio o recurso, con el color del jugador. */
@@ -101,6 +114,8 @@ export class HUD {
 
   dispose() {
     this.off.forEach(f => f());
+    for (const p of this.panels) p.dispose?.();
+    this.panelBox?.remove();
     if (this.tip0) clearTimeout(this.tip0.timer);
     clearTimeout(this.tipHide);
     this.el.notices.innerHTML = '';
@@ -132,6 +147,7 @@ export class HUD {
     this.refreshTop();
     this.refreshCommands();
     this.refreshSelection();
+    for (const p of this.panels) p.update();
   }
 
   // ------------------------------------------------------------ barra superior

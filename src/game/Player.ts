@@ -56,6 +56,10 @@ export class Player {
   stats = { kills: 0, losses: 0, razed: 0, gathered: 0, trained: 0 };
   /** Marca de tiempo del último aviso de cada tipo (para no repetirlos). */
   warnedAt: Record<string, number> = {};
+  /** Cuándo murió por última vez una unidad de cada tipo (para `retrainCooldown`). */
+  lastDeath: Record<string, number> = {};
+  /** Almacén libre para sistemas y mods. */
+  data: Record<string, any> = {};
   private cache = new Map<string, number>();
 
   constructor(

@@ -80,6 +80,12 @@ export class Minimap {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     void human;
 
+    // Dibujos de los mods (p. ej. el círculo de batalla)
+    if (g.reg.minimapOverlays.length) {
+      const o = { ctx, game: g, ui: this.ui, zoom: k, project: (x: number, y: number) => this.toMini(x, y), unproject: (x: number, y: number) => this.fromMini(x, y) };
+      for (const fn of g.reg.minimapOverlays) fn(o);
+    }
+
     // Avisos de ataque
     const now = g.time;
     this.ui.pings = this.ui.pings.filter(p => now - p.t < 3);

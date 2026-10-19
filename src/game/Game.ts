@@ -29,6 +29,8 @@ export interface GameOptions {
   speed: number;
   seed: number;
   mods: string[];
+  /** Modo Guerra declarada: minutos de preparación entre la declaración y la batalla. */
+  warPrepMinutes?: number;
 }
 
 export interface Decal { x: number; y: number; kind: 'corpse' | 'rubble'; color: string; time: number; size: number }
@@ -151,6 +153,15 @@ export class Game {
   /** Definición de unidad o edificio (no nodos de recurso). */
   defOf(e: Entity): AnyDef { return e.kind === 'unit' ? this.reg.unit(e.defId) : this.reg.building(e.defId); }
   isEnemy(a: number, b: number): boolean { return a !== b && a !== 0 && b !== 0; }
+  /**
+   * ¿Puede `a` atacar a `t`? Enemigos y todas las reglas de combate de los mods de acuerdo.
+   * `hitting` = va a golpear ya; si es false, solo se pregunta si puede ir a por él.
+   */
+  canAttack(a: Entity, t: Entity, hitting = true): boolean {
+    if (!this.isEnemy(a.owner, t.owner)) return false;
+    for (const r of this.reg.combatRules) if (!r(this, a, t, hitting)) return false;
+    return true;
+  }
 
   notify(text: string, playerId?: number, tone: 'info' | 'warn' | 'good' = 'info', at?: Pt) {
     this.events.emit('notify', { text, playerId, tone, at });
@@ -267,6 +278,7 @@ export class Game {
       if (e.kind === 'unit') { kp.stats.kills++; owner.stats.losses++; }
       else if (e.kind === 'building') kp.stats.razed++;
     }
+    if (e.kind === 'unit' && this.reg.unit(e.defId).retrainCooldown) owner.lastDeath[e.defId] = this.time;
     if (e.kind === 'unit') this.decals.push({ x: e.x, y: e.y, kind: 'corpse', color: owner.color, time: this.time, size: 1 });
     else if (e.kind === 'building') this.decals.push({ x: e.x, y: e.y, kind: 'rubble', color: '#777', time: this.time, size: e.size });
     this.events.emit('entityDied', { entity: e, killer });

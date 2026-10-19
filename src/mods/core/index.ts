@@ -2,7 +2,7 @@ import type { GameMod, VictoryDef } from '../../core/types';
 import { attackMoveOrder, attackOrder, exploreOrder, buildOrder, gatherOrder, moveOrder } from '../../game/orders';
 import { AISystem } from '../../game/systems/AISystem';
 import {
-  CombatSystem, MovementSystem, OrderSystem, PlayerStatsSystem, ProductionSystem, VictorySystem, VisionSystem,
+  AuraSystem, CombatSystem, MovementSystem, OrderSystem, PlayerStatsSystem, ProductionSystem, VictorySystem, VisionSystem,
 } from '../../game/systems/core';
 import { registerCoreSprites } from '../../render/sprites';
 import { buildings } from './buildings';
@@ -60,6 +60,7 @@ export const coreMod: GameMod = {
     reg.addSystem('orders', g => new OrderSystem(g), 10);
     reg.addSystem('movement', g => new MovementSystem(g), 20);
     reg.addSystem('production', g => new ProductionSystem(g), 30);
+    reg.addSystem('aura', g => new AuraSystem(g), 35);
     reg.addSystem('combat', g => new CombatSystem(g), 40);
     reg.addSystem('vision', g => new VisionSystem(g), 50);
     reg.addSystem('victory', g => new VictorySystem(g), 60);

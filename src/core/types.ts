@@ -113,6 +113,20 @@ export interface UnitDef extends BaseDef {
   radius?: number;
   /** Puede explorar sola el mapa (orden 'explore'), si se tienen estos edificios. */
   autoExplore?: { requiresBuildings?: string[] };
+  /** Máximo de unidades de este tipo vivas (o en cola) a la vez por jugador. */
+  maxAlive?: number;
+  /** Si muere, segundos de espera para poder entrenar otra. */
+  retrainCooldown?: number;
+  /** Bonificación a las unidades propias cercanas (p. ej. el General). */
+  aura?: UnitAura;
+}
+
+export interface UnitAura {
+  radius: number;
+  /** Multiplicador del ataque de las unidades dentro del aura. */
+  attackMul?: number;
+  /** Armadura extra (cuerpo a cuerpo y a distancia) dentro del aura. */
+  armorAdd?: number;
 }
 
 export interface BuildingDef extends BaseDef {
@@ -265,6 +279,59 @@ export interface SpriteContext {
   age: number;
 }
 export type SpriteFn = (s: SpriteContext) => void;
+
+/**
+ * Regla de combate: ¿puede `attacker` atacar a `target`? Todas las registradas deben
+ * permitirlo (además de que sean enemigos). `hitting` = va a golpear ya (si es false,
+ * solo se pregunta si puede elegirlo como objetivo e ir a por él).
+ */
+export type CombatRule = (game: Game, attacker: Entity, target: Entity, hitting: boolean) => boolean;
+
+/** Lo que una extensión de IA puede usar en cada "pensamiento" de un jugador IA. */
+export interface AIContext {
+  game: Game;
+  player: Player;
+  home: Pt;
+  army: Entity[];
+  villagers: Entity[];
+  buildings: Entity[];
+  /** Construye un edificio cerca de `near` (por defecto, la base). */
+  build(defId: string, near?: Pt): boolean;
+  /** Entrena una unidad en el primer edificio libre que pueda. */
+  train(unitId: string): boolean;
+  /** ¿Se puede gastar esto sin tocar la reserva para la siguiente edad? */
+  canSpend(cost: Cost): boolean;
+}
+
+/** Extensión de la IA (la registra un mod). */
+export interface AIPlugin {
+  id: string;
+  /**
+   * Se llama antes de entrenar el ejército. armyHandled: la IA no mueve el ejército por su
+   * cuenta este turno; holdTraining: no entrena tropas este turno; reserve: recursos que la IA
+   * no debe gastar en otra cosa (se aplica desde el siguiente turno).
+   */
+  think(ctx: AIContext): { armyHandled?: boolean; holdTraining?: boolean; reserve?: Cost } | void;
+}
+
+/** Panel de interfaz de un mod (HTML), que el HUD monta y refresca. */
+export interface HudPanelDef {
+  id: string;
+  create(session: any): { el: HTMLElement; update(): void; dispose?(): void } | null;
+}
+
+/** Dibujo sobre el mundo (en el suelo, bajo las unidades) o sobre el minimapa. */
+export interface OverlayContext {
+  ctx: CanvasRenderingContext2D;
+  game: Game;
+  ui: any;
+  zoom: number;
+  /** Mundo (casillas) → pantalla, siguiendo el relieve. */
+  project(x: number, y: number): Pt;
+  /** Pantalla → mundo. */
+  unproject(x: number, y: number): Pt;
+}
+export type OverlayFn = (o: OverlayContext) => void;
 
 /** Un mod registra contenido y comportamiento en el Registry. */
 export interface GameMod {

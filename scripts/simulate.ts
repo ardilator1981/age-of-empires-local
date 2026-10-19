@@ -1,6 +1,7 @@
 /**
  * Simulación sin gráficos (IA contra IA) para probar reglas y mods rápidamente.
- * Uso: npm run simulate -- [minutos] [mapa] [semilla]
+ * Uso: npm run simulate -- [minutos] [mapa] [semilla] [dificultad roja] [--guerra] [--prep=min]
+ * Con --guerra se juega en modo Guerra declarada (por defecto el modo no está activo).
  */
 import { buildRegistry } from '../src/core/Registry';
 import { TICK_DT } from '../src/core/constants';
@@ -11,14 +12,18 @@ const minutes = Number(process.argv[2] ?? 15);
 const mapType = process.argv[3] ?? 'arabia';
 const seed = Number(process.argv[4] ?? 12345);
 
-const reg = buildRegistry(ALL_MODS);
+const war = process.argv.includes('--guerra');
+const prepArg = process.argv.find(a => a.startsWith('--prep='));
+const mods = ALL_MODS.filter(m => war || m.id !== 'declared-war');
+const reg = buildRegistry(mods);
 await reg.mapTypes.get(mapType)?.load?.();
 const game = new Game(reg, {
   mapType, mapSize: 96, startingResources: 'standard', startAge: 0, victory: 'conquest', visibility: 'normal',
-  popLimit: 125, speed: 1, seed, mods: ALL_MODS.map(m => m.id),
+  popLimit: 125, speed: 1, seed, mods: mods.map(m => m.id),
+  warPrepMinutes: prepArg ? Number(prepArg.slice(7)) : undefined,
   players: [
     { name: 'IA Azul', civ: 'franks', color: '#3b6fe0', human: false, difficulty: 'hard' },
-    { name: 'IA Roja', civ: 'britons', color: '#d63a3a', human: false, difficulty: (process.argv[5] as any) ?? 'normal' },
+    { name: 'IA Roja', civ: 'britons', color: '#d63a3a', human: false, difficulty: (process.argv[5]?.startsWith('--') ? undefined : process.argv[5] as any) ?? 'normal' },
   ],
 });
 game.events.on('notify', n => { if (n.playerId === undefined) console.log(`[${fmt(game.time)}] ${n.text}`); });

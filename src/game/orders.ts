@@ -28,11 +28,14 @@ export const moveOrder: OrderHandler = {
 
 /** Un paso de ataque contra `t`. Devuelve false si hay que abandonar. */
 function attackStep(game: Game, u: Entity, o: Order, t: Entity): boolean {
+  if (!game.canAttack(u, t, false)) return false;
   const p = game.players[u.owner];
   const def = game.unitDef(u);
   const range = p.getStat(def, 'range');
   // Desde lo alto, las unidades a distancia alcanzan más lejos
-  const r = range >= 1 ? range + rangeBonus(game, u, t, range) : MELEE_RANGE + (t.kind === 'unit' ? 0 : 0.25);
+  let r = range >= 1 ? range + rangeBonus(game, u, t, range) : MELEE_RANGE + (t.kind === 'unit' ? 0 : 0.25);
+  // Si una regla de los mods no le deja golpear desde donde está (p. ej. fuera de la zona de batalla), se acerca más
+  if (game.reg.combatRules.length && !game.canAttack(u, t, true)) r = MELEE_RANGE;
   const st = approach(game, u, t, r);
   if (st === ARRIVED) {
     face(u, t);
