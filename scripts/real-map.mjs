@@ -122,7 +122,8 @@ async function cached(key, ext, fetcher, refresh) {
 }
 
 async function httpGet(url, init = {}) {
-  const res = await fetch(url, { ...init, headers: { 'User-Agent': USER_AGENT, ...(init.headers ?? {}) } });
+  // Límite de tiempo por petición: un servidor que no responde no debe colgar el script
+  const res = await fetch(url, { signal: AbortSignal.timeout(180000), ...init, headers: { 'User-Agent': USER_AGENT, ...(init.headers ?? {}) } });
   if (!res.ok) throw new Error(`HTTP ${res.status} en ${url.slice(0, 120)}`);
   return Buffer.from(await res.arrayBuffer());
 }

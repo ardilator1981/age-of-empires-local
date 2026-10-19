@@ -90,5 +90,7 @@ export const BALANCE = {
       { food: 0.4, wood: 0.3, gold: 0.25, stone: 0.05 },
       { food: 0.38, wood: 0.27, gold: 0.28, stone: 0.07 },
     ] as Record<string, number>[],
+    /** Con más de esto en el almacén, la IA aparta aldeanos de ese recurso. */
+    stockpileEnough: 1200,
   },
 };

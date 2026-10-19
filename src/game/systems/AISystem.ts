@@ -19,6 +19,7 @@ interface Difficulty {
 
 export const AI_DIFFICULTY: Record<string, Difficulty> = BALANCE.ai.difficulty;
 const RATIOS = BALANCE.ai.ratios;
+const STOCKPILE_ENOUGH = BALANCE.ai.stockpileEnough;
 
 /**
  * IA de un jugador. Lee las definiciones del Registry (no conoce unidades
@@ -294,7 +295,11 @@ export class AIController {
 
   private assignVillagers(vills: Entity[]) {
     const g = this.game, p = this.p;
-    const ratio = RATIOS[Math.min(p.age, RATIOS.length - 1)];
+    // Lo que ya sobra en el almacén deja de pedir aldeanos (si no, la IA acumula oro y se queda sin comida ni madera)
+    const ratio = { ...RATIOS[Math.min(p.age, RATIOS.length - 1)] };
+    for (const r of Object.keys(ratio)) if ((p.res[r] ?? 0) > STOCKPILE_ENOUGH) ratio[r] *= 0.15;
+    const sum = Object.values(ratio).reduce((a, b) => a + b, 0) || 1;
+    for (const r of Object.keys(ratio)) ratio[r] /= sum;
     const counts: Record<string, number> = {};
     for (const r of Object.keys(ratio)) counts[r] = 0;
     for (const v of vills) { const r = this.resourceOf(v); if (r) counts[r] = (counts[r] ?? 0) + 1; }
@@ -316,9 +321,16 @@ export class AIController {
       const keys = Object.keys(ratio);
       const under = keys.sort((a, b) => deficit(b) - deficit(a))[0];
       const over = keys.sort((a, b) => deficit(a) - deficit(b))[0];
-      if (under !== over && deficit(under) > 1.5 && deficit(over) < -1.5) {
+      // Si sobra mucho de algo, se reasignan varios a la vez
+      const moves = Math.max(1, Math.min(4, Math.floor(-deficit(over) / 3)));
+      for (let k = 0; k < moves && under !== over && deficit(under) > 1.5 && deficit(over) < -1.5; k++) {
         const v = vills.find(x => this.resourceOf(x) === over && (!x.carry || x.carry.amount < 1));
-        if (v && this.sendToResource(v, under, vills)) { /* reasignado */ }
+        if (!v) break;
+        // Si no se puede (p. ej. granjas sin madera), al siguiente recurso que falte
+        const to = keys.filter(r => r !== over && deficit(r) > 0.5).sort((a, b) => deficit(b) - deficit(a))
+          .find(r => this.sendToResource(v, r, vills));
+        if (!to) break;
+        counts[over]--; counts[to] = (counts[to] ?? 0) + 1;
       }
     }
   }
@@ -332,6 +344,16 @@ export class AIController {
       if (dh > bestD + 10) continue;
       const d = dh * 0.6 + Math.hypot(n.x - v.x, n.y - v.y) * 0.4;
       if (d < bestD && isAccessible(g, n, v)) { bestD = d; best = n; }
+    }
+    if (!best && res !== 'food') {
+      // Se agotó lo cercano (mapas de montaña o desierto): lo más cercano alcanzable, esté donde esté.
+      // ensureDropSites levantará allí un campamento en cuanto vayan varios aldeanos.
+      let far = Infinity;
+      for (const n of this.nodes) {
+        if (n.dead || n.resType !== res || n.amount <= 0) continue;
+        const d = Math.hypot(n.x - h.x, n.y - h.y);
+        if (d < far && isAccessible(g, n, v)) { far = d; best = n; }
+      }
     }
     if (best) { setOrder(v, { type: 'gather', targetId: best.id, phase: 'gather' }); return true; }
     if (res !== 'food') return false;

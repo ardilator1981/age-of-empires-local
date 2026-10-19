@@ -28,6 +28,13 @@
 | Navegador, vista de móvil, Arabia 120×120 | 0,70 + 0,12 ms | 0,74 + 0,16 ms |
 | Navegador, vista de móvil, Val d'Aran 120×120 (5.200 entidades) | — | 0,92 + 0,13 ms |
 
+| Estrés: 300 unidades cruzan Gran San Bernardo (real, 144×144) | — | peor tick 32,5 ms, 0 atascadas, 0 sobre roca |
+| Estrés: 300 unidades cruzan Montserrat (real, 144×144) | — | peor tick 28,6 ms, 0 atascadas, 0 sobre roca |
+
 \* En la primera medición contaba como atascada 1 unidad que en realidad estaba quieta atacando; se corrigió el criterio.
 
 **FPS:** en el Mac, un fotograma completo cuesta ~1,2 ms, muy por debajo de los 16,7 ms de 60 FPS. No se ha medido en un móvil real. Un móvil de gama media suele ser entre 5 y 10 veces más lento que este Mac en JavaScript, así que se estiman 6–12 ms por fotograma: 60 FPS en la mayoría de casos, y en todo caso por encima de los 30 FPS exigidos. La simulación va aparte, a 20 ticks por segundo. Los cambios del relieve añaden menos de un 10 % al coste por fotograma.
+
+### Partidas completas en las regiones reales
+
+`npm run simulate -- 60 <mapa> 7 easy` (IA difícil contra IA fácil, conquista). Las 12 regiones, Arabia y Pirineos terminan con un ganador: 10 de ellas en 34–56 minutos de juego; Gran San Bernardo (61:42) y Hastings (67:19) necesitan algo más de una hora. Cada partida tarda 3–13 s en simularse.

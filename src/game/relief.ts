@@ -127,8 +127,12 @@ function compNear(comp: Int32Array, w: number, h: number, p: Pt): number {
   return -1;
 }
 
-/** Dijkstra multiorigen: camino de menor coste desde cualquier origen a cualquier destino. */
-function cheapestPath(w: number, h: number, isSource: (i: number) => boolean, isTarget: (i: number) => boolean, cost: (i: number) => number): number[] | null {
+/**
+ * Dijkstra multiorigen: camino de menor coste desde cualquier origen a cualquier destino.
+ * Con `fourConn` solo usa pasos ortogonales: un corredor de una casilla con pasos en
+ * diagonal no sería transitable, porque las unidades no cortan esquinas.
+ */
+function cheapestPath(w: number, h: number, isSource: (i: number) => boolean, isTarget: (i: number) => boolean, cost: (i: number) => number, fourConn = false): number[] | null {
   const N = w * h;
   const dist = new Float64Array(N).fill(Infinity), prev = new Int32Array(N).fill(-1);
   const heapI: number[] = [], heapD: number[] = [];
@@ -170,6 +174,7 @@ function cheapestPath(w: number, h: number, isSource: (i: number) => boolean, is
     const x = i % w, y = (i / w) | 0;
     for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
       if (!dx && !dy) continue;
+      if (fourConn && dx && dy) continue;
       const nx = x + dx, ny = y + dy;
       if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue;
       const j = ny * w + nx;
@@ -279,7 +284,7 @@ export function ensurePlayable(gen: MapGenerator, starts: Pt[]): PlayableReport 
     const other = regs.findIndex(v => v !== regs[0]);
     if (other < 0) break;
     const a = regs[0], b = regs[other];
-    const path = cheapestPath(W, H, i => m.region(i % W, (i / W) | 0) === a, i => m.region(i % W, (i / W) | 0) === b, i => blockCost(i));
+    const path = cheapestPath(W, H, i => m.region(i % W, (i / W) | 0) === a, i => m.region(i % W, (i / W) | 0) === b, i => blockCost(i), true);
     if (!path) break;
     carve(gen, path, 0, e => e.resType === 'gold' || e.resType === 'stone');
     report.passesOpened++;
@@ -297,7 +302,7 @@ export function ensurePlayable(gen: MapGenerator, starts: Pt[]): PlayableReport 
       const target = near[0];
       const path = cheapestPath(W, H, i => m.region(i % W, (i / W) | 0) === reg0,
         i => Math.max(Math.abs((i % W) - target.tx), Math.abs(((i / W) | 0) - target.ty)) === 1,
-        i => blockCost(i, res));
+        i => blockCost(i, res), true);
       if (!path) continue;
       carve(gen, path, 0, e => e === target || ((e.resType === 'gold' || e.resType === 'stone') && e.resType === res));
       report.resourceLinks++;

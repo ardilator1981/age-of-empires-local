@@ -78,8 +78,9 @@ async function main() {
     };
   }
   // Estrés: 300 unidades cruzan la cordillera hacia la base contraria
-  {
-    const g = await makeGame(options('pyrenees', 120, 2));
+  for (const [map, size] of [['pyrenees', 120], ['gran-san-bernardo', 144], ['montserrat', 144]] as const) {
+    if (!reg.mapTypes.has(map)) continue;
+    const g = await makeGame(options(map, size, 2));
     const tcs = g.buildings.filter(b => b.defId === 'townCenter');
     const army: any[] = [];
     for (let side = 0; side < 2; side++) {
@@ -116,9 +117,10 @@ async function main() {
     for (let i = 0; i < 20; i++) vision.recompute();
     const visionMs = +((performance.now() - tv) / 20).toFixed(2);
     const arrived = army.filter(u => !u.dead && !u.order).length;
-    out['estrés 300 unidades cruzando los Pirineos (4 min)'] = {
+    const onRock = army.filter(u => !u.dead && !g.map.walkable(Math.floor(u.x), Math.floor(u.y))).length;
+    out[`estrés 300 unidades cruzando ${map} (4 min)`] = {
       msPerTick: +((performance.now() - t0) / ((minutes * 60) / TICK_DT)).toFixed(3), worstTickMs: +worst.toFixed(1),
-      vivas: army.filter(u => !u.dead).length, llegadas: arrived, atascadas: stuck, visionMs,
+      vivas: army.filter(u => !u.dead).length, llegadas: arrived, atascadas: stuck, enRoca: onRock, visionMs,
     };
   }
   console.log(JSON.stringify(out, null, 2));

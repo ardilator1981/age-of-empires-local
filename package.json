@@ -11,7 +11,7 @@
     "simulate": "vite build --ssr scripts/simulate.ts --outDir .sim --emptyOutDir --logLevel warn && node .sim/simulate.js",
     "real-map": "node scripts/real-map.mjs",
     "bench": "vite build --ssr scripts/bench.ts --outDir .sim --emptyOutDir --logLevel warn && node .sim/bench.js",
-    "test": "vitest run",
+    "test": "node -e \"require('fs').rmSync('node_modules/.vitest-cache',{recursive:true,force:true})\" && vitest run",
     "regions": "node scripts/regions.mjs",
     "world-map": "node scripts/world-map.mjs"
   },
