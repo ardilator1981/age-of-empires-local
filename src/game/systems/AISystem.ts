@@ -1,3 +1,4 @@
+import { BALANCE } from '../../config/balance';
 import type { Cost, Pt, System } from '../../core/types';
 import { isAccessible, nearestDrop, nearestNode, isFarmTaken, setOrder } from '../actions';
 import { Commands } from '../commands';
@@ -16,18 +17,8 @@ interface Difficulty {
   think: number;
 }
 
-export const AI_DIFFICULTY: Record<string, Difficulty> = {
-  easy: { gather: 0.75, maxVillagers: 18, firstAttack: 900, wave: 5, waveGrow: 1, villagersForAge: [14, 20, 26], think: 2 },
-  normal: { gather: 1.0, maxVillagers: 28, firstAttack: 600, wave: 8, waveGrow: 2, villagersForAge: [18, 24, 30], think: 1 },
-  hard: { gather: 1.15, maxVillagers: 40, firstAttack: 420, wave: 10, waveGrow: 3, villagersForAge: [20, 26, 32], think: 0.6 },
-};
-
-const RATIOS: Record<string, number>[] = [
-  { food: 0.55, wood: 0.4, gold: 0.05, stone: 0 },
-  { food: 0.45, wood: 0.35, gold: 0.15, stone: 0.05 },
-  { food: 0.4, wood: 0.3, gold: 0.25, stone: 0.05 },
-  { food: 0.38, wood: 0.27, gold: 0.28, stone: 0.07 },
-];
+export const AI_DIFFICULTY: Record<string, Difficulty> = BALANCE.ai.difficulty;
+const RATIOS = BALANCE.ai.ratios;
 
 /**
  * IA de un jugador. Lee las definiciones del Registry (no conoce unidades

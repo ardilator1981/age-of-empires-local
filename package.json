@@ -10,12 +10,14 @@
     "typecheck": "tsc --noEmit",
     "simulate": "vite build --ssr scripts/simulate.ts --outDir .sim --emptyOutDir --logLevel warn && node .sim/simulate.js",
     "real-map": "node scripts/real-map.mjs",
-    "bench": "vite build --ssr scripts/bench.ts --outDir .sim --emptyOutDir --logLevel warn && node .sim/bench.js"
+    "bench": "vite build --ssr scripts/bench.ts --outDir .sim --emptyOutDir --logLevel warn && node .sim/bench.js",
+    "test": "vitest run"
   },
   "devDependencies": {
     "geotiff": "^3.0.5",
     "typescript": "^7.0.2",
     "vite": "^8.3.4",
-    "vite-plugin-pwa": "^2.0.0"
+    "vite-plugin-pwa": "^2.0.0",
+    "vitest": "^5.0.5"
   }
 }

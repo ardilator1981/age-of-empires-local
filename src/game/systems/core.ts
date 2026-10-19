@@ -1,5 +1,7 @@
 import type { System } from '../../core/types';
+import { BALANCE } from '../../config/balance';
 import { setOrder } from '../actions';
+import { rangeBonus } from '../heightRules';
 import { findEnemyNear, performAttack, updateProjectiles } from '../combat';
 import type { Entity } from '../Entity';
 import type { Game } from '../Game';
@@ -233,7 +235,9 @@ export class CombatSystem implements System {
         e.cooldown -= dt;
         if (e.cooldown > 0) continue;
         const p = g.players[e.owner];
-        const t = findEnemyNear(g, e, p.getStat(def, 'range'), false);
+        const range = p.getStat(def, 'range');
+        // Torres y castillos en alto alcanzan más lejos (BALANCE.highGround)
+        const t = findEnemyNear(g, e, range + BALANCE.highGround.rangeCap, false, false, (en, d) => d <= range + rangeBonus(g, e, en, range));
         if (t) { performAttack(g, e, t); e.cooldown = p.getStat(def, 'reloadTime'); }
         else e.cooldown = 0.5;
       } else if (e.kind === 'unit' && !e.order && g.time >= e.scanAt) {

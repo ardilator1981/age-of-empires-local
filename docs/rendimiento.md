@@ -13,3 +13,5 @@
 | Partida 4 IA, Pirineos 120×120, 25 min | 0,077 ms/tick, peor tick 10,2 ms |
 | Estrés: 300 unidades cruzan los Pirineos | 0,252 ms/tick, **peor tick 327 ms** (todas calculan el camino a la vez), 281 de 282 llegan, 1 atascada |
 | Visión (150 unidades) | 0,05 ms por recálculo |
+| Navegador, vista de móvil 740×360, Pirineos 120×120 con 4 jugadores (15 min) | 1,03 ms de render + 0,12 ms de simulación por fotograma |
+| Navegador, vista de móvil, Arabia 120×120 | 0,70 ms de render + 0,12 ms de simulación por fotograma |
