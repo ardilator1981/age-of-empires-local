@@ -1,6 +1,6 @@
 import { TICK_DT } from '../core/constants';
 import { buildRegistry } from '../core/Registry';
-import { Music } from '../audio/Music';
+import { AudioManager } from '../audio/AudioManager';
 import { Game, type GameOptions } from '../game/Game';
 import { ALL_MODS } from '../mods';
 import { Menu } from '../ui/Menu';
@@ -11,7 +11,8 @@ export class App {
   session: Session | null = null;
   paused = false;
   menuOpen = true;
-  readonly music = new Music();
+  /** Todo el sonido: música, efectos y alertas. */
+  readonly audio = new AudioManager();
   readonly menu: Menu;
   private acc = 0;
   private last = 0;
@@ -34,12 +35,16 @@ export class App {
     this.session = null;
     const game = new Game(reg, opts);
     this.hud.style.display = '';
-    this.session = new Session(this, game);
-    this.music.attach(game);
+    const session = this.session = new Session(this, game);
+    // El sonido del combate depende de lo que se esté mirando
+    this.audio.attach(game, () => {
+      const cam = session.renderer.cam, c = cam.center, corner = cam.screenToWorld(0, 0);
+      return { x: c.x, y: c.y, r: Math.max(4, Math.hypot(corner.x - c.x, corner.y - c.y)) };
+    });
     game.events.on('gameOver', ({ won }) => setTimeout(() => { if (this.session?.game === game) this.menu.showGameOver(won); }, 1500));
     this.lastOptions = opts;
     this.paused = false;
-    this.music.setPaused(false);
+    this.audio.setPaused(false);
     this.menuOpen = false;
     this.acc = 0;
     this.menu.hide();
@@ -55,8 +60,8 @@ export class App {
     this.session?.dispose();
     this.session = null;
     this.paused = false;
-    this.music.setPaused(false);
-    this.music.detach();
+    this.audio.setPaused(false);
+    this.audio.detach();
     this.menuOpen = true;
     this.hud.style.display = 'none';
     const c = document.getElementById('game') as HTMLCanvasElement;
@@ -76,7 +81,7 @@ export class App {
     if (!this.session) return;
     this.paused = paused;
     this.menuOpen = paused;
-    this.music.setPaused(paused);
+    this.audio.setPaused(paused);
     if (paused && showMenu) this.menu.showPause();
     else this.menu.hide();
   }

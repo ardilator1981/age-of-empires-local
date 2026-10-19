@@ -72,6 +72,14 @@ button { font-family: var(--font); cursor: pointer; }
 .vol { display: flex; align-items: center; gap: 8px; justify-content: center; color: var(--parchment); text-shadow: 1px 1px 0 #000; }
 .vol input { accent-color: var(--gold); width: 160px; }
 .vol + .vol { margin-top: 8px; }
+.sound-set {
+  display: grid; grid-template-columns: auto 160px auto 160px; gap: 6px 10px; align-items: center; justify-content: center;
+  margin: 6px auto 8px; color: var(--parchment); text-shadow: 1px 1px 0 #000;
+}
+.sound-set button { grid-column: 1 / -1; justify-self: center; }
+.sound-set label { text-align: right; }
+.sound-set input { accent-color: var(--gold); width: 100%; }
+@media (max-width: 560px) { .sound-set { grid-template-columns: auto 1fr; } }
 
 /* ---------------------------------------------------------------- avisos */
 #notices {

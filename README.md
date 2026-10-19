@@ -37,7 +37,8 @@ Abre <http://localhost:5173>.
 - **Mapas reales** con el relieve, los ríos, los bosques y los pueblos de verdad: **Val d'Aran** y **Plana de Vic**, y un script para crear el de cualquier zona (ver «Un mapa de una zona real»).
 - Relieve: colinas y montañas con iluminación, y ventaja de altura en combate (+25 % desde arriba, -25 % desde abajo).
 - Estética inspirada en el original: terreno con texturas detalladas y agua animada, edificios que cambian con la edad (madera y paja → entramado y tejas → piedra), retratos de unidades e interfaz de piedra y oro.
-- Música medieval generativa (laúd, flauta dulce, viela, zanfona, arpa y tambores) que se compone sobre la marcha: nunca se repite, suma instrumentos con cada edad, cambia a un tema de batalla en combate y tiene fanfarrias al subir de edad, ganar o perder.
+- Música medieval generativa, tranquila y casi hipnótica (laúd, flauta dulce, viela, zanfona, arpa y tambores), que se compone sobre la marcha y cambia a un tema más tenso en combate.
+- Efectos de sonido sintéticos, sin archivos: confirmación de órdenes, edificio terminado, unidad entrenada, tecnología y nueva edad, recurso agotado, alertas de ataque (cuerno para unidades, campana para edificios) y errores (sin recursos, mal sitio, población). Combate y ambiente a volumen bajo, según lo que se ve. Volumen general, de música, de efectos y de alertas, y botón de silencio (ver `CREDITS.md`).
 - Niebla de guerra, minimapa, grupos de unidades, puntos de reunión, ataque-movimiento y colas de producción.
 - Opciones de partida: rivales (hasta 5), mapa, tamaño, recursos, edad inicial, victoria, visibilidad, población y velocidad.
 
@@ -57,7 +58,7 @@ Abre <http://localhost:5173>.
 | Centrar en la selección | `Espacio` |
 | Eliminar | `Supr` |
 | Pausa | `P`, `F10` o `Esc` |
-| Activar / silenciar la música | `M` (volumen en el menú) |
+| Activar / silenciar el sonido | `M` o el botón 🔊 (volúmenes en el menú) |
 
 ## Jugar en el móvil (iPhone y Android)
 
@@ -114,7 +115,7 @@ src/
   game/        Simulación: Game, entidades, jugadores, mapa, caminos (A*), combate,
                órdenes de unidades, comandos y reglas de disponibilidad
     systems/   Sistemas que se ejecutan cada tick (movimiento, producción, combate, IA...)
-  audio/       Música generativa con Web Audio (sin archivos de sonido)
+  audio/       AudioManager (único punto de salida del sonido), música generativa y efectos sintéticos
   render/      Cámara isométrica con relieve, terreno en WebGL (TerrainGL), texturas procedurales,
                sprites, retratos de la interfaz y minimapa
   ui/          HUD, menús y entrada de ratón y teclado

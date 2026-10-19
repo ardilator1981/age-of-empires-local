@@ -236,7 +236,7 @@ export const gatherOrder: OrderHandler = {
     const amt = Math.min(rate * dt, target.amount, cap - u.carry.amount);
     target.amount -= amt;
     u.carry.amount += amt;
-    if (target.amount <= 0.001) game.deplete(target);
+    if (target.amount <= 0.001) game.deplete(target, u.owner);
   },
 };
 

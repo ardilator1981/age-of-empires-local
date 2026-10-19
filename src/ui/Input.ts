@@ -167,7 +167,8 @@ export class Input {
       if (!keep || !buildingAvail(game, game.human, defId).ok) { ui.placing = null; ui.page = 'main'; }
     } else {
       const a = buildingAvail(game, game.human, defId);
-      game.notify(a.ok ? 'No se puede construir ahí' : a.reason ?? 'No disponible', game.humanId, 'warn');
+      if (a.ok) game.reject(game.humanId, 'placement', 'No se puede construir ahí');
+      else game.rejectAvail(game.humanId, a);
     }
   }
 
@@ -176,7 +177,7 @@ export class Input {
     const w = this.s.renderer.cam.screenToWorld(sx, sy);
     const units = this.ownSelected().filter(u => u.kind === 'unit');
     const target = this.pick(sx, sy, touch);
-    if (target && game.isEnemy(game.humanId, target.owner) && target.kind !== 'resource') Commands.attack(game, units, target);
+    if (target && game.isEnemy(game.humanId, target.owner) && target.kind !== 'resource') Commands.smart(game, game.humanId, units, w.x, w.y, target);
     else Commands.attackMove(game, units, w.x, w.y);
     this.marker(w.x, w.y, '#ff6b6b');
     if (!keep) ui.targeting = null;
@@ -512,9 +513,9 @@ export class Input {
       return;
     }
     if ((e.key === 'm' || e.key === 'M') && !e.ctrlKey && !e.metaKey) {
-      const muted = app.music.toggleMute();
-      this.s.hud.updateMusicButton();
-      game.notify(muted ? 'Música desactivada' : 'Música activada', game.humanId);
+      const muted = app.audio.toggleMute();
+      this.s.hud.updateSoundButton();
+      game.notify(muted ? 'Sonido desactivado' : 'Sonido activado', game.humanId);
       return;
     }
     if (e.key === ' ') { e.preventDefault(); this.centerOnSelection(); return; }
