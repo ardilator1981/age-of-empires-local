@@ -32,13 +32,22 @@ const DEVICES = [
 ];
 if (args.desktop) DEVICES.push({ id: 'escritorio', width: 1440, height: 900, dpr: 1, mobile: false, touch: false });
 
-/** Escenas: código que se ejecuta en la página antes de la captura. */
+/**
+ * Escenas: código que se ejecuta en la página antes de la captura.
+ * only: dispositivos en los que se captura · mobileOnly: solo si la interfaz móvil está activa.
+ */
+const pickVillager = `const g = game, v = g.units.find(u => u.owner === g.humanId && g.unitDef(u).builder); app.session.ui.setSelection([v.id]); app.session.renderer.cam.centerOn(v.x, v.y);`;
 const SCENES = [
-  { id: 'nada', js: `app.session.ui.setSelection([])` },
-  { id: 'aldeano', js: `(() => { const g = game, v = g.units.find(u => u.owner === g.humanId && g.unitDef(u).builder); app.session.ui.setSelection([v.id]); app.session.renderer.cam.centerOn(v.x, v.y); })()` },
-  { id: 'centro', js: `(() => { const g = game, b = g.buildings.find(x => x.owner === g.humanId); app.session.ui.setSelection([b.id]); })()` },
-  // En vertical: tras pulsar "Seguir en vertical" (si hay aviso de girar)
-  { id: 'vertical-seguir', portrait: true, js: `(app.session.ui.setSelection([]), document.getElementById('btn-rotate-ok')?.click())` },
+  // En vertical, primero el aviso de girar; las demás escenas, tras pulsar «Seguir en vertical»
+  { id: 'aviso', only: ['movil-vertical'], js: `app.session.ui.setSelection([])` },
+  { id: 'nada', js: `(document.getElementById('btn-rotate-ok')?.click(), app.session.ui.setSelection([]))` },
+  { id: 'aldeano', js: `(() => { ${pickVillager} })()` },
+  { id: 'construir', mobileOnly: true, js: `(() => { ${pickVillager} setTimeout(() => document.querySelector('[data-b="t0"]')?.click(), 400); })()`, wait: 1300 },
+  { id: 'colocar', mobileOnly: true, only: ['movil-horizontal', 'movil-vertical'], js: `document.querySelector('#m-sheet [data-b="s1"]')?.click()` },
+  { id: 'centro', only: ['movil-horizontal', 'tableta', 'escritorio'], js: `(() => { const g = game, b = g.buildings.find(x => x.owner === g.humanId); app.session.ui.setSelection([b.id]); })()` },
+  { id: 'menu', mobileOnly: true, only: ['movil-horizontal'], js: `(app.session.ui.setSelection([]), document.querySelector('[data-a="menu"]').click())` },
+  { id: 'ajustes', mobileOnly: true, only: ['movil-horizontal'], js: `document.querySelector('[data-screen="settings"]').click()` },
+  { id: 'ayuda', mobileOnly: true, only: ['movil-horizontal'], js: `(document.querySelector('[data-a="screen-close"]').click(), app.session.mobile.showHint())` },
 ];
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -92,11 +101,15 @@ async function main() {
     });
     await send('Emulation.setTouchEmulationEnabled', { enabled: d.touch, maxTouchPoints: d.touch ? 5 : 0 });
     await send('Emulation.setEmitTouchEventsForMouse', { enabled: d.touch, configuration: d.touch ? 'mobile' : 'desktop' });
-    // Pista de gestos ya vista: que no tape las capturas
-    await evaluate(`try { localStorage.setItem('aoe-gesture-hint-v1', '1') } catch {}`).catch(() => {});
-    await send('Page.navigate', { url: URL });
-    await sleep(2500);
-    await evaluate(`try { localStorage.setItem('aoe-gesture-hint-v1', '1') } catch {}; 1`);
+    const load = async () => {
+      await send('Page.navigate', { url: URL });
+      for (let i = 0; i < 60 && !(await evaluate('!!window.app').catch(() => false)); i++) await sleep(250);
+      await sleep(500);
+    };
+    await load();
+    // Pista de gestos ya vista (que no tape las capturas) e interfaz automática
+    await evaluate(`localStorage.setItem('aoe-ui-v1', JSON.stringify({ layout: 'auto', scale: 1, haptics: true, hintSeen: true })), 1`);
+    await load();
     await evaluate(`(app.start(app.menu.buildOptions()), 1)`);
     await sleep(2500);
     await evaluate(`window.__measure = () => {
@@ -108,9 +121,10 @@ async function main() {
       return Math.round(m / n * 1000) / 10;
     }; 1`);
     for (const sc of SCENES) {
-      if (sc.portrait && d.width > d.height) continue;
+      if (sc.only && !sc.only.includes(d.id)) continue;
+      if (sc.mobileOnly && !(await evaluate(`!!document.querySelector('.ui-movil')`))) continue;
       await evaluate(sc.js);
-      await sleep(900);
+      await sleep(sc.wait ?? 900);
       const pct = await evaluate('__measure()');
       const shot = await send('Page.captureScreenshot', { format: 'png' });
       const file = join(OUT, `${PREFIX}-${d.id}-${sc.id}.png`);

@@ -418,6 +418,7 @@ table.stats td { padding: 4px; text-shadow: 1px 1px 0 #000; }
   .rp-desc { font-size: 12px; margin: 4px 0; }
   .buttons.row { margin: 6px 0; gap: 6px; }
   .buttons.row button { min-width: 0; font-size: 13px; }
+}
 
 /* ================================================================ interfaz móvil (html.ui-movil)
    El mapa ocupa toda la pantalla y los controles flotan encima. No cambia nada de la interfaz de escritorio:
@@ -504,7 +505,7 @@ table.stats td { padding: 4px; text-shadow: 1px 1px 0 #000; }
 
 /* Bandeja de selección: solo con algo seleccionado, abajo entre los grupos y el minimapa */
 #m-tray {
-  display: none; bottom: calc(var(--safe-b) + 6px);
+  display: none; bottom: calc(var(--safe-b) + 6px); min-height: 56px;
   left: calc(var(--safe-l) + 12px + var(--mb));
   max-width: calc(100% - var(--safe-l) - var(--safe-r) - 30px - 2 * var(--mb) - var(--mini));
   height: calc(var(--mb) + 14px); padding: 6px; gap: 6px; align-items: center;
@@ -520,11 +521,13 @@ table.stats td { padding: 4px; text-shadow: 1px 1px 0 #000; }
 .m-txt b, .m-txt small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 1px 1px 0 #000; }
 .m-txt b { color: var(--gold); font-size: calc(14px * var(--s)); }
 .m-txt small { font-size: calc(11.5px * var(--s)); color: var(--parchment); }
+.m-txt .hg-up { color: #ffd24a; }
+.m-txt .hg-down { color: #ff8a7a; }
 .m-hp { height: 5px; width: calc(110px * var(--s)); background: #3a0c08; border-radius: 3px; overflow: hidden; }
 .m-hp i { display: block; height: 100%; background: linear-gradient(#6ee86e, #2a9a2a); }
 .m-queue, .m-multi { display: flex; gap: 5px; align-items: center; flex: none; }
 .m-q, .m-chip {
-  position: relative; width: calc(44px * var(--s)); height: calc(44px * var(--s)); padding: 0; overflow: hidden; flex: none;
+  position: relative; width: max(44px, calc(44px * var(--s))); height: max(44px, calc(44px * var(--s))); padding: 0; overflow: hidden; flex: none;
   background: #1e160e; border: 1px solid var(--gold-dark); border-radius: 6px; font-size: 20px;
 }
 .m-q .pic, .m-chip .pic { width: 100%; height: 100%; display: block; pointer-events: none; }
@@ -542,7 +545,7 @@ table.stats td { padding: 4px; text-shadow: 1px 1px 0 #000; }
 .cmd-m.off, .m-cell.off { filter: grayscale(0.9) brightness(0.6); }
 .cmd-m em, .m-cell em { position: absolute; inset: auto 0 2px; font-style: normal; font-size: 9px; text-align: center; }
 .mbtn.armed, .m-cell.armed { background: rgba(160, 36, 24, 0.92); border-color: #ffb0a0; }
-.m-fold { flex: none; align-self: stretch; width: 34px; padding: 0; background: none; border: none; font-size: 18px; color: var(--gold); }
+.m-fold { flex: none; align-self: stretch; width: 44px; margin-left: -6px; padding: 0; background: none; border: none; font-size: 18px; color: var(--gold); }
 .folded .m-fold { transform: rotate(180deg); }
 
 /* Apuntar (ataque-movimiento) y colocar edificios */

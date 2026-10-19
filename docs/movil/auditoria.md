@@ -24,3 +24,21 @@ Capturas: `antes-<dispositivo>-<escena>.png` en esta carpeta.
 8. Colocar un edificio lo construye al levantar el dedo: el dedo tapa el fantasma y no hay confirmar/cancelar.
 9. No hay grupos de control táctiles, ni botón de ejército, ni alertas; ordenar exige pulsación larga o el modo «Ordenar».
 10. En vertical el aviso tapa todo; al seguir, el panel pasa a 214 px y la tableta reserva 196 px fijos (≈ 26 %).
+
+# Después (rama feat/interfaz-movil)
+
+Mismas condiciones, con `--prefix despues`. Capturas: `despues-<dispositivo>-<escena>.png`.
+
+| Dispositivo | Nada seleccionado | Aldeano | Centro urbano | Colocando un edificio |
+| --- | --- | --- | --- | --- |
+| Móvil horizontal 844×390 | **87,3 %** (antes 61 %) | 75,9 % | 77,7 % | 80,1 % |
+| Móvil vertical 390×844 | aviso de girar · 86,6 % tras «Seguir en vertical» (antes 68 %) | 75,8 % | — | 79,2 % |
+| Tableta 1024×768 | **93 %** (antes 68,6 %) | 87,1 % | 88,2 % | — |
+
+Con la hoja de construcción o el menú abiertos el mapa queda detrás de un velo (0 %): son pantallas modales que se
+cierran al elegir. La meta (≥ 85 % en horizontal sin nada seleccionado) se cumple; con una selección la bandeja y los
+grupos de control quitan unos 11 puntos más.
+
+La interfaz de escritorio no cambia: en 1440×900 y 1180×640, con nada seleccionado, un aldeano, sus dos menús de
+construcción, el centro urbano y una selección múltiple, la posición, el tamaño y el texto de todos los elementos del
+HUD son idénticos antes y después. La única diferencia es el selector «Interfaz» añadido al menú de pausa.

@@ -369,6 +369,11 @@ export class MobileHUD {
       } else if (!e.complete) line = `En construcción: ${Math.floor(e.progress * 100)} %`;
       else if (g.buildingDef(e).gatherable) line = `🍖 ${Math.ceil(e.amount)}`;
       else line = `${Math.ceil(e.hp)}/${Math.round(e.maxHp)}`;
+      // Relieve: ventaja o desventaja de altura (el detalle, en la interfaz de escritorio)
+      const adv = e.data.heightAdv as { range: number; damage: number; until: number } | undefined;
+      if (adv && adv.until >= g.time && (adv.range > 0 || adv.damage !== 0)) {
+        line += adv.damage > 0 || adv.range > 0 ? ' · <span class="hg-up">▲ altura</span>' : ' · <span class="hg-down">▼ cuesta arriba</span>';
+      }
     }
     let queue = '';
     if (e.kind === 'building' && e.owner === g.humanId && e.queue.length) {
@@ -615,7 +620,7 @@ export class MobileHUD {
     if (was && resume && this.s.app.paused) this.s.app.setPaused(false);
   }
 
-  private showHint() {
+  showHint() {
     if (!this.screen && !this.hint) this.s.app.setPaused(true, false);
     this.hint = true;
     this.root.classList.add('hint-open');

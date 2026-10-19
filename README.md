@@ -71,16 +71,28 @@ El juego es una **PWA**: se instala desde el navegador y funciona sin conexión.
 
 Se juega en horizontal. En pantallas táctiles el mapa por defecto es *Pequeño*.
 
+En móviles y tabletas se usa la **interfaz móvil**: el mapa ocupa toda la pantalla y los controles flotan encima
+(recursos en una línea arriba, minimapa en una esquina y una bandeja abajo solo cuando hay algo seleccionado).
+Se elige sola según la pantalla y el tipo de entrada; en **☰ › Ajustes** (o en el menú de pausa en el ordenador) se
+puede forzar la de escritorio o la móvil, y cambiar el tamaño de los controles. Para probarla en el ordenador: `?ui=movil`.
+
 | Acción | Gesto |
 | --- | --- |
 | Seleccionar | Tocar |
 | Todas las unidades de un tipo en pantalla | Tocar dos veces |
-| Seleccionar varias | Arrastrar con un dedo |
-| Ordenar (mover / atacar / recolectar / construir / reunión) | Mantener pulsado, o activar 🎯 **Ordenar** y tocar |
+| Seleccionar varias | Arrastrar con un dedo (con el modo ✥ **Cámara**, arrastrar mueve el mapa) |
+| Ordenar (mover / atacar / recolectar / construir / reunión) | Mantener pulsado en el mapa o en el minimapa |
 | Mover la cámara / zoom | Dos dedos / pellizcar (o tocar el minimapa) |
-| Construir | Elegir el edificio, arrastrar el fantasma y soltar para colocarlo (✖ cancela) |
-| Ver la descripción de un botón | Mantenerlo pulsado |
-| Aldeano inactivo / plegar el panel | 💤 / ▾ |
+| Construir | Bandeja › **Construir** › pestaña › edificio; arrastrar el fantasma y **✔ Construir** (✖ cancela) |
+| Entrenar / investigar | Bandeja (las 4 primeras) o **⋯ Más** (pestañas Unidades, Tecnologías, Acciones) |
+| Eliminar / quitar de la cola | Dos toques seguidos (el primero pide confirmación) |
+| Grupos 1–5 | Tocar = seleccionar (dos veces: centrar) · Mantener pulsado = guardar la selección |
+| Aldeano inactivo / ejército / alertas | 💤 / ⚔️ / 🔔 |
+| Minimapa | ⇲ plegar · ⤢ a pantalla completa (tocar un punto para ir allí) |
+| Ver coste y descripción de un botón | Mantenerlo pulsado |
+| Pausa, estadísticas, tecnologías, diplomacia, ajustes | ☰ |
+
+Capturas y medición de la interfaz en móvil: `docs/movil/` (`npm run shots:movil -- --url http://localhost:5173/ --prefix despues`).
 
 ### Publicar en GitHub Pages
 
