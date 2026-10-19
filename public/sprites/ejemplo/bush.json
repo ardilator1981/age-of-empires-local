@@ -1,0 +1,10 @@
+{
+  "image": "bush.png",
+  "cell": { "w": 96, "h": 80 },
+  "anchor": { "x": 48, "y": 70 },
+  "scale": 2,
+  "shadow": 16,
+  "states": {
+    "idle": { "frames": 3, "pick": "amount" }
+  }
+}

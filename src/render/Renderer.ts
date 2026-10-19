@@ -1,7 +1,7 @@
 import { ELEV_PX, HALF_H, HALF_W } from '../core/constants';
 import type { Pt, SpriteContext } from '../core/types';
 import type { Entity } from '../game/Entity';
-import type { Game } from '../game/Game';
+import type { Decal, Game } from '../game/Game';
 import type { UIState } from '../ui/UIState';
 import { Camera } from './Camera';
 import { ellipse, poly, up } from './draw';
@@ -180,6 +180,14 @@ export class Renderer {
     if (fogged) this.ctx.filter = 'none';
   }
 
+  /** Animación de muerte del sprite de la unidad (si la tiene). */
+  private drawDeath(d: Decal, p: Pt, age: number): boolean {
+    if (!d.defId) return false;
+    const s = this.spriteCtx(null, d.defId, 'unit', p.x, p.y, d.owner ?? 0);
+    const fn = s && this.game.reg.sprites.get(s.def.sprite);
+    return !!(s && fn?.death?.(s, age, d.facing ?? 1));
+  }
+
   /** Matas, flores, piedras... (solo decorativo). */
   private drawDecorations() {
     const { ctx, cam, game } = this;
@@ -252,7 +260,9 @@ export class Renderer {
       if (p.x < -100 || p.y < -100 || p.x > W + 100 || p.y > H + 100) continue;
       if (!game.human.visible[Math.floor(d.y) * m.w + Math.floor(d.x)]) continue;
       ctx.globalAlpha = Math.max(0, 1 - age / 40);
-      if (d.kind === 'corpse') {
+      if (d.kind === 'corpse' && this.drawDeath(d, p, age)) {
+        // animación de muerte de la hoja de sprites
+      } else if (d.kind === 'corpse') {
         ctx.fillStyle = 'rgba(70,20,15,0.55)'; ellipse(ctx, p.x, p.y, 10 * z, 4 * z); ctx.fill();
         ctx.fillStyle = d.color; ellipse(ctx, p.x + 2 * z, p.y - 1 * z, 6 * z, 2.4 * z); ctx.fill();
       } else {

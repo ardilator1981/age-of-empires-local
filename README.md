@@ -4,7 +4,8 @@ Un juego de estrategia en tiempo real inspirado en **Age of Empires II**, que se
 entero en tu ordenador. Está pensado para **crecer**: todo el contenido (unidades, edificios, tecnologías,
 civilizaciones, mapas, reglas) son datos registrados por *mods*, así que añadir cosas nuevas no exige tocar el motor.
 
-> Los gráficos se dibujan por código; no se usa ningún archivo del juego original.
+> Los gráficos se dibujan por código o salen de imágenes propias (ver [Arte con imágenes](#arte-con-imágenes));
+> no se usa ningún archivo del juego original.
 
 ## Cómo jugar
 
@@ -69,14 +70,18 @@ src/
   audio/       Música generativa con Web Audio (sin archivos de sonido)
   render/      Cámara isométrica con relieve, terreno en WebGL (TerrainGL), texturas procedurales,
                sprites, retratos de la interfaz y minimapa
+    art/       Carga de imágenes: texturas de terreno, hojas de sprites y color del jugador
   ui/          HUD, menús y entrada de ratón y teclado
   app/         Ciclo de vida: menú → partida → menú
   mods/
     core/            Todo el contenido base (datos puros, fácil de leer y editar)
     extra-content/   Mod de ejemplo: unidad, tecnología, sprite y mapa nuevos
     treasure-hunt/   Mod de ejemplo: reglas nuevas mediante un sistema propio
+    art/             Qué unidades, edificios y recursos usan imágenes en vez de sprites procedurales
 scripts/
-  simulate.ts  Partida IA contra IA sin gráficos, para probar cambios rápidamente
+  simulate.ts      Partida IA contra IA sin gráficos, para probar cambios rápidamente
+  fix-textures.mjs Hace repetibles las texturas de terreno (npm run fix-textures)
+public/sprites/    Imágenes del juego (texturas, hojas de sprites) y ejemplos
 ```
 
 ## Arquitectura en 1 minuto
@@ -239,6 +244,156 @@ reg.addSprite('mi-caballero', imageSprite('/sprites/caballero.png', { width: 48,
 ```
 
 Las imágenes van en una carpeta `public/` en la raíz del proyecto.
+
+Para sustituir los dibujos por imágenes pieza a pieza (generadas con IA o dibujadas a mano) mira la sección
+[Arte con imágenes](#arte-con-imágenes).
+
+## Arte con imágenes
+
+El motor puede usar imágenes en lugar de los gráficos procedurales, **pieza a pieza**: lo que tenga imagen se
+dibuja con ella y todo lo demás sigue dibujándose por código. Si falta un archivo, o tiene un error, el juego
+avisa en la consola (`[arte] ...`) y usa el dibujo procedural, así que nunca se rompe nada.
+
+### Dónde va cada cosa
+
+```
+public/sprites/
+  terrain/      Texturas de terreno: grass, dirt, forest, water, sand, shallows, snow, rock, desert (.png/.jpg/.webp)
+  units/        Hojas de unidades: militia.png + militia.json (+ militia-mask.png)
+  buildings/    Hojas de edificios: house.png + house.json (+ variantes por edad y máscara)
+  resources/    Árboles, minas, arbustos...
+  ejemplo/      Hojas y textura de prueba (ver «Comprobar el resultado»)
+art-src/terrain/  Originales de las texturas antes de hacerlas repetibles (lo crea npm run fix-textures)
+src/mods/art/     Lista de qué unidades, edificios y recursos usan qué hoja
+```
+
+Especificaciones comunes: vista isométrica 2:1, luz desde arriba a la izquierda, dibujado **a 2x** (el doble de
+lo que ocupa en pantalla a zoom 1), fondo recortado a PNG con transparencia. Los edificios van **sin sombra
+proyectada**: la pone el motor.
+
+### 1. Texturas de terreno
+
+1. Guarda cada textura como `public/sprites/terrain/<patrón>.png` (también vale `.jpg` o `.webp`), donde
+   `<patrón>` es el `pattern` del terreno: `grass`, `dirt`, `forest`, `water`, `sand`, `shallows`, `snow`, `rock`
+   o `desert`. Son imágenes **cuadradas vistas desde arriba**, idealmente de 1024x1024.
+2. Hazlas repetibles:
+
+   ```bash
+   npm run fix-textures
+   ```
+
+   Desplaza cada imagen un 50 %, funde las costuras e iguala la luz (las imágenes generadas suelen traer una
+   viñeta que, repetida, formaría una cuadrícula). Avisa si alguna no es cuadrada. Guarda el original en
+   `art-src/terrain/` y recuerda qué ha procesado, así que puedes ejecutarlo cada vez que añadas texturas.
+   Con `-- --check` solo informa (tamaño y si la costura se nota), con `-- --force` lo rehace todo desde los
+   originales y con `-- --no-flatten` no toca la luz.
+3. Recarga el juego. Cada textura se reduce a 512x512 (con mipmaps) y se repite cada 3 casillas, con una
+   segunda capa a otra escala para que no se note la repetición. El motor le añade el relieve, la iluminación,
+   las olas del agua y las manchas de color, igual que a las procedurales. El minimapa toma su color medio.
+
+Un terreno de un mod puede usar otra ruta con `texture: 'sprites/mi-mod/lava.png'` en su `TerrainDef`.
+
+### 2. Hojas de sprites
+
+Una hoja es un PNG dividido en **celdas iguales**: cada fila es un estado (quieto, andar, atacar...) y cada
+columna un fotograma. Junto al PNG va un JSON (el *manifiesto*) que la describe. Plantilla para una unidad
+(celdas de 128x128 a 2x, es decir, 64x64 en pantalla):
+
+```json
+{
+  "image": "militia.png",
+  "mask": "militia-mask.png",
+  "cell": { "w": 128, "h": 128 },
+  "anchor": { "x": 64, "y": 122 },
+  "scale": 2,
+  "facing": "right",
+  "directions": 1,
+  "states": {
+    "idle":   { "row": 0, "frames": 1 },
+    "walk":   { "row": 1, "frames": 8, "fps": 10 },
+    "attack": { "row": 2, "frames": 6 },
+    "work":   { "row": 3, "frames": 6, "fps": 8 },
+    "carry":  { "row": 4, "frames": 8, "fps": 10 },
+    "death":  { "row": 5, "frames": 6, "fps": 8 }
+  }
+}
+```
+
+| Campo | Qué es |
+| --- | --- |
+| `image` | PNG de la hoja, con ruta relativa al JSON. |
+| `mask` | (Opcional) máscara del color del jugador, del mismo tamaño que `image`. |
+| `cell` | Ancho y alto de cada celda, en píxeles de la imagen. |
+| `anchor` | Punto de la celda que va en el suelo: **los pies** de la unidad, la base del tronco de un árbol... En edificios, el **centro del rombo de la base** (si no se indica, se supone que la punta de abajo del rombo toca el borde inferior de la celda). |
+| `scale` | Píxeles de imagen por píxel de pantalla a zoom 1. Generando a 2x: `2`. |
+| `facing` | Hacia dónde mira el dibujo (`right` o `left`); el motor lo refleja para el otro lado. |
+| `directions` | `1` = una dirección reflejada (MVP). `5` = S, SO, O, NO, N (el este se refleja). `8` = S, SO, O, NO, N, NE, E, SE. Con 5 u 8, cada dirección ocupa la fila siguiente dentro del estado (`row` + n.º de dirección). |
+| `states` | Estados con `row` y `col` (primera celda), `frames`, `fps` (8 por defecto) o `duration` (segundos), `loop` y, si hace falta, `image`/`mask`/`cell`/`anchor` propios (una imagen por estado). |
+| `ages` | (Edificios) variantes por edad: `{ "1": { "image": "house-feudal.png" }, "2": { ... } }`. Se usa la mayor edad ≤ la del jugador (0 Oscura, 1 Feudal, 2 Castillos, 3 Imperial). Pueden cambiar `image`, `mask`, `states` y `portrait`. |
+| `portrait` | (Opcional) imagen para el retrato de la interfaz. Si no hay, se recorta el primer fotograma de `idle`. |
+| `shadow` | Radio (px a zoom 1) de la sombra elíptica bajo unidades y recursos, o `false`. Por defecto 10 en infantería y 17 en caballería. |
+
+Cómo elige el motor el estado de una unidad: `attack` mientras da un golpe (dura 0,35 s, los fotogramas se
+reparten en ese tiempo); `walk` si se mueve, o `carry` si además lleva recursos; `work` mientras recolecta o
+construye; `idle` en otro caso; y `death` al morir (se queda en el último fotograma y se desvanece como el
+cadáver). Para el aldeano se pueden afinar por tarea: `work-wood`, `work-gold`, `work-stone`, `work-food`,
+`work-build`, `carry-wood`, `carry-food`... Si un estado no existe se usa el siguiente más parecido
+(`work-wood` → `work` → `idle`; `carry` → `walk`).
+
+**Edificios.** El rombo de la base mide `N*128 x N*64` px a 2x para un edificio de `N`x`N` casillas (casa: 2,
+cuartel: 3, centro urbano: 4). Estados: `idle` (terminado), `work` (opcional, mientras produce; p. ej. humo) y
+`construction` (opcional): si existe, sus fotogramas se reparten según el progreso de la obra; si no, el edificio
+terminado aparece de abajo arriba como ahora.
+
+**Recursos.** `"pick": "variant"` elige un fotograma distinto para cada árbol (variedad sin animación) y
+`"pick": "amount"` cambia de fotograma según lo que queda (mina llena → casi agotada).
+
+### 3. La máscara del color del jugador
+
+Un PNG del mismo tamaño que la hoja, **transparente** salvo en las zonas que deben llevar el color del jugador
+(estandartes, tabardos, escudos, tejas de banderas), que se pintan en **blanco opaco** (los bordes pueden ser
+semitransparentes para suavizar). El motor pasa esas zonas de la imagen a gris y las multiplica por el color del
+jugador, conservando las luces y sombras del dibujo; por eso conviene generarlas en un tono **claro y neutro**
+(blanco o gris claro).
+
+Cómo hacerla en cualquier editor con capas (Photopea, GIMP, Krita, Photoshop):
+
+1. Abre la hoja ya recortada y añade una capa nueva, transparente, encima.
+2. Pinta en blanco, sobre la capa nueva, las zonas de color de jugador (la varita mágica sobre la capa de la hoja
+   ayuda a seleccionarlas).
+3. Oculta la hoja y exporta solo esa capa como `nombre-mask.png` (mismo tamaño, con transparencia).
+
+### 4. Declarar qué usa cada hoja
+
+En `src/mods/art/index.ts`, añade una línea por hoja a la lista `ART`:
+
+```ts
+export const ART: ArtEntry[] = [
+  unitArt('villager', 'units/villager'),       // public/sprites/units/villager.json
+  unitArt('militia', 'units/militia'),
+  buildingArt('house', 'buildings/house'),
+  resourceArt('tree', 'resources/oak'),
+];
+```
+
+Los ids son los de `src/mods/core/` (`villager`, `militia`, `manAtArms`, `archer`, `knight`, `house`,
+`barracks`, `townCenter`, `tree`, `goldMine`, `berries`...). Una misma hoja puede servir para varias
+definiciones. Los retratos de la interfaz salen automáticamente de la hoja.
+
+### 5. Comprobar el resultado
+
+```bash
+npm run dev
+```
+
+- `http://localhost:5173/?arte=ejemplo` activa las imágenes de prueba de `public/sprites/ejemplo/` (milicia y
+  hombre de armas con color de jugador y animaciones, casa con variante de la Edad Feudal, arbusto de bayas que
+  cambia al agotarse y textura de adoquines para la tierra). Sirven de modelo para tus propios archivos.
+- `http://localhost:5173/?arte=no` dibuja todo procedural, para comparar.
+- Abre la consola del navegador: cualquier hoja que no se pueda cargar aparece como `[arte] ...` con el motivo.
+- Prueba el ancla con zoom máximo: los pies deben quedar justo sobre el anillo de selección y el rombo del
+  edificio sobre su huella verde al colocarlo.
+
 
 ## Probar cambios sin gráficos
 

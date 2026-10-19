@@ -1,0 +1,13 @@
+{
+  "image": "house.png",
+  "mask": "house-mask.png",
+  "cell": { "w": 256, "h": 256 },
+  "anchor": { "x": 128, "y": 192 },
+  "scale": 2,
+  "states": {
+    "idle": { "row": 0, "frames": 1 }
+  },
+  "ages": {
+    "1": { "image": "house-feudal.png" }
+  }
+}

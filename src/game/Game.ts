@@ -30,7 +30,11 @@ export interface GameOptions {
   mods: string[];
 }
 
-export interface Decal { x: number; y: number; kind: 'corpse' | 'rubble'; color: string; time: number; size: number }
+export interface Decal {
+  x: number; y: number; kind: 'corpse' | 'rubble'; color: string; time: number; size: number;
+  /** Unidad muerta (para su animación de muerte, si el sprite la tiene). */
+  defId?: string; owner?: number; facing?: number;
+}
 
 const GAIA_CIV: CivDef = { id: 'gaia', name: 'Naturaleza', description: '', bonuses: [], bonusText: [] };
 
@@ -257,7 +261,7 @@ export class Game {
       if (e.kind === 'unit') { kp.stats.kills++; owner.stats.losses++; }
       else if (e.kind === 'building') kp.stats.razed++;
     }
-    if (e.kind === 'unit') this.decals.push({ x: e.x, y: e.y, kind: 'corpse', color: owner.color, time: this.time, size: 1 });
+    if (e.kind === 'unit') this.decals.push({ x: e.x, y: e.y, kind: 'corpse', color: owner.color, time: this.time, size: 1, defId: e.defId, owner: e.owner, facing: e.facing });
     else if (e.kind === 'building') this.decals.push({ x: e.x, y: e.y, kind: 'rubble', color: '#777', time: this.time, size: e.size });
     this.events.emit('entityDied', { entity: e, killer });
   }

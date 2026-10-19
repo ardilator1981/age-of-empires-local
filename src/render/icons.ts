@@ -1,15 +1,19 @@
 import type { Registry } from '../core/Registry';
 import type { Pt, SpriteContext } from '../core/types';
+import { artFor } from './art/artRegistry';
+import { artVersion } from './art/assets';
 
 /**
  * Retratos para la interfaz, dibujados con los mismos sprites del juego
  * (como los retratos de AoE2). Se generan una vez y se guardan en caché.
+ * Si la definición tiene hoja de sprites cargada, el retrato sale de su imagen.
  */
 const cache = new Map<string, string>();
 const S = 64;
 
 export function portrait(reg: Registry, kind: 'unit' | 'building' | 'resource', defId: string, color: string, age: number): string {
-  const key = `${kind}|${defId}|${color}|${age}`;
+  const art = artFor(reg, kind, defId);
+  const key = `${kind}|${defId}|${color}|${age}|${art ? artVersion() : 0}`;
   const hit = cache.get(key);
   if (hit) return hit;
   const def: any = kind === 'unit' ? reg.units.get(defId) : kind === 'building' ? reg.buildings.get(defId) : reg.resourceNodes.get(defId);
@@ -23,7 +27,9 @@ export function portrait(reg: Registry, kind: 'unit' | 'building' | 'resource', 
   bg.addColorStop(0, '#6e5a40'); bg.addColorStop(1, '#1e160e');
   ctx.fillStyle = bg;
   ctx.fillRect(0, 0, S, S);
-  if (fn && def) {
+  if (art && def) {
+    art.drawPortrait(ctx, S, color, age, def.size ?? 1);
+  } else if (fn && def) {
     let x = S / 2, y = S * 0.88, z = 1.3;
     let project: (wx: number, wy: number) => Pt = () => ({ x, y });
     let foot: SpriteContext['foot'];

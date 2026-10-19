@@ -1,0 +1,15 @@
+{
+  "image": "militia.png",
+  "mask": "militia-mask.png",
+  "cell": { "w": 128, "h": 128 },
+  "anchor": { "x": 64, "y": 122 },
+  "scale": 2,
+  "facing": "right",
+  "directions": 1,
+  "states": {
+    "idle":   { "row": 0, "frames": 1 },
+    "walk":   { "row": 1, "frames": 4, "fps": 8 },
+    "attack": { "row": 2, "frames": 3 },
+    "death":  { "row": 3, "frames": 4, "fps": 8 }
+  }
+}

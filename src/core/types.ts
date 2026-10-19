@@ -57,6 +57,11 @@ export interface TerrainDef {
   pattern?: string;
   /** Se anima como agua (olas, reflejos, espuma). */
   water?: boolean;
+  /**
+   * Imagen de textura (ruta dentro de public/). Si no se indica se busca
+   * `sprites/terrain/<pattern>.png|jpg|webp`; si no existe se usa la procedural.
+   */
+  texture?: string;
 }
 
 // ---------------------------------------------------------------- unidades y edificios
@@ -248,7 +253,14 @@ export interface SpriteContext {
   /** Edad del propietario (los edificios cambian de aspecto con la edad). */
   age: number;
 }
-export type SpriteFn = (s: SpriteContext) => void;
+export interface SpriteFn {
+  (s: SpriteContext): void;
+  /**
+   * Opcional: dibuja la animación de muerte `t` segundos después de morir (con
+   * `s.entity` = null). Devuelve false si no tiene, y se dibuja el cadáver genérico.
+   */
+  death?: (s: SpriteContext, t: number, facing: number) => boolean;
+}
 
 /** Un mod registra contenido y comportamiento en el Registry. */
 export interface GameMod {

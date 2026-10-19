@@ -1,4 +1,5 @@
 import type { GameMod } from '../core/types';
+import { artMod } from './art';
 import { coreMod } from './core';
 import { extraContentMod } from './extra-content';
 import { treasureHuntMod } from './treasure-hunt';
@@ -9,9 +10,11 @@ import { treasureHuntMod } from './treasure-hunt';
  *   2. Impórtalo aquí y añádelo a la lista.
  * Aparecerá en el menú principal para activarlo o desactivarlo.
  * El orden importa: un mod puede modificar contenido de los anteriores.
+ * El mod de arte va el último para poder poner imágenes a todo lo anterior.
  */
 export const ALL_MODS: GameMod[] = [
   coreMod,
   extraContentMod,
   treasureHuntMod,
+  artMod,
 ];

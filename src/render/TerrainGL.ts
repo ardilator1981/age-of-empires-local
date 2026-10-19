@@ -1,12 +1,16 @@
 import { ELEV_PX, HALF_H, HALF_W } from '../core/constants';
 import type { Game } from '../game/Game';
 import type { Camera } from './Camera';
+import { IMAGE_TEX, imagePixels, loadTerrainImage, peekTerrainImage, scalePixels } from './art/terrainTextures';
 import { TEX, averageColor, buildNoise, buildPattern } from './terrainPatterns';
 
 /**
  * Terreno en WebGL2: una malla de alturas texturizada con mezcla suave entre
  * terrenos, iluminación según la pendiente, agua animada y niebla de guerra.
  * Las entidades se dibujan encima en un canvas 2D.
+ *
+ * Cada terreno usa la imagen `public/sprites/terrain/<pattern>.png` si existe
+ * (ver art/terrainTextures.ts) y, si no, su textura procedural.
  */
 
 const VS = `#version 300 es
@@ -185,21 +189,44 @@ export class TerrainGL {
   }
 
   private avgColors: [number, number, number][] = [];
+  /** Textura procedural (256 px) de cada capa, para no regenerarla al cambiar de resolución. */
+  private patterns: Uint8ClampedArray[] = [];
+  /** Imagen de cada capa (null = procedural). */
+  private images: (HTMLImageElement | null)[] = [];
+  private detailDirty = false;
 
   private buildStaticTextures() {
     const gl = this.gl, reg = this.game.reg;
     // Texturas de detalle de cada terreno en un array de texturas
-    const layers = reg.terrains.length;
-    const data = new Uint8Array(TEX * TEX * 4 * layers);
     reg.terrains.forEach((t, i) => {
-      const px = buildPattern(t, 17 + i * 31);
-      data.set(px, i * TEX * TEX * 4);
-      this.avgColors[i] = averageColor(px);
+      this.patterns[i] = buildPattern(t, 17 + i * 31);
+      const ready = peekTerrainImage(t);
+      this.images[i] = ready ?? null;
+      if (ready === undefined) {
+        void loadTerrainImage(t).then(img => { if (img) { this.images[i] = img; this.detailDirty = true; } });
+      }
     });
-    const arr = gl.createTexture()!;
-    this.tex.detail = arr;
-    gl.bindTexture(gl.TEXTURE_2D_ARRAY, arr);
-    gl.texImage3D(gl.TEXTURE_2D_ARRAY, 0, gl.RGBA8, TEX, TEX, layers, 0, gl.RGBA, gl.UNSIGNED_BYTE, data);
+    this.tex.detail = gl.createTexture()!;
+    this.uploadDetail();
+    this.texture('noise', TEX, TEX, gl.R8, gl.RED, buildNoise(99), gl.LINEAR, gl.REPEAT);
+    const m = this.game.map;
+    this.texture('fog', m.w, m.h, gl.R8, gl.RED, new Uint8Array(m.w * m.h), gl.LINEAR, gl.CLAMP_TO_EDGE);
+  }
+
+  /** Sube el array de texturas de detalle (512 px si alguna capa viene de una imagen). */
+  private uploadDetail() {
+    const gl = this.gl, layers = this.patterns.length;
+    this.detailDirty = false;
+    const size = this.images.some(Boolean) ? IMAGE_TEX : TEX;
+    const data = new Uint8Array(size * size * 4 * layers);
+    for (let i = 0; i < layers; i++) {
+      const img = this.images[i];
+      const px = img ? imagePixels(img, size) : scalePixels(this.patterns[i], TEX, size);
+      data.set(px, i * size * size * 4);
+      this.avgColors[i] = averageColor(px);
+    }
+    gl.bindTexture(gl.TEXTURE_2D_ARRAY, this.tex.detail);
+    gl.texImage3D(gl.TEXTURE_2D_ARRAY, 0, gl.RGBA8, size, size, layers, 0, gl.RGBA, gl.UNSIGNED_BYTE, data);
     gl.generateMipmap(gl.TEXTURE_2D_ARRAY);
     gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
     gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
@@ -207,9 +234,8 @@ export class TerrainGL {
     gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_T, gl.REPEAT);
     const aniso = gl.getExtension('EXT_texture_filter_anisotropic');
     if (aniso) gl.texParameterf(gl.TEXTURE_2D_ARRAY, aniso.TEXTURE_MAX_ANISOTROPY_EXT, Math.min(8, gl.getParameter(aniso.MAX_TEXTURE_MAX_ANISOTROPY_EXT)));
-    this.texture('noise', TEX, TEX, gl.R8, gl.RED, buildNoise(99), gl.LINEAR, gl.REPEAT);
-    const m = this.game.map;
-    this.texture('fog', m.w, m.h, gl.R8, gl.RED, new Uint8Array(m.w * m.h), gl.LINEAR, gl.CLAMP_TO_EDGE);
+    // El minimapa usa el color medio de cada textura
+    this.terrainVersion = -1;
   }
 
   private buildTerrainTextures() {
@@ -312,6 +338,7 @@ export class TerrainGL {
   /** Prepara las texturas y la malla si el mapa ha cambiado. */
   sync() {
     const m = this.game.map;
+    if (this.detailDirty) this.uploadDetail();
     if (m.version !== this.terrainVersion) this.buildTerrainTextures();
     if (m.heightVersion !== this.heightVersion) this.buildMesh();
   }
