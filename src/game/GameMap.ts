@@ -47,6 +47,23 @@ export class GameMap {
     return fx >= fy ? h00 + (h10 - h00) * fx + (h11 - h10) * fy : h00 + (h11 - h01) * fx + (h01 - h00) * fy;
   }
 
+  private tileH: Float32Array | null = null;
+  private tileHVersion = -1;
+
+  /** Altura media de cada casilla (caché; se recalcula si cambia el relieve). */
+  tileHeights(): Float32Array {
+    if (!this.tileH || this.tileHVersion !== this.heightVersion) {
+      const t = this.tileH ?? new Float32Array(this.w * this.h);
+      const W = this.w + 1, H = this.heights;
+      for (let y = 0; y < this.h; y++) for (let x = 0; x < this.w; x++) {
+        t[y * this.w + x] = (H[y * W + x] + H[y * W + x + 1] + H[(y + 1) * W + x] + H[(y + 1) * W + x + 1]) / 4;
+      }
+      this.tileH = t;
+      this.tileHVersion = this.heightVersion;
+    }
+    return this.tileH;
+  }
+
   /** Diferencia entre el vértice más alto y el más bajo de un rectángulo de casillas. */
   slopeOf(tx: number, ty: number, size: number): number {
     let lo = Infinity, hi = -Infinity;

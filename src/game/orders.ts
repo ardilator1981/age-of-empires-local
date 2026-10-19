@@ -2,7 +2,7 @@ import { BALANCE } from '../config/balance';
 import { BUILD_RANGE, DROP_RANGE, GATHER_RANGE, MELEE_RANGE } from '../core/constants';
 import type { Order, OrderHandler } from '../core/types';
 import {
-  ARRIVED, UNREACHABLE, approach, edgeDist, face, isFarmTaken, moveTo, nearestDrop, nearestNode, setOrder,
+  ARRIVED, UNREACHABLE, approach, edgeDist, face, isFarmTaken, moveTo, nearestDrop, nearestNode, pathBudget, setOrder,
 } from './actions';
 import { findEnemyNear, performAttack } from './combat';
 import { rangeBonus } from './heightRules';
@@ -17,7 +17,11 @@ import type { Game } from './Game';
 
 export const moveOrder: OrderHandler = {
   update(game, u, o) {
-    if (!o.started) { moveTo(game, u, o.x, o.y); o.started = true; }
+    if (!o.started) {
+      if (!pathBudget(game)) return; // se calcula en un tick próximo
+      moveTo(game, u, o.x, o.y);
+      o.started = true;
+    }
     if (!u.path.length) setOrder(u, null);
   },
 };
@@ -74,7 +78,11 @@ export const attackMoveOrder: OrderHandler = {
       return;
     }
     o.targetId = 0;
-    if (!o.moving) { moveTo(game, u, o.x, o.y); o.moving = true; }
+    if (!o.moving) {
+      if (!pathBudget(game)) return;
+      moveTo(game, u, o.x, o.y);
+      o.moving = true;
+    }
     if (!u.path.length) setOrder(u, null);
   },
 };

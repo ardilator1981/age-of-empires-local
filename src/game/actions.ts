@@ -1,3 +1,4 @@
+import { BALANCE } from '../config/balance';
 import type { Order, Pt } from '../core/types';
 import type { Entity } from './Entity';
 import type { Game } from './Game';
@@ -24,6 +25,18 @@ function rectOf(t: Entity): GoalRect {
     return { x0: x, y0: y, x1: x, y1: y };
   }
   return { x0: t.tx, y0: t.ty, x1: t.tx + t.size - 1, y1: t.ty + t.size - 1 };
+}
+
+/**
+ * ¿Queda presupuesto para calcular un camino largo este tick? (BALANCE.pathfinding.pathsPerTick)
+ * Así, cuando muchas unidades reciben una orden a la vez, el cálculo se reparte entre
+ * varios ticks en lugar de congelar el juego.
+ */
+export function pathBudget(game: Game): boolean {
+  const used = game.data.pathsThisTick ?? 0;
+  if (used >= BALANCE.pathfinding.pathsPerTick) return false;
+  game.data.pathsThisTick = used + 1;
+  return true;
 }
 
 export function setOrder(u: Entity, order: Order | null) {
@@ -80,6 +93,9 @@ function approachStep(game: Game, u: Entity, t: Entity, d: number): number {
       u.pathFor = t.id;
       if (d < 4 && lineClear(m, u.x, u.y, t.x, t.y)) {
         u.path = [{ x: t.x, y: t.y }];
+      } else if (!pathBudget(game)) {
+        u.nextRepath = game.time; // se intentará el próximo tick
+        return MOVING;
       } else {
         const r = findPath(m, u.x, u.y, rectOf(t), 0);
         const raw = r.path;
@@ -91,6 +107,7 @@ function approachStep(game: Game, u: Entity, t: Entity, d: number): number {
     return MOVING;
   }
   if (!u.path.length || u.pathFor !== t.id || game.time >= u.nextRepath) {
+    if (!pathBudget(game)) return MOVING; // sin presupuesto este tick: se sigue con el camino actual
     const walkableTarget = t.kind === 'building' && !!game.reg.building(t.defId).walkable;
     const r = findPath(m, u.x, u.y, rectOf(t), walkableTarget ? 0 : 1);
     u.path = smoothPath(m, u.x, u.y, r.path);

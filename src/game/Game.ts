@@ -124,6 +124,7 @@ export class Game {
   update(dt: number) {
     this.tick++;
     this.time += dt;
+    this.data.pathsThisTick = 0;
     for (const e of this.units) { e.px = e.x; e.py = e.y; }
     for (const s of this.systems) s.update(dt);
     if (this.anyDead) {

@@ -108,7 +108,7 @@ async function main() {
         if (lastPos.get(u.id) !== k) { lastPos.set(u.id, k); lastMove.set(u.id, g.time); }
       }
     }
-    for (const u of army) if (!u.dead && u.order && g.time - (lastMove.get(u.id) ?? 0) > 20) stuck++;
+    for (const u of army) if (!u.dead && (u.order?.type === 'move' || u.order?.type === 'attackMove') && g.time - (lastMove.get(u.id) ?? 0) > 20) stuck++;
     // Visión de un jugador con 150 unidades repartidas por el mapa
     g.players[1].isHuman = true;
     const vision = g.systems.find(s => typeof (s as any).recompute === 'function') as any;
