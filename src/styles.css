@@ -71,6 +71,7 @@ button { font-family: var(--font); cursor: pointer; }
 #btn-music.off { opacity: 0.55; }
 .vol { display: flex; align-items: center; gap: 8px; justify-content: center; color: var(--parchment); text-shadow: 1px 1px 0 #000; }
 .vol input { accent-color: var(--gold); width: 160px; }
+.vol + .vol { margin-top: 8px; }
 
 /* ---------------------------------------------------------------- avisos */
 #notices {
@@ -441,6 +442,7 @@ table.stats td { padding: 4px; text-shadow: 1px 1px 0 #000; }
   box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.6);
 }
 .mini-full .m-mini-btn[data-a="mini-toggle"] { display: none; }
+.mini-full #m-mini-canvas { background: rgba(10, 7, 4, 0.94); }
 .mini-full .m-mini-btn[data-a="mini-full"] { bottom: auto; top: 0; }
 
 /* Bandeja de selección: solo con algo seleccionado, abajo entre los grupos y el minimapa */

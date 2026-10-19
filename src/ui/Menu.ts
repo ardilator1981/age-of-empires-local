@@ -3,6 +3,7 @@ import { buildRegistry, type Registry } from '../core/Registry';
 import type { GameOptions } from '../game/Game';
 import { ALL_MODS } from '../mods';
 import type { App } from '../app/App';
+import { setUIPrefs, uiPrefs, type LayoutPref } from './layout';
 
 type Diff = 'easy' | 'normal' | 'hard';
 
@@ -289,13 +290,19 @@ export class Menu {
 
   private volumeHtml() {
     const m = this.app.music;
-    return `<label class="vol">🎵 Música <input type="range" min="0" max="100" step="1" value="${m.muted ? 0 : Math.round(m.volume * 100)}" data-vol></label>`;
+    const lay = uiPrefs().layout;
+    return `<label class="vol">🎵 Música <input type="range" min="0" max="100" step="1" value="${m.muted ? 0 : Math.round(m.volume * 100)}" data-vol></label>`
+      + `<label class="vol">Interfaz <select data-layout>${opt('auto', 'Automática', lay)}${opt('desktop', 'Escritorio', lay)}${opt('mobile', 'Móvil', lay)}</select></label>`;
   }
 
   private bindVolume() {
     this.overlay.querySelector<HTMLInputElement>('[data-vol]')?.addEventListener('input', e => {
       this.app.music.setVolume(Number((e.target as HTMLInputElement).value) / 100);
       this.app.session?.hud.updateMusicButton();
+    });
+    // Interfaz de escritorio o móvil (automática según la pantalla, o forzada)
+    this.overlay.querySelector<HTMLSelectElement>('[data-layout]')?.addEventListener('change', e => {
+      setUIPrefs({ layout: (e.target as HTMLSelectElement).value as LayoutPref });
     });
   }
 

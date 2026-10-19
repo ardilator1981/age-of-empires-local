@@ -33,7 +33,7 @@ const ARM_MS = 2500;
 const GESTURE_HELP = `
   <ul class="m-gestures">
     <li><b>👆 Tocar</b> seleccionar · <b>dos toques</b> todas las unidades de ese tipo en pantalla</li>
-    <li><b>☝️ Arrastrar</b> recuadro de selección (o mover la cámara con el modo ✋)</li>
+    <li><b>☝️ Arrastrar</b> recuadro de selección (o mover la cámara con el modo ✥)</li>
     <li><b>✌️ Dos dedos</b> mover la cámara · <b>pellizcar</b> zoom</li>
     <li><b>⏱ Mantener pulsado</b> en el mapa o el minimapa: mover, atacar, recolectar, construir…</li>
     <li><b>Botones</b> mantener pulsado = ver coste y descripción · <b>1–5</b> mantener pulsado = guardar grupo</li>
@@ -75,7 +75,7 @@ export class MobileHUD {
         <button class="mbtn" data-a="alerts" data-mt="alerts">🔔<i class="mb-badge"></i></button>
         <button class="mbtn" data-a="army" data-mt="army">⚔️</button>
         <button class="mbtn" data-a="idle" data-mt="idle">💤<i class="mb-badge"></i></button>
-        <button class="mbtn soon" data-a="strategy" data-mt="strategy">🗺️</button>
+        <button class="mbtn soon" data-a="strategy" data-mt="strategy">📜</button>
         <button class="mbtn" data-a="menu" data-mt="menu">☰</button>
       </div>
       <button id="m-mode" class="mbtn" data-a="mode" data-mt="mode"></button>
@@ -83,7 +83,7 @@ export class MobileHUD {
       <div id="m-mini">
         <div id="m-mini-canvas"></div>
         <button class="mbtn m-mini-btn" data-a="mini-full" data-mt="mini-full">⤢</button>
-        <button class="mbtn m-mini-btn" data-a="mini-toggle" data-mt="mini-toggle">🗺️</button>
+        <button class="mbtn m-mini-btn" data-a="mini-toggle" data-mt="mini-toggle">⇲</button>
       </div>
       <div id="m-tray">
         <div class="m-info"></div>
@@ -186,6 +186,8 @@ export class MobileHUD {
     this.mini = m;
     this.root.classList.toggle('mini-small', m === 'small');
     this.root.classList.toggle('mini-full', m === 'full');
+    (this.root.querySelector('[data-a="mini-full"]') as HTMLElement).textContent = m === 'full' ? '✖' : '⤢';
+    (this.root.querySelector('[data-a="mini-toggle"]') as HTMLElement).textContent = m === 'small' ? '🗺️' : '⇲';
     requestAnimationFrame(() => this.s.minimap.resize());
   }
 
@@ -250,7 +252,7 @@ export class MobileHUD {
     badge('alerts', this.alerts.length);
     badge('idle', this.idleVillagers());
     const mode = this.s.input.cameraMode;
-    this.setHtml('mode', this.el['m-mode'], mode ? '✋<span>Cámara</span>' : '⬚<span>Selección</span>');
+    this.setHtml('mode', this.el['m-mode'], mode ? '✥<span>Cámara</span>' : '⬚<span>Selección</span>');
     this.el['m-mode'].classList.toggle('on', mode);
     // Grupos: los guardados siempre; todos mientras hay algo propio seleccionado (para poder guardarlo)
     const own = ui.selected(g).some(e => e.owner === g.humanId && e.kind === 'unit');
@@ -585,7 +587,7 @@ export class MobileHUD {
       idle: '<b>Aldeano inactivo</b><br>Selecciona el siguiente aldeano sin tarea.',
       strategy: '<b>Pantalla de estrategia</b><br>Próximamente.',
       menu: '<b>Menú</b><br>Pausa, estadísticas, tecnologías, diplomacia y ajustes.',
-      mode: '<b>Arrastrar con un dedo</b><br>⬚ Selección: dibuja un recuadro · ✋ Cámara: mueve el mapa.',
+      mode: '<b>Arrastrar con un dedo</b><br>⬚ Selección: dibuja un recuadro · ✥ Cámara: mueve el mapa.',
       'mini-full': '<b>Minimapa a pantalla completa</b><br>Toca un punto para ir allí.',
       'mini-toggle': '<b>Plegar o desplegar el minimapa</b>',
     };
