@@ -9,8 +9,17 @@ export const TILE_W = 64;
 export const TILE_H = 32;
 export const HALF_W = TILE_W / 2;
 export const HALF_H = TILE_H / 2;
-/** Píxeles (a zoom 1) que sube el terreno por cada nivel de elevación. */
+/** Píxeles (a zoom 1) que sube el terreno por cada nivel de elevación (antes de la escala visual del mapa). */
 export const ELEV_PX = 12;
+/**
+ * Escala visual del relieve en los mapas aleatorios: cuánto se levanta el terreno en
+ * pantalla. Solo afecta al dibujo; las reglas (roca, ventaja de altura, visión) usan
+ * los niveles de elevación. Los mapas reales calculan la suya según su desnivel real.
+ */
+export const DEFAULT_VISUAL_RELIEF = 2.5;
+/** Mapas reales: fracción de la escala vertical real con la que se dibujan las montañas, y tope. */
+export const REAL_RELIEF_FRACTION = 1.2;
+export const MAX_VISUAL_RELIEF = 7;
 
 /** Jugador 0 = naturaleza (árboles, minas, arbustos...). */
 export const GAIA = 0;

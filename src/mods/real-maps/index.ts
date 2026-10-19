@@ -1,4 +1,5 @@
 import { BALANCE } from '../../config/balance';
+import { DEFAULT_VISUAL_RELIEF, ELEV_PX, MAX_VISUAL_RELIEF, REAL_RELIEF_FRACTION } from '../../core/constants';
 import type { GameMod, MapRegionInfo, MapTypeDef, Pt } from '../../core/types';
 import type { MapGenerator } from '../../game/MapGenerator';
 import REGION_LIST from './regions.json';
@@ -89,6 +90,9 @@ function generateReal(gen: MapGenerator, d: RealMapData) {
   };
   const idx = (x: number, y: number) => y * W + x;
   const rockSlope = d.rockSlopeDeg ?? BALANCE.relief.realRockSlopeDeg;
+  // Escala visual: una fracción de la escala vertical real (los datos comprimen el desnivel en ~10 niveles)
+  const trueMpl = (mpt * ELEV_PX) / Math.hypot(32, 16);
+  m.visualRelief = Math.max(DEFAULT_VISUAL_RELIEF, Math.min(MAX_VISUAL_RELIEF, (REAL_RELIEF_FRACTION * mpl) / trueMpl));
   const arid = d.biome === 'arid';
 
   // ---------------- agua: lagos de OSM y ríos trazados (1 = agua, 2 = vado / arroyo)

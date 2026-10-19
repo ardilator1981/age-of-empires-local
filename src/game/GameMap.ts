@@ -1,3 +1,4 @@
+import { DEFAULT_VISUAL_RELIEF } from '../core/constants';
 import type { Registry } from '../core/Registry';
 import type { TerrainDef } from '../core/types';
 
@@ -14,6 +15,8 @@ export class GameMap {
   heights: Float32Array;
   /** Se incrementa cuando cambian las alturas. */
   heightVersion = 0;
+  /** Escala visual del relieve (solo dibujo). La fija el tipo de mapa; ver DEFAULT_VISUAL_RELIEF. */
+  visualRelief = DEFAULT_VISUAL_RELIEF;
   private walk: boolean[];
   private build: boolean[];
   /** Región conectada de cada casilla caminable (-1 = no caminable). */

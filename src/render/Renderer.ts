@@ -45,7 +45,7 @@ export class Renderer {
     this.gl = TerrainGL.create(terrainCanvas, game);
     terrainCanvas.style.display = this.gl ? '' : 'none';
     if (this.gl) {
-      this.cam.elev = ELEV_PX;
+      this.cam.elev = ELEV_PX * m.visualRelief;
       this.cam.heightAt = (x, y) => m.heightAt(x, y);
     }
     this.fogCanvas = document.createElement('canvas');
@@ -194,7 +194,7 @@ export class Renderer {
       const sx = (d.ix - cam.x) * z + hw;
       if (sx < -30 || sx > W + 30) continue;
       let sy = (d.iy - cam.y) * z + hh;
-      if (sy < -30 || sy > H + 140 * z) continue;
+      if (sy < -30 || sy > H + (60 + 12 * elev) * z) continue;
       if (m.occupant[d.tile] || !p.explored[d.tile]) continue;
       if (elev) sy -= m.heightAt(d.x, d.y) * elev * z;
       const lit = all || p.visible[d.tile];
