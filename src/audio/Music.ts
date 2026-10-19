@@ -3,16 +3,16 @@ import type { Game } from '../game/Game';
 /**
  * Música medieval generativa: todo se sintetiza en el navegador con Web Audio, sin archivos.
  *
- * Cada pieza se compone al vuelo (modo, tonalidad, progresión, melodías y carácter al azar) con una forma
- * reconocible (intro · A · A' · B · B' · A'' · coda) y se separa de la siguiente por un silencio, así que
- * una partida larga nunca repite lo mismo. La instrumentación crece con la edad del jugador y la música
- * pasa a un tema de batalla cuando sus unidades o edificios están en combate.
+ * Cada pieza se compone al vuelo (modo, tonalidad, progresión, ostinato y melodías al azar): un arpegio
+ * lento que se repite sobre un bordón, con frases de flauta o arpa que aparecen y desaparecen. Las piezas
+ * suelen mantener la tonalidad de la anterior y se separan con silencios, así que la música acompaña sin
+ * cansar. La instrumentación crece con la edad del jugador y pasa a un tema más tenso en combate.
  */
 
 export type MoodId = 'menu' | 'peace' | 'battle';
 type StingerId = 'ageUp' | 'victory' | 'defeat';
 type Voice = 'flute' | 'vielle' | 'shawm' | 'trumpet';
-type Character = 'menu' | 'battle' | 'pastoral' | 'chanson' | 'dance';
+type Character = 'menu' | 'battle' | 'drift' | 'song';
 
 const MODES = {
   dorian: [0, 2, 3, 5, 7, 9, 10],
@@ -41,50 +41,50 @@ interface MoodDef {
 }
 
 const ARP_DEG = [0, 2, 4, 7, 9];
-const RHYTHMS_6 = [[3, 3], [2, 1, 3], [1, 1, 1, 3], [2, 1, 2, 1], [3, 1, 1, 1], [1, 1, 1, 1, 2], [2, 2, 2], [4, 2]];
-const RHYTHMS_8 = [[2, 2, 2, 2], [3, 1, 2, 2], [1, 1, 2, 4], [4, 2, 2], [2, 1, 1, 4], [3, 3, 2], [1, 1, 1, 1, 2, 2], [2, 2, 4]];
 
+// Música tranquila, casi hipnótica: acordes que cambian cada dos compases, un ostinato que se repite
+// toda la pieza sobre un bordón, melodías escasas de notas largas y percusión mínima.
 const MOODS: Record<MoodId, MoodDef> = {
   menu: {
     modes: [
-      { mode: MODES.dorian, progs: [[0, 6, 0, 4], [0, 3, 0, 6], [0, 6, 5, 6]] },
-      { mode: MODES.aeolian, progs: [[0, 5, 6, 0], [0, 3, 4, 0], [0, 6, 5, 4]] },
+      { mode: MODES.dorian, progs: [[0, 0, 6, 6], [0, 0, 3, 3], [0, 6, 0, 6]] },
+      { mode: MODES.aeolian, progs: [[0, 0, 5, 5], [0, 0, 6, 6]] },
     ],
-    tonics: [50, 52, 45],
+    tonics: [50, 45],
     steps: 6,
-    arps: [[0, 2, 3, 4, 3, 2], [0, 2, 3, 2, 4, 2]],
-    rhythms: [[3, 3], [6], [4, 2], [2, 1, 3], [2, 2, 2]],
-    drumsLow: ['b.....'],
+    arps: [[0, 2, 3, 4, 3, 2], [0, 3, 2, 3, 4, 3]],
+    rhythms: [[6], [3, 3], [4, 2]],
+    drumsLow: ['......'],
     drumsHigh: ['......'],
-    gap: [3, 6],
+    gap: [6, 10],
   },
   peace: {
     modes: [
-      { mode: MODES.dorian, progs: [[0, 6, 0, 4], [0, 3, 6, 0], [0, 6, 5, 6], [0, 2, 3, 0]] },
-      { mode: MODES.mixolydian, progs: [[0, 6, 3, 0], [0, 3, 6, 0], [0, 4, 6, 0]] },
-      { mode: MODES.ionian, progs: [[0, 3, 4, 0], [0, 4, 3, 0], [0, 5, 3, 4]] },
-      { mode: MODES.aeolian, progs: [[0, 5, 6, 0], [0, 6, 5, 6], [0, 3, 6, 0]] },
+      { mode: MODES.dorian, progs: [[0, 0, 6, 6], [0, 0, 3, 3], [0, 0, 0, 6], [0, 6, 0, 6]] },
+      { mode: MODES.mixolydian, progs: [[0, 0, 6, 6], [0, 0, 3, 3]] },
+      { mode: MODES.aeolian, progs: [[0, 0, 5, 5], [0, 0, 6, 6], [0, 5, 0, 6]] },
+      { mode: MODES.ionian, progs: [[0, 0, 3, 3], [0, 0, 4, 4]] },
     ],
-    tonics: [50, 52, 48, 55, 45],
+    tonics: [50, 45, 52, 48],
     steps: 6,
-    arps: [[0, 2, 3, 2, 1, 2], [0, -1, 2, 3, 2, -1], [0, 2, 1, 3, 2, 1], [0, -1, -1, 2, -1, -1]],
-    rhythms: RHYTHMS_6,
-    drumsLow: ['B..b..', 'B..b.b', 'B.bB..'],
-    drumsHigh: ['...t..', '..t..t', '.t..t.'],
-    gap: [5, 12],
+    arps: [[0, 2, 3, 2, 1, 2], [0, 3, 2, 3, 1, 3], [0, -1, 2, -1, 3, -1], [0, 2, 4, 3, 2, 1]],
+    rhythms: [[6], [3, 3], [4, 2], [2, 4], [3, 1, 2]],
+    drumsLow: ['b.....', 'b.....', 'b..b..'],
+    drumsHigh: ['......'],
+    gap: [6, 14],
   },
   battle: {
     modes: [
-      { mode: MODES.aeolian, progs: [[0, 5, 6, 0], [0, 6, 5, 6], [0, 0, 5, 6]] },
-      { mode: MODES.phrygian, progs: [[0, 1, 0, 6], [0, 1, 2, 1]] },
-      { mode: MODES.dorian, progs: [[0, 6, 0, 6], [0, 3, 6, 0]] },
+      { mode: MODES.aeolian, progs: [[0, 0, 5, 6], [0, 0, 6, 6]] },
+      { mode: MODES.phrygian, progs: [[0, 1, 0, 0], [0, 0, 1, 1]] },
+      { mode: MODES.dorian, progs: [[0, 0, 6, 6]] },
     ],
-    tonics: [45, 50, 52, 47],
+    tonics: [45, 50],
     steps: 8,
-    arps: [[0, 0, 2, 0, 3, 0, 2, 0], [0, -1, 0, 2, 0, -1, 0, 2], [0, 2, 3, 2, 0, 2, 3, 2]],
-    rhythms: RHYTHMS_8,
-    drumsLow: ['W.bWW.b.', 'W..bW.bb', 'W.bbW.bW'],
-    drumsHigh: ['..t...t.', 't.t.t.t.', 'k.k.t.k.'],
+    arps: [[0, -1, 2, -1, 0, -1, 2, -1], [0, 2, 3, 2, 0, 2, 3, 2]],
+    rhythms: [[4, 4], [2, 2, 4], [3, 1, 4], [4, 2, 2], [8]],
+    drumsLow: ['W...w...', 'W..wW...', 'W.......'],
+    drumsHigh: ['....k...', '......k.'],
     gap: [0, 0.2],
   },
 };
@@ -143,6 +143,8 @@ export class Music {
   private piece: Piece | null = null;
   private lastMood: MoodId = 'menu';
   private lastBattleTonic = 0;
+  /** Tonalidad de la última pieza tranquila, para encadenar la siguiente sin saltos. */
+  private lastPeaceKey: { tonic: number; modeIdx: number } | null = null;
   private phraseIdx = 0;
   private step = 0;
   private nextTime = 0;
@@ -274,9 +276,9 @@ export class Music {
     this.out = ctx.createGain();
     this.out.gain.value = this.level();
     const verb = ctx.createConvolver();
-    verb.buffer = this.impulse(2.8);
+    verb.buffer = this.impulse(4);
     const wet = ctx.createGain();
-    wet.gain.value = 0.3;
+    wet.gain.value = 0.42;
     this.mix.connect(this.filter);
     this.mix.connect(verb);
     verb.connect(wet);
@@ -323,8 +325,8 @@ export class Music {
 
   private wantMood(): MoodId {
     if (!this.game || this.over) return 'menu';
-    if (this.lastMood === 'battle') return this.heat > 0.12 ? 'battle' : 'peace';
-    return this.heat > 0.5 ? 'battle' : 'peace';
+    if (this.lastMood === 'battle') return this.heat > 0.15 ? 'battle' : 'peace';
+    return this.heat > 0.6 ? 'battle' : 'peace';
   }
 
   private pump() {
@@ -387,51 +389,52 @@ export class Music {
   private startPiece(mood: MoodId, t: number) {
     const ctx = this.ctx!;
     const def = MOODS[mood];
-    const { mode, progs } = pick(def.modes);
+    // Las piezas tranquilas suelen seguir en la tonalidad de la anterior, como un único flujo
+    const keep = mood === 'peace' && this.lastPeaceKey && Math.random() < 0.65 ? this.lastPeaceKey : null;
+    const modeIdx = keep?.modeIdx ?? Math.floor(Math.random() * def.modes.length);
+    const { mode, progs } = def.modes[modeIdx];
     const progA = pick(progs);
     let progB = pick(progs);
     while (progs.length > 1 && progB === progA) progB = pick(progs);
-    let tonic = pick(def.tonics);
-    if (mood === 'battle' && this.lastBattleTonic && Math.random() < 0.5) tonic = this.lastBattleTonic;
+    let tonic = keep?.tonic ?? pick(def.tonics);
+    if (mood === 'battle' && this.lastBattleTonic && Math.random() < 0.7) tonic = this.lastBattleTonic;
     if (mood === 'battle') this.lastBattleTonic = tonic;
+    if (mood === 'peace') this.lastPeaceKey = { tonic, modeIdx };
     const age = this.game?.human.age ?? 1;
 
-    let char: Character = mood === 'peace' ? 'pastoral' : mood;
-    if (mood === 'peace') {
-      const w = { pastoral: 1, chanson: 1, dance: 0.4 + 0.4 * age };
-      let r = Math.random() * (w.pastoral + w.chanson + w.dance);
-      char = (r -= w.pastoral) < 0 ? 'pastoral' : (r -= w.chanson) < 0 ? 'chanson' : 'dance';
-    }
-    const stepSec = {
-      menu: rand(0.3, 0.34), battle: rand(0.135, 0.155), pastoral: rand(0.25, 0.28), chanson: rand(0.21, 0.24), dance: rand(0.17, 0.19),
-    }[char];
+    // «drift»: casi solo ostinato y bordón; «song»: con una melodía lenta de flauta o viela
+    const char: Character = mood === 'peace' ? (Math.random() < 0.55 ? 'drift' : 'song') : mood;
+    const stepSec = { menu: rand(0.4, 0.44), battle: rand(0.18, 0.2), drift: rand(0.38, 0.44), song: rand(0.32, 0.36) }[char];
     const S = def.steps;
     const gen = (prog: number[]) => this.melody(prog, S, def.rhythms);
     const cad = (prog: number[]) => [...prog.slice(0, 3), 0];
     const A = gen(progA), B = gen(progB);
     const ph = (prog: number[], melody: Note[] | null, role: Phrase['role'] = 'main'): Phrase => ({ prog, melody, role });
+    // Frase en la que la melodía aparece o, en «drift», a menudo deja solo el ostinato
+    const maybe = (prog: number[], m: Note[]) => ph(prog, char === 'drift' && Math.random() < 0.5 ? null : m);
 
     let phrases: Phrase[];
     if (mood === 'menu') {
-      phrases = [ph(progA, null, 'intro'), ph(progA, A), ph(progB, B), ph(cad(progA), this.vary(A, true)), ph(progA, null, 'outro')];
+      phrases = [ph(progA, null, 'intro'), ph(progA, null), ph(progA, A), ph(progA, A), ph(progB, B), ph(cad(progA), this.vary(A, true)), ph(progA, null, 'outro')];
     } else if (mood === 'battle') {
-      phrases = [ph(progA, null, 'intro'), ph(progA, A), ph(progA, this.vary(A, false)), ph(progB, B), ph(progB, this.vary(B, false)), ph(cad(progA), this.vary(A, true))];
+      phrases = [ph(progA, null, 'intro'), ph(progA, A), ph(progA, A), ph(progB, B), ph(progB, this.vary(B, false)), ph(progA, null), ph(cad(progA), this.vary(A, true))];
     } else {
-      phrases = [ph(progA, null, 'intro'), ph(progA, A), ph(progA, this.vary(A, false)), ph(progB, B)];
-      if (Math.random() < 0.5) phrases.push(ph(progB, this.vary(B, false)));
+      phrases = [ph(progA, null, 'intro'), ph(progA, null), maybe(progA, A), maybe(progA, A), ph(progA, null)];
+      phrases.push(maybe(progB, B), maybe(progB, B));
       if (Math.random() < 0.6) phrases.push(ph(progB, this.vary(B, false), 'interlude'));
-      phrases.push(ph(cad(progA), this.vary(A, true)), ph(progA, null, 'outro'));
+      phrases.push(ph(progA, null), maybe(progA, A), ph(cad(progA), this.vary(A, true)), ph(progA, null, 'outro'));
     }
 
     const bus = ctx.createGain();
+    bus.gain.value = mood === 'battle' ? 0.75 : 1;
     bus.connect(this.mix);
-    const lead: Voice = mood === 'battle' ? 'shawm' : char === 'chanson' ? pick(['flute', 'vielle'] as const) : char === 'dance' && Math.random() < 0.4 ? 'vielle' : 'flute';
+    const lead: Voice = mood === 'battle' ? 'vielle' : char === 'song' && Math.random() < 0.3 ? 'vielle' : 'flute';
     const p: Piece = {
       mood, char, tonic, mode, steps: S, stepSec,
       arp: pick(def.arps), drumLow: pick(def.drumsLow), drumHigh: pick(def.drumsHigh), lead,
-      drone: mood !== 'peace' || char !== 'chanson' || Math.random() < 0.5,
-      drums: mood !== 'peace' || char === 'dance' || (char === 'chanson' && age >= 1),
-      harp: mood === 'menu' || char === 'chanson',
+      drone: true,
+      drums: mood === 'battle' || (mood === 'peace' && char === 'song' && age >= 1),
+      harp: mood === 'menu' || Math.random() < 0.4,
       phrases, bus, ch: this.channels(bus),
     };
     if (p.drone) p.stopDrone = this.drone(p, t);
@@ -455,11 +458,12 @@ export class Music {
       rh.forEach((len, i) => {
         const last = b === 3 && i === rh.length - 1;
         if (last) deg = nearest(deg, d => mod7(d - chord) === 0);
-        else if (s === 0 || len >= 3) deg = nearest(deg + pick([-2, -1, 0, 1, 2]), chordTone);
-        else deg += pick([-1, -1, 1, 1, -2, 2, 1, -1, 0]);
-        if (deg > 14) deg -= 2;
-        if (deg < 4) deg += 2;
-        if (last || i === 0 || Math.random() > 0.07) notes.push({ at: b * S + s, len, deg, vel: (s === 0 ? 0.9 : 0.75) * rand(0.9, 1.05) });
+        else if (s === 0 || len >= 3) deg = nearest(deg + pick([-1, 0, 1]), chordTone);
+        else deg += pick([-1, 1, -1, 1, 0]);
+        if (deg > 13) deg -= 2;
+        if (deg < 5) deg += 2;
+        // Silencios frecuentes: la melodía respira y deja oír el ostinato
+        if (last || (i === 0 && b % 2 === 0) || Math.random() > 0.3) notes.push({ at: b * S + s, len, deg, vel: (s === 0 ? 0.8 : 0.68) * rand(0.95, 1.03) });
         s += len;
       });
     }
@@ -471,9 +475,9 @@ export class Music {
     const out = m.map(n => ({ ...n }));
     const last = out[out.length - 1];
     const inner = out.slice(0, -1);
-    for (let k = 0; k < 2; k++) if (inner.length && Math.random() < 0.7) pick(inner).deg += pick([-1, 1]);
+    if (inner.length && Math.random() < 0.6) pick(inner).deg += pick([-1, 1]);
     const long = inner.filter(n => n.len >= 2);
-    if (long.length && Math.random() < 0.5) {
+    if (long.length && Math.random() < 0.25) {
       const n = pick(long), a = Math.floor(n.len / 2);
       out.push({ at: n.at + a, len: n.len - a, deg: n.deg + pick([-1, 1]), vel: n.vel * 0.85 });
       n.len = a;
@@ -492,18 +496,20 @@ export class Music {
     const bar = Math.floor(this.step / S), s = this.step % S;
     const chord = ph.prog[bar];
     const age = this.game?.human.age ?? 1;
-    const hum = () => t + (Math.random() - 0.5) * 0.012;
+    const hum = () => t + (Math.random() - 0.5) * 0.008;
     const outro = ph.role === 'outro';
+    // Oleaje lento de intensidad cada 8 compases: el ostinato «respira» sin cambiar de notas
+    const swell = 0.8 + 0.2 * Math.sin(((this.phraseIdx * 4 * S + this.step) / (8 * S)) * Math.PI * 2);
 
-    // Bajo: raíz en la parte fuerte y, a veces, la quinta
-    if (s === 0) this.pluck(p.ch.lute, hum(), 'lute', this.midi(p, chord - 7), 0.55, 2.2);
-    if (!outro && s === S / 2 && (S === 8 || Math.random() < 0.5)) this.pluck(p.ch.lute, hum(), 'lute', this.midi(p, chord - 3), 0.38, 1.6);
+    // Bajo: raíz en la parte fuerte; en batalla, también a mitad de compás
+    if (s === 0) this.pluck(p.ch.lute, hum(), 'lute', this.midi(p, chord - 7), 0.45, 2.4);
+    if (!outro && s === S / 2 && p.mood === 'battle') this.pluck(p.ch.lute, hum(), 'lute', this.midi(p, chord - 3), 0.32, 1.6);
 
-    // Arpegio (laúd; arpa en el menú). En la coda se va apagando
+    // Ostinato (laúd; arpa en el menú). En la coda se va apagando
     const a = p.arp[s];
     if (a >= 0 && (!outro || (bar < 3 && Math.random() < 1 - bar * 0.3))) {
       const harp = p.mood === 'menu';
-      this.pluck(harp ? p.ch.harp : p.ch.lute, hum(), harp ? 'harp' : 'lute', this.midi(p, chord + ARP_DEG[a]), (s === 0 ? 0.38 : 0.3) * rand(0.85, 1.1), 1.2);
+      this.pluck(harp ? p.ch.harp : p.ch.lute, hum(), harp ? 'harp' : 'lute', this.midi(p, chord + ARP_DEG[a]), (s === 0 ? 0.32 : 0.25) * swell * rand(0.96, 1.03), 1.6);
     }
     if (outro && bar === 3 && s === 0) {
       [0, 2, 4, 7].forEach((d, i) => this.pluck(p.ch.harp, t + i * 0.06, 'harp', this.midi(p, d + 7), 0.3, 3));
@@ -514,12 +520,12 @@ export class Music {
       for (const n of ph.melody) {
         if (n.at !== this.step) continue;
         if (ph.role === 'interlude') {
-          this.pluck(p.ch.harp, t, 'harp', this.midi(p, n.deg) + 12, 0.45 * n.vel, 1.8);
+          this.pluck(p.ch.harp, t, 'harp', this.midi(p, n.deg) + 12, 0.36 * n.vel, 2.4);
           continue;
         }
         this.voice(p.ch.lead, t, p.lead, this.midi(p, n.deg) + LEAD_OCTAVE[p.lead], n.len * p.stepSec * 0.96, n.vel);
         if ((p.harp || age >= 2) && n.len >= 3 && p.mood !== 'battle') {
-          this.pluck(p.ch.harp, t + 0.01, 'harp', this.midi(p, n.deg - (p.mood === 'menu' ? 4 : 2)) + 12, 0.3, 1.6);
+          this.pluck(p.ch.harp, t + 0.01, 'harp', this.midi(p, n.deg - (p.mood === 'menu' ? 4 : 2)) + 12, 0.22, 2.4);
         }
       }
     }
@@ -529,7 +535,7 @@ export class Music {
     if (drums) {
       const lo = p.drumLow[s];
       if (lo !== '.') this.drum(p.ch.drum, t, lo);
-      const tamb = p.mood === 'battle' ? age >= 1 : age >= 2 || p.char === 'dance';
+      const tamb = p.mood === 'battle' && age >= 1;
       const hi = p.drumHigh[s];
       if (tamb && hi !== '.') this.drum(p.ch.drum, hum(), hi);
     }
@@ -561,20 +567,20 @@ export class Music {
       dur = 9.5 * beat + 3;
     } else {
       // Fanfarria de trompetas con timbal y arpa
-      const beat = kind === 'ageUp' ? 0.2 : 0.22;
+      const beat = kind === 'ageUp' ? 0.28 : 0.3;
       const line: [number, number, number][] = kind === 'ageUp'
         ? [[0, 0, 1], [4, 1, 1], [7, 2, 1], [7, 3, 0.5], [9, 3.5, 0.5], [11, 4, 5]]
         : [[0, 0, 1], [0, 1, 0.5], [0, 1.5, 0.5], [4, 2, 1], [2, 3, 1], [4, 4, 1], [7, 5, 6]];
       for (const [d, at, len] of line) {
         this.voice(ch.lead, t0 + at * beat, 'trumpet', this.midi(key, d), len * beat, 0.9);
-        if (len >= 1) this.voice(ch.lead, t0 + at * beat, 'trumpet', this.midi(key, d - 2), len * beat, 0.55);
+        if (len >= 1) this.voice(ch.lead, t0 + at * beat, 'trumpet', this.midi(key, d - 2), len * beat, 0.5);
       }
       const end = line[line.length - 1][1];
-      for (let i = 0; i <= end; i++) this.drum(ch.drum, t0 + i * beat, i === end ? 'W' : 'w');
-      for (let i = 0; i < 6; i++) this.drum(ch.drum, t0 + (end + i / 6) * beat, 't');
-      for (let i = 0; i < 8; i++) this.pluck(ch.harp, t0 + end * beat + i * 0.05, 'harp', this.midi(key, 7 + i), 0.3, 2.5);
+      this.drum(ch.drum, t0, 'w');
+      this.drum(ch.drum, t0 + end * beat, 'w');
+      for (let i = 0; i < 8; i++) this.pluck(ch.harp, t0 + end * beat + i * 0.08, 'harp', this.midi(key, 7 + i), 0.26, 3);
       this.pluck(ch.lute, t0 + end * beat, 'lute', this.midi(key, -7), 0.6, 3);
-      dur = end * beat + 2.6;
+      dur = end * beat + 3.5;
     }
     if (this.simTime === null) setTimeout(() => bus.disconnect(), (dur + 5) * 1000);
     this.gapUntil = t0 + dur;
@@ -603,11 +609,11 @@ export class Music {
       return f;
     };
     return {
-      lute: mk(-0.3, biquad('lowpass', 3000), biquad('peaking', 240, 1, 3)),
+      lute: mk(-0.3, biquad('lowpass', 2200), biquad('peaking', 240, 1, 3)),
       lead: mk(0.2),
       harp: mk(0.4, biquad('highpass', 150)),
       drum: mk(0),
-      drone: mk(-0.05, biquad('lowpass', 900)),
+      drone: mk(-0.05, biquad('lowpass', 700)),
     };
   }
 
@@ -618,7 +624,7 @@ export class Music {
     if (cached) return cached;
     const ctx = this.ctx!, sr = ctx.sampleRate;
     const seconds = kind === 'lute' ? 2.6 : 3.2;
-    const bright = kind === 'lute' ? 0.55 : 0.85;
+    const bright = kind === 'lute' ? 0.45 : 0.75;
     const decay = kind === 'lute' ? 0.996 : 0.998;
     const n = Math.floor(sr * seconds);
     const buf = ctx.createBuffer(1, n, sr), out = buf.getChannelData(0);
@@ -667,14 +673,14 @@ export class Music {
     let attack = 0.05, rel = 0.08, level = vel, vibDepth = 0.005, vibRate = 5;
     if (kind === 'flute') {
       o.setPeriodicWave(this.fluteWave);
-      level *= 0.3;
-      this.breath(dest, t, f, vel * 0.06, dur);
+      attack = 0.12; rel = 0.18; level *= 0.28; vibDepth = 0.0035; vibRate = 4.6;
+      this.breath(dest, t, f, vel * 0.035, dur);
     } else if (kind === 'vielle') {
       o.type = 'sawtooth';
       const lp = ctx.createBiquadFilter(); lp.frequency.value = 2000;
       const body = ctx.createBiquadFilter(); body.type = 'peaking'; body.frequency.value = 700; body.gain.value = 4;
       chain(lp); chain(body);
-      attack = 0.09; rel = 0.12; level *= 0.12; vibRate = 5.3;
+      attack = 0.16; rel = 0.2; level *= 0.11; vibRate = 4.8;
     } else if (kind === 'shawm') {
       o.type = 'sawtooth';
       const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 1300; bp.Q.value = 0.9;
@@ -688,7 +694,7 @@ export class Music {
       lp.frequency.linearRampToValueAtTime(2800, t + 0.05);
       lp.frequency.setTargetAtTime(1800, t + 0.05, 0.2);
       chain(lp);
-      attack = 0.03; level *= 0.14; vibDepth = 0.002;
+      attack = 0.05; level *= 0.1; vibDepth = 0.002;
     }
     chain(g);
     g.connect(dest);
@@ -737,7 +743,7 @@ export class Music {
     const root = p.tonic - 12;
     const g = ctx.createGain();
     g.gain.setValueAtTime(0, t);
-    g.gain.linearRampToValueAtTime(p.mood === 'battle' ? 0.06 : 0.045, t + 4);
+    g.gain.linearRampToValueAtTime(p.mood === 'battle' ? 0.055 : 0.05, t + 6);
     g.connect(p.ch.drone);
     const oscs = ([[root, 0, 'sawtooth', 0.5], [root, 6, 'sawtooth', 0.35], [root + 7, -4, 'sawtooth', 0.3], [root - 12, 0, 'triangle', 0.6]] as const).map(([m, cents, type, amp]) => {
       const o = ctx.createOscillator();
@@ -753,8 +759,8 @@ export class Music {
     });
     // Respiración lenta del bordón
     const lfo = ctx.createOscillator(), lg = ctx.createGain();
-    lfo.frequency.value = 0.13;
-    lg.gain.value = 0.01;
+    lfo.frequency.value = 0.07;
+    lg.gain.value = 0.012;
     lfo.connect(lg);
     lg.connect(g.gain);
     lfo.start(t);

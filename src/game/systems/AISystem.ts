@@ -1,3 +1,4 @@
+import { BALANCE } from '../../config/balance';
 import type { Cost, Pt, System } from '../../core/types';
 import { isAccessible, nearestDrop, nearestNode, isFarmTaken, setOrder } from '../actions';
 import { Commands } from '../commands';
@@ -16,18 +17,9 @@ interface Difficulty {
   think: number;
 }
 
-export const AI_DIFFICULTY: Record<string, Difficulty> = {
-  easy: { gather: 0.75, maxVillagers: 18, firstAttack: 900, wave: 5, waveGrow: 1, villagersForAge: [14, 20, 26], think: 2 },
-  normal: { gather: 1.0, maxVillagers: 28, firstAttack: 600, wave: 8, waveGrow: 2, villagersForAge: [18, 24, 30], think: 1 },
-  hard: { gather: 1.15, maxVillagers: 40, firstAttack: 420, wave: 10, waveGrow: 3, villagersForAge: [20, 26, 32], think: 0.6 },
-};
-
-const RATIOS: Record<string, number>[] = [
-  { food: 0.55, wood: 0.4, gold: 0.05, stone: 0 },
-  { food: 0.45, wood: 0.35, gold: 0.15, stone: 0.05 },
-  { food: 0.4, wood: 0.3, gold: 0.25, stone: 0.05 },
-  { food: 0.38, wood: 0.27, gold: 0.28, stone: 0.07 },
-];
+export const AI_DIFFICULTY: Record<string, Difficulty> = BALANCE.ai.difficulty;
+const RATIOS = BALANCE.ai.ratios;
+const STOCKPILE_ENOUGH = BALANCE.ai.stockpileEnough;
 
 /**
  * IA de un jugador. Lee las definiciones del Registry (no conoce unidades
@@ -178,6 +170,9 @@ export class AIController {
     const start = Math.floor(g.rng() * 8);
     const free = g.findFreeTile(this.home.x, this.home.y, 8);
     const homeRegion = free ? m.region(Math.floor(free.x), Math.floor(free.y)) : -1;
+    // Torres y castillos: el sitio válido más alto (la altura les da alcance y daño)
+    const defensive = (def.attack ?? 0) > 0;
+    let best: Pt | null = null, bestScore = -Infinity;
     for (let r = minR; r <= maxR; r++) {
       const ring: Pt[] = [];
       for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) {
@@ -200,10 +195,42 @@ export class AIController {
           if (!e) continue;
           if (e.kind === 'building' || (!isDrop && g.nodeDef(e)?.resource !== 'wood')) { ok = false; break; }
         }
-        if (ok) return t;
+        if (!ok) continue;
+        if (!defensive) return t;
+        const score = m.baseHeight(t.x, t.y, s) - r * 0.08;
+        if (score > bestScore) { bestScore = score; best = t; }
       }
     }
-    return null;
+    return best;
+  }
+
+  private postAt = -999;
+  private post: Pt | null = null;
+
+  /** Punto alto cerca de la base, de cara al enemigo más cercano, para esperar defendiendo. */
+  private defensePost(): Pt | null {
+    const g = this.game, m = g.map, h = this.home;
+    if (g.time - this.postAt < 60 && this.post) return this.post;
+    this.postAt = g.time;
+    let foe: Pt | null = null, fd = Infinity;
+    for (const b of g.buildings) {
+      if (b.dead || !g.isEnemy(this.p.id, b.owner)) continue;
+      const d = Math.hypot(b.x - h.x, b.y - h.y);
+      if (d < fd) { fd = d; foe = b; }
+    }
+    if (!foe) return (this.post = null);
+    const dirX = (foe.x - h.x) / fd, dirY = (foe.y - h.y) / fd;
+    const reg = m.regionAt(h.x + dirX * 4, h.y + dirY * 4);
+    const th = m.tileHeights();
+    let best: Pt | null = null, bs = -Infinity;
+    for (let r = 6; r <= 14; r++) for (let a = -0.9; a <= 0.9; a += 0.15) {
+      const ca = Math.cos(a), sa = Math.sin(a);
+      const x = Math.floor(h.x + (dirX * ca - dirY * sa) * r), y = Math.floor(h.y + (dirX * sa + dirY * ca) * r);
+      if (!m.walkable(x, y) || (reg >= 0 && m.region(x, y) !== reg)) continue;
+      const score = th[y * m.w + x] - r * 0.05;
+      if (score > bs) { bs = score; best = { x: x + 0.5, y: y + 0.5 }; }
+    }
+    return (this.post = best);
   }
 
   private dropBuildingFor(res: string): string | null {
@@ -268,7 +295,11 @@ export class AIController {
 
   private assignVillagers(vills: Entity[]) {
     const g = this.game, p = this.p;
-    const ratio = RATIOS[Math.min(p.age, RATIOS.length - 1)];
+    // Lo que ya sobra en el almacén deja de pedir aldeanos (si no, la IA acumula oro y se queda sin comida ni madera)
+    const ratio = { ...RATIOS[Math.min(p.age, RATIOS.length - 1)] };
+    for (const r of Object.keys(ratio)) if ((p.res[r] ?? 0) > STOCKPILE_ENOUGH) ratio[r] *= 0.15;
+    const sum = Object.values(ratio).reduce((a, b) => a + b, 0) || 1;
+    for (const r of Object.keys(ratio)) ratio[r] /= sum;
     const counts: Record<string, number> = {};
     for (const r of Object.keys(ratio)) counts[r] = 0;
     for (const v of vills) { const r = this.resourceOf(v); if (r) counts[r] = (counts[r] ?? 0) + 1; }
@@ -290,9 +321,16 @@ export class AIController {
       const keys = Object.keys(ratio);
       const under = keys.sort((a, b) => deficit(b) - deficit(a))[0];
       const over = keys.sort((a, b) => deficit(a) - deficit(b))[0];
-      if (under !== over && deficit(under) > 1.5 && deficit(over) < -1.5) {
+      // Si sobra mucho de algo, se reasignan varios a la vez
+      const moves = Math.max(1, Math.min(4, Math.floor(-deficit(over) / 3)));
+      for (let k = 0; k < moves && under !== over && deficit(under) > 1.5 && deficit(over) < -1.5; k++) {
         const v = vills.find(x => this.resourceOf(x) === over && (!x.carry || x.carry.amount < 1));
-        if (v && this.sendToResource(v, under, vills)) { /* reasignado */ }
+        if (!v) break;
+        // Si no se puede (p. ej. granjas sin madera), al siguiente recurso que falte
+        const to = keys.filter(r => r !== over && deficit(r) > 0.5).sort((a, b) => deficit(b) - deficit(a))
+          .find(r => this.sendToResource(v, r, vills));
+        if (!to) break;
+        counts[over]--; counts[to] = (counts[to] ?? 0) + 1;
       }
     }
   }
@@ -306,6 +344,16 @@ export class AIController {
       if (dh > bestD + 10) continue;
       const d = dh * 0.6 + Math.hypot(n.x - v.x, n.y - v.y) * 0.4;
       if (d < bestD && isAccessible(g, n, v)) { bestD = d; best = n; }
+    }
+    if (!best && res !== 'food') {
+      // Se agotó lo cercano (mapas de montaña o desierto): lo más cercano alcanzable, esté donde esté.
+      // ensureDropSites levantará allí un campamento en cuanto vayan varios aldeanos.
+      let far = Infinity;
+      for (const n of this.nodes) {
+        if (n.dead || n.resType !== res || n.amount <= 0) continue;
+        const d = Math.hypot(n.x - h.x, n.y - h.y);
+        if (d < far && isAccessible(g, n, v)) { far = d; best = n; }
+      }
     }
     if (best) { setOrder(v, { type: 'gather', targetId: best.id, phase: 'gather' }); return true; }
     if (res !== 'food') return false;
@@ -356,6 +404,13 @@ export class AIController {
       if (t) {
         Commands.attackMove(g, atHome, t.x, t.y);
         this.waveSize += this.cfg.waveGrow;
+      }
+    } else {
+      // Mientras se reúne la oleada, el ejército espera en un punto alto de cara al enemigo
+      const post = this.defensePost();
+      if (post) {
+        const away = atHome.filter(a => Math.hypot(a.x - post.x, a.y - post.y) > 4);
+        if (away.length) Commands.move(g, away, post.x, post.y);
       }
     }
   }

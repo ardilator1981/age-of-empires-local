@@ -1,6 +1,7 @@
 import type { Session } from '../app/Session';
 import { Commands } from '../game/commands';
 import { esc, OK, pic, selectionCommands, statsLine, taskText, type Cmd } from './commandModel';
+import { sightRadius } from '../game/vision';
 import { LONG_PRESS_MS } from './Input';
 import { isMobileLayout } from './layout';
 import { ICONS } from './svgIcons';
@@ -221,6 +222,15 @@ export class HUD {
       const pct = Math.max(0, e.hp / e.maxHp) * 100;
       body += `<div class="hp"><i style="width:${pct}%"></i><span>${Math.ceil(e.hp)} / ${Math.round(e.maxHp)}</span></div>`;
       body += `<div class="line stats">${statsLine(g, def)}</div>`;
+      // Relieve: ventaja o desventaja de altura y visión extra
+      const adv = e.data.heightAdv as { range: number; damage: number; until: number } | undefined;
+      if (adv && adv.until >= g.time && (adv.range > 0 || adv.damage !== 0)) {
+        const up = adv.damage > 0 || adv.range > 0;
+        const parts = [adv.range ? `+${adv.range} alcance` : '', `${adv.damage > 0 ? '+' : ''}${Math.round(adv.damage * 100)} % daño`].filter(Boolean);
+        body += `<div class="line ${up ? 'hg-up' : 'hg-down'}">${up ? '▲ Ventaja de altura' : '▼ Ataca cuesta arriba'}: ${parts.join(', ')}</div>`;
+      }
+      const losBonus = Math.round(sightRadius(g, e) - (owner.getStat(def, 'los') + (e.kind === 'building' ? e.size / 2 : 0)));
+      if (losBonus > 0) body += `<div class="line hg-up">⛰ Visión +${losBonus} por la altura</div>`;
       if (e.kind === 'unit') {
         const udef = g.unitDef(e);
         if (udef.gatherer) {

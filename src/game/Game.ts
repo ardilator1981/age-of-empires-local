@@ -1,10 +1,11 @@
 import { EventBus } from '../core/EventBus';
 import type { Registry } from '../core/Registry';
-import { MAX_BUILD_SLOPE } from '../core/constants';
+import { BALANCE } from '../config/balance';
 import type { AnyDef, BuildingDef, CivDef, Pt, ResourceNodeDef, System, UnitDef } from '../core/types';
 import { Entity } from './Entity';
 import { GameMap } from './GameMap';
 import { MapGenerator } from './MapGenerator';
+import { deriveCliffs, ensurePlayable } from './relief';
 import { Player } from './Player';
 import type { Projectile } from './combat';
 
@@ -88,7 +89,15 @@ export class Game {
     this.humanId = this.players.find(p => p.isHuman)?.id ?? 1;
 
     const mt = reg.mapTypes.get(opts.mapType) ?? [...reg.mapTypes.values()][0];
-    mt.generate(new MapGenerator(this));
+    const gen = new MapGenerator(this);
+    mt.generate(gen);
+    // Reglas de relieve comunes: acantilados infranqueables y pasos garantizados entre bases
+    deriveCliffs(gen);
+    const starts = this.players.slice(1).map(p => {
+      const tc = this.buildings.find(b => b.owner === p.id && !b.dead) ?? this.units.find(u => u.owner === p.id && !u.dead);
+      return tc ? { x: tc.x, y: tc.y } : null;
+    }).filter((s): s is Pt => !!s);
+    this.data.relief = ensurePlayable(gen, starts);
 
     if (opts.visibility !== 'normal') for (const p of this.players) p.explored.fill(1);
     this.systems = reg.systems.map(s => s.factory(this));
@@ -115,6 +124,7 @@ export class Game {
   update(dt: number) {
     this.tick++;
     this.time += dt;
+    this.data.pathsThisTick = 0;
     for (const e of this.units) { e.px = e.x; e.py = e.y; }
     for (const s of this.systems) s.update(dt);
     if (this.anyDead) {
@@ -281,7 +291,7 @@ export class Game {
         if (p?.isHuman && !p.explored[y * this.map.w + x]) return false;
       }
     }
-    return this.map.slopeOf(tx, ty, def.size) <= MAX_BUILD_SLOPE;
+    return this.map.slopeOf(tx, ty, def.size) <= BALANCE.relief.buildMaxSlope;
   }
 
   /** Casilla caminable más cercana (búsqueda en anillos). */

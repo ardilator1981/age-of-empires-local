@@ -4,6 +4,7 @@ import type { GameOptions } from '../game/Game';
 import { ALL_MODS } from '../mods';
 import type { App } from '../app/App';
 import { setUIPrefs, uiPrefs, type LayoutPref } from './layout';
+import { RegionPicker } from './RegionPicker';
 
 type Diff = 'easy' | 'normal' | 'hard';
 
@@ -78,6 +79,8 @@ export class Menu {
   private state: MenuState;
   private overlay = document.getElementById('overlay')!;
   private regCache: { key: string; reg: Registry } | null = null;
+  /** Semilla de la vista previa de una región real, para jugar exactamente ese mapa. */
+  private pinnedSeed: { map: string; seed: number } | null = null;
 
   constructor(private app: App) {
     this.state = { ...DEFAULTS };
@@ -162,6 +165,7 @@ export class Menu {
             <div class="grid">
               <label>Mapa</label><select data-k="mapType">${[...reg.mapTypes.values()].map(m => opt(m.id, m.name, st.mapType)).join('')}</select>
               <span></span><small>${esc(map?.description ?? '')}</small>
+              ${[...reg.mapTypes.values()].some(m => m.region) ? '<span></span><button class="small" data-regions>🌍 Elegir región real…</button>' : ''}
               <label>Tamaño</label><select data-k="mapSize">${SIZES.map(([v, l]) => opt(v, l, st.mapSize)).join('')}</select>
               <label>Recursos</label><select data-k="startingResources">${opt('low', 'Bajos', st.startingResources)}${opt('standard', 'Estándar', st.startingResources)}${opt('high', 'Altos', st.startingResources)}</select>
               <label>Edad inicial</label><select data-k="startAge">${reg.ages.map(a => opt(a.index, a.name, st.startAge)).join('')}</select>
@@ -179,6 +183,7 @@ export class Menu {
           </section>
         </div>
         <button class="start" data-start>⚔️ ¡Comenzar partida!</button>
+        <div class="credits-link"><button class="small" data-credits>📜 Créditos y atribuciones</button></div>
         ${this.volumeHtml()}
         ${help()}
       </div>`);
@@ -220,7 +225,9 @@ export class Menu {
       this.save();
       this.showMain();
     });
-    root.querySelector('[data-start]')!.addEventListener('click', () => this.app.start(this.buildOptions()));
+    root.querySelector('[data-start]')!.addEventListener('click', () => void this.app.start(this.buildOptions()));
+    root.querySelector('[data-regions]')?.addEventListener('click', () => this.showRegions());
+    root.querySelector('[data-credits]')?.addEventListener('click', () => this.showCredits());
     this.bindVolume();
   }
 
@@ -244,7 +251,7 @@ export class Menu {
       mapType: st.mapType, mapSize: st.mapSize,
       players: [{ name: st.name || 'Jugador', civ: pick(st.civ), color: PLAYER_COLORS[st.color], human: true, difficulty: 'normal' }, ...rivals],
       startingResources: st.startingResources, startAge: st.startAge, victory: st.victory, visibility: st.visibility,
-      popLimit: st.popLimit, speed: st.speed, seed: Math.floor(Math.random() * 1e9), mods: st.mods,
+      popLimit: st.popLimit, speed: st.speed, seed: this.pinnedSeed?.map === st.mapType ? this.pinnedSeed.seed : Math.floor(Math.random() * 1e9), mods: st.mods,
     };
   }
 
@@ -286,6 +293,57 @@ export class Menu {
         </div>
       </div>`);
     this.bindButtons();
+  }
+
+  /** Selector de regiones reales con mapamundi y vista previa. */
+  showRegions() {
+    const st = this.state;
+    new RegionPicker({
+      overlay: this.overlay,
+      registry: this.registry(),
+      selected: st.mapType,
+      options: (mapType, seed) => ({ ...this.buildOptions(), mapType, seed }),
+      onChoose: (mapType, seed, playNow) => {
+        st.mapType = mapType;
+        this.pinnedSeed = { map: mapType, seed };
+        this.save();
+        if (playNow) void this.app.start(this.buildOptions());
+        else this.showMain();
+      },
+      onBack: () => this.showMain(),
+    }).show();
+  }
+
+  /** Créditos y atribuciones de los datos geográficos. */
+  showCredits() {
+    this.show(`
+      <div class="menu small credits">
+        <h1>Créditos</h1>
+        <div class="sub">Age of Empires II · Edición local — proyecto personal sin ánimo de lucro inspirado en <i>Age of Empires II</i> (marca de Microsoft). No usa ningún recurso gráfico ni sonoro del juego original: los gráficos y la música se generan por código.</div>
+        <h2>Relieve y datos de las regiones reales</h2>
+        <ul>
+          <li><b>Copernicus DEM GLO-30</b>: © DLR e.V. 2010-2014 y © Airbus Defence and Space GmbH 2014-2018, proporcionado bajo el programa COPERNICUS de la Unión Europea y la ESA.</li>
+          <li><b>Institut Cartogràfic i Geològic de Catalunya (ICGC)</b>: Model d'Elevacions del Terreny, licencia CC BY 4.0 (regiones de Cataluña).</li>
+          <li><b>OpenStreetMap</b>: ríos, lagos, bosques, usos del suelo y núcleos de población © colaboradores de OpenStreetMap, licencia ODbL 1.0 (openstreetmap.org/copyright).</li>
+        </ul>
+        <h2>Mapamundi del selector</h2>
+        <p>Teselas de elevación <b>Terrarium</b> de Mapzen (AWS Open Data). Atribución requerida:</p>
+        <ul class="small-list">
+          <li>ArcticDEM terrain data DEM(s) were created from DigitalGlobe, Inc., imagery and funded under National Science Foundation awards 1043681, 1559691, and 1542736;</li>
+          <li>Australia terrain data © Commonwealth of Australia (Geoscience Australia) 2017;</li>
+          <li>Austria terrain data © offene Daten Österreichs – Digitales Geländemodell (DGM) Österreich;</li>
+          <li>Canada terrain data contains information licensed under the Open Government Licence – Canada;</li>
+          <li>Europe terrain data produced using Copernicus data and information funded by the European Union - EU-DEM layers;</li>
+          <li>Global ETOPO1 terrain data U.S. National Oceanic and Atmospheric Administration;</li>
+          <li>Mexico terrain data source: INEGI, Continental relief, 2016;</li>
+          <li>New Zealand terrain data Copyright 2011 Crown copyright (c) Land Information New Zealand and the New Zealand Government (All rights reserved);</li>
+          <li>Norway terrain data © Kartverket;</li>
+          <li>United Kingdom terrain data © Environment Agency copyright and/or database right 2015. All rights reserved;</li>
+          <li>United States 3DEP (formerly NED) and global GMTED2010 and SRTM terrain data courtesy of the U.S. Geological Survey.</li>
+        </ul>
+        <div class="buttons"><button data-a="back">↩ Volver</button></div>
+      </div>`);
+    this.overlay.querySelector('[data-a="back"]')!.addEventListener('click', () => this.showMain());
   }
 
   private volumeHtml() {

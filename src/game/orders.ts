@@ -1,9 +1,11 @@
+import { BALANCE } from '../config/balance';
 import { BUILD_RANGE, DROP_RANGE, GATHER_RANGE, MELEE_RANGE } from '../core/constants';
 import type { Order, OrderHandler } from '../core/types';
 import {
-  ARRIVED, UNREACHABLE, approach, edgeDist, face, isFarmTaken, moveTo, nearestDrop, nearestNode, setOrder,
+  ARRIVED, UNREACHABLE, approach, edgeDist, face, isFarmTaken, moveTo, nearestDrop, nearestNode, pathBudget, setOrder,
 } from './actions';
 import { findEnemyNear, performAttack } from './combat';
+import { rangeBonus } from './heightRules';
 import type { Entity } from './Entity';
 import type { Game } from './Game';
 
@@ -15,7 +17,11 @@ import type { Game } from './Game';
 
 export const moveOrder: OrderHandler = {
   update(game, u, o) {
-    if (!o.started) { moveTo(game, u, o.x, o.y); o.started = true; }
+    if (!o.started) {
+      if (!pathBudget(game)) return; // se calcula en un tick próximo
+      moveTo(game, u, o.x, o.y);
+      o.started = true;
+    }
     if (!u.path.length) setOrder(u, null);
   },
 };
@@ -25,7 +31,8 @@ function attackStep(game: Game, u: Entity, o: Order, t: Entity): boolean {
   const p = game.players[u.owner];
   const def = game.unitDef(u);
   const range = p.getStat(def, 'range');
-  const r = range >= 1 ? range : MELEE_RANGE + (t.kind === 'unit' ? 0 : 0.25);
+  // Desde lo alto, las unidades a distancia alcanzan más lejos
+  const r = range >= 1 ? range + rangeBonus(game, u, t, range) : MELEE_RANGE + (t.kind === 'unit' ? 0 : 0.25);
   const st = approach(game, u, t, r);
   if (st === ARRIVED) {
     face(u, t);
@@ -71,7 +78,11 @@ export const attackMoveOrder: OrderHandler = {
       return;
     }
     o.targetId = 0;
-    if (!o.moving) { moveTo(game, u, o.x, o.y); o.moving = true; }
+    if (!o.moving) {
+      if (!pathBudget(game)) return;
+      moveTo(game, u, o.x, o.y);
+      o.moving = true;
+    }
     if (!u.path.length) setOrder(u, null);
   },
 };
@@ -198,7 +209,7 @@ export const buildOrder: OrderHandler = {
       b.hp = Math.min(b.maxHp, b.hp + b.maxHp * dp);
       if (b.progress >= 1) game.completeBuilding(b);
     } else {
-      b.hp = Math.min(b.maxHp, b.hp + (b.maxHp / (bt * 1.5)) * dt);
+      b.hp = Math.min(b.maxHp, b.hp + (b.maxHp / (bt * BALANCE.combat.repairTimeFactor)) * dt);
     }
   },
 };

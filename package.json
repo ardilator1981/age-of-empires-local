@@ -10,12 +10,18 @@
     "typecheck": "tsc --noEmit",
     "simulate": "vite build --ssr scripts/simulate.ts --outDir .sim --emptyOutDir --logLevel warn && node .sim/simulate.js",
     "real-map": "node scripts/real-map.mjs",
-    "shots:movil": "node scripts/mobile-shots.mjs"
+    "shots:movil": "node scripts/mobile-shots.mjs",
+    "bench": "vite build --ssr scripts/bench.ts --outDir .sim --emptyOutDir --logLevel warn && node .sim/bench.js",
+    "test": "node -e \"require('fs').rmSync('node_modules/.vitest-cache',{recursive:true,force:true})\" && vitest run",
+    "regions": "node scripts/regions.mjs",
+    "world-map": "node scripts/world-map.mjs"
   },
   "devDependencies": {
     "geotiff": "^3.0.5",
+    "pngjs": "^7.0.0",
     "typescript": "^7.0.2",
     "vite": "^8.3.4",
-    "vite-plugin-pwa": "^2.0.0"
+    "vite-plugin-pwa": "^2.0.0",
+    "vitest": "^5.0.5"
   }
 }

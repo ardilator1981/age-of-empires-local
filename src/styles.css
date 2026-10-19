@@ -362,6 +362,63 @@ table.stats td { padding: 4px; text-shadow: 1px 1px 0 #000; }
   #age { display: none; }
 }
 
+/* Relieve: ventaja / desventaja de altura en el panel de selección */
+.info .hg-up { color: #ffd24a; }
+.info .hg-down { color: #ff8a7a; }
+
+/* ---------------------------------------------------------------- selector de regiones reales */
+.menu.regions { width: min(1180px, 100%); }
+.region-cols { display: grid; grid-template-columns: 1.3fr 1fr; gap: 18px; text-align: left; }
+@media (max-width: 900px) { .region-cols { grid-template-columns: 1fr; } }
+.world { position: relative; width: 100%; aspect-ratio: 2 / 1; overflow: hidden; box-shadow: var(--bevel-in), 0 0 0 1px var(--gold-dark); }
+.world img { width: 100%; height: 100%; display: block; }
+.world .marks { position: absolute; inset: 0; }
+.world .mark {
+  position: absolute; width: 12px; height: 12px; margin: -6px 0 0 -6px; padding: 0; border-radius: 50%;
+  background: #ffd24a; border: 2px solid #3a1a08; box-shadow: 0 0 0 1px #fff8; cursor: pointer;
+}
+.world .mark.sel { background: #ff4a3a; width: 16px; height: 16px; margin: -8px 0 0 -8px; box-shadow: 0 0 10px #ff4a3a; z-index: 2; }
+.region-list { margin-top: 8px; max-height: 300px; overflow-y: auto; }
+.region-list h3 { margin: 10px 0 4px; }
+.region {
+  display: inline-flex; flex-direction: column; align-items: flex-start; margin: 3px; padding: 6px 10px; min-width: 150px; min-height: 44px;
+  background: var(--grain), linear-gradient(#5c5044, #3a322a); color: var(--text); border: 1px solid #1a120a;
+  box-shadow: var(--bevel-out), 0 0 0 1px var(--gold-dark); font-family: var(--font); cursor: pointer; text-align: left;
+}
+.region small { color: var(--gold-dim); font-size: 11px; }
+.region.sel { box-shadow: var(--bevel-out), 0 0 0 2px var(--gold); background: linear-gradient(#7a6650, #4a3c2e); }
+.preview-col h2 { margin-bottom: 2px; }
+.rp-meta { font-size: 13px; color: var(--parchment); margin-bottom: 8px; }
+.rp-canvas { position: relative; width: 100%; aspect-ratio: 720 / 372; margin: 0 auto; background: radial-gradient(#1a140e, #070503); box-shadow: var(--bevel-in); }
+.rp-canvas canvas { width: 100%; height: 100%; display: block; }
+.rp-loading { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; color: var(--gold); text-shadow: 1px 1px 0 #000; background: rgba(0, 0, 0, 0.4); }
+.rp-legend { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: 11px; margin: 8px 0; color: var(--parchment); }
+.rp-legend i { display: inline-block; width: 10px; height: 10px; margin-right: 4px; border: 1px solid #000; vertical-align: -1px; }
+.rp-legend i.dot { background: #3b6fe0; border: 1px solid #fff; }
+.rp-desc { font-size: 14px; }
+.rp-attr { font-size: 11px; color: var(--gold-dim); }
+.buttons.row { flex-direction: row; flex-wrap: wrap; justify-content: center; }
+.buttons.row button { width: auto; min-width: 140px; font-size: 15px; padding: 8px 12px; min-height: 44px; }
+.credits-link { text-align: center; margin-top: -4px; }
+.credits ul { text-align: left; font-size: 13px; }
+.credits .small-list { font-size: 11px; color: var(--parchment); }
+.credits p { font-size: 13px; text-align: left; }
+/* Zona táctil generosa para los marcadores del mapamundi */
+.world .mark::before { content: ''; position: absolute; inset: -14px; border-radius: 50%; }
+/* Móvil en horizontal: lista y vista previa lado a lado; el mapamundi sobra */
+@media (max-height: 560px) {
+  .menu.regions { padding: 10px 12px; }
+  .menu.regions h1 { font-size: 24px; }
+  .menu.regions .sub { margin-bottom: 6px; font-size: 12px; }
+  .region-cols { grid-template-columns: 1fr 1.2fr; gap: 10px; }
+  .world { display: none; }
+  .region-list { max-height: none; margin-top: 0; }
+  .region { min-width: 0; width: calc(50% - 6px); }
+  .rp-legend { display: none; }
+  .rp-desc { font-size: 12px; margin: 4px 0; }
+  .buttons.row { margin: 6px 0; gap: 6px; }
+  .buttons.row button { min-width: 0; font-size: 13px; }
+
 /* ================================================================ interfaz móvil (html.ui-movil)
    El mapa ocupa toda la pantalla y los controles flotan encima. No cambia nada de la interfaz de escritorio:
    todas las reglas van bajo .ui-movil o sobre elementos que solo existen en la interfaz móvil (#mhud). */

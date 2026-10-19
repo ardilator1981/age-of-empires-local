@@ -8,9 +8,11 @@ TypeScript estricto + Vite, sin framework de interfaz. La **simulación** (`src/
 
 ```
 src/
+  config/      balance.ts: TODOS los valores de balance generales (relieve, altura, visión, movimiento, IA...)
   core/        Tipos de datos, Registry, EventBus, constantes
   game/        Simulación pura: Game, Entity, Player, GameMap (alturas, regiones),
-               MapGenerator, pathfinding, combat, orders, commands, rules
+               MapGenerator, pathfinding, combat, orders, commands, rules,
+               relief (roca, pasos, conectividad), heightRules (ventaja de altura), vision
     systems/   core.ts (sistemas básicos) y AISystem.ts (IA por jugador)
   render/      Camera (con relieve), Renderer (2D), TerrainGL (WebGL2), terrainPatterns,
                sprites, decorations, icons (retratos), Minimap, imageSprite
@@ -26,9 +28,11 @@ docs/          decisiones.md (decisiones de diseño), riesgos.md (riesgos técni
 
 ## Estado de las ramas (actualizar al fusionar)
 
-- `main`: juego base, relieve y Pirineos, terreno orgánico y música.
-- `feat/fusion-movil-mapas`: `main` + **versión móvil** (controles táctiles, interfaz adaptable, PWA con `vite-plugin-pwa`, despliegue en GitHub Pages y APK con Capacitor) + **mapas reales** (`scripts/real-map.mjs` + mod `src/mods/real-maps/`). Pendiente de fusionar en `main`. La rama de origen era `claude/upbeat-ishizaka-5d23f0`; de ella salieron la web publicada y la Release v0.1.0.
-- Remoto: `origin` = github.com/ardilator1981/age-of-empires-local.
+- `main`: juego base, terreno orgánico, música, **versión móvil** (controles táctiles, interfaz adaptable, PWA con `vite-plugin-pwa`, Pages y APK con Capacitor) y **relieve con mapas reales**: roca infranqueable y pasos garantizados, reglas de altura, visión con crestas y 12 regiones reales sin conexión con selector en mapamundi (fusionado desde `feat/relieve-mapas-reales`).
+- `feat/fusion-movil-mapas` y `feat/relieve-mapas-reales`: ya están en `main`.
+- `feat/interfaz-movil`: capa táctil de interfaz (otra sesión, en curso).
+- `claude/arte-ia`: gráficos con sprites generados por IA (otra sesión).
+- Remoto: `origin` = github.com/ardilator1981/age-of-empires-local. La web publicada y la Release v0.1.0 salieron de `claude/upbeat-ishizaka-5d23f0`.
 
 ## Comandos
 
@@ -39,7 +43,9 @@ docs/          decisiones.md (decisiones de diseño), riesgos.md (riesgos técni
 | Comprobar tipos | `npm run typecheck` |
 | Build | `npm run build` (incluye la comprobación de tipos) |
 | Prueba de humo | `npm run simulate -- <minutos> <mapa> <semilla> [dificultad]`: partida IA contra IA sin gráficos; debe terminar sin errores, y las IAs deben avanzar de edad y combatir |
-| Tests | **No hay tests unitarios todavía.** Cuando se añadan, usar Vitest (`npm test`) |
+| Tests | `npm test` (Vitest, carpeta `tests/`): conectividad de todos los mapas, reglas de altura, visión, caminos |
+| Rendimiento | `npm run bench`: A*, partida con 4 IA, estrés de 300 unidades y visión. Resultados en `docs/rendimiento.md` |
+| Regiones reales | `npm run regions` (todas las de `src/mods/real-maps/regions.json`, con `--all` u `--only <id>`); `npm run world-map` regenera el mapamundi del selector |
 | Mapa real | `npm run real-map -- ...` (ver README): descarga relieve del ICGC o de Copernicus y datos de OpenStreetMap, y genera `src/mods/real-maps/data/<id>.json` |
 | Despliegue | Al hacer push a `main`, GitHub Actions publica la PWA en Pages (`.github/workflows/pages.yml`). Al crear una etiqueta `v*`, genera el APK con Capacitor y lo adjunta a una Release (`android.yml`). Es una **PWA**: `vite.config.ts` con `base: './'` y caché sin conexión |
 
@@ -61,6 +67,6 @@ Depuración en el navegador: `window.app` y `window.game` están accesibles desd
 - **No romper lo que ya funciona:** antes de dar algo por terminado, ejecuta `npm run build` y `npm run simulate -- 20 arabia 1` (y los tests cuando existan). Añade tests a la lógica nueva cuando tenga sentido.
 - **Mobile-first:** todo debe funcionar con táctil en un móvil de gama media, a 30 FPS o más.
 - **Decisiones ambiguas:** elige un valor por defecto razonable, anótalo en `docs/decisiones.md` y sigue. Solo pregunta si algo te bloquea.
-- **Balance en un solo sitio:** daños, costes, tiempos y bonus viven en un único archivo de configuración, no repartidos por el código. Hoy no se cumple del todo (ver `docs/riesgos.md`): mientras tanto, no añadas números de balance nuevos fuera de los datos de los mods.
+- **Balance en un solo sitio:** las reglas generales (alcances, relieve, altura, visión, movimiento, pathfinding, IA) viven en `src/config/balance.ts`. Las estadísticas de cada unidad, edificio y tecnología son datos de los mods (`src/mods/core/`). No añadas números de balance sueltos en el código.
 - **Al terminar cada tarea:** resumen corto de qué cambió, cómo probarlo y qué decisiones tomaste.
 - No toques cambios ajenos sin commit ni ramas de otras sesiones. Las ramas de otras sesiones solo se fusionan cuando el usuario lo pide.

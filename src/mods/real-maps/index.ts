@@ -1,5 +1,8 @@
-import type { GameMod, MapTypeDef, Pt } from '../../core/types';
+import { BALANCE } from '../../config/balance';
+import { DEFAULT_VISUAL_RELIEF, ELEV_PX, MAX_VISUAL_RELIEF, REAL_RELIEF_FRACTION } from '../../core/constants';
+import type { GameMod, MapRegionInfo, MapTypeDef, Pt } from '../../core/types';
 import type { MapGenerator } from '../../game/MapGenerator';
+import REGION_LIST from './regions.json';
 
 /**
  * MAPAS REALES: cada JSON de ./data (generado con `npm run real-map`) se registra como un mapa.
@@ -21,7 +24,10 @@ export interface RealMapData {
   elevation: { min: number; max: number; metersPerLevel: number };
   snowLine: number;
   pineLine: number;
-  rockSlopeDeg: number;
+  /** Si falta, se usa BALANCE.relief.realRockSlopeDeg. */
+  rockSlopeDeg?: number;
+  /** temperate (por defecto) o arid (desierto con vegetación junto al agua). */
+  biome?: string;
   preferredStarts?: string[];
   /** Una fila de caracteres por fila de casillas (ver `legend`). */
   terrain: string[];
@@ -31,8 +37,29 @@ export interface RealMapData {
   settlements: { name: string; kind: string; x: number; y: number; population?: number }[];
 }
 
-const files = import.meta.glob<RealMapData>('./data/*.json', { eager: true, import: 'default' });
-export const REAL_MAPS: RealMapData[] = Object.values(files).filter(d => d && d.format === 1).sort((a, b) => a.name.localeCompare(b.name));
+/** Metadatos de las regiones (src/mods/real-maps/regions.json): se listan sin cargar los datos. */
+export interface RegionMeta {
+  id: string; name: string; country: string; category: string;
+  lat: number; lon: number; sizeKm: number; biome?: string; snowLine?: number; starts?: string[];
+  description: string;
+}
+export const REGIONS: RegionMeta[] = REGION_LIST as RegionMeta[];
+
+/** Los datos de cada región van en su propio fichero y se cargan al elegirla (no pesan en el arranque). */
+const loaders = import.meta.glob<RealMapData>('./data/*.json', { import: 'default' });
+const cache = new Map<string, RealMapData>();
+const idOf = (path: string) => path.replace(/^.*\/(.*)\.json$/, '$1');
+async function loadData(id: string): Promise<RealMapData> {
+  const hit = cache.get(id);
+  if (hit) return hit;
+  const loader = Object.entries(loaders).find(([path]) => idOf(path) === id)?.[1];
+  if (!loader) throw new Error(`No hay datos para el mapa real "${id}" (ejecuta npm run regions)`);
+  const d = await loader();
+  cache.set(id, d);
+  return d;
+}
+/** Ids de las regiones que tienen datos generados. */
+export const AVAILABLE = new Set(Object.keys(loaders).map(idOf));
 
 /** Vecinos en 8 direcciones con su coste. */
 const DIRS: [number, number, number][] = [[1, 0, 1], [-1, 0, 1], [0, 1, 1], [0, -1, 1], [1, 1, Math.SQRT2], [1, -1, Math.SQRT2], [-1, 1, Math.SQRT2], [-1, -1, Math.SQRT2]];
@@ -62,10 +89,32 @@ function generateReal(gen: MapGenerator, d: RealMapData) {
     return Math.atan((Math.hypot(gx, gy) * mpl) / mpt) * 180 / Math.PI;
   };
   const idx = (x: number, y: number) => y * W + x;
+  const rockSlope = d.rockSlopeDeg ?? BALANCE.relief.realRockSlopeDeg;
+  // Escala visual: una fracción de la escala vertical real (los datos comprimen el desnivel en ~10 niveles)
+  const trueMpl = (mpt * ELEV_PX) / Math.hypot(32, 16);
+  m.visualRelief = Math.max(DEFAULT_VISUAL_RELIEF, Math.min(MAX_VISUAL_RELIEF, (REAL_RELIEF_FRACTION * mpl) / trueMpl));
+  const arid = d.biome === 'arid';
 
   // ---------------- agua: lagos de OSM y ríos trazados (1 = agua, 2 = vado / arroyo)
   const water = new Uint8Array(W * H);
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (cls(x, y) === 'w') water[idx(x, y)] = 1;
+  // Mar: casillas a cota ~0 conectadas con el borde del mapa (el relieve no distingue el mar de la costa)
+  if (d.elevation.min <= 0.5) {
+    const sea = (x: number, y: number) => elevAt(x, y) <= 0.5;
+    const stack: number[] = [];
+    for (let i = 0; i < W; i++) for (const [x, y] of [[i, 0], [i, H - 1], [0, i], [W - 1, i]]) {
+      if (y < H && sea(x, y) && water[idx(x, y)] !== 1) { water[idx(x, y)] = 1; stack.push(idx(x, y)); }
+    }
+    while (stack.length) {
+      const c = stack.pop()!, cx = c % W, cy = (c / W) | 0;
+      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        const nx = cx + dx, ny = cy + dy;
+        if (!m.inBounds(nx, ny) || water[idx(nx, ny)] === 1 || !sea(nx, ny)) continue;
+        water[idx(nx, ny)] = 1;
+        stack.push(idx(nx, ny));
+      }
+    }
+  }
   const stroke = (pts: Pt[], r: number, val: number) => {
     for (let i = 0; i + 1 < pts.length; i++) {
       const a = pts[i], b = pts[i + 1], len = Math.hypot(b.x - a.x, b.y - a.y), steps = Math.max(1, Math.ceil(len * 3));
@@ -108,7 +157,7 @@ function generateReal(gen: MapGenerator, d: RealMapData) {
       const r = Math.hypot(dx, dy);
       if (r > 6.5) continue;
       if (water[idx(tx, ty)]) c += r < 4.5 ? 60 : 8;
-      if (cls(tx, ty) === 'r' || slopeDeg(tx, ty) > d.rockSlopeDeg) c += 15;
+      if (cls(tx, ty) === 'r' || slopeDeg(tx, ty) > rockSlope) c += 15;
       c += gen.tileSlope(tx, ty) * 2;
     }
     return c;
@@ -134,7 +183,7 @@ function generateReal(gen: MapGenerator, d: RealMapData) {
     let best: Pt = { x: W / 2, y: H / 2 }, bestD = -1;
     for (let k = 0; k < 400; k++) {
       const x = gen.randInt(10, W - 11), y = gen.randInt(10, H - 11);
-      if (water[idx(x, y)] || slopeDeg(x, y) > d.rockSlopeDeg * 0.6) continue;
+      if (water[idx(x, y)] || slopeDeg(x, y) > rockSlope * 0.6) continue;
       const dist = chosen.length ? Math.min(...chosen.map(c => Math.hypot(c.p.x - x, c.p.y - y))) : Math.hypot(x - W / 2, y - H / 2) * -1 + W;
       if (dist > bestD) { bestD = dist; best = { x, y }; }
     }
@@ -149,7 +198,7 @@ function generateReal(gen: MapGenerator, d: RealMapData) {
   const tileCost = new Float32Array(W * H);
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
     const sl = slopeDeg(x, y), c = cls(x, y);
-    tileCost[idx(x, y)] = 1 + (sl / 10) ** 2 + (water[idx(x, y)] === 1 ? 12 : water[idx(x, y)] ? 2 : 0) + (c === 'r' ? 10 : 0) + (sl > d.rockSlopeDeg ? 20 : 0);
+    tileCost[idx(x, y)] = 1 + (sl / 10) ** 2 + (water[idx(x, y)] === 1 ? 12 : water[idx(x, y)] ? 2 : 0) + (c === 'r' ? 10 : 0) + (sl > rockSlope ? 20 : 0);
   }
   const route = (a: Pt, b: Pt): Pt[] => {
     const dist = new Float64Array(W * H).fill(Infinity), prev = new Int32Array(W * H).fill(-1);
@@ -208,15 +257,24 @@ function generateReal(gen: MapGenerator, d: RealMapData) {
   for (const r of roads) for (let i = 0; i < r.length; i += 1) gen.protectCircle(r[i].x, r[i].y, 1.6);
 
   // ---------------- terreno
-  gen.fill('grass');
+  gen.fill(arid ? 'desert' : 'grass');
+  // En el desierto solo es fértil la franja junto al agua (y los cultivos de OpenStreetMap)
+  const nearWater = new Uint8Array(W * H);
+  if (arid) {
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      if (!water[idx(x, y)]) continue;
+      for (let dy = -4; dy <= 4; dy++) for (let dx = -4; dx <= 4; dx++) if (m.inBounds(x + dx, y + dy) && Math.hypot(dx, dy) <= 4.5) nearWater[idx(x + dx, y + dy)] = 1;
+    }
+  }
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
     const c = cls(x, y), e = elevAt(x, y), sl = slopeDeg(x, y), prot = gen.isProtected(x, y);
     const high = e > d.snowLine + (gen.noise(x, y, 4) - 0.5) * 120;
-    if (!prot && (c === 'r' || sl > d.rockSlopeDeg)) gen.set(x, y, 'rock');
+    if (!prot && (c === 'r' || sl > rockSlope)) gen.set(x, y, 'rock');
     else if (high || c === 'g') gen.set(x, y, 'snow');
     else if (c === 'd' || (c === 'r' && prot) || (c === 'u' && gen.noise(x + 90, y, 2.5) > 0.35)) gen.set(x, y, 'dirt');
     else if (c === 'a') { if (gen.noise(x, y, 3) > 0.55) gen.set(x, y, 'dirt'); }
-    else if (c === '.' && gen.noise(x + 40, y, 6) > 0.72) gen.set(x, y, 'dirt');
+    else if (c === '.' && gen.noise(x + 40, y, 6) > 0.72) gen.set(x, y, arid ? 'sand' : 'dirt');
+    if (arid && (nearWater[idx(x, y)] || c === 'a' || c === 'm') && gen.terrainAt(x, y) === 'desert') gen.set(x, y, 'grass');
     const wv = water[idx(x, y)];
     if (wv) gen.set(x, y, wv === 1 && !prot ? 'water' : 'shallows');
   }
@@ -244,6 +302,11 @@ function generateReal(gen: MapGenerator, d: RealMapData) {
     if (t === 'rock' || t === 'water' || t === 'shallows' || t === 'sand') continue;
     const c = cls(x, y), e = elevAt(x, y), f = gen.noise(x + 300, y, 5), r = gen.rng();
     let node: string | null = null;
+    if (arid) {
+      // Palmerales y huertas junto al agua; el desierto, pelado
+      if ((nearWater[idx(x, y)] || c === 'f' || c === 'x') && f > 0.62 && r < 0.6) gen.placeNode('tree', x, y);
+      continue;
+    }
     if (c === 'f' || c === 'x' || c === 'p') {
       if (f < 0.12 || e > treeLine) continue; // claros
       if (e > d.snowLine - 150) node = 'snowPine';
@@ -282,65 +345,41 @@ function generateReal(gen: MapGenerator, d: RealMapData) {
     }
   }
   gen.scatter('berries', Math.round(2 * scale), 5, 18, starts);
-
-  ensureConnected(gen, starts);
+  // La conexión entre bases (pasos de ancho mínimo) la garantiza el motor después (relief.ensurePlayable)
 }
 
-/** Si alguna base quedó aislada, abre un paso en línea recta (vado sobre el agua, tierra sobre la roca). */
-function ensureConnected(gen: MapGenerator, starts: Pt[]) {
-  const g = gen.game, m = g.map;
-  // Unidades iniciales que hayan quedado debajo de un recurso: a la casilla libre más cercana
-  for (const u of g.units) {
-    if (m.walkable(Math.floor(u.x), Math.floor(u.y))) continue;
-    const p = g.findFreeTile(u.x, u.y, 10);
-    if (p) { u.x = u.px = p.x; u.y = u.py = p.y; }
-  }
-  const regionOf = (p: Pt) => {
-    m.obstaclesChanged();
-    for (let r = 4; r < 10; r++) for (let a = 0; a < 16; a++) {
-      const x = Math.floor(p.x + Math.cos(a * Math.PI / 8) * r), y = Math.floor(p.y + Math.sin(a * Math.PI / 8) * r);
-      const reg = m.region(x, y);
-      if (reg >= 0) return reg;
-    }
-    return -1;
-  };
-  for (let i = 1; i < starts.length; i++) {
-    for (let attempt = 0; attempt < 3 && regionOf(starts[i]) !== regionOf(starts[0]); attempt++) {
-      const a = starts[0], b = starts[i], len = Math.hypot(b.x - a.x, b.y - a.y), steps = Math.ceil(len * 2);
-      for (let k = 0; k <= steps; k++) {
-        const cx = a.x + (b.x - a.x) * k / steps, cy = a.y + (b.y - a.y) * k / steps;
-        for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
-          const x = Math.floor(cx) + dx, y = Math.floor(cy) + dy;
-          if (!m.inBounds(x, y)) continue;
-          const occ = m.occupant[y * m.w + x];
-          const e = occ ? g.entities.get(occ) : undefined;
-          if (e && e.kind === 'resource') g.remove(e);
-          const t = gen.terrainAt(x, y);
-          if (t === 'water') gen.set(x, y, 'shallows');
-          else if (!m.terrainDef(x, y).walkable) gen.set(x, y, 'dirt');
-        }
-      }
-    }
-  }
-  m.obstaclesChanged();
-}
-
-function mapType(d: RealMapData): MapTypeDef {
-  const km = (d.source.sideMeters / 1000).toFixed(0);
+function mapType(meta: RegionMeta): MapTypeDef {
+  const region: MapRegionInfo = { lat: meta.lat, lon: meta.lon, sizeKm: meta.sizeKm, category: meta.category, country: meta.country };
   return {
-    id: d.id,
-    name: `${d.name} (real)`,
-    description: `${d.description} Escala: ${Math.round(d.metersPerTile)} m por casilla en tamaño ${d.size}×${d.size} (${km}×${km} km). Datos: ${d.attribution.join(' · ')}.`,
-    generate: gen => generateReal(gen, d),
+    id: meta.id,
+    name: `${meta.name} (real)`,
+    description: `${meta.description} ${meta.country} · ${meta.sizeKm}×${meta.sizeKm} km.`,
+    region,
+    async load() { await loadData(meta.id); },
+    generate(gen) {
+      const d = cache.get(meta.id);
+      if (!d) throw new Error(`El mapa real "${meta.id}" no está cargado (llama a load() antes)`);
+      generateReal(gen, d);
+    },
   };
+}
+
+/** Atribuciones de los datos de una región (para la pantalla de créditos). */
+export async function regionAttribution(id: string): Promise<string[]> {
+  return (await loadData(id)).attribution;
 }
 
 export const realMapsMod: GameMod = {
   id: 'real-maps',
   name: 'Mapas reales',
-  description: `Mapas generados a partir de datos geográficos reales (relieve del ICGC / Copernicus y OpenStreetMap): ${REAL_MAPS.map(d => d.name).join(', ') || 'ninguno todavía'}.`,
+  description: `Mapas de lugares reales con su relieve, ríos, bosques y pueblos (Copernicus / ICGC y OpenStreetMap): ${REGIONS.filter(r => AVAILABLE.has(r.id)).map(r => r.name).join(', ') || 'ninguno todavía'}.`,
   defaultEnabled: true,
   register(reg) {
-    for (const d of REAL_MAPS) reg.addMapType(mapType(d));
+    for (const meta of REGIONS) if (AVAILABLE.has(meta.id)) reg.addMapType(mapType(meta));
+    // Mapas generados a mano con npm run real-map que no están en la lista
+    for (const id of AVAILABLE) {
+      if (REGIONS.some(r => r.id === id)) continue;
+      reg.addMapType(mapType({ id, name: id, country: '', category: 'Otras', lat: 0, lon: 0, sizeKm: 8, description: 'Mapa real generado con npm run real-map.' }));
+    }
   },
 };
