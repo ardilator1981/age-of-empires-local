@@ -1,9 +1,10 @@
+import type { RejectReason } from '../core/EventBus';
 import type { Cost } from '../core/types';
 import type { Game } from './Game';
 import type { Player } from './Player';
 
 /** Disponibilidad de una acción: si se muestra el botón, si se puede usar y por qué no. */
-export interface Avail { visible: boolean; ok: boolean; reason?: string }
+export interface Avail { visible: boolean; ok: boolean; reason?: string; code?: RejectReason }
 
 const HIDDEN: Avail = { visible: false, ok: false };
 const OK: Avail = { visible: true, ok: true };
@@ -29,18 +30,18 @@ export function missingText(game: Game, p: Player, cost: Cost): string {
 }
 
 function ageCheck(game: Game, p: Player, age: number): Avail | null {
-  return age > p.age ? { visible: true, ok: false, reason: `Requiere ${game.reg.ageName(age)}` } : null;
+  return age > p.age ? { visible: true, ok: false, reason: `Requiere ${game.reg.ageName(age)}`, code: 'requirement' } : null;
 }
 
 function techsCheck(game: Game, p: Player, techs: string[] | undefined): Avail | null {
   for (const t of techs ?? []) {
-    if (!p.researched.has(t)) return { visible: true, ok: false, reason: `Requiere ${game.reg.techs.get(t)?.name ?? t}` };
+    if (!p.researched.has(t)) return { visible: true, ok: false, reason: `Requiere ${game.reg.techs.get(t)?.name ?? t}`, code: 'requirement' };
   }
   return null;
 }
 
 function affordCheck(game: Game, p: Player, cost: Cost): Avail | null {
-  return p.canAfford(cost) ? null : { visible: true, ok: false, reason: missingText(game, p, cost) };
+  return p.canAfford(cost) ? null : { visible: true, ok: false, reason: missingText(game, p, cost), code: 'resources' };
 }
 
 export function unitAvail(game: Game, p: Player, unitId: string): Avail {
@@ -55,7 +56,7 @@ export function buildingAvail(game: Game, p: Player, id: string): Avail {
   const a = ageCheck(game, p, def.age) ?? techsCheck(game, p, def.requiresTechs);
   if (a) return a;
   for (const b of def.requiresBuildings ?? []) {
-    if (p.count(b) === 0) return { visible: true, ok: false, reason: `Requiere ${game.reg.buildings.get(b)?.name ?? b}` };
+    if (p.count(b) === 0) return { visible: true, ok: false, reason: `Requiere ${game.reg.buildings.get(b)?.name ?? b}`, code: 'requirement' };
   }
   return affordCheck(game, p, p.getCost(def)) ?? OK;
 }
@@ -65,7 +66,7 @@ export function exploreAvail(game: Game, p: Player, unitId: string): Avail {
   const ae = game.reg.units.get(unitId)?.autoExplore;
   if (!ae) return HIDDEN;
   for (const b of ae.requiresBuildings ?? []) {
-    if (p.count(b) === 0) return { visible: true, ok: false, reason: `Requiere ${game.reg.buildings.get(b)?.name ?? b}` };
+    if (p.count(b) === 0) return { visible: true, ok: false, reason: `Requiere ${game.reg.buildings.get(b)?.name ?? b}`, code: 'requirement' };
   }
   return OK;
 }
@@ -90,7 +91,7 @@ export function techAvail(game: Game, p: Player, id: string): Avail {
     const have = ids.filter(b => p.count(b) > 0).length;
     if (have < count) {
       const names = ids.map(b => game.reg.buildings.get(b)?.name ?? b).join(', ');
-      return { visible: true, ok: false, reason: `Requiere ${count} edificio${count > 1 ? 's' : ''} de: ${names}` };
+      return { visible: true, ok: false, reason: `Requiere ${count} edificio${count > 1 ? 's' : ''} de: ${names}`, code: 'requirement' };
     }
   }
   return affordCheck(game, p, p.getCost(def)) ?? OK;

@@ -1,4 +1,4 @@
-import { EventBus } from '../core/EventBus';
+import { EventBus, type RejectReason } from '../core/EventBus';
 import type { Registry } from '../core/Registry';
 import { BALANCE } from '../config/balance';
 import type { AnyDef, BuildingDef, CivDef, Pt, ResourceNodeDef, System, UnitDef } from '../core/types';
@@ -156,11 +156,23 @@ export class Game {
     this.events.emit('notify', { text, playerId, tone, at });
   }
 
-  /** Aviso con límite de frecuencia por jugador y tipo. */
-  warn(p: Player, key: string, text: string, every = 10, at?: Pt) {
-    if (this.time - (p.warnedAt[key] ?? -999) < every) return;
+  /** Aviso con límite de frecuencia por jugador y tipo. Devuelve si se ha mostrado. */
+  warn(p: Player, key: string, text: string, every = 10, at?: Pt): boolean {
+    if (this.time - (p.warnedAt[key] ?? -999) < every) return false;
     p.warnedAt[key] = this.time;
     this.notify(text, p.id, 'warn', at);
+    return true;
+  }
+
+  /** Una acción de un jugador no se ha podido hacer: lo avisa y emite `actionRejected` (para el sonido de error). */
+  reject(playerId: number, reason: RejectReason, text: string) {
+    this.events.emit('actionRejected', { playerId, reason, text });
+    this.notify(text, playerId, 'warn');
+  }
+
+  /** `reject` a partir del resultado de una comprobación de disponibilidad (`rules.ts`). */
+  rejectAvail(playerId: number, a: { reason?: string; code?: RejectReason }) {
+    this.reject(playerId, a.code ?? 'other', a.reason ?? 'No disponible');
   }
 
   // ------------------------------------------------------------ creación
@@ -272,11 +284,19 @@ export class Game {
     this.events.emit('entityDied', { entity: e, killer });
   }
 
-  /** Recurso agotado (árbol talado, granja agotada...). */
-  deplete(e: Entity) {
+  /** Recurso agotado (árbol talado, granja agotada...). `by`: jugador que lo estaba recolectando. */
+  deplete(e: Entity, by?: number) {
     this.remove(e);
-    if (e.kind === 'building' && this.players[e.owner].isHuman) {
+    const playerId = e.kind === 'building' ? e.owner : by ?? 0;
+    // ¿Se acaba la zona? Granja: siempre. Nodo del mapa: si no queda otro igual cerca (último árbol, última veta)
+    const area = e.kind === 'building' || !this.nodes.some(n => !n.dead && n.defId === e.defId && Math.abs(n.x - e.x) < 5 && Math.abs(n.y - e.y) < 5);
+    this.events.emit('resourceDepleted', { entity: e, playerId, resType: e.resType ?? '', area });
+    const p = this.players[playerId];
+    if (!p?.isHuman) return;
+    if (e.kind === 'building') {
       this.notify(`Una ${this.buildingDef(e).name.toLowerCase()} se ha agotado`, e.owner, 'warn', { x: e.x, y: e.y });
+    } else if (area) {
+      this.warn(p, 'depleted:' + e.defId, `Se ha agotado: ${(this.nodeDef(e)?.name ?? 'recurso').toLowerCase()}`, BALANCE.alerts.depletedEvery, { x: e.x, y: e.y });
     }
   }
 

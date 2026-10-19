@@ -117,7 +117,7 @@ export function selectionCommands(s: Session): CommandSet {
           tip: tipHtml(def.name, cost, def.description, a),
           action: () => {
             const av = buildingAvail(g, p, id);
-            if (!av.ok) { g.notify(av.reason ?? 'No disponible', p.id, 'warn'); return; }
+            if (!av.ok) { g.rejectAvail(p.id, av); return; }
             ui.placing = { defId: id, tx: 0, ty: 0, valid: false };
           },
         } as Cmd;
@@ -144,7 +144,7 @@ export function selectionCommands(s: Session): CommandSet {
         tip: tipHtml('Auto-exploración', '', 'Explora el mapa sola, zona por zona, hasta que no quede nada por descubrir. Cualquier otra orden la detiene.', a),
         action: () => {
           const av = exploreAvail(g, p, scouts[0].defId);
-          if (!av.ok) { g.notify(av.reason ?? 'No disponible', p.id, 'warn'); return; }
+          if (!av.ok) { g.rejectAvail(p.id, av); return; }
           Commands.explore(g, scouts);
         },
       };
@@ -173,7 +173,8 @@ export function selectionCommands(s: Session): CommandSet {
         for (let i = 0; i < (shift ? 5 : 1); i++) {
           if (!Commands.train(g, target(), id)) {
             const av = unitAvail(g, p, id);
-            g.notify(av.ok ? 'Cola llena' : av.reason ?? 'No disponible', p.id, 'warn');
+            if (av.ok) g.reject(p.id, 'queue', 'Cola llena');
+            else g.rejectAvail(p.id, av);
             break;
           }
         }
@@ -190,7 +191,7 @@ export function selectionCommands(s: Session): CommandSet {
       action: () => {
         if (!Commands.research(g, target(), id)) {
           const av = techAvail(g, p, id);
-          g.notify(av.reason ?? 'No disponible', p.id, 'warn');
+          g.rejectAvail(p.id, av);
         }
       },
     });

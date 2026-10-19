@@ -45,8 +45,8 @@ export class HUD {
     this.on(hud, 'mousemove', e => this.onHover(e as MouseEvent));
     this.on(hud, 'mouseleave', () => { this.el.tooltip.style.display = 'none'; });
     this.on(document.getElementById('btn-menu')!, 'click', () => s.app.togglePause());
-    this.on(document.getElementById('btn-music')!, 'click', () => { s.app.music.toggleMute(); this.updateMusicButton(); });
-    this.updateMusicButton();
+    this.on(document.getElementById('btn-music')!, 'click', () => { s.app.audio.toggleMute(); this.updateSoundButton(); });
+    this.updateSoundButton();
     // Tooltips con pulsación larga en pantallas táctiles
     this.on(hud, 'touchstart', e => this.onTouchTipStart(e as TouchEvent));
     this.on(hud, 'touchmove', e => this.onTouchTipMove(e as TouchEvent));
@@ -72,11 +72,11 @@ export class HUD {
     this.off.push(() => t.removeEventListener(type, fn));
   }
 
-  /** Refleja en la barra superior si la música suena o está silenciada. */
-  updateMusicButton() {
-    const b = document.getElementById('btn-music')!, m = this.s.app.music;
-    const off = m.muted || m.volume === 0;
-    b.textContent = off ? '🔇' : '🎵';
+  /** Refleja en la barra superior si el sonido está activado o silenciado. */
+  updateSoundButton() {
+    const b = document.getElementById('btn-music')!;
+    const off = this.s.app.audio.silent;
+    b.textContent = off ? '🔇' : '🔊';
     b.classList.toggle('off', off);
   }
 
@@ -178,7 +178,7 @@ export class HUD {
     const c = this.cmds[i];
     if (!c) return;
     if (!c.avail.ok && c.avail.reason) {
-      this.s.game.notify(c.avail.reason, this.s.game.humanId, 'warn');
+      this.s.game.rejectAvail(this.s.game.humanId, c.avail);
       return;
     }
     c.action(shift);

@@ -5,6 +5,7 @@ import { costText } from '../game/rules';
 import { esc, pic, selectionCommands, taskText, type Cmd, type CommandSet } from './commandModel';
 import { LONG_PRESS_MS } from './Input';
 import { haptic, isMobileLayout, setUIPrefs, uiPrefs, UI_SCALES, type LayoutPref } from './layout';
+import { bindSoundControls, soundControlsHtml } from './soundSettings';
 import { ICONS } from './svgIcons';
 
 /** Botón de la interfaz móvil (bandeja u hoja). */
@@ -276,7 +277,7 @@ export class MobileHUD {
     return {
       icon: c.icon, label: c.label, ok: c.avail.ok, tip: c.tip, badge: c.badge, cost: c.cost,
       run: () => {
-        if (!c.avail.ok) { g.notify(c.avail.reason ?? 'No disponible', g.humanId, 'warn'); return; }
+        if (!c.avail.ok) { g.rejectAvail(g.humanId, c.avail); return; }
         c.action(false);
       },
       ...extra,
@@ -538,7 +539,7 @@ export class MobileHUD {
       case 'cancel-target': input.cancelTargeting(); break;
       case 'place-cancel': input.cancelTargeting(); break;
       case 'place-ok':
-        if (!ui.placing?.valid) { g.notify('No se puede construir ahí', g.humanId, 'warn'); break; }
+        if (!ui.placing?.valid) { g.reject(g.humanId, 'placement', 'No se puede construir ahí'); break; }
         input.confirmPlacement();
         break;
       case 'screen-close': this.closeScreen(true); break;
@@ -664,19 +665,15 @@ export class MobileHUD {
     } else {
       const pr = uiPrefs();
       const lay: [LayoutPref, string][] = [['auto', 'Automática'], ['mobile', 'Móvil'], ['desktop', 'Escritorio']];
-      const m = app.music;
       body = `<div class="m-scroll"><div class="m-set">
         <label>Interfaz</label><div class="m-seg">${lay.map(([v, l]) => `<button class="${pr.layout === v ? 'on' : ''}" data-layout="${v}">${l}</button>`).join('')}</div>
         <label>Tamaño de los controles</label><div class="m-seg">${UI_SCALES.map(([v, l]) => `<button class="${pr.scale === v ? 'on' : ''}" data-a="scale" data-v="${v}">${l}</button>`).join('')}</div>
         <label>Vibración</label><div class="m-seg"><button class="${pr.haptics ? 'on' : ''}" data-a="haptics">${pr.haptics ? 'Activada' : 'Desactivada'}</button></div>
-        <label>Música</label><input type="range" min="0" max="100" step="1" value="${m.muted ? 0 : Math.round(m.volume * 100)}" data-vol>
+        ${soundControlsHtml(app.audio, true)}
       </div></div>`;
     }
     this.el['m-screen'].innerHTML = `<div class="m-card wide"><div class="m-tabs">${tabs}<button class="mbtn m-close" data-a="screen-close" aria-label="Cerrar">✖</button></div>${body}</div>`;
-    this.el['m-screen'].querySelector<HTMLInputElement>('[data-vol]')?.addEventListener('input', e => {
-      app.music.setVolume(Number((e.target as HTMLInputElement).value) / 100);
-      this.s.hud.updateMusicButton();
-    });
+    bindSoundControls(this.el['m-screen'], app.audio, () => this.s.hud.updateSoundButton());
     this.el['m-screen'].querySelectorAll<HTMLElement>('[data-layout]').forEach(b => b.addEventListener('click', () => {
       setUIPrefs({ layout: b.dataset.layout as LayoutPref });
       if (isMobileLayout()) this.renderScreen();
