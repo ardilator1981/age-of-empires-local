@@ -42,9 +42,10 @@ Mapa:
                           0 = el recuadro exacto, con el norte arriba a la derecha (por defecto con --bbox/--utm).
   --exaggeration X        Exageración vertical respecto a la escala real (por defecto 1.5).
   --max-level L           Nivel máximo de elevación del juego; si el relieve no cabe, se comprime (por defecto 10).
-  --snow-line M           Cota (m) a partir de la que hay nieve (por defecto 2300).
-  --pine-line M           Cota (m) a partir de la que los bosques sin especie conocida son pinares (por defecto 1400).
-  --rock-slope GRADOS     Pendiente real (°) a partir de la que el terreno es roca infranqueable (por defecto 40).
+  --snow-line M           Cota (m) a partir de la que hay nieve (por defecto según la latitud: ~2300 m a 42°).
+  --pine-line M           Cota (m) a partir de la que los bosques sin especie conocida son pinares (por defecto 900 m bajo la nieve).
+  --rock-slope GRADOS     Pendiente real (°) a partir de la que el terreno es roca (por defecto la del juego: BALANCE.relief.realRockSlopeDeg).
+  --biome temperate|arid  Clima: arid = desierto con vegetación solo junto al agua (por defecto temperate).
   --starts "A,B,..."      Asentamientos preferidos para los jugadores, por orden (opcional).
 
 Fuentes:
@@ -551,6 +552,9 @@ async function main() {
   for (const row of terrain) for (const c of row) counts[c] = (counts[c] ?? 0) + 1;
   log(`  Terreno: ${Object.entries(counts).sort((a, b) => b[1] - a[1]).map(([c, n]) => `${c} ${(100 * n / tiles / tiles).toFixed(0)}%`).join(' · ')}`);
 
+  // Cotas de nieve y de pinar según la latitud (más bajas cuanto más al norte)
+  const snowLine = Number(args['snow-line'] ?? Math.round(2300 + (42 - Math.abs(cLat)) * 90));
+  const pineLine = Number(args['pine-line'] ?? snowLine - 900);
   const attribution = [
     demMode === 'icgc' ? 'Elevaciones: Institut Cartogràfic i Geològic de Catalunya (ICGC), CC BY 4.0' : null,
     /Copernicus/.test(demName) ? 'Elevaciones: Copernicus DEM GLO-30 © DLR e.V. 2010-2014 y © Airbus Defence and Space GmbH 2014-2018, proporcionado bajo el programa COPERNICUS de la Unión Europea y la ESA' : null,
@@ -571,9 +575,10 @@ async function main() {
     size: tiles,
     metersPerTile: +mpt.toFixed(3),
     elevation: { min: +eMin.toFixed(1), max: +eMax.toFixed(1), metersPerLevel: +mpl.toFixed(3) },
-    snowLine: Number(args['snow-line'] ?? 2300),
-    pineLine: Number(args['pine-line'] ?? 1400),
-    rockSlopeDeg: Number(args['rock-slope'] ?? 40),
+    snowLine,
+    pineLine,
+    biome: String(args.biome ?? 'temperate'),
+    ...(args['rock-slope'] ? { rockSlopeDeg: Number(args['rock-slope']) } : {}),
     ...(args.starts ? { preferredStarts: String(args.starts).split(',').map(s => s.trim()).filter(Boolean) } : {}),
     legend: LEGEND,
     terrain: terrain.map(r => r.join('')),
