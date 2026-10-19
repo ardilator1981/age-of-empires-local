@@ -32,9 +32,11 @@ export class Camera {
   screenToWorld(sx: number, sy: number): Pt {
     let w = this.flatToWorld(sx, sy);
     if (!this.elev) return w;
-    for (let i = 0; i < 6; i++) {
+    // Iteración amortiguada: converge también con relieves muy marcados
+    for (let i = 0; i < 12; i++) {
       const h = this.heightAt(w.x, w.y) * this.elev * this.zoom;
-      w = this.flatToWorld(sx, sy + h);
+      const n = this.flatToWorld(sx, sy + h);
+      w = { x: w.x + (n.x - w.x) * 0.65, y: w.y + (n.y - w.y) * 0.65 };
     }
     return w;
   }

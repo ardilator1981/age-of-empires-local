@@ -334,6 +334,26 @@ reg.addSprite('mi-caballero', imageSprite('/sprites/caballero.png', { width: 48,
 
 Las imágenes van en una carpeta `public/` en la raíz del proyecto.
 
+## Relieve, roca y pasos
+
+- **Roca:** las pendientes por encima de `relief.cliffSlope` (en `src/config/balance.ts`) son roca infranqueable para todas las unidades (también el asedio) y no se puede construir en ella. En pantalla se distingue por el gris y el borde oscuro de los cantiles.
+- **Pasos:** tras generar cualquier mapa se comprueba, con un recorrido por regiones, que todas las bases están unidas por pasos de al menos `relief.passMinWidth` casillas y que llegan a madera, comida, oro y piedra. Si no, se abre automáticamente el paso por la silla de montaña más baja.
+- **Ventaja de altura:** las unidades a distancia y los edificios defensivos más altos que su objetivo ganan alcance y daño (▲ dorado sobre la unidad y anillo de alcance ampliado). Atacar cuesta arriba penaliza (▼ rojo).
+- **Visión:** desde lo alto se ve más lejos y las crestas tapan lo que hay detrás.
+- **Movimiento:** cuesta arriba se va más despacio, y los caminos prefieren el llano y los pasos.
+
+## Regiones reales
+
+En el menú, **🌍 Elegir región real…** abre un mapamundi con 12 regiones: alta montaña con pasos, costa, valle fluvial, desierto, meseta y valle glaciar. Cada una muestra una vista previa del mapa antes de jugar. Los datos van incluidos en el juego, así que **no hace falta conexión**.
+
+Para añadir una región, añade una entrada a `src/mods/real-maps/regions.json` y ejecuta:
+
+```bash
+npm run regions -- --only <id>
+```
+
+Descarga el relieve (Copernicus DEM GLO-30, o el ICGC en Cataluña) y los ríos, bosques y pueblos de OpenStreetMap. Las atribuciones aparecen en la pantalla de **Créditos** del juego.
+
 ## Probar cambios sin gráficos
 
 ```bash

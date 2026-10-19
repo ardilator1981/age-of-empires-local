@@ -187,10 +187,24 @@ export interface CivDef {
 
 // ---------------------------------------------------------------- mapas, victoria y partida
 
+/** Lugar del mundo real del que sale un mapa (para el selector de regiones). */
+export interface MapRegionInfo {
+  lat: number;
+  lon: number;
+  /** Lado del recuadro jugable, en km. */
+  sizeKm: number;
+  category: string;
+  country: string;
+}
+
 export interface MapTypeDef {
   id: string;
   name: string;
   description: string;
+  /** Si el mapa necesita datos (p. ej. una región real), se cargan aquí antes de generarlo. */
+  load?(): Promise<void>;
+  /** Mapas de lugares reales: dónde están (se listan en el selector de regiones). */
+  region?: MapRegionInfo;
   generate(gen: MapGenerator): void;
 }
 

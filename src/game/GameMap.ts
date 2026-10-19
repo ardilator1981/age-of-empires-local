@@ -1,3 +1,4 @@
+import { DEFAULT_VISUAL_RELIEF } from '../core/constants';
 import type { Registry } from '../core/Registry';
 import type { TerrainDef } from '../core/types';
 
@@ -14,6 +15,8 @@ export class GameMap {
   heights: Float32Array;
   /** Se incrementa cuando cambian las alturas. */
   heightVersion = 0;
+  /** Escala visual del relieve (solo dibujo). La fija el tipo de mapa; ver DEFAULT_VISUAL_RELIEF. */
+  visualRelief = DEFAULT_VISUAL_RELIEF;
   private walk: boolean[];
   private build: boolean[];
   /** Región conectada de cada casilla caminable (-1 = no caminable). */
@@ -45,6 +48,23 @@ export class GameMap {
     const W = this.w + 1, H = this.heights;
     const h00 = H[iy * W + ix], h10 = H[iy * W + ix + 1], h01 = H[(iy + 1) * W + ix], h11 = H[(iy + 1) * W + ix + 1];
     return fx >= fy ? h00 + (h10 - h00) * fx + (h11 - h10) * fy : h00 + (h11 - h01) * fx + (h01 - h00) * fy;
+  }
+
+  private tileH: Float32Array | null = null;
+  private tileHVersion = -1;
+
+  /** Altura media de cada casilla (caché; se recalcula si cambia el relieve). */
+  tileHeights(): Float32Array {
+    if (!this.tileH || this.tileHVersion !== this.heightVersion) {
+      const t = this.tileH ?? new Float32Array(this.w * this.h);
+      const W = this.w + 1, H = this.heights;
+      for (let y = 0; y < this.h; y++) for (let x = 0; x < this.w; x++) {
+        t[y * this.w + x] = (H[y * W + x] + H[y * W + x + 1] + H[(y + 1) * W + x] + H[(y + 1) * W + x + 1]) / 4;
+      }
+      this.tileH = t;
+      this.tileHVersion = this.heightVersion;
+    }
+    return this.tileH;
   }
 
   /** Diferencia entre el vértice más alto y el más bajo de un rectángulo de casillas. */

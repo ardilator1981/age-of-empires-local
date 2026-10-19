@@ -1,5 +1,8 @@
 import type { System } from '../../core/types';
+import { BALANCE } from '../../config/balance';
 import { setOrder } from '../actions';
+import { rangeBonus } from '../heightRules';
+import { castVision, eyeHeight, sightRadius } from '../vision';
 import { findEnemyNear, performAttack, updateProjectiles } from '../combat';
 import type { Entity } from '../Entity';
 import type { Game } from '../Game';
@@ -68,13 +71,20 @@ export class MovementSystem implements System {
   }
 
   update(dt: number) {
-    const g = this.game;
+    const g = this.game, m = g.map, mv = BALANCE.movement;
     const units: Entity[] = [];
     for (const u of g.units) {
       if (u.dead) continue;
       units.push(u);
       if (!u.path.length) { u.moving = false; continue; }
-      const speed = g.players[u.owner].getStat(g.unitDef(u), 'speed');
+      let speed = g.players[u.owner].getStat(g.unitDef(u), 'speed');
+      // Cuesta arriba se avanza más despacio (BALANCE.movement)
+      const t0 = u.path[0], dd = Math.hypot(t0.x - u.x, t0.y - u.y);
+      if (dd > 0.01) {
+        const k = Math.min(0.5, dd) / dd;
+        const grade = (m.heightAt(u.x + (t0.x - u.x) * k, u.y + (t0.y - u.y) * k) - m.heightAt(u.x, u.y)) / Math.min(0.5, dd);
+        if (grade > 0) speed *= Math.max(mv.minSpeedFactor, 1 - mv.uphillSlowPerGrade * grade);
+      }
       let step = speed * dt;
       u.moving = true;
       while (step > 0 && u.path.length) {
@@ -118,8 +128,11 @@ export class MovementSystem implements System {
           // Giro ligero para que las unidades se rodeen en vez de chocar de frente
           const ux = d2 === 0 ? 1 : dx / d, uy = d2 === 0 ? 0 : dy / d;
           const nx = (ux * 0.88 - uy * 0.48) * push, ny = (uy * 0.88 + ux * 0.48) * push;
-          // Las unidades en marcha empujan; las paradas ceden el paso
-          const wu = u.moving ? 0.25 : u.working ? 0.6 : 1, wo = o.moving ? 0.25 : o.working ? 0.6 : 1;
+          // Las unidades en marcha empujan; las paradas ceden el paso. Dos unidades que
+          // avanzan casi juntas se empujan poco, para que en los pasos estrechos se encolen
+          // en vez de bloquearse.
+          const both = u.moving && o.moving ? 0.35 : 1;
+          const wu = (u.moving ? 0.25 : u.working ? 0.6 : 1) * both, wo = (o.moving ? 0.25 : o.working ? 0.6 : 1) * both;
           this.tryMove(u, u.x - nx * wu, u.y - ny * wu);
           this.tryMove(o, o.x + nx * wo, o.y + ny * wo);
         }
@@ -233,7 +246,9 @@ export class CombatSystem implements System {
         e.cooldown -= dt;
         if (e.cooldown > 0) continue;
         const p = g.players[e.owner];
-        const t = findEnemyNear(g, e, p.getStat(def, 'range'), false);
+        const range = p.getStat(def, 'range');
+        // Torres y castillos en alto alcanzan más lejos (BALANCE.highGround)
+        const t = findEnemyNear(g, e, range + BALANCE.highGround.rangeCap, false, false, (en, d) => d <= range + rangeBonus(g, e, en, range));
         if (t) { performAttack(g, e, t); e.cooldown = p.getStat(def, 'reloadTime'); }
         else e.cooldown = 0.5;
       } else if (e.kind === 'unit' && !e.order && g.time >= e.scanAt) {
@@ -250,19 +265,7 @@ export class CombatSystem implements System {
 
 /** Niebla de guerra del jugador humano. */
 export class VisionSystem implements System {
-  private offsets = new Map<number, number[]>();
-  version = 0;
   constructor(private game: Game) { this.recompute(); }
-
-  private circle(r: number): number[] {
-    let o = this.offsets.get(r);
-    if (!o) {
-      o = [];
-      for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) if (dx * dx + dy * dy <= r * r + r) o.push(dx, dy);
-      this.offsets.set(r, o);
-    }
-    return o;
-  }
 
   private recompute() {
     const g = this.game, m = g.map;
@@ -270,19 +273,15 @@ export class VisionSystem implements System {
       if (!p.isHuman) continue;
       if (g.opts.visibility === 'revealed') { p.visible.fill(1); p.explored.fill(1); continue; }
       p.visible.fill(0);
+      // Varias unidades en la misma casilla ven lo mismo: se calcula una vez
+      const done = new Set<number>();
       for (const e of g.actors) {
         if (e.owner !== p.id || e.dead) continue;
-        const def = g.defOf(e);
-        const r = Math.ceil(p.getStat(def, 'los') + (e.kind === 'building' ? e.size / 2 : 0));
-        const cx = Math.floor(e.x), cy = Math.floor(e.y);
-        const off = this.circle(r);
-        for (let i = 0; i < off.length; i += 2) {
-          const x = cx + off[i], y = cy + off[i + 1];
-          if (x < 0 || y < 0 || x >= m.w || y >= m.h) continue;
-          const k = y * m.w + x;
-          p.visible[k] = 1;
-          p.explored[k] = 1;
-        }
+        const r = sightRadius(g, e), eye = eyeHeight(g, e);
+        const key = ((Math.floor(e.y) * m.w + Math.floor(e.x)) * 64 + Math.round(r * 2)) * 16 + Math.round(eye * 2);
+        if (done.has(key)) continue;
+        done.add(key);
+        castVision(m, e.x, e.y, eye, r, p.visible, p.explored);
       }
     }
     g.data.visionVersion = (g.data.visionVersion ?? 0) + 1;

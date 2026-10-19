@@ -26,10 +26,12 @@ export class App {
     (window as any).app = this;
   }
 
-  start(opts: GameOptions) {
+  async start(opts: GameOptions) {
+    const reg = buildRegistry(ALL_MODS.filter(m => m.core || opts.mods.includes(m.id)));
+    // Los mapas reales cargan sus datos (incluidos en el juego: no hace falta red) antes de empezar
+    await reg.mapTypes.get(opts.mapType)?.load?.();
     this.session?.dispose();
     this.session = null;
-    const reg = buildRegistry(ALL_MODS.filter(m => m.core || opts.mods.includes(m.id)));
     const game = new Game(reg, opts);
     this.hud.style.display = '';
     this.session = new Session(this, game);
@@ -46,7 +48,7 @@ export class App {
   }
 
   restart() {
-    if (this.lastOptions) this.start({ ...this.lastOptions, seed: Math.floor(Math.random() * 1e9) });
+    if (this.lastOptions) void this.start({ ...this.lastOptions, seed: Math.floor(Math.random() * 1e9) });
   }
 
   toMenu() {

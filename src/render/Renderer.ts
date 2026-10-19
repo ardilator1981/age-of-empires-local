@@ -45,7 +45,7 @@ export class Renderer {
     this.gl = TerrainGL.create(terrainCanvas, game);
     terrainCanvas.style.display = this.gl ? '' : 'none';
     if (this.gl) {
-      this.cam.elev = ELEV_PX;
+      this.cam.elev = ELEV_PX * m.visualRelief;
       this.cam.heightAt = (x, y) => m.heightAt(x, y);
     }
     this.fogCanvas = document.createElement('canvas');
@@ -194,7 +194,7 @@ export class Renderer {
       const sx = (d.ix - cam.x) * z + hw;
       if (sx < -30 || sx > W + 30) continue;
       let sy = (d.iy - cam.y) * z + hh;
-      if (sy < -30 || sy > H + 140 * z) continue;
+      if (sy < -30 || sy > H + (60 + 12 * elev) * z) continue;
       if (m.occupant[d.tile] || !p.explored[d.tile]) continue;
       if (elev) sy -= m.heightAt(d.x, d.y) * elev * z;
       const lit = all || p.visible[d.tile];
@@ -343,9 +343,57 @@ export class Renderer {
     this.drawOverlays(sel);
   }
 
+  /** Anillo de alcance (elipse isométrica) alrededor de una entidad. */
+  private rangeRing(d: Drawn, tiles: number, color: string, dash: number[]) {
+    const { ctx } = this, z = this.cam.zoom;
+    const extra = d.e.kind === 'building' ? d.e.size / 2 : d.e.radius;
+    const r = tiles + extra;
+    ctx.strokeStyle = color; ctx.lineWidth = Math.max(1, 1.3 * z); ctx.setLineDash(dash);
+    ellipse(ctx, d.sx, d.sy, r * 45.25 * z, r * 22.63 * z); ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  /** Marcas de ventaja (▲ dorado) o desventaja (▼ rojo) de altura sobre las unidades que atacan. */
+  private heightMarks() {
+    const { ctx, game } = this, z = this.cam.zoom;
+    for (const d of this.drawn) {
+      const adv = d.e.data.heightAdv as { range: number; damage: number; until: number } | undefined;
+      if (!adv || adv.until < game.time || d.e.kind === 'resource') continue;
+      const up = adv.damage > 0 || adv.range > 0;
+      const n = up ? Math.max(1, Math.min(3, Math.round(adv.damage / 0.15))) : 1;
+      const top = d.e.kind === 'unit' ? d.sy - (d.e.radius > 0.3 ? 62 : 54) * z : this.footprint(d.e, d.hb)[0].y - (buildingHeight(d.e) + 12) * z;
+      const a = Math.min(1, (adv.until - game.time) / 0.6);
+      ctx.globalAlpha = a;
+      for (let i = 0; i < n; i++) {
+        const y = top - i * 4.5 * z;
+        ctx.beginPath();
+        if (up) { ctx.moveTo(d.sx - 5 * z, y + 3 * z); ctx.lineTo(d.sx, y - 2 * z); ctx.lineTo(d.sx + 5 * z, y + 3 * z); }
+        else { ctx.moveTo(d.sx - 5 * z, y - 2 * z); ctx.lineTo(d.sx, y + 3 * z); ctx.lineTo(d.sx + 5 * z, y - 2 * z); }
+        ctx.strokeStyle = 'rgba(0,0,0,0.85)'; ctx.lineWidth = Math.max(2, 3.6 * z); ctx.stroke();
+        ctx.strokeStyle = up ? '#ffd24a' : '#ff5a4a'; ctx.lineWidth = Math.max(1, 2 * z); ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+    }
+  }
+
   private drawOverlays(sel: Set<number>) {
     const { ctx, cam, game, ui } = this;
     const z = cam.zoom;
+    // Alcance de la primera unidad o torre propia seleccionada que ataque a distancia
+    // (y el alcance extra si está en alto). Solo una, para no llenar la pantalla de anillos.
+    let ringDone = false;
+    for (const d of this.drawn) {
+      const e = d.e;
+      if (!sel.has(e.id) || e.owner !== game.humanId || e.kind === 'resource') continue;
+      const range = game.players[e.owner].getStat(game.defOf(e), 'range');
+      if (range < 1) continue;
+      ringDone = true;
+      this.rangeRing(d, range, 'rgba(255,255,255,0.45)', [5, 4]);
+      const adv = e.data.heightAdv as { range: number; until: number } | undefined;
+      if (adv && adv.until >= game.time && adv.range > 0) this.rangeRing(d, range + adv.range, 'rgba(255,210,74,0.8)', [7, 3]);
+      if (ringDone) break;
+    }
+    this.heightMarks();
     for (const d of this.drawn) {
       const e = d.e;
       if (!sel.has(e.id) && !(e.kind === 'building' && !e.complete && e.owner === game.humanId)) continue;

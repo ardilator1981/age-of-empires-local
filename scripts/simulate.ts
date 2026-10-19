@@ -12,6 +12,7 @@ const mapType = process.argv[3] ?? 'arabia';
 const seed = Number(process.argv[4] ?? 12345);
 
 const reg = buildRegistry(ALL_MODS);
+await reg.mapTypes.get(mapType)?.load?.();
 const game = new Game(reg, {
   mapType, mapSize: 96, startingResources: 'standard', startAge: 0, victory: 'conquest', visibility: 'normal',
   popLimit: 125, speed: 1, seed, mods: ALL_MODS.map(m => m.id),

@@ -1,0 +1,64 @@
+[
+  {
+    "id": "val-daran", "name": "Val d'Aran", "country": "Cataluña, España", "category": "Alta montaña",
+    "lat": 42.7016, "lon": 0.7956, "sizeKm": 8, "biome": "temperate", "snowLine": 2050,
+    "starts": ["Vielha", "Betren", "Escunhau", "Casarilh", "Gausac"],
+    "description": "Valle del Garona alrededor de Vielha: cumbres nevadas, pinares y abetales en las laderas y pueblos en el fondo del valle."
+  },
+  {
+    "id": "gran-san-bernardo", "name": "Gran San Bernardo", "country": "Suiza e Italia", "category": "Alta montaña",
+    "lat": 45.8686, "lon": 7.1706, "sizeKm": 8, "biome": "temperate",
+    "description": "El puerto alpino por el que Napoleón cruzó los Alpes en 1800: roca, nieve y un único paso entre dos valles."
+  },
+  {
+    "id": "roncesvalles", "name": "Roncesvalles", "country": "Navarra, España", "category": "Alta montaña",
+    "lat": 43.0094, "lon": -1.3194, "sizeKm": 8, "biome": "temperate",
+    "description": "Puerto del Pirineo navarro donde los vascones derrotaron a la retaguardia de Carlomagno en el año 778. Hayedos y pastos."
+  },
+  {
+    "id": "montserrat", "name": "Montserrat", "country": "Cataluña, España", "category": "Alta montaña",
+    "lat": 41.5933, "lon": 1.8378, "sizeKm": 8, "biome": "temperate",
+    "description": "El macizo de agujas de conglomerado sobre el Llobregat: paredes de roca infranqueables y pocos accesos."
+  },
+  {
+    "id": "termopilas", "name": "Termópilas", "country": "Grecia", "category": "Costa",
+    "lat": 38.796, "lon": 22.536, "sizeKm": 8, "biome": "temperate",
+    "description": "El estrecho paso entre las montañas y el mar donde Leónidas frenó a los persas en el 480 a. C."
+  },
+  {
+    "id": "delta-ebro", "name": "Delta del Ebro", "country": "Cataluña, España", "category": "Costa",
+    "lat": 40.72, "lon": 0.78, "sizeKm": 8, "biome": "temperate",
+    "description": "Llanura de arrozales y lagunas en la desembocadura del Ebro: casi sin relieve y con mucha agua."
+  },
+  {
+    "id": "loreley", "name": "Valle del Rin (Loreley)", "country": "Alemania", "category": "Valle fluvial",
+    "lat": 50.139, "lon": 7.729, "sizeKm": 8, "biome": "temperate",
+    "description": "El Rin encajado entre laderas de viñedos y bosques: el río divide el mapa y solo se cruza por los vados."
+  },
+  {
+    "id": "toledo", "name": "Toledo y el Tajo", "country": "Castilla-La Mancha, España", "category": "Valle fluvial",
+    "lat": 39.857, "lon": -4.024, "sizeKm": 8, "biome": "temperate",
+    "description": "El meandro del Tajo que rodea Toledo: una ciudad en alto, protegida por el río y por cortados de roca."
+  },
+  {
+    "id": "luxor", "name": "Luxor y el Valle de los Reyes", "country": "Egipto", "category": "Desierto",
+    "lat": 25.72, "lon": 32.62, "sizeKm": 8, "biome": "arid",
+    "description": "El Nilo y su franja fértil entre el desierto y los acantilados de la necrópolis tebana."
+  },
+  {
+    "id": "glencoe", "name": "Glencoe", "country": "Escocia, Reino Unido", "category": "Valle glaciar",
+    "lat": 56.68, "lon": -5.10, "sizeKm": 8, "biome": "temperate",
+    "description": "Valle glaciar de las Tierras Altas, escenario de la masacre de 1692: laderas empinadas, ríos y lagos."
+  },
+  {
+    "id": "hastings", "name": "Hastings (Battle)", "country": "Inglaterra, Reino Unido", "category": "Meseta y llanura",
+    "lat": 50.912, "lon": 0.487, "sizeKm": 8, "biome": "temperate",
+    "description": "Las suaves colinas donde Guillermo el Conquistador venció a Haroldo en 1066: bosques, prados y una loma que defender."
+  },
+  {
+    "id": "vic", "name": "Plana de Vic", "country": "Cataluña, España", "category": "Meseta y llanura",
+    "lat": 41.9301, "lon": 2.2549, "sizeKm": 8, "biome": "temperate",
+    "starts": ["Vic", "Gurb", "Calldetenes", "Sentfores", "Torrenegra"],
+    "description": "La llanura de Vic: campos de cultivo, robledales y pinares, y los ríos Mèder y Gurri."
+  }
+]
