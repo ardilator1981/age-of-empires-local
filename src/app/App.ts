@@ -66,10 +66,16 @@ export class App {
   togglePause() {
     if (!this.session) return;
     if (this.menuOpen && !this.paused) return;
-    this.paused = !this.paused;
-    this.menuOpen = this.paused;
-    this.music.setPaused(this.paused);
-    if (this.paused) this.menu.showPause();
+    this.setPaused(!this.paused);
+  }
+
+  /** Pausa o reanuda. `showMenu = false`: sin el menú de pausa (la interfaz móvil abre sus propias pantallas). */
+  setPaused(paused: boolean, showMenu = true) {
+    if (!this.session) return;
+    this.paused = paused;
+    this.menuOpen = paused;
+    this.music.setPaused(paused);
+    if (paused && showMenu) this.menu.showPause();
     else this.menu.hide();
   }
 
