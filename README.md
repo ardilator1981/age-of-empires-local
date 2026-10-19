@@ -354,6 +354,20 @@ npm run regions -- --only <id>
 
 Descarga el relieve (Copernicus DEM GLO-30, o el ICGC en Cataluña) y los ríos, bosques y pueblos de OpenStreetMap. Las atribuciones aparecen en la pantalla de **Créditos** del juego.
 
+## Modo "Guerra declarada"
+
+Se activa en el menú, en **Mods → Guerra declarada**. Al activarlo aparece la opción **Preparación**: el tiempo entre la declaración y la batalla (30 min por defecto). Desactivado, el juego funciona como siempre.
+
+1. **Paz:** al principio nadie puede atacar a nadie. Un panel arriba a la izquierda muestra qué falta para poder declarar la guerra: llegar a la **Edad de los Castillos**, **descubrir el asentamiento enemigo** y tener un **General**. El General se entrena en el Castillo, solo puede haber uno y anima a las tropas cercanas: más ataque y +1 de armadura. Si muere, hay que esperar 3 min para entrenar otro.
+2. **Declaración:** con todo en verde, pulsa **⚔️ Declarar la guerra** y toca el mapa donde quieras la batalla. La vista previa marca en rojo la roca, el agua y los bosques, en verde las entradas al círculo y con ▲ la cima. Confirma con **✔ Declarar aquí**. Manda el punto de quien declara.
+3. **Preparación:** cuenta atrás visible en el panel, en el mapa y en el minimapa. Entrena, fortifica y coloca tu ejército; **🚩 Ejército al punto** lo lleva en formación a tu mitad del círculo.
+4. **Batalla:** solo se combate **dentro del círculo**. Pierde la batalla quien pierde a su General o se queda 30 s sin tropas en el círculo. Al acabar el tiempo (12 min) gana quien tenga más ejército dentro, y si empatan hay tablas y vuelve la paz.
+5. **Conquista:** quien gana la batalla puede atacar ya en todo el mapa y tiene 20 min para **arrasar el pueblo** del rival. El perdedor solo puede defenderse. Si cae el último edificio, gana la partida; si el pueblo resiste, vuelve la paz y se puede volver a declarar.
+
+La IA juega con las mismas reglas: entrena su General, explora, declara la guerra eligiendo un punto con altura a su favor, espera en formación en lo alto de su mitad del círculo y va a la batalla.
+
+Los valores (radio del círculo, tiempos, aura del General...) están en `war` dentro de `src/config/balance.ts`. Para probarlo sin gráficos: `npm run simulate -- 120 arabia 7 normal --guerra --prep=10`.
+
 ## Probar cambios sin gráficos
 
 ```bash

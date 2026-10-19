@@ -20,7 +20,7 @@ src/
   audio/       Music (Web Audio generativa)
   mods/real-maps/  Mapas a partir de relieve y datos reales (JSON en data/)
   app/         App (ciclo menú → partida) y Session (todo lo de una partida)
-  mods/        core/ (contenido base: datos), extra-content/, treasure-hunt/
+  mods/        core/ (contenido base: datos), extra-content/, treasure-hunt/, declared-war/ (modo Guerra declarada)
 scripts/       simulate.ts (partida IA contra IA sin gráficos), real-map.mjs, make-icons.mjs
 .github/       Workflows de GitHub Pages y del APK de Android
 docs/          decisiones.md (decisiones de diseño), riesgos.md (riesgos técnicos)
@@ -43,13 +43,21 @@ docs/          decisiones.md (decisiones de diseño), riesgos.md (riesgos técni
 | Comprobar tipos | `npm run typecheck` |
 | Build | `npm run build` (incluye la comprobación de tipos) |
 | Prueba de humo | `npm run simulate -- <minutos> <mapa> <semilla> [dificultad]`: partida IA contra IA sin gráficos; debe terminar sin errores, y las IAs deben avanzar de edad y combatir |
-| Tests | `npm test` (Vitest, carpeta `tests/`): conectividad de todos los mapas, reglas de altura, visión, caminos |
+| Tests | `npm test` (Vitest, carpeta `tests/`): conectividad de todos los mapas, reglas de altura, visión, caminos, órdenes y Guerra declarada. Los modos de juego (`declared-war`) solo se activan en las pruebas que los piden (`newGame(map, { war: true })`) |
 | Rendimiento | `npm run bench`: A*, partida con 4 IA, estrés de 300 unidades y visión. Resultados en `docs/rendimiento.md` |
 | Regiones reales | `npm run regions` (todas las de `src/mods/real-maps/regions.json`, con `--all` u `--only <id>`); `npm run world-map` regenera el mapamundi del selector |
 | Mapa real | `npm run real-map -- ...` (ver README): descarga relieve del ICGC o de Copernicus y datos de OpenStreetMap, y genera `src/mods/real-maps/data/<id>.json` |
 | Despliegue | Al hacer push a `main`, GitHub Actions publica la PWA en Pages (`.github/workflows/pages.yml`). Al crear una etiqueta `v*`, genera el APK con Capacitor y lo adjunta a una Release (`android.yml`). Es una **PWA**: `vite.config.ts` con `base: './'` y caché sin conexión |
 
 Depuración en el navegador: `window.app` y `window.game` están accesibles desde la consola.
+
+## Puntos de extensión para mods (además de contenido, órdenes y sistemas)
+
+- `reg.addCombatRule(fn)`: quién puede atacar a quién (`game.canAttack`). La usa Guerra declarada para la paz y el círculo de batalla.
+- `reg.addAIPlugin(p)`: la IA le pregunta cada turno; puede pedir edificios y unidades, reservar recursos, frenar el entrenamiento o encargarse del ejército.
+- `reg.addHudPanel(def)`, `reg.addWorldOverlay(fn)`, `reg.addMinimapOverlay(fn)`: paneles HTML y dibujos sobre el mapa y el minimapa. `ui.pickPoint` sirve para pedir un punto del mapa.
+- En las unidades: `maxAlive`, `retrainCooldown` y `aura` (bonificación a las tropas cercanas, la aplica `AuraSystem`).
+- `src/game/formation.ts`: formación sencilla en filas; es el gancho para formaciones de verdad.
 
 ## Convenciones
 
