@@ -1,5 +1,5 @@
 import type { GameMod, VictoryDef } from '../../core/types';
-import { attackMoveOrder, attackOrder, buildOrder, gatherOrder, moveOrder } from '../../game/orders';
+import { attackMoveOrder, attackOrder, exploreOrder, buildOrder, gatherOrder, moveOrder } from '../../game/orders';
 import { AISystem } from '../../game/systems/AISystem';
 import {
   CombatSystem, MovementSystem, OrderSystem, PlayerStatsSystem, ProductionSystem, VictorySystem, VisionSystem,
@@ -51,6 +51,7 @@ export const coreMod: GameMod = {
     reg.addOrder('move', moveOrder);
     reg.addOrder('attack', attackOrder);
     reg.addOrder('attackMove', attackMoveOrder);
+    reg.addOrder('explore', exploreOrder);
     reg.addOrder('gather', gatherOrder);
     reg.addOrder('build', buildOrder);
 

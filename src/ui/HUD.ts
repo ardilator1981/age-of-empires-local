@@ -154,6 +154,7 @@ export class HUD {
       }
       if (set.build) { out[0] = set.build.economy.cmd; out[1] = set.build.military.cmd; }
       out[5] = set.attackMove;
+      out[6] = set.explore;
       out[10] = set.stop;
       out[14] = set.del;
       return out;

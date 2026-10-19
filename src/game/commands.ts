@@ -2,7 +2,7 @@ import type { Pt } from '../core/types';
 import { setOrder } from './actions';
 import type { Entity } from './Entity';
 import type { Game } from './Game';
-import { buildingAvail, techAvail, unitAvail } from './rules';
+import { buildingAvail, exploreAvail, techAvail, unitAvail } from './rules';
 
 /**
  * Todas las acciones de los jugadores (humano o IA) pasan por aquí.
@@ -55,6 +55,13 @@ export const Commands = {
 
   build(game: Game, units: Entity[], target: Entity) {
     for (const u of units) if (game.unitDef(u).builder) setOrder(u, { type: 'build', targetId: target.id });
+  },
+
+  /** Exploración automática (solo las unidades que la tienen disponible). */
+  explore(game: Game, units: Entity[]) {
+    for (const u of units) {
+      if (u.kind === 'unit' && exploreAvail(game, game.players[u.owner], u.defId).ok) setOrder(u, { type: 'explore' });
+    }
   },
 
   stop(game: Game, units: Entity[]) {

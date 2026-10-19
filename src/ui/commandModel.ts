@@ -3,7 +3,7 @@ import { Commands } from '../game/commands';
 import type { Entity } from '../game/Entity';
 import type { Game } from '../game/Game';
 import {
-  buildablesFor, buildingAvail, costText, researchablesAt, techAvail, trainablesAt, unitAvail, type Avail,
+  buildablesFor, buildingAvail, costText, exploreAvail, researchablesAt, techAvail, trainablesAt, unitAvail, type Avail,
 } from '../game/rules';
 import type { Session } from '../app/Session';
 import { portrait } from '../render/icons';
@@ -32,6 +32,8 @@ export interface CommandSet {
   /** Menús de construcción (solo si hay constructores): botón de categoría y edificios visibles. */
   build: Record<'economy' | 'military', { cmd: Cmd; items: Cmd[] }> | null;
   attackMove: Cmd | null;
+  /** Auto-exploración (unidades con `autoExplore`). */
+  explore: Cmd | null;
   stop: Cmd | null;
   /** Unidades que entrenar y tecnologías que investigar en los edificios seleccionados. */
   train: Cmd[];
@@ -84,6 +86,7 @@ export function taskText(g: Game, e: Entity): string {
     }
     case 'attack': return 'Atacando';
     case 'attackMove': return 'Ataque-movimiento';
+    case 'explore': return 'Explorando';
     case 'move': return 'Moviéndose';
     default: return o.type;
   }
@@ -95,7 +98,7 @@ export function selectionCommands(s: Session): CommandSet {
   const sel = ui.selected(g).filter(e => e.owner === p.id);
   const units = sel.filter(e => e.kind === 'unit');
   const blds = sel.filter(e => e.kind === 'building');
-  const set: CommandSet = { units, blds, build: null, attackMove: null, stop: null, train: [], research: [], del: null };
+  const set: CommandSet = { units, blds, build: null, attackMove: null, explore: null, stop: null, train: [], research: [], del: null };
   if (!sel.length) return set;
   const del: Cmd = {
     icon: '❌', label: 'Eliminar', avail: OK, tip: '<b>Eliminar</b> (Supr)<br>Destruye la selección.',
@@ -131,6 +134,19 @@ export function selectionCommands(s: Session): CommandSet {
         icon: '🎯', label: 'Ataque-movimiento', avail: OK,
         tip: '<b>Ataque-movimiento</b><br>Avanza hacia un punto atacando a todo enemigo que encuentre. Haz clic en el mapa.',
         action: () => { ui.targeting = 'attackMove'; },
+      };
+    }
+    const scouts = units.filter(u => g.unitDef(u).autoExplore);
+    if (scouts.length) {
+      const a = exploreAvail(g, p, scouts[0].defId);
+      set.explore = {
+        icon: '🧭', label: 'Auto-exploración', avail: a,
+        tip: tipHtml('Auto-exploración', '', 'Explora el mapa sola, zona por zona, hasta que no quede nada por descubrir. Cualquier otra orden la detiene.', a),
+        action: () => {
+          const av = exploreAvail(g, p, scouts[0].defId);
+          if (!av.ok) { g.notify(av.reason ?? 'No disponible', p.id, 'warn'); return; }
+          Commands.explore(g, scouts);
+        },
       };
     }
     set.stop = { icon: '✋', label: 'Detener', avail: OK, tip: '<b>Detener</b>', action: () => Commands.stop(g, units) };

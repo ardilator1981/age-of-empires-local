@@ -283,7 +283,7 @@ export class Menu {
     this.app.menuOpen = true;
     this.show(`
       <div class="menu small">
-        <h1>${won ? '🏆 ¡Victoria!' : '💀 Derrota'}</h1>
+        <h1>${won ? '🏆 ¡Vaya máquina!' : '💀 Te falta barrio'}</h1>
         <div class="sub">Duración: ${Math.floor(t / 60)} min ${t % 60} s</div>
         <table class="stats"><tr><th>Jugador</th><th>Civ.</th><th>Edad</th><th>Bajas causadas</th><th>Pérdidas</th><th>Edificios destruidos</th><th>Recursos</th><th>Estado</th></tr>${rows}</table>
         <div class="buttons">
