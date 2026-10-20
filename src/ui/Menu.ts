@@ -9,6 +9,7 @@ import { RegionPicker } from './RegionPicker';
 import { bindSettings, settingsHtml } from './SettingsPanel';
 import { ago, AUTO_SLOT, deleteSlot, gameClock, listSlots, MANUAL_SLOTS } from '../app/saves';
 import { bindSoundControls, soundControlsHtml } from './soundSettings';
+import { Lobby } from './Lobby';
 import { DIFFS, esc, opt, SIZES, SPEEDS, type Diff } from './menuOptions';
 
 
@@ -181,6 +182,7 @@ export class Menu {
           </section>
         </div>
         <button class="start" data-start>⚔️ ¡Comenzar partida!</button>
+        <button class="start net" data-net>🌐 Jugar en red con amigos</button>
         <div class="credits-link"><button class="small" data-settings>⚙️ Ajustes</button> <button class="small" data-credits>📜 Créditos y atribuciones</button></div>
         ${this.volumeHtml()}
         ${help()}
@@ -224,6 +226,7 @@ export class Menu {
       this.showMain();
     });
     root.querySelector('[data-start]')!.addEventListener('click', () => void this.app.start(this.buildOptions()));
+    root.querySelector('[data-net]')!.addEventListener('click', () => this.showNet());
     void this.fillContinue(root);
     root.querySelector('[data-regions]')?.addEventListener('click', () => this.showRegions());
     root.querySelector('[data-credits]')?.addEventListener('click', () => this.showCredits());
@@ -351,6 +354,26 @@ export class Menu {
       root.querySelector('[data-back]')!.addEventListener('click', back);
     };
     render();
+  }
+
+  /** Partidas en red: crear o unirse a una sala (ver ui/Lobby.ts). */
+  showNet() { this.lobby().show(); }
+
+  /** Una sala nueva con las opciones del menú. */
+  lobby() { return new Lobby(this.app, this.overlay, this.netDefaults(), () => this.showMain()); }
+
+  /** Opciones y jugador con los que el anfitrión abre la sala (las del menú). */
+  private netDefaults() {
+    const st = this.state;
+    return {
+      name: st.name || 'Jugador', civ: st.civ, color: st.color,
+      settings: {
+        mapType: st.mapType, mapSize: st.mapSize, startingResources: st.startingResources, startAge: st.startAge, victory: st.victory,
+        visibility: st.visibility, popLimit: st.popLimit, speed: st.speed, mods: st.mods, warPrepMinutes: st.warPrepMinutes,
+      },
+      registry: () => this.registry(),
+      rememberName: (name: string) => { st.name = name; this.save(); },
+    };
   }
 
   showPause() {

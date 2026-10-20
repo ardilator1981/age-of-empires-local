@@ -9,6 +9,7 @@ import { AUTO_SLOT, clearEmergency, deleteSlot, readSlot, warmUp, writeEmergency
 import { ALL_MODS } from '../mods';
 import { Menu } from '../ui/Menu';
 import type { NetGame } from '../net/NetGame';
+import { openFromUrl } from '../ui/Lobby';
 import { LocalOrders } from './orders';
 import { Session } from './Session';
 
@@ -55,6 +56,8 @@ export class App {
     this.menu = new Menu(this);
     this.hud.style.display = 'none';
     this.menu.showMain();
+    // Un enlace de invitación abre directamente la sala
+    openFromUrl(this, () => this.menu.lobby());
     requestAnimationFrame(this.loop);
     (window as any).app = this;
     // Guardado automático al pasar a segundo plano o cerrar (en el móvil, al cambiar de app).
