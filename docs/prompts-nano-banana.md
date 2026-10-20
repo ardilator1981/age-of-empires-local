@@ -1,461 +1,443 @@
 # Prompts para generar el arte con Nano Banana
 
-Catálogo de prompts para sustituir todos los gráficos procedurales por imágenes, pack a pack. Cada bloque
-de código es **un prompt completo**: cópialo tal cual (están en inglés porque Nano Banana es más preciso así).
+Catálogo de prompts para sustituir los gráficos del juego por ilustraciones, pack a pack. Cada bloque de
+código es **un prompt completo**: cópialo tal cual. Están en inglés porque Nano Banana es más preciso así.
 
-Lo marcado con 🔧 todavía no existe en el juego: el arte se puede generar ya, pero hace falta programar
-la mecánica (caza, murallas, barcos...) para usarlo. Está aquí para enriquecer el juego más adelante.
+Están escritos como encargos de **ilustración**, no de recursos para un videojuego: sin jerga técnica, sin
+códigos de color, sin medidas en píxeles y sin listas numeradas. Palabras como "game assets", "game
+development", "sprite sheet", "seamless tileable", "texture" u "orthographic" hacen que Nano Banana rechace la
+petición ("I cannot create images of a seamless tileable texture... for game development"), y los códigos o
+listas numeradas hacen que escriba textos y números en la imagen. Las
+exigencias técnicas (recorte, escala, máscara de color) las resuelve después el script `npm run art-import`.
+
+Lo marcado con 🔧 todavía no existe en el juego: el dibujo se puede hacer ya, pero hay que programar la
+mecánica (caza, murallas, barcos...) para usarlo.
 
 ## Cómo trabajar
 
-1. **Una imagen por prompt, con 4–6 piezas como máximo.** Con más, baja el detalle y la escala se vuelve irregular.
-2. Pide la **máxima resolución** (2K o 4K si lo permite).
-3. **Coherencia entre imágenes:** cuando una salga bien, adjúntala como referencia en las siguientes del mismo
-   pack ("match the style, palette, lighting and scale of the attached image").
-4. Si una pieza sale mal (sombra en el suelo, luz desde la derecha, suelo debajo), pide solo esa pieza otra vez
-   en vez de repetir la imagen entera.
-5. Guarda las imágenes en `art-src/entrada/<pack>/` con un nombre descriptivo (`pack3-edad-oscura.png`,
-   `pack2-robles.png`...). Claude se encarga del resto: quitar el fondo, separar las piezas, escalarlas,
-   colocar el punto de apoyo, sacar la máscara del color del jugador y montar las hojas con su JSON.
+1. **Una imagen por prompt, con 4–6 objetos como máximo.** Con más, baja el detalle y la escala se vuelve irregular.
+2. Pide la **máxima resolución** que permita.
+3. **Coherencia:** cuando una imagen salga bien, adjúntala en las siguientes del mismo pack y añade al principio:
+   *"Same illustration style, colors, lighting and viewing angle as the attached picture."*
+4. Si un objeto sale mal (con sombra en el suelo, con hierba debajo, iluminado desde la derecha), pide solo ese
+   objeto otra vez en lugar de repetir la imagen entera.
+5. Guarda las imágenes sin tocar en `art-src/entrada/<pack>/` y avisa a Claude.
 
-### Reglas que llevan todos los prompts
+### Lo que tiene que cumplir cada imagen (ya va en los prompts)
 
-- **Fondo blanco liso** y piezas bien separadas entre sí y de los bordes (se separan automáticamente).
-- **Isométrico 2:1**: la huella en el suelo es un rombo el doble de ancho que de alto.
-- **Luz desde arriba a la izquierda**: caras izquierdas iluminadas, derechas en sombra.
-- **Sin sombra proyectada ni suelo debajo** (la sombra la pone el motor, y el terreno es el del mapa).
-- **Color del jugador en magenta puro (#FF00FF)**: banderas, estandartes, tabardos, escudos, toldos. El script
-  detecta el magenta, crea la máscara y lo sustituye por el color de cada jugador. El magenta no debe
-  aparecer en nada más.
-- Sin texto, etiquetas, marcos ni marcas de agua. Diseño original, sin copiar ningún juego existente.
+- **Fondo blanco liso** y objetos bien separados entre sí y de los bordes.
+- **Vista desde arriba en diagonal**, desde una esquina: la planta de los edificios se ve como un rombo el doble
+  de ancho que de alto.
+- **Sol desde arriba a la izquierda**: caras izquierdas iluminadas, derechas en sombra.
+- **Sin sombra en el suelo y sin suelo debajo**: los objetos "flotan" sobre el blanco (la sombra y el terreno
+  los pone el juego).
+- **Telas de color del jugador en magenta** (rosa-púrpura intenso): banderas, estandartes, tabardos, escudos,
+  toldos. El script detecta ese color y lo cambia por el de cada jugador. El magenta no debe aparecer en nada más.
+- **Ni textos, ni números, ni marcos.**
 
-### Tamaños de referencia
+Si aun así aparecen problemas, estas frases ayudan añadidas al final:
 
-| Pieza | Huella | Nota |
-| --- | --- | --- |
-| Centro urbano, castillo | 4×4 casillas | |
-| Cuartel, galería de tiro, establo, herrería, taller de asedio | 3×3 | |
-| Casa, molino, campamentos, granja | 2×2 | |
-| Torre de vigilancia, árbol, mina, arbusto | 1×1 | |
-| Persona | ~⅓ de la altura de una casa | caballería ~½ |
-
-No hace falta que Nano Banana acierte el tamaño exacto: el script escala cada pieza según su huella. Lo
-importante es que **dentro de cada imagen** las proporciones sean coherentes.
+| Problema | Añade |
+| --- | --- |
+| Pone nombres o números | *"Absolutely no writing, letters or numbers anywhere."* |
+| Dibuja sombras o suelo | *"The objects float on pure white paper: no shadow, no ground, no grass beneath them."* |
+| Los objetos se tocan | *"Leave wide empty white gaps between the objects."* |
+| Vista de frente o de lado | *"Seen from high above at a corner, like a model village photographed from a balcony."* |
+| La luz viene de la derecha | *"The sun is in the upper left corner; the right-hand walls are in shade."* |
+| Escalas muy distintas | *"All objects drawn at the same scale, as if standing in the same village."* |
 
 ---
 
 ## Pack 1 · Texturas de terreno
 
-Una imagen por textura, **cuadrada**. Después se ejecuta `npm run fix-textures` para hacerlas repetibles.
-Plantilla (sustituye la línea `SURFACE`):
+Una imagen por terreno, cuadrada. **No pidas que sea "seamless", "tileable", "texture", "orthographic" ni que sea
+para un juego**: Nano Banana lo rechaza. Que se repita sin costuras lo hace después `npm run fix-textures`.
+Plantilla (cambia la última frase):
 
 ```text
-Seamless tileable ground texture for a medieval strategy game, square 1:1, highest resolution.
-Viewed straight from above: orthographic top-down, no perspective, no horizon, no camera tilt.
-Flat, even lighting with no vignette and no dark corners; only subtle micro-shading as if lit softly from the upper left.
-Uniform density across the whole image: no single large feature, no path, no object that would repeat noticeably when tiled.
-Hand-painted 2D game art, rich natural colors, crisp small details. No text, no frame, no border.
-SURFACE: <descripción>
+A square close-up painting of the ground, as if photographed looking straight down at your feet: no horizon, no sky, no perspective.
+Soft, even daylight with no dark corners and no strong shadows.
+The same kind of ground fills the whole square evenly, with no single large object, path or feature that stands out.
+Detailed hand-painted illustration with natural colors and fine small details. No writing, no frame, no border.
+The ground is: <descripción>
 ```
 
-| Archivo | `SURFACE` |
+| Archivo | Descripción |
 | --- | --- |
-| `grass` | lush meadow grass with small tufts, a few tiny yellow and white wildflowers, slight variation between green and olive patches |
-| `dirt` | packed brown earth with small pebbles, faint cracks and sparse dry grass blades, warm but not orange |
-| `forest` | forest floor: dark soil, fallen leaves, pine needles, moss patches, small twigs |
-| `sand` | pale beach sand with soft wind ripples and a few tiny shells and pebbles |
-| `desert` | dry ochre desert ground, hard cracked clay, scattered small stones and dry shrub fragments |
-| `snow` | fresh snow with gentle drifts, soft blue shadows in hollows, a few ice crystals |
-| `rock` | rugged grey mountain rock surface, cracks, lichen spots, stratified stone |
-| `water` | deep lake water seen from above, dark blue-teal, gentle small ripples, no reflections of sky objects, no foam |
-| `shallows` | clear shallow water over sandy bottom with visible pebbles and soft caustic light patterns |
+| `grass` | a lush green meadow with small tufts of grass and a few tiny yellow and white wildflowers, with gentle variation between fresh green and olive patches |
+| `dirt` | packed brown earth with small pebbles, faint cracks and a few dry grass blades, a natural brown rather than orange |
+| `forest` | a forest floor of dark soil, fallen leaves, pine needles, moss patches and small twigs |
+| `sand` | pale beach sand with soft ripples from the wind and a few tiny shells and pebbles |
+| `desert` | dry ochre desert ground, hard cracked clay with scattered small stones |
+| `snow` | fresh snow with gentle drifts, soft blue shade in the hollows and a few sparkling ice crystals |
+| `rock` | rugged grey mountain rock with cracks, layers and spots of lichen |
+| `water` | deep calm lake water, dark blue-green, with small gentle ripples and no reflections |
+| `shallows` | clear shallow water over a sandy bottom with visible pebbles and soft rippling light |
 
 Extras para enriquecer el mapa (se añaden como terrenos nuevos en un mod, es fácil):
 
-| Archivo | `SURFACE` |
+| Archivo | Descripción |
 | --- | --- |
 | `dry-grass` | dry yellowed late-summer grass with seed heads |
-| `mud` | wet dark mud with puddles and footprints-free smooth patches |
-| `road` | worn cobblestone road, irregular rounded stones with grass in the joints |
-| `autumn-forest` | forest floor covered with orange, red and brown autumn leaves |
-| `pebbles` | river bank of rounded grey and brown pebbles |
+| `mud` | wet dark mud with small puddles |
+| `road` | a worn cobblestone road of irregular rounded stones with grass growing between them |
+| `autumn-forest` | a forest floor covered with orange, red and brown autumn leaves |
+| `pebbles` | a riverbank of rounded grey and brown pebbles |
 
 ---
 
 ## Pack 2 · Naturaleza y recursos
 
-Común a todos los prompts de este pack (ya va incluido en cada uno): vista isométrica, luz arriba-izquierda,
-sin sombra ni suelo debajo, fondo blanco.
-
-### 2a · Robles (4 variantes, se reparten al azar por el mapa)
+### 2a · Robles (variantes para repartir por el mapa)
 
 ```text
-Game asset sheet for an original medieval strategy game: 6 separate deciduous trees on a pure flat white background (#FFFFFF), arranged in a 3x2 grid with generous empty space between them, nothing touching another tree or the image edges.
-Isometric 3/4 view from above, as in classic isometric strategy games. Each tree stands on a single map tile; only the trunk base touches the ground.
-Lighting: sun from the upper left, lit foliage on the left, darker foliage on the lower right. NO cast shadows, NO grass or ground under the trees.
-Trees: 4 broadleaf oaks of slightly different shapes and sizes (round, tall, wide, slightly lopsided), 1 young oak, 1 old gnarled oak.
-Hand-painted 2D game art, dense detailed leaves, visible branches, crisp clean silhouette, rich natural greens. Same scale for all. No text, no labels, no frames.
+A hand-painted illustration of six separate oak trees on a plain white background, arranged in two rows of three, each tree standing on its own with wide empty white space around it.
+Seen from high above at an angle, as in a model landscape viewed from a balcony.
+Sunlight comes from the upper left: the left side of each crown is bright, the lower right side darker.
+The trees float on the white background: no shadow on the ground, no grass or soil around the trunks.
+Four full-grown oaks with slightly different shapes (round, tall, wide, a little lopsided), one young oak and one old gnarled oak, all drawn at the same scale.
+Detailed leaves and branches, crisp clean outlines, rich natural greens. No writing, no numbers, no frame.
 ```
 
 ### 2b · Pinos y pinos nevados
 
 ```text
-Game asset sheet for an original medieval strategy game: 6 separate conifer trees on a pure flat white background (#FFFFFF), 3x2 grid, generous empty space, nothing touching.
-Isometric 3/4 view from above. Each tree occupies one map tile; only the trunk base touches the ground.
-Sun from the upper left, NO cast shadows, NO ground or snow piles under the trees.
-Top row: 3 green mountain pines of different heights and shapes. Bottom row: the same 3 pines covered with fresh snow on the branches.
-Hand-painted 2D game art, detailed needles, crisp silhouettes, consistent scale. No text, no labels.
+A hand-painted illustration of six separate pine trees on a plain white background, two rows of three, each with wide empty white space around it.
+Seen from high above at an angle, like a model landscape viewed from a balcony.
+Sunlight from the upper left. The trees float on the white background: no shadow on the ground, no grass or snow piles at their feet.
+In the top row, three green mountain pines of different heights; in the bottom row, the same three pines with fresh snow resting on their branches.
+Detailed needles, crisp outlines, same scale for all. No writing, no numbers, no frame.
 ```
 
-### 2c · Más árboles (variedad de biomas)
+### 2c · Más árboles (variedad de paisajes)
 
 ```text
-Game asset sheet for an original medieval strategy game: 6 separate trees on a pure flat white background (#FFFFFF), 3x2 grid, generous space, nothing touching.
-Isometric 3/4 view from above, one map tile each, only the trunk base touches the ground. Sun from the upper left, NO cast shadows, NO ground.
-1. White birch with light foliage. 2. Tall slim poplar. 3. Date palm for an oasis. 4. Dead leafless tree. 5. Autumn oak with orange and red leaves. 6. Olive tree with silver-green leaves.
-Hand-painted 2D game art, crisp silhouettes, same scale as a typical oak. No text.
+A hand-painted illustration of six different trees on a plain white background, two rows of three, each with wide empty white space around it.
+Seen from high above at an angle, sunlight from the upper left; the trees float on the white background with no shadow and no ground beneath them.
+A white birch, a tall slim poplar, a date palm, a dead leafless tree, an oak with orange and red autumn leaves, and an olive tree with silvery-green leaves, all at the same scale as a normal oak.
+Crisp outlines, natural colors. No writing, no numbers, no frame.
 ```
 
-### 2d · Tocones y troncos (árbol talado)
+### 2d · Tocones y troncos
 
 ```text
-Game asset sheet for an original medieval strategy game: 6 separate objects on a pure flat white background (#FFFFFF), 3x2 grid, generous space.
-Isometric 3/4 view, sun from the upper left, NO cast shadows, NO ground.
-1. Fresh oak stump with a few wood chips. 2. Pine stump. 3. Old mossy stump. 4. Felled oak log. 5. Small pile of chopped firewood. 6. Stack of three logs.
-Hand-painted 2D game art, crisp edges, natural wood colors. No text.
+A hand-painted illustration of six separate wooden objects on a plain white background, two rows of three, with wide white gaps.
+Seen from high above at an angle, sunlight from the upper left, no shadow and no ground beneath them.
+A freshly cut oak stump with wood chips, a pine stump, an old mossy stump, a felled oak log, a small pile of chopped firewood and a neat stack of three logs.
+Crisp outlines, natural wood colors. No writing, no numbers, no frame.
 ```
 
-### 2e · Minas de oro y piedra (3 fases de agotamiento)
+### 2e · Yacimientos de oro y piedra (de lleno a casi agotado)
 
 ```text
-Game asset sheet for an original medieval strategy game: 6 separate resource deposits on a pure flat white background (#FFFFFF), 3x2 grid, generous empty space, nothing touching.
-Isometric 3/4 view from above, each deposit fits on one map tile. Sun from the upper left, NO cast shadows, NO ground or grass around them.
-Top row: a gold ore deposit (grey rocks with shiny gold veins and nuggets) in three stages: full large pile, half depleted, almost depleted (a few small rocks).
-Bottom row: a stone quarry deposit (pale grey granite boulders) in the same three stages: full, half, almost depleted.
-Hand-painted 2D game art, crisp edges, gold must glitter clearly. No text, no labels.
+A hand-painted illustration of six separate piles of rocks on a plain white background, two rows of three, with wide white gaps.
+Seen from high above at an angle, sunlight from the upper left. The rocks float on the white background: no shadow, no soil or grass around them.
+Top row: grey rocks with shining veins and nuggets of gold, first as a large heap, then half the size, then only a few small rocks left.
+Bottom row: pale grey granite boulders from a stone quarry, in the same three sizes: large heap, half, almost gone.
+The gold must glitter clearly. Crisp outlines. No writing, no numbers, no frame.
 ```
 
-### 2f · Arbustos de bayas (3 fases) y arbustos decorativos
+### 2f · Arbustos de bayas y arbustos decorativos
 
 ```text
-Game asset sheet for an original medieval strategy game: 6 separate bushes on a pure flat white background (#FFFFFF), 3x2 grid, generous space.
-Isometric 3/4 view, each bush fits on one map tile. Sun from the upper left, NO cast shadows, NO ground.
-Top row: a forage bush full of bright red berries, the same bush with half the berries, the same bush with no berries left.
-Bottom row: three decorative shrubs without berries (round green bush, flowering bush with small white flowers, dry brown shrub).
-Hand-painted 2D game art, crisp edges, consistent scale. No text.
+A hand-painted illustration of six separate bushes on a plain white background, two rows of three, with wide white gaps.
+Seen from high above at an angle, sunlight from the upper left, no shadow and no ground beneath them.
+Top row: a bush full of bright red berries, the same bush with only half its berries, and the same bush with no berries left.
+Bottom row: a round green bush, a bush with small white flowers, and a dry brown shrub.
+All the same scale, crisp outlines. No writing, no numbers, no frame.
 ```
 
 ### 2g · Animales 🔧 (caza y pastoreo)
 
-Primero una imagen de referencia con los animales quietos; las animaciones se piden después como en el Pack 6.
+Primero una imagen con los animales quietos; las animaciones se piden después como en el Pack 6.
 
 ```text
-Game asset sheet for an original medieval strategy game: 6 separate animals on a pure flat white background (#FFFFFF), 3x2 grid, generous space, nothing touching.
-Isometric 3/4 view from above, all facing toward the lower right of the image, standing still. Sun from the upper left, NO cast shadows, NO ground.
-1. Red deer stag. 2. Wild boar. 3. White sheep. 4. Grey wolf. 5. Brown cow. 6. Domestic chicken (small).
-Realistic proportions relative to each other (a sheep is about knee-high to a person, a boar slightly bigger, a cow much bigger).
-Hand-painted 2D game art, crisp clean edges. No text.
+A hand-painted illustration of six separate animals on a plain white background, two rows of three, with wide white gaps.
+Seen from high above at an angle, all animals facing toward the lower right corner of the picture and standing still.
+Sunlight from the upper left. The animals float on the white background: no shadow, no grass under their feet.
+A red deer stag, a wild boar, a white sheep, a grey wolf, a brown cow and a chicken, with realistic sizes relative to one another.
+Crisp outlines, natural colors. No writing, no numbers, no frame.
 ```
 
-### 2h · Recursos del agua 🔧 (pesca)
+### 2h · Pesca 🔧
 
 ```text
-Game asset sheet for an original medieval strategy game: 6 separate objects on a pure flat white background (#FFFFFF), 3x2 grid, generous space.
-Isometric 3/4 view from above, sun from the upper left, NO cast shadows.
-1-3. A shoal of fish seen just below a small patch of water surface, in three stages: many fish, fewer fish, almost none (the water patch is round and soft-edged).
-4. A small wooden fishing trap with a float. 5. A cluster of reeds growing out of water. 6. Floating lily pads with two white flowers.
-Hand-painted 2D game art. No text.
+A hand-painted illustration of six separate small scenes on a plain white background, two rows of three, with wide white gaps.
+Seen from high above at an angle, sunlight from the upper left, no shadow.
+Three small round patches of water with fish swimming just below the surface: many fish, fewer fish, and almost none.
+A small wooden fish trap with a float, a clump of reeds growing out of a little water, and floating lily pads with two white flowers.
+No writing, no numbers, no frame.
 ```
 
 ---
 
-## Pack 3 · Edificios económicos (Edad Oscura)
+## Pack 3 · Edificios del pueblo (Edad Oscura)
 
 ### 3a · Seis edificios
 
 ```text
-Game asset sheet for an original medieval real-time strategy game. Six separate buildings on a pure flat white background (#FFFFFF), arranged in a 3x2 grid with generous empty white space between them; nothing touches another building or the image edges.
+A hand-painted illustration of six separate early medieval village buildings on a plain white background, arranged in two rows of three, each standing on its own with wide empty white space around it.
 
-Camera: isometric 2:1 dimetric view, the ground footprint of every building is a diamond twice as wide as it is tall. All buildings at the same scale: one map tile is a 2:1 diamond, the large building covers 4x4 tiles, the medium one 3x3, the small ones 2x2.
+They are seen from high above at a corner, like a model village viewed from a balcony, so that the ground plan of every building looks like a diamond twice as wide as it is tall. All are drawn at the same scale, as if they stood in the same village.
 
-Lighting: sun from the upper left. Left-facing walls brightly lit, right-facing walls in shade. NO cast shadows on the ground, NO ground, grass, pavement or terrain under the buildings, only a thin stone or timber foundation exactly on the footprint.
+Sunlight comes from the upper left: walls facing left are bright, walls facing right are in shade.
+The buildings float on the white background: no shadow on the ground, no grass, paving or soil around them, only their own low stone or timber foundation.
 
-Era: early medieval, "dark age" village: rough timber, wattle and daub, thatched roofs, stone footings, weathered wood.
-1. Town center (4x4): large timber hall with a central lookout tower, thatched roofs, a banner pole.
-2. House (2x2): small thatched cottage with one door and a window.
-3. Mill (2x2): wooden windmill-style granary with sails, sacks of grain.
-4. Lumber camp (2x2): open timber shed with stacked logs and an axe stump.
-5. Mining camp (2x2): open shed with carts of stone and ore, pickaxes.
-6. Barracks (3x3): long timber training hall with a fenced yard and weapon racks.
+The village is poor and rustic: rough timber, wattle and daub, thatched roofs, stone footings, weathered wood.
+A large town hall with a wooden lookout tower in the middle and a tall banner pole, the biggest building of the set.
+A small thatched cottage with one door and one window.
+A wooden windmill with sails and sacks of grain.
+An open woodcutter's shed with stacked logs and an axe in a stump.
+An open miner's shed with carts full of stone and ore and some pickaxes.
+A long timber training hall for soldiers with a fenced yard and weapon racks, larger than the cottage but smaller than the town hall.
 
-Player color: every flag, banner, pennant and cloth awning is painted in a single flat pure magenta (#FF00FF) with light shading only; magenta appears nowhere else.
+Every flag, banner, pennant and cloth awning is made of bright magenta fabric (an intense pink-purple); magenta appears nowhere else in the picture.
 
-Style: detailed hand-painted 2D game art, crisp clean edges, rich but natural colors, high resolution, consistent level of detail. No text, no labels, no UI, no people, no animals, no frames.
+Detailed painterly style, crisp clean outlines, rich natural colors. No people, no animals, no writing, no numbers, no frame.
 ```
 
-### 3b · Granja (4 fases)
+### 3b · Campo de cultivo (de recién sembrado a cosechado)
 
 ```text
-Game asset sheet for an original medieval strategy game: 4 separate farm fields on a pure flat white background (#FFFFFF), 2x2 grid, generous space, nothing touching.
-Isometric 2:1 view: each field is a flat diamond-shaped plot of 2x2 map tiles (twice as wide as tall), bordered by a low wooden fence or stone edge, seen from above.
-Sun from the upper left, NO cast shadows, NO grass or ground outside the plot.
-1. Freshly ploughed and sown soil with neat furrows. 2. Young green wheat sprouts. 3. Ripe golden wheat ready for harvest. 4. Harvested field with stubble and a few straw bundles.
-All four plots identical in size, shape and fence; only the crop changes. Hand-painted 2D game art. No text, no people.
+A hand-painted illustration of four separate small farm fields on a plain white background, in two rows of two, with wide white gaps.
+Each field is a flat square plot with a low wooden fence, seen from high above at a corner so that it looks like a diamond twice as wide as it is tall. The four plots are identical in size and fence; only the crop changes.
+Sunlight from the upper left. No shadow and no grass outside the fence.
+A freshly ploughed and sown field with neat furrows, a field of young green wheat sprouts, a field of ripe golden wheat, and a harvested field with stubble and a few straw bundles.
+No people, no writing, no numbers, no frame.
 ```
 
-### 3c · Obras en construcción (opcional; si no, el edificio aparece de abajo arriba)
+### 3c · Obras en construcción (opcional)
 
 ```text
-Game asset sheet for an original medieval strategy game: 4 separate construction sites on a pure flat white background (#FFFFFF), 2x2 grid, generous space.
-Isometric 2:1 view, each site is a diamond footprint: 1x1, 2x2, 3x3 and 4x4 map tiles, at the same scale.
-Each site shows a levelled earth foundation with wooden stakes and rope marking the corners, a few planks, stones and tools, and a partial wooden scaffold.
-Sun from the upper left, NO cast shadows, NO ground outside the footprint. Hand-painted 2D game art. No text, no people.
+A hand-painted illustration of four separate building sites on a plain white background, in two rows of two, with wide white gaps, from small to large.
+Seen from high above at a corner, so that each site looks like a diamond twice as wide as it is tall. Sunlight from the upper left, no shadow, nothing outside the sites.
+Each site shows levelled earth with wooden stakes and rope marking the corners, a few planks, stones and tools, and a partly built wooden scaffold.
+No people, no writing, no numbers, no frame.
 ```
 
 ---
 
 ## Pack 4 · Edificios militares y especiales
 
-### 4a · Militares (Edad Feudal)
+### 4a · Militares
 
 ```text
-Game asset sheet for an original medieval real-time strategy game. Six separate buildings on a pure flat white background (#FFFFFF), 3x2 grid, generous empty space; nothing touches another building or the image edges.
-Camera: isometric 2:1 dimetric view, footprints are diamonds twice as wide as tall. Same scale for all: 1 map tile = one 2:1 diamond.
-Lighting: sun from the upper left, left walls lit, right walls in shade. NO cast shadows, NO ground or terrain under the buildings, only a thin foundation on the footprint.
-Era: high medieval, timber framing on stone ground floors, wooden shingles and clay tiles.
-1. Archery range (3x3): open yard with straw targets, a covered stand and a small hall.
-2. Stable (3x3): long wooden stable with horse stalls, hay bales, a water trough.
-3. Blacksmith (3x3): stone forge with a big chimney, anvil, glowing furnace under an awning.
-4. Siege workshop (3x3): large open timber workshop with logs, beams and a half-built siege frame.
-5. Watch tower (1x1): tall narrow stone tower with a wooden lookout platform and roof.
-6. Castle (4x4): compact stone keep with corner towers and battlements.
-Player color: every flag, banner and awning in flat pure magenta (#FF00FF) with light shading; magenta nowhere else.
-Detailed hand-painted 2D game art, crisp edges, consistent detail. No text, no people, no animals.
+A hand-painted illustration of six separate medieval military buildings on a plain white background, in two rows of three, each with wide empty white space around it.
+Seen from high above at a corner, like a model village viewed from a balcony, so that each ground plan looks like a diamond twice as wide as it is tall. All at the same scale.
+Sunlight from the upper left: left walls bright, right walls in shade. The buildings float on the white background: no shadow, no ground around them, only their own low foundation.
+Timber-framed walls on stone ground floors, wooden shingles and clay tiles.
+An archery range with straw targets in an open yard and a small covered stand.
+A long wooden stable with horse stalls, hay bales and a water trough.
+A stone smithy with a big chimney, an anvil and a glowing furnace under an awning.
+A large open timber workshop with beams and the frame of a half-built siege engine.
+A tall narrow stone watchtower with a wooden lookout and roof, standing on a small base.
+A compact stone castle with a keep, corner towers and battlements, the largest of the set.
+Every flag, banner and awning is bright magenta fabric (intense pink-purple); magenta appears nowhere else.
+No people, no animals, no writing, no numbers, no frame.
 ```
 
-### 4b · Torres por edad
+### 4b · Torres por época
 
 ```text
-Game asset sheet for an original medieval strategy game: 4 separate defensive towers on a pure flat white background (#FFFFFF), in one row with generous space, nothing touching.
-Isometric 2:1 view, each tower stands on a 1x1 diamond footprint, same scale. Sun from the upper left, NO cast shadows, NO ground.
-1. Wooden palisade watch tower with a thatched lookout (dark age). 2. Stone watch tower with a wooden roof (feudal). 3. Tall stone guard tower with a tiled conical roof (castle age). 4. Massive stone keep tower with battlements and a slate roof (imperial).
-Player color: a small flag on each tower in flat pure magenta (#FF00FF); magenta nowhere else.
-Hand-painted 2D game art. No text, no people.
+A hand-painted illustration of four separate defensive towers on a plain white background, in one row, with wide white gaps.
+Seen from high above at a corner, all at the same scale, sunlight from the upper left, no shadow and no ground.
+From left to right, the same tower improving over time: a wooden palisade watchtower with a thatched lookout; a stone watchtower with a wooden roof; a tall stone tower with a pointed tiled roof; a massive stone keep with battlements and a slate roof.
+Each tower flies a small bright magenta flag (intense pink-purple); magenta appears nowhere else.
+No people, no writing, no numbers, no frame.
 ```
 
 ### 4c · Murallas y puertas 🔧
 
 ```text
-Game asset sheet for an original medieval strategy game: wall segments on a pure flat white background (#FFFFFF), arranged in a grid with generous space, nothing touching.
-Isometric 2:1 view: every segment covers exactly one map tile (a 2:1 diamond) and is aligned with the isometric grid. Sun from the upper left, NO cast shadows, NO ground.
-Stone wall with battlements: 1. straight segment running from upper left to lower right. 2. straight segment running from upper right to lower left. 3. corner piece. 4. T-junction. 5. small square wall tower. 6. gate (2 tiles wide) with closed wooden doors. 7. the same gate open. 8. wooden palisade straight segment (sharpened logs).
-Player color: a small pennant above the gate in flat pure magenta (#FF00FF).
-Hand-painted 2D game art, crisp edges. No text.
+A hand-painted illustration of separate pieces of a medieval stone wall on a plain white background, arranged in rows with wide white gaps.
+Seen from high above at a corner, like a model; sunlight from the upper left; no shadow and no ground.
+A straight wall section running from upper left to lower right, the same section running from upper right to lower left, a corner, a T-shaped junction, a small square wall tower, a gatehouse with closed wooden doors, the same gatehouse with open doors, and a straight section of wooden palisade of sharpened logs.
+A small bright magenta pennant flies above the gatehouse; magenta appears nowhere else.
+No writing, no numbers, no frame.
 ```
 
 ### 4d · Edificios nuevos 🔧 (monasterio, mercado, muelle, universidad)
 
 ```text
-Game asset sheet for an original medieval real-time strategy game. Four separate buildings on a pure flat white background (#FFFFFF), 2x2 grid, generous space, nothing touching.
-Isometric 2:1 dimetric view, footprints are diamonds twice as wide as tall, same scale (1 tile = one 2:1 diamond). Sun from the upper left, NO cast shadows, NO ground.
-1. Monastery (3x3): stone chapel with a bell tower and a small cloister garden.
-2. Market (4x4): covered market hall with stalls, crates, barrels and cloth awnings.
-3. Dock (3x3): wooden pier on stilts with a crane and stacked nets (stilts end where the water would be; no water drawn).
-4. University (4x4): stone building with a dome and arched windows.
-Player color: flags and awnings in flat pure magenta (#FF00FF); magenta nowhere else.
-Hand-painted 2D game art. No text, no people.
+A hand-painted illustration of four separate medieval buildings on a plain white background, in two rows of two, with wide white gaps.
+Seen from high above at a corner, same scale for all, sunlight from the upper left, no shadow and no ground around them.
+A stone monastery chapel with a bell tower and a small cloister garden.
+A covered market hall with stalls, crates, barrels and cloth awnings.
+A wooden pier on stilts with a small crane and stacked fishing nets (the stilts end in mid-air; no water is drawn).
+A stone university with a dome and tall arched windows.
+Flags and awnings are bright magenta fabric; magenta appears nowhere else.
+No people, no writing, no numbers, no frame.
 ```
 
 ---
 
-## Pack 5 · Variantes por edad
+## Pack 5 · Los mismos edificios en cada época
 
-Un prompt por edad con los mismos edificios. Adjunta la imagen del Pack 3a como referencia para que
-mantengan forma y huella.
+Un prompt por época, **adjuntando la imagen del Pack 3a** (y después la del 4a) para que conserven forma y
+tamaño. Cambia la última frase:
 
 ```text
-Using the attached image as reference for layout, footprints, scale and lighting, redraw the same six buildings in the AGE_STYLE.
-Keep each building's footprint size and overall silhouette recognisable so the player sees it is the same building, now upgraded.
-Pure flat white background (#FFFFFF), same 3x2 grid and spacing, isometric 2:1 view, sun from the upper left, NO cast shadows, NO ground.
-Player color: every flag, banner and awning in flat pure magenta (#FF00FF); magenta nowhere else.
-Detailed hand-painted 2D game art. No text, no people.
-AGE_STYLE: <estilo>
+Redraw the six buildings of the attached picture as they would look in a later, richer period, keeping the same arrangement, viewing angle, size and lighting, so that each one is clearly recognisable as the same building, now improved.
+Plain white background with wide white gaps, sunlight from the upper left, no shadow and no ground around them.
+Every flag, banner and awning stays bright magenta fabric; magenta appears nowhere else.
+No people, no writing, no numbers, no frame.
+The new period: <época>
 ```
 
-| Edad | `AGE_STYLE` |
+| Época | Frase |
 | --- | --- |
-| Feudal | feudal age: half-timbered walls on stone ground floors, steep red clay tile roofs, chimneys with smoke vents, wooden shutters |
-| Castillos | castle age: dressed stone walls, slate roofs, arched windows, iron fittings, small decorative banners |
-| Imperial | imperial age: large ornate stone and brick buildings, blue-grey slate roofs, towers with spires, carved details, glass windows |
-
-Repite lo mismo con la imagen del Pack 4a para los edificios militares.
+| Feudal | half-timbered walls on stone ground floors, steep red clay tile roofs, chimneys and wooden shutters |
+| Castillos | dressed stone walls, slate roofs, arched windows, iron fittings and small decorative banners |
+| Imperial | large ornate stone and brick buildings with blue-grey slate roofs, small towers with spires, carved details and glass windows |
 
 ---
 
-## Pack 6 · Unidades
+## Pack 6 · Personajes
 
-Las animaciones son lo más difícil de mantener coherentes. El método que mejor funciona:
+Las animaciones son lo más difícil de mantener iguales. El método que mejor funciona:
 
-1. **Hoja de referencia** con todas las unidades quietas (6a, 6b). De aquí salen también los retratos.
-2. **Animaciones de una en una** (6c), adjuntando la imagen de la unidad elegida y pidiendo los fotogramas
-   en una tira horizontal. Si un fotograma sale distinto, pídelo suelto con la referencia.
+1. Una **imagen de referencia** con todos los personajes quietos (6a, 6b). De aquí salen también los retratos.
+2. Las **animaciones de una en una** (6c), adjuntando el personaje elegido y pidiendo las posturas en una fila.
+   Si una postura sale distinta, se pide sola con la referencia.
 
-Dirección: una sola (mirando hacia abajo a la derecha); el juego la refleja para el otro lado. Más adelante
-se pueden pedir las otras direcciones con el mismo método.
+Todos miran hacia abajo a la derecha; el juego los refleja para el otro lado.
 
-### 6a · Infantería y arqueros (quietos)
-
-```text
-Character sheet for an original medieval real-time strategy game: 9 separate soldiers on a pure flat white background (#FFFFFF), 3x3 grid, generous space, nothing touching.
-Each character is shown full body in isometric 3/4 view from above, facing toward the lower right of the image, standing in an idle ready pose, feet on the ground.
-Sun from the upper left. NO cast shadows, NO ground.
-1. Male villager: simple tunic, belt, leather boots, holding an axe.
-2. Female villager: dress with apron and headscarf, holding a basket.
-3. Militia: padded tunic, simple round helmet, short sword.
-4. Man-at-arms: chainmail, nasal helmet, sword and round shield.
-5. Long swordsman: mail and plate, great helm, long sword, kite shield.
-6. Spearman: padded armour, kettle hat, long spear.
-7. Pikeman: breastplate, very long pike.
-8. Archer: hood, leather jerkin, longbow, quiver.
-9. Crossbowman: mail, brimmed helmet, crossbow.
-Player color: tabards, tunics, shield faces and hood linings painted in flat pure magenta (#FF00FF) with light shading; magenta nowhere else (not on skin, weapons or hair).
-All at the same scale and height (an adult is about 1.8 m). Detailed hand-painted 2D game art, crisp outlines. No text, no labels.
-```
-
-### 6b · Caballería, asedio y unidades únicas (quietos)
+### 6a · Aldeanos e infantería
 
 ```text
-Character sheet for an original medieval real-time strategy game: 8 separate units on a pure flat white background (#FFFFFF), 4x2 grid, generous space, nothing touching.
-Isometric 3/4 view from above, all facing toward the lower right of the image, idle pose. Sun from the upper left, NO cast shadows, NO ground.
-1. Skirmisher: light tunic, bundle of javelins, small shield.
-2. Scout cavalry: light rider on a fast brown horse, leather armour.
-3. Knight: armoured rider on a barded warhorse, lance raised.
-4. Paladin: rider in full plate on a heavily barded black horse, ornate helmet.
-5. Battering ram: wheeled wooden siege engine with a hide-covered roof and an iron-capped log.
-6. Longbowman: tall archer with a very long yew bow, green hood.
-7. Throwing axeman: bearded warrior with helmet, shield and throwing axes.
-8. Horse archer: light rider with a composite bow on a small steppe horse.
-Player color: rider tabards, horse caparisons, shield faces and pennants in flat pure magenta (#FF00FF) with light shading; magenta nowhere else.
-Same scale (a rider on horseback is about 1.5 times as tall as a standing soldier). Detailed hand-painted 2D game art. No text.
+A hand-painted illustration of nine separate medieval characters on a plain white background, in three rows of three, each with wide empty white space around them.
+Each is shown full length, seen from slightly above, turned toward the lower right corner of the picture and standing calmly ready.
+Sunlight from the upper left. They float on the white background: no shadow, no ground under their feet.
+A peasant man in a simple tunic and boots holding an axe; a peasant woman in a dress with an apron and headscarf holding a basket; a militiaman in a padded tunic with a simple round helmet and short sword; a soldier in chainmail with a nose-guard helmet, sword and round shield; a heavy swordsman in mail and plate with a great helm, long sword and kite shield; a spearman with a padded coat, wide-brimmed iron hat and long spear; a pikeman with a breastplate and a very long pike; an archer with a hood, leather jerkin, longbow and quiver; a crossbowman in mail with a brimmed helmet and crossbow.
+Their tunics, tabards, shield faces and hood linings are bright magenta cloth (intense pink-purple); magenta is never on skin, hair, metal or wood.
+All the same height and scale. Crisp outlines, natural colors. No writing, no numbers, no frame.
 ```
 
-Unidades de mods y nuevas: huscarle (godo con hacha y escudo grande), elefante de guerra, monje 🔧,
-barco de pesca 🔧, galera 🔧, mangonel 🔧. Se piden igual, de 4 a 6 por imagen.
-
-### 6c · Animación de una unidad (plantilla)
+### 6b · Caballería, asedio y guerreros especiales
 
 ```text
-Using the attached character as the exact reference (same face, body proportions, clothes, colors, weapon and magenta player-color areas), draw an animation strip of ANIMATION.
-FRAMES frames in a single horizontal row, evenly spaced, on a pure flat white background (#FFFFFF); frames do not touch each other.
-Same isometric 3/4 view from above, facing toward the lower right, same size in every frame, feet on the same baseline.
-Sun from the upper left, NO cast shadows, NO ground, NO motion blur, NO speed lines.
-Detailed hand-painted 2D game art, crisp outlines. No text, no frame numbers.
+A hand-painted illustration of eight separate medieval figures on a plain white background, in two rows of four, with wide white gaps.
+Seen from slightly above, all turned toward the lower right corner of the picture and standing still. Sunlight from the upper left; no shadow and no ground beneath them.
+A light skirmisher with a bundle of javelins and a small shield; a light scout rider on a fast brown horse; an armoured knight on a horse wearing a cloth caparison, lance raised; a knight in full plate on a heavily armoured black horse; a wheeled battering ram with a hide-covered roof and an iron-capped log; a tall archer with a very long yew bow and green hood; a bearded warrior with a helmet, shield and throwing axes; a mounted archer with a short curved bow on a small steppe horse.
+Tabards, horse caparisons, shield faces and pennants are bright magenta cloth; magenta appears nowhere else.
+Riders on horseback are about one and a half times as tall as a standing soldier. Crisp outlines. No writing, no numbers, no frame.
 ```
 
-| Estado | `ANIMATION` | `FRAMES` |
-| --- | --- | --- |
-| `walk` | a looping walk cycle (contact, passing, contact, passing with the opposite leg) | 8 |
-| `attack` | a melee attack: wind-up, strike, follow-through, recover (archers: draw, aim, release, recover) | 6 |
-| `death` | falling down: hit, stagger, knees buckle, falling, lying on the ground, lying still | 6 |
-| `idle` | a subtle breathing idle (optional) | 4 |
+Otros personajes (se piden igual, de 4 a 6 por imagen): guerrero godo con hacha y escudo grande, elefante de
+guerra, monje 🔧, barca de pesca 🔧, galera 🔧, catapulta 🔧.
 
-Solo para el aldeano (adjunta la referencia del hombre o la mujer):
+### 6c · Animación de un personaje (plantilla)
 
-| Estado | `ANIMATION` | `FRAMES` |
-| --- | --- | --- |
-| `work-wood` | chopping a tree trunk with an axe (the tree itself is not drawn) | 6 |
-| `work-gold` / `work-stone` | swinging a pickaxe down at rocks (the rocks are not drawn) | 6 |
-| `work-food` | picking berries from a bush and placing them in a basket (bush not drawn) | 6 |
-| `work-farm` | hoeing the ground with a hoe | 6 |
-| `work-build` | hammering with a mallet, crouched | 6 |
-| `carry-wood` | walking while carrying logs on the shoulder | 8 |
-| `carry-food` | walking while carrying a full basket of food | 8 |
-| `carry-gold` / `carry-stone` | walking while carrying a sack of ore over the shoulder | 8 |
+Adjunta la imagen del personaje elegido y cambia la última frase:
+
+```text
+Using the attached character as the exact model (same face, body, clothes, colors, weapon and magenta cloth), draw a row of poses showing the movement described below.
+The poses are side by side in a single horizontal row on a plain white background, evenly spaced and not touching.
+Same viewing angle from slightly above, turned toward the lower right, the same size in every pose, the feet on the same level.
+Sunlight from the upper left; no shadow, no ground, no motion blur, no speed lines. No writing, no numbers, no frame.
+The movement: <movimiento>
+```
+
+| Estado | Movimiento |
+| --- | --- |
+| `walk` | eight poses of one complete walking step that loops smoothly |
+| `attack` | six poses of a sword blow: raising the weapon, striking, following through and recovering (archers: drawing, aiming, releasing, lowering the bow) |
+| `death` | six poses of falling: being hit, staggering, knees giving way, falling, lying on the ground, lying still |
+| `idle` | four poses of standing and breathing calmly (optional) |
+
+Solo para los aldeanos (adjunta el hombre o la mujer):
+
+| Estado | Movimiento |
+| --- | --- |
+| `work-wood` | six poses of chopping a tree trunk with an axe (the tree is not drawn) |
+| `work-gold` / `work-stone` | six poses of swinging a pickaxe down at rocks (the rocks are not drawn) |
+| `work-food` | six poses of picking berries from a bush and putting them in a basket (the bush is not drawn) |
+| `work-farm` | six poses of working the soil with a hoe |
+| `work-build` | six poses of hammering with a mallet, crouching |
+| `carry-wood` | eight poses of walking while carrying logs on the shoulder |
+| `carry-food` | eight poses of walking while carrying a full basket of food |
+| `carry-gold` / `carry-stone` | eight poses of walking with a heavy sack of ore over the shoulder |
 
 ---
 
 ## Pack 7 · Proyectiles, efectos y restos
 
 ```text
-Game asset sheet for an original medieval strategy game: small separate objects on a pure flat white background (#FFFFFF), grid with generous space, nothing touching.
-Side view for projectiles (pointing to the right), isometric 3/4 view for the rest. Sun from the upper left, NO cast shadows, NO ground.
-Row 1: an arrow, a crossbow bolt, a javelin, a throwing axe, a round catapult stone.
-Row 2: a burning arrow; four frames of a small orange fire flame (looping).
-Row 3: four frames of a puff of grey dust; four frames of rising dark smoke.
-Hand-painted 2D game art, crisp edges. No text.
+A hand-painted illustration of small separate objects on a plain white background, in rows with wide white gaps between them.
+Top row, seen from the side and pointing to the right: an arrow, a crossbow bolt, a javelin, a throwing axe, a round catapult stone.
+Middle row: a burning arrow, and four stages of a small flickering orange flame.
+Bottom row: four stages of a small puff of grey dust, and four stages of rising dark smoke.
+No shadow, no ground. No writing, no numbers, no frame.
 ```
 
 ```text
-Game asset sheet for an original medieval strategy game: 4 separate piles of building rubble on a pure flat white background (#FFFFFF), 2x2 grid, generous space.
-Isometric 2:1 view, each pile covers a diamond footprint of 1x1, 2x2, 3x3 and 4x4 map tiles at the same scale: broken stones, charred beams, scattered roof tiles, a little smoke.
-Sun from the upper left, NO cast shadows, NO ground outside the debris. Hand-painted 2D game art. No text.
+A hand-painted illustration of four separate heaps of rubble from destroyed medieval buildings on a plain white background, in two rows of two, with wide white gaps, from small to large.
+Seen from high above at a corner, sunlight from the upper left, nothing around the rubble: broken stones, charred beams, scattered roof tiles and a little smoke.
+No shadow on the white background. No writing, no numbers, no frame.
 ```
 
 ```text
-Game asset sheet for an original medieval strategy game: 6 separate objects on a pure flat white background (#FFFFFF), 3x2 grid, generous space.
-Isometric 3/4 view, sun from the upper left, NO cast shadows, NO ground.
-1. Rally point flag on a pole (flag in flat pure magenta #FF00FF). 2. Small treasure chest, closed. 3. The same chest open with gold coins. 4. Broken wooden cart. 5. Scattered bones and a helmet (battlefield remains, not gory). 6. A burnt campfire.
-Hand-painted 2D game art. No text.
+A hand-painted illustration of six separate small objects on a plain white background, two rows of three, with wide white gaps.
+Seen from high above at an angle, sunlight from the upper left, no shadow and no ground.
+A flag on a wooden pole made of bright magenta cloth, a small closed treasure chest, the same chest open and full of gold coins, a broken wooden cart, an old helmet lying among a few bones, and the ashes of a burnt-out campfire.
+No writing, no numbers, no frame.
 ```
 
 ---
 
 ## Pack 8 · Decoración del terreno
 
-Detalles pequeños que el motor reparte por el mapa (ya hay decoración procedural: estas imágenes la sustituyen).
+Detalles pequeños que el juego reparte por el mapa (sustituyen a la decoración actual dibujada por código).
 
 ```text
-Game asset sheet for an original medieval strategy game: 12 small separate ground decorations on a pure flat white background (#FFFFFF), 4x3 grid, generous space, nothing touching.
-Isometric 3/4 view from above, each object much smaller than a map tile. Sun from the upper left, NO cast shadows, NO ground patch under the objects.
-Grass tufts (3 shapes), a clump of yellow wildflowers, a clump of white daisies, a clump of purple heather, two small grey stones, a mossy rock, red-capped mushrooms, a fern, a fallen branch.
-Hand-painted 2D game art, crisp edges, natural colors. No text.
+A hand-painted illustration of twelve small separate plants and stones on a plain white background, in three rows of four, with wide white gaps.
+Seen from high above at an angle, sunlight from the upper left; they float on the white background with no shadow and no ground under them.
+Three different tufts of grass, a clump of yellow wildflowers, a clump of white daisies, a clump of purple heather, two small grey stones, a mossy rock, red-capped mushrooms, a fern and a fallen branch.
+Crisp outlines, natural colors. No writing, no numbers, no frame.
 ```
 
 ```text
-Game asset sheet for an original medieval strategy game: 12 small separate decorations on a pure flat white background (#FFFFFF), 4x3 grid, generous space.
-Isometric 3/4 view from above, small objects, sun from the upper left, NO cast shadows, NO ground.
-Shore and water: reeds (2 sizes), cattails, water lilies, a rock half in water, driftwood.
-Snow and mountain: snowy rock, frozen bush, small ice crystals cluster.
-Desert: dry thorny shrub, animal skull, sandstone rocks.
-Hand-painted 2D game art. No text.
+A hand-painted illustration of twelve small separate natural details on a plain white background, in three rows of four, with wide white gaps.
+Seen from high above at an angle, sunlight from the upper left, no shadow and no ground.
+Two clumps of reeds of different sizes, bulrushes, water lilies, a rock half sunk in a little water, a piece of driftwood, a snowy rock, a frosted bush, a small cluster of ice crystals, a dry thorny shrub, an animal skull and a few sandstone rocks.
+No writing, no numbers, no frame.
 ```
 
 ```text
-Game asset sheet for an original medieval strategy game: 8 village props on a pure flat white background (#FFFFFF), 4x2 grid, generous space.
-Isometric 3/4 view from above, sun from the upper left, NO cast shadows, NO ground.
-A haystack, a stone well, stacked barrels, wooden crates, a straight wooden fence section, a wooden signpost, a wheelbarrow, a wooden bench.
-Hand-painted 2D game art, same scale as each other (a barrel is about waist-high). No text.
+A hand-painted illustration of eight separate village objects on a plain white background, in two rows of four, with wide white gaps.
+Seen from high above at an angle, sunlight from the upper left, no shadow and no ground.
+A haystack, a stone well, a stack of barrels, a pile of wooden crates, a straight section of wooden fence, a wooden signpost without writing, a wheelbarrow and a wooden bench, all at the same scale.
+No writing, no numbers, no frame.
 ```
 
 ---
 
 ## Pack 9 · Interfaz
 
-Los iconos son cuadrados y llevan su propio fondo pintado (no se recortan). El juego usa ahora emojis:
-cambiarlos por imágenes requiere un pequeño cambio en la interfaz 🔧.
+Los iconos llevan su propio fondo pintado (no se recortan). El juego usa ahora emojis: cambiarlos por estos
+iconos requiere un pequeño cambio en la interfaz 🔧.
 
 ```text
-Set of 12 square game icons for an original medieval strategy game interface, arranged in a 4x3 grid on a pure white background with white gaps between icons.
-Each icon: square, painted illustration with a dark bevelled stone frame, readable at 48x48 pixels, strong silhouette, warm medieval palette, light from the upper left.
-Icons: food (bread and meat), wood (log pile), gold (coins), stone (cut blocks), population (two villagers), idle villager, house, attack, stop, delete (red cross), build (hammer), rally point (flag).
-No text, no letters, no numbers.
+Twelve small square paintings arranged in three rows of four on a plain white background, with white gaps between them.
+Each painting is a single object on a dark, warm background inside a bevelled grey stone border, with a strong simple silhouette that is easy to recognise even when very small. Light from the upper left, warm medieval colors.
+The objects: a loaf of bread with a ham, a pile of logs, a heap of gold coins, a few cut stone blocks, two peasants side by side, a sleeping peasant, a small cottage, a crossed sword and shield, a raised open hand, a red cross, a hammer, a flag on a pole.
+No writing, no letters, no numbers.
 ```
 
 ```text
-Set of 12 square technology icons for an original medieval strategy game, 4x3 grid on a pure white background with white gaps.
-Each icon: square painted illustration with a dark bevelled stone frame, readable at 48x48 pixels, warm medieval palette.
-Icons: loom (spinning wheel), wheelbarrow, hand cart, double-bit axe, bow saw, horse collar, heavy plough, gold mining (pickaxe with gold), stone mining (chisel on stone), forging (hammer on anvil), iron casting (molten iron), fletching (arrow feathers).
-No text, no letters, no numbers.
+Twelve small square paintings arranged in three rows of four on a plain white background, with white gaps between them, each a single object on a dark warm background inside a bevelled grey stone border, easy to recognise when very small.
+The objects: a spinning wheel, a wheelbarrow, a hand cart, a double-bladed axe, a bow saw, a horse collar, a heavy plough, a pickaxe with gold nuggets, a chisel on a stone block, a hammer on an anvil, molten iron being poured, a bundle of arrow feathers.
+No writing, no letters, no numbers.
 ```
 
 ```text
-Set of 8 square technology icons for an original medieval strategy game, 4x2 grid on a pure white background with white gaps, same frame and style as before:
-bodkin arrow, scale mail armour, scale barding (horse armour), padded archer armour, conscription (marching soldiers), husbandry (horse head), feudal age emblem (wooden shield with a tower), castle age emblem (stone castle).
-No text, no letters, no numbers.
+Eight small square paintings arranged in two rows of four on a plain white background, with white gaps between them, in the same style: a single object on a dark warm background inside a bevelled grey stone border.
+The objects: a sharp narrow arrowhead, a coat of scale armour, a horse wearing scale armour, a padded archer's jacket, a column of marching soldiers, a horse's head, a wooden shield with a tower on it, a stone castle.
+No writing, no letters, no numbers.
 ```
 
 ```text
-Medieval strategy game interface textures, 4 separate square tiles on a pure white background with white gaps:
-1. Dark carved grey stone panel, seamless. 2. Dark polished wood panel, seamless. 3. Aged parchment, seamless. 4. Ornate gold and stone corner piece for a frame.
-Flat front view, even lighting, no text.
+Four separate square surfaces on a plain white background with white gaps between them, seen straight on with even lighting:
+a dark carved grey stone panel, a dark polished wooden panel, a sheet of aged parchment, and an ornate gold and stone corner piece for a picture frame.
+No writing, no letters, no numbers.
 ```
