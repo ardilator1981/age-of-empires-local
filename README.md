@@ -367,6 +367,15 @@ npm run regions -- --only <id>
 
 Descarga el relieve (Copernicus DEM GLO-30, o el ICGC en Cataluña) y los ríos, bosques y pueblos de OpenStreetMap. Las atribuciones aparecen en la pantalla de **Créditos** del juego.
 
+## Jugar en red
+
+**🌐 Jugar en red con amigos** en el menú principal: alguien crea la sala, los demás se unen con el código, el enlace o el QR, y cada uno juega en su dispositivo (móvil u ordenador). Gratis y sin servidor propio:
+- **🌍 Por internet:** los navegadores se encuentran por redes públicas (Trystero) y se conectan directamente.
+- **📷 Sin intermediarios:** invitación y respuesta por QR o copiando un código (ideal en la misma wifi).
+- **🗂 En este navegador:** otra ventana, para probar.
+
+Pausa y velocidad para todos, y si alguien se va, la IA juega por él hasta que vuelve. Detalles, cómo probarlo y qué falta comprobar: [docs/multijugador.md](docs/multijugador.md).
+
 ## Guardar y continuar
 
 - La partida se guarda sola cada 45 segundos y al cerrar el navegador o cambiar de app en el móvil. Al volver a abrir el juego, **▶ Continuar la partida** la recupera tal cual.
@@ -427,4 +436,4 @@ referencia a algo que no existe (un edificio, una tecnología o un sprite).
 - Formaciones y posturas de combate
 - Guardado y carga de partida (todas las acciones pasan por `Commands`)
 - Efectos de sonido (golpes, flechas, construcción)
-- Multijugador en red (viabilidad y plan en `docs/multijugador.md`)
+- Multijugador: cambio de anfitrión, equipos y partidas públicas

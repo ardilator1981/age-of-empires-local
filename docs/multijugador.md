@@ -1,9 +1,159 @@
-# Multijugador en red: viabilidad
+# Multijugador en red
 
-Informe de la rama `feat/multijugador-viabilidad` (20 de octubre de 2026). La pregunta es si se puede
-añadir un modo multijugador en red al juego tal como está, cómo hacerlo y cuánto cuesta. Esta rama no
-lo construye: incluye el análisis, un prototipo de medición y los arreglos de determinismo que
-salieron por el camino.
+Este documento tiene dos partes:
+- **Lo construido** (rama `feat/multijugador`): cómo funciona, cómo probarlo y qué falta comprobar.
+- **El informe de viabilidad** (rama `feat/multijugador-viabilidad`, 20 de octubre de 2026), con las
+  mediciones que llevaron a la decisión.
+
+## Lo construido
+
+Pasos sincronizados deterministas (lockstep), como en el informe: cada dispositivo ejecuta la
+partida entera y solo viajan las órdenes. Todo es gratis y sin servidor propio: la web sigue
+siendo una PWA estática en GitHub Pages.
+
+### Cómo se juega
+
+**🌐 Jugar en red con amigos**, en el menú principal. Alguien crea la sala (el anfitrión), elige
+mapa y opciones y puede añadir jugadores de la IA. Los demás se unen, y cada uno elige su nombre,
+civilización y color. El anfitrión pulsa **Empezar** y todos cargan su partida. Funciona igual en
+la interfaz de escritorio y en la móvil.
+
+Hay tres formas de conectar:
+
+| Forma | Para qué | Cómo |
+| --- | --- | --- |
+| 🌍 **Por internet** | Jugar con alguien en otra casa, o un móvil en wifi y otro con datos | Sala con código de 6 letras, enlace y QR. Los navegadores se encuentran por redes públicas y gratuitas ([Trystero](https://github.com/dmotz/trystero): relés de Nostr; si en 8 s no hay nadie, también rastreadores de BitTorrent y brókeres MQTT). Después hablan directamente (WebRTC, cifrado), y la señalización va cifrada con el código de la sala |
+| 📷 **Sin intermediarios** | La misma wifi, o no depender de ningún servicio | El anfitrión crea una invitación por jugador (QR o enlace para copiar o compartir). El otro la abre y le devuelve su respuesta: escaneando su QR con la cámara (el enlace llega solo a la pestaña del juego), o copiándola y pegándola. Solo se usan los STUN públicos para que cada uno averigüe su dirección |
+| 🗂 **En este navegador** | Probar sin red | Otra pestaña del mismo navegador (BroadcastChannel) |
+
+En partida:
+- Arriba a la derecha: **📶 latencia · ⏱ retardo** de las órdenes (verde si va bien).
+- **Pausa para todos** desde el menú (escritorio) o ☰ → Partida (móvil); cualquiera la quita con
+  **▶ Reanudar**. Abrir un menú no para el juego. La velocidad, en Ajustes, cambia para todos.
+- **"Esperando a…"** si faltan las órdenes de alguien. Si no vuelve (4 s si se ha desconectado o
+  ha salido de la app, 12 s si sigue conectado pero no avanza), **la IA juega por él**. Al volver,
+  recibe la partida de ese momento y retoma el mando él solo.
+- Si un invitado **recarga la página** (o el móvil le cierra la pestaña), vuelve solo a la partida.
+- Si **te derrotan**, puedes seguir mirando mientras los demás juegan.
+- Si se **pierde al anfitrión**: esperar a que vuelva, **seguir solo contra la IA** (la IA juega
+  por los demás) o salir. Si el anfitrión solo ha salido de la app, avisa y se le espera 2 minutos.
+- Si dos partidas **se desincronizan** (no debería pasar), el invitado lo detecta en un segundo y
+  carga la del anfitrión sin hacer nada.
+
+### Cómo funciona
+
+| Pieza | Archivo |
+| --- | --- |
+| Órdenes en JSON (incluidas pausa, velocidad, "la IA juega por…" y las de los mods con `reg.addNetCommand`) | `src/game/net/netCommands.ts` |
+| Pasos sincronizados: turnos, retardo variable, jugadores que se van y vuelven | `src/game/net/lockstep.ts` |
+| Huella del estado | `src/game/net/hash.ts` |
+| Matemáticas iguales en todos los navegadores | `src/game/fmath.ts` |
+| La partida en red de la sala al final, sin DOM (se prueba en Node) | `src/net/NetGame.ts`, `src/net/protocol.ts` |
+| Transportes: pestañas, Trystero y código o QR; mensajes en trozos numerados | `src/net/transports/`, `src/net/framing.ts` |
+| La interfaz da las órdenes a `session.orders` (al momento contra la IA, por la red en línea) | `src/app/orders.ts` |
+| Sala, indicador en partida, menús | `src/ui/Lobby.ts`, `src/ui/NetHud.ts`, `src/ui/Menu.ts`, `src/ui/MobileHUD.ts` |
+
+- **El anfitrión manda.** Los invitados solo hablan con él y él retransmite los turnos de todos
+  (en estrella). Así decide sin ambigüedad quién juega en cada tick: si alguien se va, sabe cuál fue
+  su último turno; si vuelve, le hace sitio unos ticks más adelante. Mientras le manda la partida,
+  lo que le enviaría espera y va justo detrás. Si se va el anfitrión, la partida en red termina (no
+  hay cambio de anfitrión); cada uno puede seguir solo contra la IA.
+- **Todos empiezan con la partida guardada del anfitrión** (comprimida, 30 a 95 KB), no con la
+  semilla. Además se compara una huella del contenido del juego: con versiones o mods distintos, no
+  se empieza.
+- **Retardo adaptable:** el anfitrión mide la latencia de cada invitado y fija el retardo para todos
+  (empieza en 200 ms; entre 100 y 700). Sube enseguida y baja despacio.
+- **Respuesta inmediata:** la marca y el sonido de una orden salen al darla, aunque se ejecute
+  unos ticks después.
+- **Comprobación de sincronía:** la huella del anfitrión viaja cada segundo con sus turnos.
+- **Trozos numerados:** cada mensaje se parte en trozos de 12 KB con número y se recompone en orden.
+  Así nada adelanta a la partida guardada, aunque Trystero mande los mensajes grandes por otro
+  camino.
+
+### Gratis y sin servidor propio
+
+- **Señalización:** relés públicos de Nostr, rastreadores de BitTorrent y brókeres MQTT (Trystero);
+  el anfitrión espera en los tres. En el modo sin intermediarios no hay señalización: la hacen las
+  personas, copiando o escaneando.
+- **STUN:** públicos y gratuitos (Google y Cloudflare). Con ellos conecta la gran mayoría de redes.
+- **TURN (opcional):** solo hace falta si alguna red no deja conectar directamente (algunas de datos
+  móviles con CGNAT estricto, o de empresa). Se configura en **Opciones de conexión** (URL, usuario
+  y contraseña) y se guarda en el navegador. Opciones con capa gratuita: el TURN de
+  [Cloudflare Realtime](https://developers.cloudflare.com/realtime/pricing/) (1.000 GB al mes
+  gratis; pide credenciales temporales con una clave, así que hay que generarlas aparte),
+  [Open Relay de Metered](https://www.metered.ca/tools/openrelay/) (20 GB al mes gratis según su
+  página, en los puertos 80 y 443, que pasan casi cualquier cortafuegos; comprobad la cifra antes
+  de depender de ella) o un `coturn` propio en cualquier máquina. Una partida gasta
+  unos 0,7 KB/s por jugador: cualquier capa gratuita sobra.
+- **Tamaño:** Trystero añade unos 330 KB a la descarga (MQTT, el más grande, se carga solo si hace
+  falta). Todo queda en la caché sin conexión de la PWA.
+
+### Cómo probarlo
+
+**1. Dos pestañas en el ordenador** (sin red):
+```bash
+npm run dev
+```
+1. Abre http://localhost:5173 → **🌐 Jugar en red** → **🗂 En este navegador** → **Crear sala**.
+2. Copia el enlace de la sala y ábrelo en **otra ventana** (no en otra pestaña de la misma ventana).
+   Ponlas una al lado de la otra: una pestaña oculta no avanza y, como en un móvil que sale de la
+   app, a los 4 s la IA juega por ella.
+3. Elige civilización y color en cada una, y **Empezar** en la del anfitrión.
+
+**2. Dos móviles, uno en wifi y otro con datos** (por internet): hace falta la web publicada
+(GitHub Pages, https) o el APK.
+1. Móvil A: **🌐 Jugar en red** → **🌍 Por internet** → **Crear sala**.
+2. Móvil B: escanea el QR de la sala (botón **▦ QR**) con la cámara, o ábrelo con el enlace
+   (**📤 Compartir** por WhatsApp, por ejemplo), o escribe el código en **Unirme**.
+3. Si no se encuentran en unos 20 s, prueba otra señalización en **Opciones de conexión**. Si se
+   encuentran pero no conectan ("could not connect… configure TURN"), alguna de las dos redes
+   bloquea la conexión directa: hace falta un TURN.
+
+**3. Dos móviles en la misma wifi, sin intermediarios:**
+1. Móvil A: **📷 Sin intermediarios** → **Crear sala** → **➕ Crear invitación**.
+2. Móvil B: escanea el QR con la cámara. Se abre el juego con su respuesta en pantalla.
+3. Móvil A: escanea el QR de la respuesta con la cámara. Llega sola a la pestaña del juego (en el
+   mismo navegador; con la app instalada en iPhone, mejor copiar y pegar). La respuesta también se
+   puede copiar y pegar en **Pega aquí su respuesta**.
+
+**Automático:** `npm test` incluye `tests/netgame.test.ts`: sala, 3 humanos y la IA, retardo
+adaptable, pausa y velocidad, corte y vuelta, segundo plano del invitado y del anfitrión,
+desincronización, versiones distintas y anfitrión perdido, todo con un transporte en memoria con
+latencia.
+
+### Qué queda por comprobar en dispositivos reales
+
+- **WebRTC de verdad.** En el navegador de pruebas de esta sesión la señalización por Nostr
+  funcionó (anfitrión e invitado se encontraron e intercambiaron la descripción de la conexión),
+  pero no la conexión directa: ese navegador integrado no puede conectar WebRTC ni dentro de la
+  misma página (no resuelve las direcciones `.local`). Hay que probar en Chrome, Safari y Firefox
+  reales, y entre un móvil en wifi y otro con datos. Lo probado de punta a punta en el navegador
+  real es el modo de pestañas, con la misma `NetGame`.
+- **Safari en iOS:** que las conexiones WebRTC sobreviven a salir un momento de la app (si se
+  cortan, el invitado vuelve solo cuando Trystero reconecta; en el modo sin intermediarios hay que
+  crear otra invitación). También que con la app instalada en la pantalla de inicio el QR de
+  respuesta no llega a la app (otra caché): ahí se copia y pega.
+- **Firefox:** el determinismo entre motores se midió en V8 y JavaScriptCore, no en SpiderMonkey.
+- **Rendimiento en un móvil de gama media** con 4 a 8 jugadores: la huella cuesta unos 2 ms por
+  segundo en un ordenador.
+- **Redes con CGNAT estricto** sin TURN.
+
+### Límites conocidos
+
+- No hay cambio de anfitrión: si el anfitrión cierra el juego, la partida en red termina (cada
+  uno puede seguir contra la IA).
+- Con 3 o más jugadores, los turnos entre invitados pasan por el anfitrión (más retardo si el
+  anfitrión tiene mala red).
+- Quien quiera hacer trampas puede ver todo el mapa (cada uno tiene la partida entera). Para jugar
+  entre amigos es aceptable.
+- Las partidas en red no se guardan solas ni se pueden continuar después.
+
+---
+
+# Informe de viabilidad
+
+Informe de la rama `feat/multijugador-viabilidad` (20 de octubre de 2026). La pregunta era si se
+podía añadir un modo multijugador en red al juego tal como estaba, cómo hacerlo y cuánto costaba.
 
 ## Resumen
 

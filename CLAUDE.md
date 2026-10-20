@@ -17,8 +17,10 @@ src/
                stances (posturas)
     save.ts    guardar y cargar partidas (formato versionado)
     fmath.ts   hypot, sin y cos deterministas (iguales en todos los navegadores)
-    net/       prototipo de multijugador: huella del estado (hash), órdenes serializables
-               (netCommands) y pasos sincronizados (lockstep); ver docs/multijugador.md
+    net/       multijugador: huella del estado (hash), órdenes en JSON (netCommands) y pasos
+               sincronizados (lockstep); ver docs/multijugador.md
+  net/         partida en red sin DOM (NetGame: sala, turnos por el anfitrión, retardo, desconexiones),
+               protocolo, trozos numerados y transportes (pestañas, Trystero, código o QR)
     systems/   core.ts (sistemas básicos) y AISystem.ts (IA por jugador)
   render/      Camera (con relieve), Renderer (2D), TerrainGL (WebGL2), quality (calidad gráfica), terrainPatterns,
                sprites, decorations, icons (retratos), Minimap, imageSprite
@@ -26,7 +28,8 @@ src/
                SettingsPanel (ajustes unificados), layout (preferencias de interfaz)
   audio/       AudioManager (eventos → sonido, volúmenes, desbloqueo móvil), Music (generativa), sfx (efectos sintéticos)
   mods/real-maps/  Mapas a partir de relieve y datos reales (JSON en data/)
-  app/         App (ciclo menú → partida, guardado automático), Session (todo lo de una partida), saves (ranuras en IndexedDB)
+  app/         App (ciclo menú → partida, guardado automático, partidas en red), Session (todo lo de una partida),
+               saves (ranuras en IndexedDB), orders (adónde van las órdenes del jugador)
   mods/        core/ (contenido base: datos), extra-content/, treasure-hunt/, declared-war/ (modo Guerra declarada)
 scripts/       simulate.ts (partida IA contra IA sin gráficos), real-map.mjs, make-icons.mjs
 .github/       Workflows de GitHub Pages y del APK de Android
@@ -40,6 +43,7 @@ docs/          decisiones.md (decisiones de diseño), riesgos.md (riesgos técni
 - `feat/interfaz-movil`: **interfaz móvil** (capa `MobileHUD`, elección automática de interfaz, gestos y grupos táctiles; capturas y medición en `docs/movil/`). Ya está en `main`. Al añadir comandos nuevos al HUD, añádelos en `ui/commandModel.ts` para que salgan también en el móvil.
 - `claude/arte-ia`: gráficos con sprites generados por IA (otra sesión).
 - `feat/multijugador-viabilidad`: informe de viabilidad del multijugador (`docs/multijugador.md`), prototipo de lockstep (`game/net/`) y arreglos de determinismo (`fmath`, niebla al cargar, fin de partida sin `humanId`). Sin fusionar.
+- `feat/multijugador` (sale de la anterior): **multijugador en red** construido: sala, pestañas, Trystero (por internet) y código o QR (sin intermediarios), pausa y velocidad para todos, la IA juega por quien se va, reconexión con la partida del anfitrión. Sin fusionar; falta probar WebRTC en dispositivos reales (ver `docs/multijugador.md`).
 - Remoto: `origin` = github.com/ardilator1981/age-of-empires-local. La web publicada y la Release v0.1.0 salieron de `claude/upbeat-ishizaka-5d23f0`.
 
 ## Comandos
@@ -64,6 +68,7 @@ Depuración en el navegador: `window.app` y `window.game` están accesibles desd
 ## Puntos de extensión para mods (además de contenido, órdenes y sistemas)
 
 - `reg.addCombatRule(fn)`: quién puede atacar a quién (`game.canAttack`). La usa Guerra declarada para la paz y el círculo de batalla.
+- `reg.addNetCommand(id, fn)`: una orden de jugador propia del mod (en red viaja por la cola de turnos). La interfaz la da con `session.orders.send({ t: 'mod', id, args })`. La usa Guerra declarada para declarar la guerra.
 - `reg.addAIPlugin(p)`: la IA le pregunta cada turno; puede pedir edificios y unidades, reservar recursos, frenar el entrenamiento o encargarse del ejército.
 - `reg.addHudPanel(def)`, `reg.addWorldOverlay(fn)`, `reg.addMinimapOverlay(fn)`: paneles HTML y dibujos sobre el mapa y el minimapa. `ui.pickPoint` sirve para pedir un punto del mapa.
 - En las unidades: `maxAlive`, `retrainCooldown` y `aura` (bonificación a las tropas cercanas, la aplica `AuraSystem`).
@@ -83,6 +88,7 @@ Depuración en el navegador: `window.app` y `window.game` están accesibles desd
 - La simulación (`src/game/`) no toca el DOM ni el render, y debe seguir funcionando en Node (`npm run simulate`).
 - Usa `game.units`, `game.buildings`, `game.nodes` y `game.actors` en vez de recorrer `game.list` en código que se ejecute cada tick. Comprueba siempre `e.dead`.
 - Las acciones de jugadores van por `Commands`. Las comprobaciones de disponibilidad (edad, coste, requisitos) van en `rules.ts`.
+- La interfaz (también los paneles de los mods) **nunca** llama a `Commands` ni cambia el estado: da un `NetCommand` con `session.orders.send(...)` (contra la IA se ejecuta al momento; en red, unos ticks después en todos los dispositivos). Lo que la orden necesite saber va en ella (ids, coordenadas), no en referencias.
 - Aleatoriedad de la simulación: `game.rng()` (determinista por semilla), nunca `Math.random()`.
 - Determinismo (para el multijugador): en el código que corre cada tick, `hypot`, `sin` y `cos` de `src/game/fmath.ts`, nunca `Math.hypot`, `Math.sin`, `Math.cos`, `Math.atan2` ni `Math.exp`, que dan distinto en Chrome y Safari. Tampoco `Date.now` ni nada de la interfaz. Un test lo comprueba en `src/game`; en los mods, a mano. El dibujo puede usar `Math`.
 - Sonido: para que algo suene, emite un evento del juego (o usa `game.reject` para los errores de una acción) y añade el efecto en `audio/sfx.ts` y su escucha en `AudioManager`. Nada de archivos con copyright; documenta cada sonido en `CREDITS.md`.
