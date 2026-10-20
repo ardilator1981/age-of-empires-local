@@ -105,7 +105,7 @@ export function decode(v: any): any {
 // ------------------------------------------------------------------ instantánea
 
 // `visible` no se guarda: la niebla de este instante se recalcula al cargar
-const PLAYER_FIELDS = ['res', 'age', 'researched', 'upgrades', 'popUsed', 'popCap', 'counts', 'pending', 'defeated', 'explored', 'stats', 'warnedAt', 'lastDeath', 'data'] as const;
+export const PLAYER_FIELDS = ['res', 'age', 'researched', 'upgrades', 'popUsed', 'popCap', 'counts', 'pending', 'defeated', 'explored', 'stats', 'warnedAt', 'lastDeath', 'data'] as const;
 
 const KEEP = new Set(['id', 'kind', 'defId', 'owner']);
 let defaults: Record<string, any> | null = null;
