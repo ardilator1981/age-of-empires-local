@@ -1,6 +1,7 @@
 node_modules/
 dist/
 .sim/
+.sim-lockstep/
 .DS_Store
 *.pkg
 .cache/

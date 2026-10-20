@@ -13,6 +13,7 @@
     "shots:movil": "node scripts/mobile-shots.mjs",
     "bench": "vite build --ssr scripts/bench.ts --outDir .sim --emptyOutDir --logLevel warn && node .sim/bench.js",
     "engines": "vite build --ssr scripts/engines.ts --outDir .sim --emptyOutDir --logLevel warn && node scripts/engines-compare.mjs",
+    "lockstep": "vite build --ssr scripts/lockstep.ts --outDir .sim-lockstep --emptyOutDir --logLevel warn && node .sim-lockstep/lockstep.js",
     "test": "node -e \"require('fs').rmSync('node_modules/.vitest-cache',{recursive:true,force:true})\" && vitest run",
     "regions": "node scripts/regions.mjs",
     "world-map": "node scripts/world-map.mjs"
