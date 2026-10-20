@@ -384,6 +384,23 @@ Los ids son los de `src/mods/core/` (`villager`, `militia`, `manAtArms`, `archer
 `barracks`, `townCenter`, `tree`, `goldMine`, `berries`...). Una misma hoja puede servir para varias
 definiciones. Los retratos de la interfaz salen automáticamente de la hoja.
 
+### Importar imágenes generadas (varias piezas sobre fondo blanco)
+
+Las imágenes de Nano Banana se dejan sin tocar en `art-src/entrada/<pack>/`. Para cada una se crea una
+configuración en `art-src/import/` (mira `pack3-edad-oscura.json`: cuadrícula, id y tamaño en casillas de cada
+pieza, y edad) y se ejecuta:
+
+```bash
+npm run art-import -- art-src/import/pack3-edad-oscura.json
+```
+
+Quita el fondo blanco (también los huecos cerrados, como entre las aspas del molino) sin dejar halo, separa las
+piezas por la cuadrícula, sustituye el magenta por gris claro y genera con él la máscara del color del jugador,
+escala cada pieza a su huella y escribe PNG, máscara y JSON en `public/sprites/<out>/`. Con `"age": 1` (2, 3)
+añade la imagen como variante de esa edad al JSON existente. En `art-src/preview/` deja una vista previa con la
+huella dibujada; si una pieza queda desplazada, se corrige con `fit` (tamaño) y `dx`/`dy` (apoyo) en la
+configuración. Después hay que añadir la hoja a `ART` en `src/mods/art/index.ts`.
+
 ### 5. Comprobar el resultado
 
 ```bash

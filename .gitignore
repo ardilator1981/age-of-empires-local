@@ -3,3 +3,4 @@ dist/
 .sim/
 .DS_Store
 *.pkg
+art-src/preview/

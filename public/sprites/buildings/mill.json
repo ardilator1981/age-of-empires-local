@@ -1,0 +1,19 @@
+{
+  "image": "mill.png",
+  "mask": "mill-mask.png",
+  "cell": {
+    "w": 264,
+    "h": 374
+  },
+  "anchor": {
+    "x": 132,
+    "y": 306
+  },
+  "scale": 2,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 1
+    }
+  }
+}

@@ -8,6 +8,7 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
+    "art-import": "node scripts/art-import.mjs",
     "fix-textures": "node scripts/fix-textures.mjs",
     "simulate": "vite build --ssr scripts/simulate.ts --outDir .sim --emptyOutDir --logLevel warn && node .sim/simulate.js"
   },

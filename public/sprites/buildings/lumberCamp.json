@@ -1,0 +1,19 @@
+{
+  "image": "lumberCamp.png",
+  "mask": "lumberCamp-mask.png",
+  "cell": {
+    "w": 264,
+    "h": 181
+  },
+  "anchor": {
+    "x": 132,
+    "y": 113
+  },
+  "scale": 2,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 1
+    }
+  }
+}

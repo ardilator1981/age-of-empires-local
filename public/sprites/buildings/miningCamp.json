@@ -1,0 +1,19 @@
+{
+  "image": "miningCamp.png",
+  "mask": "miningCamp-mask.png",
+  "cell": {
+    "w": 264,
+    "h": 194
+  },
+  "anchor": {
+    "x": 132,
+    "y": 126
+  },
+  "scale": 2,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 1
+    }
+  }
+}

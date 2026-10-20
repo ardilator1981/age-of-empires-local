@@ -1,0 +1,18 @@
+{
+  "image": "house.png",
+  "cell": {
+    "w": 264,
+    "h": 262
+  },
+  "anchor": {
+    "x": 132,
+    "y": 194
+  },
+  "scale": 2,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 1
+    }
+  }
+}

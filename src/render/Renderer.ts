@@ -6,6 +6,7 @@ import type { UIState } from '../ui/UIState';
 import { Camera } from './Camera';
 import { ellipse, poly, up } from './draw';
 import { TerrainGL } from './TerrainGL';
+import { artFor } from './art/artRegistry';
 import { type Deco, drawDecoration, generateDecorations } from './decorations';
 
 interface Drawn { e: Entity; sx: number; sy: number; hb: number }
@@ -16,8 +17,6 @@ function hash2(x: number, y: number): number {
   return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
 }
 
-/** Altura aproximada (px a zoom 1) de un edificio, para barras de vida y selección. */
-function buildingHeight(e: Entity): number { return e.size * 14 + 46; }
 
 export class Renderer {
   readonly ctx: CanvasRenderingContext2D;
@@ -212,11 +211,19 @@ export class Renderer {
     }
   }
 
+  /** Altura aproximada (px a zoom 1) de un edificio sobre su huella, para barras de vida, selección y sombra. */
+  private buildingHeight(e: Entity): number {
+    const procedural = e.size * 14 + 46;
+    const art = artFor(this.game.reg, 'building', e.defId);
+    const top = art?.heightAbove(this.game.players[e.owner]?.age ?? 0, e.size);
+    return top ? Math.max(procedural * 0.6, top - e.size * 16) : procedural;
+  }
+
   /** Sombra suave de un edificio hacia abajo a la derecha. */
   private buildingShadow(d: Drawn) {
     const e = d.e, ctx = this.ctx, z = this.cam.zoom;
     if (this.game.reg.building(e.defId).walkable) return;
-    const h = buildingHeight(e) * (e.complete ? 1 : 0.3 + 0.7 * e.progress);
+    const h = this.buildingHeight(e) * (e.complete ? 1 : 0.3 + 0.7 * e.progress);
     const ox = h * 0.5 * z, oy = h * 0.2 * z;
     const fp = this.footprint(e, d.hb);
     const pts = [...fp, ...fp.map(q => ({ x: q.x + ox, y: q.y + oy }))];
@@ -362,7 +369,7 @@ export class Renderer {
       if (e.kind === 'resource') continue;
       const isUnit = e.kind === 'unit';
       const w = (isUnit ? 26 : 22 + e.size * 12) * z;
-      const top = isUnit ? d.sy - (e.radius > 0.3 ? 52 : 44) * z : this.footprint(e, d.hb)[0].y - buildingHeight(e) * z;
+      const top = isUnit ? d.sy - (e.radius > 0.3 ? 52 : 44) * z : this.footprint(e, d.hb)[0].y - this.buildingHeight(e) * z;
       const x = d.sx - w / 2;
       ctx.fillStyle = 'rgba(0,0,0,0.75)';
       ctx.fillRect(x - 1, top - 1, w + 2, 5);
@@ -436,7 +443,7 @@ export class Renderer {
     for (let i = this.drawn.length - 1; i >= 0; i--) {
       const { e, sx: ex, sy: ey, hb } = this.drawn[i];
       if (e.kind === 'building') {
-        const h = buildingHeight(e) * z;
+        const h = this.buildingHeight(e) * z;
         const [T, R, B, L] = this.footprint(e, hb);
         const walk = this.game.reg.building(e.defId).walkable;
         const shape = walk ? [T, R, B, L] : [L, up(L, h), up(T, h), up(R, h), R, B];

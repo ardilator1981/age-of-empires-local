@@ -1,0 +1,19 @@
+{
+  "image": "townCenter.png",
+  "mask": "townCenter-mask.png",
+  "cell": {
+    "w": 520,
+    "h": 427
+  },
+  "anchor": {
+    "x": 260,
+    "y": 295
+  },
+  "scale": 2,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 1
+    }
+  }
+}

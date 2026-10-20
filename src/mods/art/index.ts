@@ -12,9 +12,14 @@ import { preloadTerrainTextures } from '../../render/art/terrainTextures';
  * public/sprites/terrain/<patrón>.png (ver README, «Arte con imágenes»).
  */
 export const ART: ArtEntry[] = [
+  // Pack 3 · Edad Oscura (art-src/import/pack3-edad-oscura.json)
+  buildingArt('townCenter', 'buildings/townCenter'),
+  buildingArt('house', 'buildings/house'),
+  buildingArt('mill', 'buildings/mill'),
+  buildingArt('lumberCamp', 'buildings/lumberCamp'),
+  buildingArt('miningCamp', 'buildings/miningCamp'),
+  buildingArt('barracks', 'buildings/barracks'),
   // unitArt('villager', 'units/villager'),        → public/sprites/units/villager.json
-  // unitArt('militia', 'units/militia'),
-  // buildingArt('house', 'buildings/house'),      → public/sprites/buildings/house.json
   // resourceArt('tree', 'resources/oak'),         → public/sprites/resources/oak.json
 ];
 
@@ -33,7 +38,8 @@ export const artMod: GameMod = {
   core: true,
   register(reg) {
     preloadTerrainTextures(reg.terrains);
-    bindArt(reg, artMode() === 'ejemplo' ? [...ART, ...EXAMPLE] : ART);
+    // Las hojas de ejemplo van primero: si una definición tiene arte de verdad, gana el de verdad
+    bindArt(reg, artMode() === 'ejemplo' ? [...EXAMPLE, ...ART] : ART);
   },
 };
 

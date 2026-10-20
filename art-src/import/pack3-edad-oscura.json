@@ -1,0 +1,15 @@
+{
+  "source": "pack3-edificios/pack3_edificios.jpg",
+  "grid": [3, 2],
+  "kind": "building",
+  "out": "buildings",
+  "age": 0,
+  "items": [
+    { "id": "townCenter", "size": 4 },
+    { "id": "house", "size": 2 },
+    { "id": "mill", "size": 2 },
+    { "id": "lumberCamp", "size": 2 },
+    { "id": "miningCamp", "size": 2 },
+    { "id": "barracks", "size": 3 }
+  ]
+}

@@ -297,6 +297,12 @@ export class Sheet {
     ctx.restore();
   }
 
+  /** Altura (px a zoom 1) del dibujo por encima de su punto de apoyo. */
+  heightAbove(age: number, size: number): number {
+    const r = this.resolve(['idle'], age, size);
+    return r ? r.anchor.y / this.scale : 0;
+  }
+
   /**
    * Retrato para la interfaz: la imagen `portrait` si la hay, o el primer fotograma
    * de idle recortado a su contenido. Dibuja en un cuadrado de `S` px.

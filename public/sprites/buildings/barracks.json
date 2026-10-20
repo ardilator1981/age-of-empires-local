@@ -1,0 +1,19 @@
+{
+  "image": "barracks.png",
+  "mask": "barracks-mask.png",
+  "cell": {
+    "w": 392,
+    "h": 284
+  },
+  "anchor": {
+    "x": 196,
+    "y": 184
+  },
+  "scale": 2,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 1
+    }
+  }
+}
