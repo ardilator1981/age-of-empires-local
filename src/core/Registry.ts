@@ -1,6 +1,6 @@
 import type { Game } from '../game/Game';
 import type {
-  AgeDef, AIPlugin, BuildingDef, CivDef, CombatRule, GameMod, HudPanelDef, MapTypeDef, OrderHandler, OverlayFn,
+  AgeDef, AIPlugin, BuildingDef, CivDef, CombatRule, GameMod, HudPanelDef, MapTypeDef, NetCommandHandler, OrderHandler, OverlayFn,
   ResourceDef, ResourceNodeDef, SetupConfig, SpriteFn, SystemFactory, TechDef, TerrainDef, UnitDef, VictoryDef,
 } from './types';
 
@@ -28,6 +28,8 @@ export class Registry {
   combatRules: CombatRule[] = [];
   aiPlugins: AIPlugin[] = [];
   hudPanels: HudPanelDef[] = [];
+  /** Órdenes de jugador propias de los mods (ver `NetCommandHandler`). */
+  netCommands = new Map<string, NetCommandHandler>();
   /** Dibujos de mods sobre el suelo del mapa y sobre el minimapa. */
   worldOverlays: OverlayFn[] = [];
   minimapOverlays: OverlayFn[] = [];
@@ -62,6 +64,7 @@ export class Registry {
   removeSystem(id: string) { this.systems = this.systems.filter(s => s.id !== id); }
   onGameStart(fn: (game: Game) => void) { this.gameStartHooks.push(fn); }
   addCombatRule(rule: CombatRule) { this.combatRules.push(rule); }
+  addNetCommand(id: string, handler: NetCommandHandler) { this.netCommands.set(id, handler); }
   addAIPlugin(p: AIPlugin) { this.aiPlugins = this.aiPlugins.filter(x => x.id !== p.id); this.aiPlugins.push(p); }
   addHudPanel(p: HudPanelDef) { this.hudPanels = this.hudPanels.filter(x => x.id !== p.id); this.hudPanels.push(p); }
   addWorldOverlay(fn: OverlayFn) { this.worldOverlays.push(fn); }

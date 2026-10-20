@@ -293,6 +293,13 @@ export type SpriteFn = (s: SpriteContext) => void;
  */
 export type CombatRule = (game: Game, attacker: Entity, target: Entity, hitting: boolean) => boolean;
 
+/**
+ * Orden propia de un mod (p. ej. declarar la guerra). En una partida en red viaja por la cola de
+ * turnos y se ejecuta en el mismo tick en todos los clientes; contra la IA, al momento.
+ * `args` son datos simples (JSON). Devuelve si se ha podido hacer.
+ */
+export type NetCommandHandler = (game: Game, playerId: number, args: any) => boolean;
+
 /** Lo que una extensión de IA puede usar en cada "pensamiento" de un jugador IA. */
 export interface AIContext {
   game: Game;

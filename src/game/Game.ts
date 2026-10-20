@@ -148,6 +148,9 @@ export class Game {
 
   update(dt: number) {
     this.tick++;
+    // Partida en red en pausa (orden `pause`): los ticks siguen, para que corran los turnos con las
+    // órdenes (también la de reanudar), pero no pasa el tiempo de juego
+    if (this.data.netPause) return;
     this.time += dt;
     this.data.pathsThisTick = 0;
     for (const e of this.units) { e.px = e.x; e.py = e.y; }

@@ -3,7 +3,7 @@ import type { GameMod, UnitDef } from '../../core/types';
 import { warAI } from './ai';
 import { drawWarMinimap, drawWarWorld } from './draw';
 import { warPanel } from './panel';
-import { GENERAL, initWar, updateWar, warCombatRule } from './war';
+import { declareWar, GENERAL, initWar, updateWar, warCombatRule } from './war';
 
 const G = BALANCE.war.general;
 
@@ -35,6 +35,12 @@ export const declaredWarMod: GameMod = {
     reg.addAIPlugin(warAI);
     reg.onGameStart(initWar);
     reg.addSystem('declared-war', game => ({ update: dt => updateWar(game, dt) }), 55);
+    // Declarar la guerra es una orden de jugador: en red viaja por la cola de turnos
+    reg.addNetCommand('declare-war', (game, pid, a) => {
+      const r = declareWar(game, pid, a.target, a.x, a.y);
+      if (typeof r === 'string') game.notify(r, pid, 'warn');
+      return typeof r !== 'string';
+    });
     reg.addHudPanel(warPanel);
     reg.addWorldOverlay(drawWarWorld);
     reg.addMinimapOverlay(drawWarMinimap);

@@ -486,12 +486,27 @@ export class AIController {
   }
 }
 
+/** ¿Juega la IA por este jugador? Los de la IA y los humanos que se han ido de una partida en red. */
+const aiPlays = (p: Player) => !p.isHuman || !!p.data.aiControl;
+
 export class AISystem implements System {
   private ais: AIController[];
-  constructor(game: Game) {
-    this.ais = game.players.slice(1).filter(p => !p.isHuman).map(p => new AIController(game, p));
+  constructor(private game: Game) {
+    this.ais = game.players.slice(1).filter(aiPlays).map(p => new AIController(game, p));
   }
-  update() { for (const ai of this.ais) ai.update(); }
+  update() {
+    // Partida en red: la IA toma (o devuelve) el mando de un humano con la orden `ai`
+    const g = this.game;
+    if (g.tick % 20 === 0) {
+      for (const p of g.players) {
+        if (!p.isHuman) continue;
+        const has = this.ais.some(ai => ai.playerId === p.id);
+        if (aiPlays(p) && !has) this.ais.push(new AIController(g, p));
+        else if (!aiPlays(p) && has) this.ais = this.ais.filter(ai => ai.playerId !== p.id);
+      }
+    }
+    for (const ai of this.ais) ai.update();
+  }
   save() { return this.ais.map(ai => ai.saveState()); }
   load(states: any[]) {
     for (const s of states ?? []) this.ais.find(ai => ai.playerId === s.pid)?.loadState(s);

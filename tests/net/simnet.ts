@@ -240,9 +240,10 @@ export function runMatch(o: MatchOptions): MatchResult {
         if (at !== undefined) { delaySum += now - at; delayN++; c.issuedAt.delete(c.game.tick); }
         if (o.fault && o.fault.client === i && c.game.tick === o.fault.tick) c.game.players[c.peer.me].res.food += 0.001;
         for (const cmd of c.bot.think(c.game)) { c.peer.issue(cmd); commands++; }
-        const turn = c.peer.endTurn();
-        if (turn.cmds.length) c.issuedAt.set(turn.tick, now);
-        send(i, turn, now);
+        for (const turn of c.peer.endTurn()) {
+          if (turn.cmds.length) c.issuedAt.set(turn.tick, now);
+          send(i, turn, now);
+        }
       }
       // Le faltan turnos: el juego se queda parado ("Esperando a...") y sigue desde ahí
       if (c.game.tick < due) {

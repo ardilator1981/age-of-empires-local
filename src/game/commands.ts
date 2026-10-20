@@ -223,6 +223,21 @@ export const Commands = {
   },
 };
 
+/**
+ * Qué haría el clic derecho con estas unidades sobre este objetivo, sin hacerlo. Sirve para que la
+ * interfaz responda al momento (marca y sonido) aunque en red la orden se ejecute un poco después.
+ */
+export function smartKind(game: Game, pid: number, units: Entity[], target: Entity | null): OrderKind | null {
+  const mine = ownUnits(units, pid);
+  if (!mine.length) return null;
+  if (target && !target.dead) {
+    if (game.isEnemy(pid, target.owner) && target.kind !== 'resource' && mine.some(u => game.canAttack(u, target, false))) return 'attack';
+    if (target.kind === 'resource' || (target.kind === 'building' && !!target.resType && target.owner === pid && target.complete)) return 'gather';
+    if (target.kind === 'building' && target.owner === pid) return 'build';
+  }
+  return 'move';
+}
+
 /** Orden contextual: decide qué hacer según el objetivo y la da. */
 function smartOrder(game: Game, pid: number, units: Entity[], x: number, y: number, target: Entity | null): OrderKind | null {
   const mine = ownUnits(units, pid);
