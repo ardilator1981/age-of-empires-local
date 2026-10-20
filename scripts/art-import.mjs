@@ -33,7 +33,10 @@
  *   "sources": [ { "source": "...", "grid": [3, 2], "items": [ ... ] }, ... ] }
  * Una pieza sin medida propia usa la escala de la anterior del mismo id y de la misma
  * imagen, para que las fases conserven su tamaño relativo.
- * Una pieza puede llevar su propia "age" (p. ej. la misma torre en cada época).
+ * Una pieza puede llevar su propia "age" (p. ej. la misma torre en cada época) y su "state"
+ * ("walk", "attack"...): esas piezas forman una animación con imagen propia en la hoja.
+ * Con "sharedScale": true en una imagen, las piezas sin medida usan la escala de la primera
+ * (personajes dibujados juntos a la misma escala).
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
@@ -230,6 +233,7 @@ for (const s of sources) {
   if (!existsSync(file)) { console.log(`No encuentro ${file}`); process.exit(1); }
   const src = await loadSource(file, s.grid);
   const lastK = new Map();
+  let sourceScale = null;
   s.items.forEach((item, k) => {
     if (!item) return;
     const ids = new Set(src.cells[k]);
@@ -244,10 +248,12 @@ for (const s of sources) {
     else if (item.width) scale = (item.width * SCALE) / cut.cw;
     else if (item.height) scale = (item.height * SCALE) / cut.ch;
     else if (lastK.has(item.id)) scale = lastK.get(item.id);
+    else if (s.sharedScale && sourceScale !== null) scale = sourceScale;
     else if (g.width) scale = (g.width * SCALE) / cut.cw;
     else scale = ((g.height ?? 60) * SCALE) / cut.ch;
     lastK.set(item.id, scale);
-    const key = `${item.id}|${item.age ?? cfg.age ?? 0}`;
+    if (sourceScale === null) sourceScale = scale;
+    const key = `${item.id}|${item.age ?? cfg.age ?? 0}|${item.state ?? 'idle'}`;
     if (!groups.has(key)) groups.set(key, []);
     groups.get(key).push({ item, cut, scale, source: s.source });
   });
@@ -260,9 +266,11 @@ mkdirSync(previewDir, { recursive: true });
 const previews = [];
 
 // La edad 0 primero: es la hoja base, las demás se añaden a su JSON como variantes
-const ordered = [...groups].map(([key, frames]) => ({ id: key.split('|')[0], age: Number(key.split('|')[1]), frames }))
-  .sort((a, b) => a.age - b.age);
-for (const { id, age, frames } of ordered) {
+const ordered = [...groups].map(([key, frames]) => {
+  const [id, age, state] = key.split('|');
+  return { id, age: Number(age), state, frames };
+}).sort((a, b) => a.age - b.age || (a.state === 'idle' ? -1 : b.state === 'idle' ? 1 : 0));
+for (const { id, age, state, frames } of ordered) {
   const g = groupCfg[id] ?? {};
   const first = frames[0].item;
   const sized = await Promise.all(frames.map(async f => {
@@ -279,15 +287,23 @@ for (const { id, age, frames } of ordered) {
     x: Math.round(cellW / 2 + dx),
     y: Math.round(cfg.kind === 'building' ? cellH - PAD - first.size * 32 * (first.fit ?? 1) + dy : cellH - PAD - 2 + dy),
   };
-  const base = age > 0 ? `${id}-${age}` : id;
+  const base = (age > 0 ? `${id}-${age}` : id) + (state !== 'idle' ? `-${state}` : '');
   const sheet = (key) => sharp({ create: { width: cellW * n, height: cellH, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } })
     .composite(sized.map((s, i) => ({ input: s[key], ...place(s, i) }))).png({ compressionLevel: 9 });
   await sheet('piece').toFile(join(outDir, `${base}.png`));
   if (hasMask) await sheet('mask').toFile(join(outDir, `${base}-mask.png`));
 
-  const idle = { row: 0, frames: n, ...(n > 1 ? { pick: g.pick ?? 'variant' } : {}) };
   const jsonPath = join(outDir, `${id}.json`);
   const old = existsSync(jsonPath) ? JSON.parse(readFileSync(jsonPath, 'utf8')) : null;
+  if (state !== 'idle') {
+    // Animación (andar, atacar...) con imagen propia dentro de la hoja de la unidad
+    if (!old) { console.log(`⚠ ${id}: falta la hoja base (idle) antes de añadir "${state}"`); continue; }
+    const st = { image: `${base}.png`, ...(hasMask ? { mask: `${base}-mask.png` } : {}), row: 0, frames: n, fps: g.fps?.[state] ?? 8, cell: { w: cellW, h: cellH }, anchor };
+    const target = age > 0 ? ((old.ages ??= {})[age] ??= {}) : old;
+    (target.states ??= {})[state] = st;
+    writeFileSync(jsonPath, JSON.stringify(old, null, 2) + '\n');
+  } else {
+  const idle = { row: 0, frames: n, ...(n > 1 ? { pick: g.pick ?? 'variant' } : {}) };
   if (age === 0 || !old) {
     const m = {
       image: `${base}.png`,
@@ -296,14 +312,16 @@ for (const { id, age, frames } of ordered) {
       anchor,
       scale: SCALE,
       ...(g.shadow !== undefined ? { shadow: g.shadow } : {}),
+      ...(g.facing ? { facing: g.facing } : {}),
       states: { ...(old?.states ?? {}), idle },
       ...(old?.ages ? { ages: old.ages } : {}),
     };
     writeFileSync(jsonPath, JSON.stringify(m, null, 2) + '\n');
   } else {
     old.ages = old.ages ?? {};
-    old.ages[age] = { image: `${base}.png`, ...(hasMask ? { mask: `${base}-mask.png` } : {}), states: { idle: { ...idle, cell: { w: cellW, h: cellH }, anchor } } };
+    old.ages[age] = { ...(old.ages[age] ?? {}), image: `${base}.png`, ...(hasMask ? { mask: `${base}-mask.png` } : {}), states: { ...(old.ages[age]?.states ?? {}), idle: { ...idle, cell: { w: cellW, h: cellH }, anchor } } };
     writeFileSync(jsonPath, JSON.stringify(old, null, 2) + '\n');
+  }
   }
 
   // Vista previa: la hoja sobre gris, con el apoyo (y la huella en edificios) de cada fotograma
@@ -316,7 +334,7 @@ for (const { id, age, frames } of ordered) {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${cellW * n}" height="${cellH}">${marks}</svg>`;
   previews.push({ buf: await sharp({ create: { width: cellW * n, height: cellH, channels: 4, background: '#8a8f7a' } })
     .composite([{ input: join(outDir, `${base}.png`) }, { input: Buffer.from(svg) }]).png().toBuffer(), w: cellW * n, h: cellH });
-  console.log(`${id}${age ? ` (edad ${age})` : ''}: ${n} fotograma(s) de ${cellW}x${cellH} px, apoyo (${anchor.x}, ${anchor.y})${hasMask ? ', máscara de color' : ''}`);
+  console.log(`${id}${age ? ` (edad ${age})` : ''}${state !== 'idle' ? ` [${state}]` : ''}: ${n} fotograma(s) de ${cellW}x${cellH} px, apoyo (${anchor.x}, ${anchor.y})${hasMask ? ', máscara de color' : ''}`);
 }
 
 if (previews.length) {

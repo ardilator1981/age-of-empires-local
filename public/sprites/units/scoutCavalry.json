@@ -1,0 +1,19 @@
+{
+  "image": "scoutCavalry.png",
+  "mask": "scoutCavalry-mask.png",
+  "cell": {
+    "w": 92,
+    "h": 132
+  },
+  "anchor": {
+    "x": 46,
+    "y": 126
+  },
+  "scale": 2,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 1
+    }
+  }
+}

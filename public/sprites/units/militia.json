@@ -1,0 +1,19 @@
+{
+  "image": "militia.png",
+  "mask": "militia-mask.png",
+  "cell": {
+    "w": 48,
+    "h": 101
+  },
+  "anchor": {
+    "x": 24,
+    "y": 95
+  },
+  "scale": 2,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 1
+    }
+  }
+}

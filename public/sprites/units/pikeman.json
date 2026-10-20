@@ -1,0 +1,19 @@
+{
+  "image": "pikeman.png",
+  "mask": "pikeman-mask.png",
+  "cell": {
+    "w": 188,
+    "h": 104
+  },
+  "anchor": {
+    "x": 94,
+    "y": 98
+  },
+  "scale": 2,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 1
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "image": "crossbowman.png",
+  "mask": "crossbowman-mask.png",
+  "cell": {
+    "w": 65,
+    "h": 103
+  },
+  "anchor": {
+    "x": 33,
+    "y": 97
+  },
+  "scale": 2,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 1
+    }
+  }
+}

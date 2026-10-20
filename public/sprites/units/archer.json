@@ -1,0 +1,19 @@
+{
+  "image": "archer.png",
+  "mask": "archer-mask.png",
+  "cell": {
+    "w": 62,
+    "h": 100
+  },
+  "anchor": {
+    "x": 31,
+    "y": 94
+  },
+  "scale": 2,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 1
+    }
+  }
+}

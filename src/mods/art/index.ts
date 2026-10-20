@@ -33,7 +33,25 @@ export const ART: ArtEntry[] = [
   resourceArt('goldMine', 'resources/goldMine'),
   resourceArt('stoneMine', 'resources/stoneMine'),
   resourceArt('berries', 'resources/berries'),
-  // unitArt('villager', 'units/villager'),        → public/sprites/units/villager.json
+  // Pack 6 · Unidades (art-src/import/pack6-unidades.json). De momento solo quietas, salvo el
+  // aldeano que también anda; los demás estados usan la imagen quieta.
+  unitArt('villager', 'units/villager'),
+  unitArt('militia', 'units/militia'),
+  unitArt('manAtArms', 'units/manAtArms'),
+  unitArt('longSwordsman', 'units/longSwordsman'),
+  unitArt('spearman', 'units/spearman'),
+  unitArt('pikeman', 'units/pikeman'),
+  unitArt('archer', 'units/archer'),
+  unitArt('crossbowman', 'units/crossbowman'),
+  unitArt('skirmisher', 'units/skirmisher'),
+  unitArt('scoutCavalry', 'units/scoutCavalry'),
+  unitArt('lightCavalry', 'units/scoutCavalry'),
+  unitArt('knight', 'units/knight'),
+  unitArt('cavalier', 'units/cavalier'),
+  unitArt('batteringRam', 'units/batteringRam'),
+  unitArt('longbowman', 'units/longbowman'),
+  unitArt('throwingAxeman', 'units/throwingAxeman'),
+  unitArt('mangudai', 'units/mangudai'),
 ];
 
 /** Hojas de prueba (public/sprites/ejemplo/). Se activan abriendo el juego con ?arte=ejemplo. */

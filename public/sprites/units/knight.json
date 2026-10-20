@@ -1,0 +1,19 @@
+{
+  "image": "knight.png",
+  "mask": "knight-mask.png",
+  "cell": {
+    "w": 85,
+    "h": 176
+  },
+  "anchor": {
+    "x": 43,
+    "y": 170
+  },
+  "scale": 2,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 1
+    }
+  }
+}

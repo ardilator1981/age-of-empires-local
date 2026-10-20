@@ -1,0 +1,19 @@
+{
+  "image": "longbowman.png",
+  "mask": "longbowman-mask.png",
+  "cell": {
+    "w": 49,
+    "h": 111
+  },
+  "anchor": {
+    "x": 25,
+    "y": 105
+  },
+  "scale": 2,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 1
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "image": "throwingAxeman.png",
+  "mask": "throwingAxeman-mask.png",
+  "cell": {
+    "w": 48,
+    "h": 91
+  },
+  "anchor": {
+    "x": 24,
+    "y": 85
+  },
+  "scale": 2,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 1
+    }
+  }
+}

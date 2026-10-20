@@ -1,0 +1,19 @@
+{
+  "image": "spearman.png",
+  "mask": "spearman-mask.png",
+  "cell": {
+    "w": 62,
+    "h": 115
+  },
+  "anchor": {
+    "x": 31,
+    "y": 109
+  },
+  "scale": 2,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 1
+    }
+  }
+}

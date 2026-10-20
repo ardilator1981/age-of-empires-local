@@ -1,0 +1,19 @@
+{
+  "image": "batteringRam.png",
+  "mask": "batteringRam-mask.png",
+  "cell": {
+    "w": 124,
+    "h": 159
+  },
+  "anchor": {
+    "x": 62,
+    "y": 153
+  },
+  "scale": 2,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 1
+    }
+  }
+}

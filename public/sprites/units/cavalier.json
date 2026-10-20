@@ -1,0 +1,19 @@
+{
+  "image": "cavalier.png",
+  "mask": "cavalier-mask.png",
+  "cell": {
+    "w": 87,
+    "h": 145
+  },
+  "anchor": {
+    "x": 44,
+    "y": 139
+  },
+  "scale": 2,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 1
+    }
+  }
+}

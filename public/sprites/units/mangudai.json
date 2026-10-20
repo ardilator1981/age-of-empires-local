@@ -1,0 +1,19 @@
+{
+  "image": "mangudai.png",
+  "mask": "mangudai-mask.png",
+  "cell": {
+    "w": 76,
+    "h": 127
+  },
+  "anchor": {
+    "x": 38,
+    "y": 121
+  },
+  "scale": 2,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 1
+    }
+  }
+}

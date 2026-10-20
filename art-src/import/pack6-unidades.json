@@ -1,0 +1,24 @@
+{
+  "kind": "unit",
+  "out": "units",
+  "groups": {
+    "villager": { "fps": { "walk": 9 } }
+  },
+  "sources": [
+    { "source": "pack6-unidades/infanteria.jpg", "grid": [6, 2], "sharedScale": true,
+      "items": [
+        { "id": "villager", "height": 46 }, null, { "id": "militia" }, { "id": "manAtArms" }, { "id": "longSwordsman" }, { "id": "spearman" },
+        null, { "id": "pikeman" }, null, { "id": "archer" }, null, { "id": "crossbowman" }
+      ] },
+    { "source": "pack6-unidades/caballeria.jpg", "grid": [4, 1], "sharedScale": true,
+      "items": [{ "id": "scoutCavalry", "height": 62 }, { "id": "knight" }, { "id": "cavalier" }, { "id": "mangudai" }] },
+    { "source": "pack6-unidades/especiales.jpg", "grid": [4, 1], "sharedScale": true,
+      "items": [{ "id": "skirmisher", "height": 46 }, { "id": "batteringRam", "width": 58 }, { "id": "longbowman" }, { "id": "throwingAxeman" }] },
+    { "source": "pack6-unidades/aldeano-andar.jpg", "grid": [6, 2], "sharedScale": true,
+      "items": [
+        null, { "id": "villager", "state": "walk", "height": 46 }, { "id": "villager", "state": "walk" },
+        { "id": "villager", "state": "walk" }, { "id": "villager", "state": "walk" }, { "id": "villager", "state": "walk" },
+        null, null, null, null, null, null
+      ] }
+  ]
+}
