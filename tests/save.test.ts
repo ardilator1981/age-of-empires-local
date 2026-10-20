@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { TICK_DT } from '../src/core/constants';
 import { Commands } from '../src/game/commands';
 import { Game } from '../src/game/Game';
+import { stateHash } from '../src/game/net/hash';
 import { SAVE_VERSION, snapshot, upgradeSave, type SaveData } from '../src/game/save';
 import { newGame, options, reg, warReg } from './helpers';
 
@@ -39,9 +40,12 @@ describe('guardar y cargar partida', () => {
     run(a, 5);
     const b = roundTrip(a);
     expect(fingerprint(b)).toBe(fingerprint(a));
+    // Huella de todo el estado (niebla, órdenes, sistemas, game.data...), no solo lo principal
+    expect(stateHash(b)).toBe(stateHash(a));
     run(a, 4 * 60);
     run(b, 4 * 60);
     expect(fingerprint(b)).toBe(fingerprint(a));
+    expect(stateHash(b)).toBe(stateHash(a));
   });
 
   it('niebla, relieve y Guerra declarada se conservan', async () => {
@@ -55,8 +59,10 @@ describe('guardar y cargar partida', () => {
     expect(JSON.stringify(h.data.war)).toBe(JSON.stringify(g.data.war));
     // Las casillas ocupadas y las regiones se recalculan igual
     expect([...h.map.blocked]).toEqual([...g.map.blocked]);
+    expect(stateHash(h)).toBe(stateHash(g));
     run(g, 30); run(h, 30);
     expect(fingerprint(h)).toBe(fingerprint(g));
+    expect(stateHash(h)).toBe(stateHash(g));
   });
 
   it('versiones: rechaza partidas dañadas o de una versión más nueva', async () => {

@@ -270,7 +270,11 @@ export class CombatSystem implements System {
 
 /** Niebla de guerra del jugador humano. */
 export class VisionSystem implements System {
-  constructor(private game: Game) { this.recompute(); }
+  constructor(private game: Game) {
+    // Solo en una partida nueva: una cargada trae su niebla. Recalcularla aquí, con las posiciones
+    // de este instante, la haría distinta de la original (y `explored` cambia dónde se puede construir)
+    if (game.tick === 0) this.recompute();
+  }
 
   private recompute() {
     const g = this.game, m = g.map;

@@ -104,7 +104,7 @@ export function decode(v: any): any {
 
 // ------------------------------------------------------------------ instantánea
 
-// `visible` no se guarda: la niebla de este instante se recalcula al cargar
+// `visible` (la niebla de este instante) va aparte y solo de los humanos: la IA no tiene niebla
 export const PLAYER_FIELDS = ['res', 'age', 'researched', 'upgrades', 'popUsed', 'popCap', 'counts', 'pending', 'defeated', 'explored', 'stats', 'warnedAt', 'lastDeath', 'data'] as const;
 
 const KEEP = new Set(['id', 'kind', 'defId', 'owner']);
@@ -135,6 +135,7 @@ export function snapshot(game: Game): SaveData {
     players: game.players.map(p => {
       const o: any = { id: p.id };
       for (const k of PLAYER_FIELDS) o[k] = (p as any)[k];
+      if (p.isHuman) o.visible = p.visible;
       return o;
     }),
     entities: game.list.filter(e => !e.dead).map(compactEntity),
@@ -191,6 +192,8 @@ export function restoreWorld(game: Game, st: any) {
       p.researched.add(id);
     }
     for (const k of PLAYER_FIELDS) (p as any)[k] = sp[k];
+    // Partidas de antes sin `visible`: la niebla de este instante se rellena en el siguiente cálculo
+    if (sp.visible) p.visible.set(sp.visible);
   }
 
   // Entidades (las de contenido que ya no existe, p. ej. de un mod quitado, se descartan)
