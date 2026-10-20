@@ -15,5 +15,61 @@
       "row": 0,
       "frames": 1
     }
+  },
+  "ages": {
+    "1": {
+      "image": "mill-1.png",
+      "mask": "mill-1-mask.png",
+      "states": {
+        "idle": {
+          "row": 0,
+          "frames": 1,
+          "cell": {
+            "w": 264,
+            "h": 373
+          },
+          "anchor": {
+            "x": 132,
+            "y": 305
+          }
+        }
+      }
+    },
+    "2": {
+      "image": "mill-2.png",
+      "mask": "mill-2-mask.png",
+      "states": {
+        "idle": {
+          "row": 0,
+          "frames": 1,
+          "cell": {
+            "w": 264,
+            "h": 354
+          },
+          "anchor": {
+            "x": 132,
+            "y": 286
+          }
+        }
+      }
+    },
+    "3": {
+      "image": "mill-3.png",
+      "mask": "mill-3-mask.png",
+      "states": {
+        "idle": {
+          "row": 0,
+          "frames": 1,
+          "cell": {
+            "w": 264,
+            "h": 375
+          },
+          "anchor": {
+            "x": 132,
+            "y": 307
+          }
+        }
+      }
+    }
   }
 }

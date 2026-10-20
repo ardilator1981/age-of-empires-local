@@ -1,0 +1,123 @@
+{
+  "kind": "building",
+  "out": "buildings",
+  "sources": [
+    {
+      "source": "pack5-edades/feudal.jpg",
+      "grid": [
+        3,
+        2
+      ],
+      "items": [
+        {
+          "id": "townCenter",
+          "size": 4,
+          "age": 1
+        },
+        {
+          "id": "house",
+          "size": 2,
+          "age": 1
+        },
+        {
+          "id": "mill",
+          "size": 2,
+          "age": 1
+        },
+        {
+          "id": "lumberCamp",
+          "size": 2,
+          "age": 1
+        },
+        {
+          "id": "miningCamp",
+          "size": 2,
+          "age": 1
+        },
+        {
+          "id": "barracks",
+          "size": 3,
+          "age": 1
+        }
+      ]
+    },
+    {
+      "source": "pack5-edades/castillos.jpg",
+      "grid": [
+        3,
+        2
+      ],
+      "items": [
+        {
+          "id": "townCenter",
+          "size": 4,
+          "age": 2
+        },
+        {
+          "id": "house",
+          "size": 2,
+          "age": 2
+        },
+        {
+          "id": "mill",
+          "size": 2,
+          "age": 2
+        },
+        {
+          "id": "lumberCamp",
+          "size": 2,
+          "age": 2
+        },
+        {
+          "id": "miningCamp",
+          "size": 2,
+          "age": 2
+        },
+        {
+          "id": "barracks",
+          "size": 3,
+          "age": 2
+        }
+      ]
+    },
+    {
+      "source": "pack5-edades/imperial.jpg",
+      "grid": [
+        3,
+        2
+      ],
+      "items": [
+        {
+          "id": "townCenter",
+          "size": 4,
+          "age": 3
+        },
+        {
+          "id": "house",
+          "size": 2,
+          "age": 3
+        },
+        {
+          "id": "mill",
+          "size": 2,
+          "age": 3
+        },
+        {
+          "id": "lumberCamp",
+          "size": 2,
+          "age": 3
+        },
+        {
+          "id": "miningCamp",
+          "size": 2,
+          "age": 3
+        },
+        {
+          "id": "barracks",
+          "size": 3,
+          "age": 3
+        }
+      ]
+    }
+  ]
+}

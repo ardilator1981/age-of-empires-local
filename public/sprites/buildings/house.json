@@ -14,5 +14,59 @@
       "row": 0,
       "frames": 1
     }
+  },
+  "ages": {
+    "1": {
+      "image": "house-1.png",
+      "states": {
+        "idle": {
+          "row": 0,
+          "frames": 1,
+          "cell": {
+            "w": 264,
+            "h": 259
+          },
+          "anchor": {
+            "x": 132,
+            "y": 191
+          }
+        }
+      }
+    },
+    "2": {
+      "image": "house-2.png",
+      "states": {
+        "idle": {
+          "row": 0,
+          "frames": 1,
+          "cell": {
+            "w": 264,
+            "h": 276
+          },
+          "anchor": {
+            "x": 132,
+            "y": 208
+          }
+        }
+      }
+    },
+    "3": {
+      "image": "house-3.png",
+      "mask": "house-3-mask.png",
+      "states": {
+        "idle": {
+          "row": 0,
+          "frames": 1,
+          "cell": {
+            "w": 264,
+            "h": 313
+          },
+          "anchor": {
+            "x": 132,
+            "y": 245
+          }
+        }
+      }
+    }
   }
 }

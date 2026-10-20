@@ -15,5 +15,61 @@
       "row": 0,
       "frames": 1
     }
+  },
+  "ages": {
+    "1": {
+      "image": "townCenter-1.png",
+      "mask": "townCenter-1-mask.png",
+      "states": {
+        "idle": {
+          "row": 0,
+          "frames": 1,
+          "cell": {
+            "w": 520,
+            "h": 425
+          },
+          "anchor": {
+            "x": 260,
+            "y": 293
+          }
+        }
+      }
+    },
+    "2": {
+      "image": "townCenter-2.png",
+      "mask": "townCenter-2-mask.png",
+      "states": {
+        "idle": {
+          "row": 0,
+          "frames": 1,
+          "cell": {
+            "w": 520,
+            "h": 437
+          },
+          "anchor": {
+            "x": 260,
+            "y": 305
+          }
+        }
+      }
+    },
+    "3": {
+      "image": "townCenter-3.png",
+      "mask": "townCenter-3-mask.png",
+      "states": {
+        "idle": {
+          "row": 0,
+          "frames": 1,
+          "cell": {
+            "w": 520,
+            "h": 495
+          },
+          "anchor": {
+            "x": 260,
+            "y": 363
+          }
+        }
+      }
+    }
   }
 }

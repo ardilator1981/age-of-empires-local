@@ -15,5 +15,61 @@
       "row": 0,
       "frames": 1
     }
+  },
+  "ages": {
+    "1": {
+      "image": "lumberCamp-1.png",
+      "mask": "lumberCamp-1-mask.png",
+      "states": {
+        "idle": {
+          "row": 0,
+          "frames": 1,
+          "cell": {
+            "w": 264,
+            "h": 181
+          },
+          "anchor": {
+            "x": 132,
+            "y": 113
+          }
+        }
+      }
+    },
+    "2": {
+      "image": "lumberCamp-2.png",
+      "mask": "lumberCamp-2-mask.png",
+      "states": {
+        "idle": {
+          "row": 0,
+          "frames": 1,
+          "cell": {
+            "w": 264,
+            "h": 183
+          },
+          "anchor": {
+            "x": 132,
+            "y": 115
+          }
+        }
+      }
+    },
+    "3": {
+      "image": "lumberCamp-3.png",
+      "mask": "lumberCamp-3-mask.png",
+      "states": {
+        "idle": {
+          "row": 0,
+          "frames": 1,
+          "cell": {
+            "w": 264,
+            "h": 197
+          },
+          "anchor": {
+            "x": 132,
+            "y": 129
+          }
+        }
+      }
+    }
   }
 }

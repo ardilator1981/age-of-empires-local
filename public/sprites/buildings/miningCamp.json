@@ -15,5 +15,61 @@
       "row": 0,
       "frames": 1
     }
+  },
+  "ages": {
+    "1": {
+      "image": "miningCamp-1.png",
+      "mask": "miningCamp-1-mask.png",
+      "states": {
+        "idle": {
+          "row": 0,
+          "frames": 1,
+          "cell": {
+            "w": 264,
+            "h": 227
+          },
+          "anchor": {
+            "x": 132,
+            "y": 159
+          }
+        }
+      }
+    },
+    "2": {
+      "image": "miningCamp-2.png",
+      "mask": "miningCamp-2-mask.png",
+      "states": {
+        "idle": {
+          "row": 0,
+          "frames": 1,
+          "cell": {
+            "w": 264,
+            "h": 195
+          },
+          "anchor": {
+            "x": 132,
+            "y": 127
+          }
+        }
+      }
+    },
+    "3": {
+      "image": "miningCamp-3.png",
+      "mask": "miningCamp-3-mask.png",
+      "states": {
+        "idle": {
+          "row": 0,
+          "frames": 1,
+          "cell": {
+            "w": 264,
+            "h": 232
+          },
+          "anchor": {
+            "x": 132,
+            "y": 164
+          }
+        }
+      }
+    }
   }
 }

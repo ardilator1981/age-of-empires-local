@@ -15,5 +15,61 @@
       "row": 0,
       "frames": 1
     }
+  },
+  "ages": {
+    "1": {
+      "image": "barracks-1.png",
+      "mask": "barracks-1-mask.png",
+      "states": {
+        "idle": {
+          "row": 0,
+          "frames": 1,
+          "cell": {
+            "w": 392,
+            "h": 294
+          },
+          "anchor": {
+            "x": 196,
+            "y": 194
+          }
+        }
+      }
+    },
+    "2": {
+      "image": "barracks-2.png",
+      "mask": "barracks-2-mask.png",
+      "states": {
+        "idle": {
+          "row": 0,
+          "frames": 1,
+          "cell": {
+            "w": 392,
+            "h": 282
+          },
+          "anchor": {
+            "x": 196,
+            "y": 182
+          }
+        }
+      }
+    },
+    "3": {
+      "image": "barracks-3.png",
+      "mask": "barracks-3-mask.png",
+      "states": {
+        "idle": {
+          "row": 0,
+          "frames": 1,
+          "cell": {
+            "w": 392,
+            "h": 283
+          },
+          "anchor": {
+            "x": 196,
+            "y": 183
+          }
+        }
+      }
+    }
   }
 }

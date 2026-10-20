@@ -180,6 +180,24 @@ const sources = cfg.sources ?? [{ source: cfg.source, grid: cfg.grid, items: cfg
 const groupCfg = cfg.groups ?? {};
 const PAD = 4;
 
+/**
+ * Cuánto se parece un color al magenta del color de jugador (0..1), por tono y saturación:
+ * así se detectan también sus sombras oscuras y sus brillos. Los rojos de tejados y ladrillo
+ * (tono 0-30°) y los morados (≤ 280°) quedan fuera.
+ */
+function magentaAmount(r, g, b) {
+  const max = Math.max(r, g, b), min = Math.min(r, g, b), d = max - min;
+  if (max < 40 || d < 25) return 0;
+  let h;
+  if (max === r) h = 60 * (((g - b) / d) % 6);
+  else if (max === g) h = 60 * ((b - r) / d + 2);
+  else h = 60 * ((r - g) / d + 4);
+  if (h < 0) h += 360;
+  const sat = d / max;
+  const hue = h >= 290 && h <= 340 ? 1 : h > 280 && h < 290 ? (h - 280) / 10 : h > 340 && h < 350 ? (350 - h) / 10 : 0;
+  return hue * Math.max(0, Math.min(1, (sat - 0.3) / 0.25));
+}
+
 /** Recorta las componentes `ids` y separa el magenta (→ gris claro + máscara). */
 function cutPiece(src, ids) {
   const { W, rgba, comp, boxes } = src;
@@ -193,7 +211,7 @@ function cutPiece(src, ids) {
     if (!ids.has(comp[i])) continue;
     let r = rgba[i * 4], g = rgba[i * 4 + 1], b = rgba[i * 4 + 2];
     const a = rgba[i * 4 + 3];
-    const m = Math.max(0, Math.min(1, (Math.min(r, b) - g - 40) / 60)) * (Math.abs(r - b) < 110 ? 1 : 0);
+    const m = magentaAmount(r, g, b);
     if (m > 0) {
       const v = Math.min(255, Math.max(r, b) * 1.05);
       r += (v - r) * m; g += (v - g) * m; b += (v - b) * m;
