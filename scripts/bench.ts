@@ -11,6 +11,7 @@ import { TICK_DT } from '../src/core/constants';
 import { Game, type GameOptions } from '../src/game/Game';
 import { findPath } from '../src/game/pathfinding';
 import { ALL_MODS } from '../src/mods';
+import { Commands } from '../src/game/commands';
 
 const MODS = ALL_MODS.filter(m => m.id !== 'declared-war');
 const reg = buildRegistry(MODS);
@@ -122,6 +123,34 @@ async function main() {
     out[`estrés 300 unidades cruzando ${map} (4 min)`] = {
       msPerTick: +((performance.now() - t0) / ((minutes * 60) / TICK_DT)).toFixed(3), worstTickMs: +worst.toFixed(1),
       vivas: army.filter(u => !u.dead).length, llegadas: arrived, atascadas: stuck, enRoca: onRock, visionMs,
+    };
+  }
+  // Formaciones: dos ejércitos de 150 avanzan atacando, en formación, por la cordillera
+  {
+    const g = await makeGame(options('pyrenees', 120, 2));
+    for (const sys of g.systems) if ((sys as any).ais) (sys as any).ais = [];
+    const tcs = g.buildings.filter(b => b.defId === 'townCenter');
+    const armies: any[][] = [[], []];
+    for (let side = 0; side < 2; side++) {
+      const tc = tcs[side];
+      for (let i = 0; i < 150; i++) {
+        const p = g.findFreeTile(tc.x + ((i % 15) - 7) * 0.7, tc.y + 5 + Math.floor(i / 15) * 0.7, 14);
+        if (p) armies[side].push(g.spawnUnit(['militia', 'archer', 'scoutCavalry'][i % 3], tc.owner, p.x, p.y));
+      }
+    }
+    Commands.army(g, armies[0], { kind: 'attack', points: [{ x: tcs[1].x + 6, y: tcs[1].y + 6 }] });
+    Commands.army(g, armies[1], { kind: 'attack', points: [{ x: tcs[0].x + 6, y: tcs[0].y + 6 }] });
+    let worst = 0;
+    const t0 = performance.now(), ticks = (4 * 60) / TICK_DT;
+    for (let i = 0; i < ticks; i++) {
+      const t = performance.now();
+      g.update(TICK_DT);
+      worst = Math.max(worst, performance.now() - t);
+    }
+    const all = [...armies[0], ...armies[1]];
+    out['formaciones: 2 × 150 avanzando atacando por los Pirineos (4 min)'] = {
+      msPerTick: +((performance.now() - t0) / ticks).toFixed(3), worstTickMs: +worst.toFixed(1),
+      vivas: all.filter(u => !u.dead).length, enRoca: all.filter(u => !u.dead && !g.map.walkable(Math.floor(u.x), Math.floor(u.y))).length,
     };
   }
   console.log(JSON.stringify(out, null, 2));

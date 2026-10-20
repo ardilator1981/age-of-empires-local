@@ -50,6 +50,8 @@ export interface Group {
   /** Dirección con la que se asignaron los huecos (para reasignar al girar). */
   assignedFacing: Pt;
   lastFight: number;
+  /** Enemigos con los que está luchando alguien del grupo (los agresivos acuden). */
+  foes: number[];
   arrivedAt?: number;
   escortId?: number;
   zone?: { x: number; y: number; r: number };
@@ -95,7 +97,7 @@ export function createGroup(game: Game, units: Entity[], opts: GroupOptions): Gr
     id: st.next++, owner: units[0].owner, members: units.map(u => u.id), type: opts.type, mode: opts.mode,
     route: opts.route.map(p => ({ x: p.x, y: p.y })), ri: 0, pos: start, facing, path: [],
     speed: Math.min(...units.map(u => speedOf(game, u))), offsets: new Map(), world: new Map(),
-    assignedFacing: facing, lastFight: -99, nextCheck: 0, escortId: opts.escortId, fullWidth: 1,
+    assignedFacing: facing, lastFight: -99, foes: [], nextCheck: 0, escortId: opts.escortId, fullWidth: 1,
     finalFacing: opts.finalFacing ? norm(opts.finalFacing) : undefined,
   };
   if (opts.mode === 'zone') grp.zone = { x: first.x, y: first.y, r: opts.zoneRadius ?? BALANCE.army.zoneRadius };
@@ -193,7 +195,8 @@ export class FormationSystem implements System {
       let changed = units.length !== grp.members.length;
       if (changed) grp.members = units.map(u => u.id);
       grp.speed = Math.min(...units.map(u => speedOf(g, u)));
-      if (units.some(u => u.order!.target)) grp.lastFight = g.time;
+      grp.foes = [...new Set(units.map(u => u.order!.target).filter(Boolean))];
+      if (grp.foes.length) grp.lastFight = g.time;
       const fighting = g.time - grp.lastFight < BALANCE.army.resumeAfter;
 
       // Escolta: el destino es detrás de la unidad protegida
@@ -280,6 +283,16 @@ export const formationOrder: OrderHandler = {
       if (!t && game.time >= (o.scanAt ?? 0)) {
         o.scanAt = game.time + 0.4;
         t = stanceTarget(game, u, slot, accept, grp.mode === 'attack' || grp.mode === 'patrol') ?? undefined;
+        // Al ataque, los agresivos acuden a la pelea de sus compañeros aunque no la vean
+        if (!t && st === 'aggressive' && (grp.mode === 'attack' || grp.mode === 'patrol') && grp.foes.length) {
+          let bd = Infinity;
+          for (const id of grp.foes) {
+            const e = game.get(id);
+            if (!e || !game.canAttack(u, e, false)) continue;
+            const d = Math.hypot(e.x - u.x, e.y - u.y);
+            if (d < bd) { bd = d; t = e; }
+          }
+        }
         // En una zona o escoltando, todos acuden a lo que entra en el área protegida
         // (aunque esté más lejos de lo que ven o de su correa)
         const area = grp.zone ?? (grp.mode === 'escort' && game.get(grp.escortId)

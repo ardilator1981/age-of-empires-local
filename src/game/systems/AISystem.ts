@@ -2,6 +2,7 @@ import { BALANCE } from '../../config/balance';
 import type { Cost, Pt, System } from '../../core/types';
 import { isAccessible, nearestDrop, nearestNode, isFarmTaken, setOrder } from '../actions';
 import { Commands } from '../commands';
+import { moveInFormation } from '../formation';
 import type { Entity } from '../Entity';
 import type { Game } from '../Game';
 import type { Player } from '../Player';
@@ -426,15 +427,27 @@ export class AIController {
     if (g.time >= this.cfg.firstAttack && atHome.length >= this.waveSize) {
       const t = this.enemyTarget(atHome[0]);
       if (t) {
+        // Al ataque en grupo: postura agresiva y en línea (en cuña si es sobre todo caballería)
+        const cav = atHome.filter(a => g.unitDef(a).classes.includes('cavalry')).length;
+        Commands.setStance(g, atHome, 'aggressive');
+        Commands.setFormation(g, atHome, cav > atHome.length / 2 ? 'wedge' : 'line');
         Commands.attackMove(g, atHome, t.x, t.y);
         this.waveSize += this.cfg.waveGrow;
       }
     } else {
-      // Mientras se reúne la oleada, el ejército espera en un punto alto de cara al enemigo
+      // Mientras se reúne la oleada, el ejército espera en línea, en un punto alto de cara al
+      // enemigo, en postura defensiva (defiende sin alejarse)
       const post = this.defensePost();
       if (post) {
         const away = atHome.filter(a => Math.hypot(a.x - post.x, a.y - post.y) > 4);
-        if (away.length) Commands.move(g, away, post.x, post.y);
+        const lax = atHome.filter(a => a.stance !== 'defensive');
+        if (lax.length) Commands.setStance(g, lax, 'defensive');
+        if (away.length) {
+          Commands.setFormation(g, away, 'line');
+          const facing = { x: post.x - this.home.x, y: post.y - this.home.y };
+          if (away.length >= 2) moveInFormation(g, away, post, facing, 'line');
+          else Commands.move(g, away, post.x, post.y);
+        }
       }
     }
   }
