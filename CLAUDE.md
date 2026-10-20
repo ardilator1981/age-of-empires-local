@@ -23,15 +23,18 @@ src/
                protocolo, trozos numerados y transportes (pestañas, Trystero, código o QR)
     systems/   core.ts (sistemas básicos) y AISystem.ts (IA por jugador)
   render/      Camera (con relieve), Renderer (2D), TerrainGL (WebGL2), quality (calidad gráfica), terrainPatterns,
-               sprites, decorations, icons (retratos), Minimap, imageSprite
+               sprites, decorations, icons (retratos), Minimap, imageSprite,
+               art/ (imágenes: texturas de terreno, hojas de sprites, color del jugador)
   ui/          HUD, Menu, Input, UIState, svgIcons, StrategyScreen (pantalla de estrategia),
                SettingsPanel (ajustes unificados), layout (preferencias de interfaz)
   audio/       AudioManager (eventos → sonido, volúmenes, desbloqueo móvil), Music (generativa), sfx (efectos sintéticos)
   mods/real-maps/  Mapas a partir de relieve y datos reales (JSON en data/)
   app/         App (ciclo menú → partida, guardado automático, partidas en red), Session (todo lo de una partida),
                saves (ranuras en IndexedDB), orders (adónde van las órdenes del jugador)
-  mods/        core/ (contenido base: datos), extra-content/, treasure-hunt/, declared-war/ (modo Guerra declarada)
-scripts/       simulate.ts (partida IA contra IA sin gráficos), real-map.mjs, make-icons.mjs
+  mods/        core/ (contenido base: datos), extra-content/, treasure-hunt/, declared-war/ (modo Guerra declarada),
+               art/ (qué definiciones se dibujan con imágenes)
+scripts/       simulate.ts (partida IA contra IA sin gráficos), real-map.mjs, make-icons.mjs,
+               fix-textures.mjs y art-import.mjs (arte con imágenes)
 .github/       Workflows de GitHub Pages y del APK de Android
 docs/          decisiones.md (decisiones de diseño), riesgos.md (riesgos técnicos), multijugador.md (viabilidad)
 ```
@@ -41,7 +44,7 @@ docs/          decisiones.md (decisiones de diseño), riesgos.md (riesgos técni
 - `main`: juego base, terreno orgánico, música, **sonido** (efectos y alertas sintéticos con `AudioManager`, fusionado desde `feat/audio-efectos`), **versión móvil** (controles táctiles, interfaz adaptable, PWA con `vite-plugin-pwa`, Pages y APK con Capacitor) y **relieve con mapas reales**: roca infranqueable y pasos garantizados, reglas de altura, visión con crestas y 12 regiones reales sin conexión con selector en mapamundi (fusionado desde `feat/relieve-mapas-reales`), y el modo **Guerra declarada** (mod `declared-war`, desactivado por defecto; fusionado desde `feat/guerra-declarada`), **ejércitos**: formaciones, posturas, órdenes tácticas y pantalla de estrategia (fusionado desde `feat/ejercitos`), y **guardado, calidad gráfica y ajustes**: partidas guardadas y Continuar, calidad automática, ahorro de batería y panel de ajustes (fusionado desde `feat/guardado-rendimiento`), y **multijugador en red** (fusionado desde `feat/multijugador`, ver `docs/multijugador.md`).
 - `feat/fusion-movil-mapas`, `feat/relieve-mapas-reales`, `feat/audio-efectos`, `feat/pequenos-cambios`, `feat/guerra-declarada`, `feat/ejercitos`, `feat/guardado-rendimiento`, `feat/multijugador-viabilidad` y `feat/multijugador`: ya están en `main`.
 - `feat/interfaz-movil`: **interfaz móvil** (capa `MobileHUD`, elección automática de interfaz, gestos y grupos táctiles; capturas y medición en `docs/movil/`). Ya está en `main`. Al añadir comandos nuevos al HUD, añádelos en `ui/commandModel.ts` para que salgan también en el móvil.
-- `claude/arte-ia`: gráficos con sprites generados por IA (otra sesión).
+- `claude/arte-ia`: **arte con imágenes** (ya en `main`). Texturas de terreno desde `public/sprites/terrain/`, hojas de sprites con manifiesto JSON (`src/render/art/`), mod `art` (`src/mods/art/`: qué definiciones usan qué hoja; lo demás sigue procedural) y scripts `fix-textures` y `art-import`. Ya tienen imagen los edificios de la Edad Oscura y militares, las torres por época, los árboles, las minas y las bayas. Prompts de Nano Banana en `docs/prompts-nano-banana.md`; flujo completo en el README («Arte con imágenes»).
 - Multijugador (ya en `main`): sala, pestañas, Trystero (por internet) y código o QR (sin intermediarios), pausa y velocidad para todos, la IA juega por quien se va, reconexión con la partida del anfitrión. Falta probar WebRTC en dispositivos reales (ver `docs/multijugador.md`). La simulación tiene que seguir siendo determinista: en el código de cada tick, `hypot`, `sin` y `cos` de `game/fmath.ts`, nunca `Math.random` ni el reloj.
 - Remoto: `origin` = github.com/ardilator1981/age-of-empires-local. Al hacer push a `main` se publica la web (GitHub Pages). La Release v0.1.0 salió de `claude/upbeat-ishizaka-5d23f0`.
 
@@ -91,7 +94,7 @@ Depuración en el navegador: `window.app` y `window.game` están accesibles desd
 - Aleatoriedad de la simulación: `game.rng()` (determinista por semilla), nunca `Math.random()`.
 - Determinismo (para el multijugador): en el código que corre cada tick, `hypot`, `sin` y `cos` de `src/game/fmath.ts`, nunca `Math.hypot`, `Math.sin`, `Math.cos`, `Math.atan2` ni `Math.exp`, que dan distinto en Chrome y Safari. Tampoco `Date.now` ni nada de la interfaz. Un test lo comprueba en `src/game`; en los mods, a mano. El dibujo puede usar `Math`.
 - Sonido: para que algo suene, emite un evento del juego (o usa `game.reject` para los errores de una acción) y añade el efecto en `audio/sfx.ts` y su escucha en `AudioManager`. Nada de archivos con copyright; documenta cada sonido en `CREDITS.md`.
-- Sprites: funciones registradas por id. La luz viene de arriba a la izquierda. Casilla de 64×32 px a zoom 1, y `ELEV_PX` píxeles por nivel de elevación.
+- Sprites: funciones registradas por id. La luz viene de arriba a la izquierda. Casilla de 64×32 px a zoom 1, y `ELEV_PX` píxeles por nivel de elevación. Para usar una imagen en vez del dibujo procedural, añade su hoja a `ART` en `src/mods/art/index.ts` (ver «Arte con imágenes» en el README).
 
 ## Reglas de trabajo
 
