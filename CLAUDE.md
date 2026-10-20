@@ -28,10 +28,9 @@ docs/          decisiones.md (decisiones de diseño), riesgos.md (riesgos técni
 
 ## Estado de las ramas (actualizar al fusionar)
 
-- `main`: juego base, terreno orgánico, música, **sonido** (efectos y alertas sintéticos con `AudioManager`, fusionado desde `feat/audio-efectos`), **versión móvil** (controles táctiles, interfaz adaptable, PWA con `vite-plugin-pwa`, Pages y APK con Capacitor) y **relieve con mapas reales**: roca infranqueable y pasos garantizados, reglas de altura, visión con crestas y 12 regiones reales sin conexión con selector en mapamundi (fusionado desde `feat/relieve-mapas-reales`).
-- `feat/fusion-movil-mapas`, `feat/relieve-mapas-reales` y `feat/audio-efectos`: ya están en `main`.
+- `main`: juego base, terreno orgánico, música, **sonido** (efectos y alertas sintéticos con `AudioManager`, fusionado desde `feat/audio-efectos`), **versión móvil** (controles táctiles, interfaz adaptable, PWA con `vite-plugin-pwa`, Pages y APK con Capacitor) y **relieve con mapas reales**: roca infranqueable y pasos garantizados, reglas de altura, visión con crestas y 12 regiones reales sin conexión con selector en mapamundi (fusionado desde `feat/relieve-mapas-reales`), y el modo **Guerra declarada** (mod `declared-war`, desactivado por defecto; fusionado desde `feat/guerra-declarada`).
+- `feat/fusion-movil-mapas`, `feat/relieve-mapas-reales`, `feat/audio-efectos`, `feat/pequenos-cambios` y `feat/guerra-declarada`: ya están en `main`.
 - `feat/interfaz-movil`: **interfaz móvil** (capa `MobileHUD`, elección automática de interfaz, gestos y grupos táctiles; capturas y medición en `docs/movil/`). Ya está en `main`. Al añadir comandos nuevos al HUD, añádelos en `ui/commandModel.ts` para que salgan también en el móvil.
-- `feat/interfaz-movil`: capa táctil de interfaz (otra sesión, en curso).
 - `claude/arte-ia`: gráficos con sprites generados por IA (otra sesión).
 - Remoto: `origin` = github.com/ardilator1981/age-of-empires-local. La web publicada y la Release v0.1.0 salieron de `claude/upbeat-ishizaka-5d23f0`.
 
