@@ -1,0 +1,26 @@
+{
+  "kind": "resource",
+  "out": "resources",
+  "groups": {
+    "tree":       { "pick": "variant", "shadow": 14, "dy": -4 },
+    "pineTree":   { "pick": "variant", "shadow": 12, "dy": -4 },
+    "snowPine":   { "pick": "variant", "shadow": 12, "dy": -4 },
+    "goldMine":   { "pick": "amount",  "shadow": 26, "dy": -14 },
+    "stoneMine":  { "pick": "amount",  "shadow": 26, "dy": -14 },
+    "berries":    { "pick": "amount",  "shadow": 16, "dy": -8 }
+  },
+  "sources": [
+    { "source": "pack2-naturaleza/robles.jpg", "grid": [3, 2],
+      "items": [{ "id": "tree", "height": 80 }, { "id": "tree" }, { "id": "tree" }, { "id": "tree" }, null, { "id": "tree" }] },
+    { "source": "pack2-naturaleza/pinos.jpg", "grid": [3, 2],
+      "items": [{ "id": "tree", "height": 78 }, { "id": "tree" }, { "id": "tree" }, null, null, null] },
+    { "source": "pack2-naturaleza/pinos.jpg", "grid": [3, 2],
+      "items": [{ "id": "pineTree", "height": 78 }, { "id": "pineTree" }, { "id": "pineTree" },
+                { "id": "snowPine", "height": 78 }, { "id": "snowPine" }, { "id": "snowPine" }] },
+    { "source": "pack2-naturaleza/minas.jpg", "grid": [3, 2],
+      "items": [{ "id": "goldMine", "width": 62 }, { "id": "goldMine" }, { "id": "goldMine" },
+                { "id": "stoneMine", "width": 62 }, { "id": "stoneMine" }, { "id": "stoneMine" }] },
+    { "source": "pack2-naturaleza/arbustos.jpg", "grid": [3, 2],
+      "items": [{ "id": "berries", "width": 40 }, { "id": "berries" }, { "id": "berries" }, null, null, null] }
+  ]
+}

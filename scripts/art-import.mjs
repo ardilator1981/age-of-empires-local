@@ -24,7 +24,15 @@
  *     { "id": "mill", "size": 2, "fit": 1.3, "dy": 6 } ← fit: ancho de la pieza / ancho de la huella
  *   ]                                                     dx, dy: mover el apoyo (px de la salida)
  * }
- * Unidades y recursos: { "id": "oak1", "height": 80 } (alto en px a zoom 1).
+ * Unidades y recursos: { "id": "tree", "height": 80 } (alto en px a zoom 1) o "width".
+ *
+ * Hojas de varios fotogramas: las piezas con el mismo id se juntan en una tira, en orden
+ * (variantes de árbol, fases de una mina...). Pueden venir de varias imágenes:
+ * { "kind": "resource", "out": "resources",
+ *   "groups": { "goldMine": { "width": 58, "pick": "amount", "shadow": 22 } },
+ *   "sources": [ { "source": "...", "grid": [3, 2], "items": [ ... ] }, ... ] }
+ * Una pieza sin medida propia usa la escala de la anterior del mismo id y de la misma
+ * imagen, para que las fases conserven su tamaño relativo.
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
@@ -37,146 +45,145 @@ const entradaArg = args.includes('--entrada') ? args[args.indexOf('--entrada') +
 const entrada = resolve(entradaArg ?? 'art-src/entrada');
 const cfg = JSON.parse(readFileSync(configPath, 'utf8'));
 const SCALE = 2;
-const srcFile = join(entrada, cfg.source);
-if (!existsSync(srcFile)) { console.log(`No encuentro ${srcFile}`); process.exit(1); }
 
-const { data, info } = await sharp(srcFile).removeAlpha().raw().toBuffer({ resolveWithObject: true });
-const W = info.width, H = info.height;
-const N = W * H;
-const px = i => [data[i * 3], data[i * 3 + 1], data[i * 3 + 2]];
+/** Quita el fondo de una imagen y agrupa sus piezas por casilla de la cuadrícula. */
+async function loadSource(srcFile, grid) {
+  const { data, info } = await sharp(srcFile).removeAlpha().raw().toBuffer({ resolveWithObject: true });
+  const W = info.width, H = info.height;
+  const N = W * H;
+  const px = i => [data[i * 3], data[i * 3 + 1], data[i * 3 + 2]];
 
-// ------------------------------------------------------------ fondo
-/** Casi blanco y sin color (el JPG deja ruido cerca del blanco). */
-const whiteish = (i, min) => {
-  const r = data[i * 3], g = data[i * 3 + 1], b = data[i * 3 + 2];
-  return Math.min(r, g, b) >= min && Math.max(r, g, b) - Math.min(r, g, b) <= 22;
-};
-const bg = new Uint8Array(N);
-{
-  const q = [];
-  for (let x = 0; x < W; x++) { q.push(x, (H - 1) * W + x); }
-  for (let y = 0; y < H; y++) { q.push(y * W, y * W + W - 1); }
-  for (const i of q) bg[i] = whiteish(i, 232) ? 1 : 0;
-  const stack = q.filter(i => bg[i]);
-  while (stack.length) {
-    const i = stack.pop(), x = i % W, y = (i / W) | 0;
-    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
-      const nx = x + dx, ny = y + dy;
-      if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue;
-      const n = ny * W + nx;
-      if (!bg[n] && whiteish(n, 232)) { bg[n] = 1; stack.push(n); }
-    }
-  }
-  // Huecos blancos cerrados (entre aspas, vallas...): regiones de blanco casi puro
-  const seen = new Uint8Array(N);
-  for (let i = 0; i < N; i++) {
-    if (bg[i] || seen[i] || !whiteish(i, 240)) continue;
-    const region = [i]; seen[i] = 1; let sum = 0;
-    for (let k = 0; k < region.length; k++) {
-      const j = region[k], x = j % W, y = (j / W) | 0;
-      const [r, g, b] = px(j); sum += (r + g + b) / 3;
+  // ------------------------------------------------------------ fondo
+  /** Casi blanco y sin color (el JPG deja ruido cerca del blanco). */
+  const whiteish = (i, min) => {
+    const r = data[i * 3], g = data[i * 3 + 1], b = data[i * 3 + 2];
+    return Math.min(r, g, b) >= min && Math.max(r, g, b) - Math.min(r, g, b) <= 22;
+  };
+  const bg = new Uint8Array(N);
+  {
+    const q = [];
+    for (let x = 0; x < W; x++) { q.push(x, (H - 1) * W + x); }
+    for (let y = 0; y < H; y++) { q.push(y * W, y * W + W - 1); }
+    for (const i of q) bg[i] = whiteish(i, 232) ? 1 : 0;
+    const stack = q.filter(i => bg[i]);
+    while (stack.length) {
+      const i = stack.pop(), x = i % W, y = (i / W) | 0;
       for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
         const nx = x + dx, ny = y + dy;
         if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue;
         const n = ny * W + nx;
-        if (!seen[n] && !bg[n] && whiteish(n, 240)) { seen[n] = 1; region.push(n); }
+        if (!bg[n] && whiteish(n, 232)) { bg[n] = 1; stack.push(n); }
       }
     }
-    if (region.length >= 12 && sum / region.length >= 247) for (const j of region) bg[j] = 1;
+    // Huecos blancos cerrados (entre aspas, vallas...): regiones de blanco casi puro
+    const seen = new Uint8Array(N);
+    for (let i = 0; i < N; i++) {
+      if (bg[i] || seen[i] || !whiteish(i, 240)) continue;
+      const region = [i]; seen[i] = 1; let sum = 0;
+      for (let k = 0; k < region.length; k++) {
+        const j = region[k], x = j % W, y = (j / W) | 0;
+        const [r, g, b] = px(j); sum += (r + g + b) / 3;
+        for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+          const nx = x + dx, ny = y + dy;
+          if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue;
+          const n = ny * W + nx;
+          if (!seen[n] && !bg[n] && whiteish(n, 240)) { seen[n] = 1; region.push(n); }
+        }
+      }
+      if (region.length >= 12 && sum / region.length >= 247) for (const j of region) bg[j] = 1;
+    }
   }
-}
 
-// ------------------------------------------------------------ borde suave sin halo blanco
-const rgba = Buffer.alloc(N * 4);
-{
-  // distancia (en px, hasta 3) al fondo
-  const dist = new Uint8Array(N).fill(255);
-  let front = [];
-  for (let i = 0; i < N; i++) if (bg[i]) { dist[i] = 0; front.push(i); }
-  for (let d = 1; d <= 3; d++) {
-    const next = [];
-    for (const i of front) {
-      const x = i % W, y = (i / W) | 0;
+  // ------------------------------------------------------------ borde suave sin halo blanco
+  const rgba = Buffer.alloc(N * 4);
+  {
+    // distancia (en px, hasta 3) al fondo
+    const dist = new Uint8Array(N).fill(255);
+    let front = [];
+    for (let i = 0; i < N; i++) if (bg[i]) { dist[i] = 0; front.push(i); }
+    for (let d = 1; d <= 3; d++) {
+      const next = [];
+      for (const i of front) {
+        const x = i % W, y = (i / W) | 0;
+        for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+          const nx = x + dx, ny = y + dy;
+          if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue;
+          const n = ny * W + nx;
+          if (dist[n] > d) { dist[n] = d; next.push(n); }
+        }
+      }
+      front = next;
+    }
+    for (let i = 0; i < N; i++) {
+      const [r, g, b] = px(i);
+      if (bg[i]) continue;
+      let a = 1, f = [r, g, b];
+      if (dist[i] <= 2) {
+        // Color del interior más cercano: el borde es ese color mezclado con blanco
+        const x = i % W, y = (i / W) | 0;
+        let best = null, bd = 1e9;
+        for (let dy = -4; dy <= 4; dy++) for (let dx = -4; dx <= 4; dx++) {
+          const nx = x + dx, ny = y + dy;
+          if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue;
+          const n = ny * W + nx;
+          if (dist[n] < 3) continue;
+          const dd = dx * dx + dy * dy;
+          if (dd < bd) { bd = dd; best = n; }
+        }
+        if (best !== null) {
+          const c = px(best);
+          let num = 0, den = 0;
+          for (let k = 0; k < 3; k++) { num += 255 - [r, g, b][k]; den += 255 - c[k]; }
+          a = den > 30 ? Math.max(0, Math.min(1, num / den)) : 1;
+          if (a > 0.02) f = [r, g, b].map((v, k) => Math.max(0, Math.min(255, (v - (1 - a) * 255) / a)));
+          f = f.map((v, k) => v * 0.5 + c[k] * 0.5);
+        }
+      }
+      rgba[i * 4] = f[0]; rgba[i * 4 + 1] = f[1]; rgba[i * 4 + 2] = f[2]; rgba[i * 4 + 3] = Math.round(a * 255);
+    }
+  }
+
+  // ------------------------------------------------------------ piezas por casilla de la cuadrícula
+  const [GC, GR] = grid ?? [1, 1];
+  const comp = new Int32Array(N).fill(-1);
+  const boxes = [];
+  for (let i = 0; i < N; i++) {
+    if (rgba[i * 4 + 3] < 8 || comp[i] >= 0) continue;
+    const id = boxes.length, st = [i];
+    comp[i] = id;
+    let x0 = W, y0 = H, x1 = 0, y1 = 0, n = 0;
+    while (st.length) {
+      const j = st.pop(), x = j % W, y = (j / W) | 0;
+      n++; if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y;
       for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
         const nx = x + dx, ny = y + dy;
         if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue;
-        const n = ny * W + nx;
-        if (dist[n] > d) { dist[n] = d; next.push(n); }
+        const k = ny * W + nx;
+        if (comp[k] < 0 && rgba[k * 4 + 3] >= 8) { comp[k] = id; st.push(k); }
       }
     }
-    front = next;
+    boxes.push({ x0, y0, x1, y1, n });
   }
-  for (let i = 0; i < N; i++) {
-    const [r, g, b] = px(i);
-    if (bg[i]) continue;
-    let a = 1, f = [r, g, b];
-    if (dist[i] <= 2) {
-      // Color del interior más cercano: el borde es ese color mezclado con blanco
-      const x = i % W, y = (i / W) | 0;
-      let best = null, bd = 1e9;
-      for (let dy = -4; dy <= 4; dy++) for (let dx = -4; dx <= 4; dx++) {
-        const nx = x + dx, ny = y + dy;
-        if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue;
-        const n = ny * W + nx;
-        if (dist[n] < 3) continue;
-        const dd = dx * dx + dy * dy;
-        if (dd < bd) { bd = dd; best = n; }
-      }
-      if (best !== null) {
-        const c = px(best);
-        let num = 0, den = 0;
-        for (let k = 0; k < 3; k++) { num += 255 - [r, g, b][k]; den += 255 - c[k]; }
-        a = den > 30 ? Math.max(0, Math.min(1, num / den)) : 1;
-        if (a > 0.02) f = [r, g, b].map((v, k) => Math.max(0, Math.min(255, (v - (1 - a) * 255) / a)));
-        f = f.map((v, k) => v * 0.5 + c[k] * 0.5);
-      }
-    }
-    rgba[i * 4] = f[0]; rgba[i * 4 + 1] = f[1]; rgba[i * 4 + 2] = f[2]; rgba[i * 4 + 3] = Math.round(a * 255);
-  }
+  const cells = Array.from({ length: GC * GR }, () => []);
+  boxes.forEach((b, id) => {
+    if (b.n < 40) return; // motas sueltas
+    const cx = (b.x0 + b.x1) / 2, cy = (b.y0 + b.y1) / 2;
+    const c = Math.min(GC - 1, Math.floor((cx / W) * GC)), r = Math.min(GR - 1, Math.floor((cy / H) * GR));
+    cells[r * GC + c].push(id);
+  });
+  return { W, H, rgba, comp, boxes, cells };
 }
 
-// ------------------------------------------------------------ piezas por casilla de la cuadrícula
-const [GC, GR] = cfg.grid ?? [1, 1];
-const comp = new Int32Array(N).fill(-1);
-const boxes = [];
-for (let i = 0; i < N; i++) {
-  if (rgba[i * 4 + 3] < 8 || comp[i] >= 0) continue;
-  const id = boxes.length, st = [i];
-  comp[i] = id;
-  let x0 = W, y0 = H, x1 = 0, y1 = 0, n = 0;
-  while (st.length) {
-    const j = st.pop(), x = j % W, y = (j / W) | 0;
-    n++; if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y;
-    for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
-      const nx = x + dx, ny = y + dy;
-      if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue;
-      const k = ny * W + nx;
-      if (comp[k] < 0 && rgba[k * 4 + 3] >= 8) { comp[k] = id; st.push(k); }
-    }
-  }
-  boxes.push({ x0, y0, x1, y1, n });
-}
-const cells = Array.from({ length: GC * GR }, () => []);
-boxes.forEach((b, id) => {
-  if (b.n < 40) return; // motas sueltas
-  const cx = (b.x0 + b.x1) / 2, cy = (b.y0 + b.y1) / 2;
-  const c = Math.min(GC - 1, Math.floor((cx / W) * GC)), r = Math.min(GR - 1, Math.floor((cy / H) * GR));
-  cells[r * GC + c].push(id);
-});
+// ------------------------------------------------------------ piezas → hojas
+const sources = cfg.sources ?? [{ source: cfg.source, grid: cfg.grid, items: cfg.items }];
+const groupCfg = cfg.groups ?? {};
+const age = cfg.age ?? 0;
+const PAD = 4;
 
-// ------------------------------------------------------------ salida
-const outDir = resolve('public/sprites', cfg.out);
-mkdirSync(outDir, { recursive: true });
-const previewDir = resolve('art-src/preview');
-mkdirSync(previewDir, { recursive: true });
-const previews = [];
-
-for (let k = 0; k < cfg.items.length; k++) {
-  const item = cfg.items[k];
-  if (!item) continue;
-  const ids = new Set(cells[k]);
-  if (!ids.size) { console.log(`⚠ ${item.id}: no hay nada en la casilla ${k + 1} de la cuadrícula`); continue; }
-  let x0 = W, y0 = H, x1 = 0, y1 = 0;
+/** Recorta las componentes `ids` y separa el magenta (→ gris claro + máscara). */
+function cutPiece(src, ids) {
+  const { W, rgba, comp, boxes } = src;
+  let x0 = Infinity, y0 = Infinity, x1 = 0, y1 = 0;
   for (const id of ids) { const b = boxes[id]; x0 = Math.min(x0, b.x0); y0 = Math.min(y0, b.y0); x1 = Math.max(x1, b.x1); y1 = Math.max(y1, b.y1); }
   const cw = x1 - x0 + 1, ch = y1 - y0 + 1;
   const piece = Buffer.alloc(cw * ch * 4), mask = Buffer.alloc(cw * ch * 4);
@@ -186,82 +193,116 @@ for (let k = 0; k < cfg.items.length; k++) {
     if (!ids.has(comp[i])) continue;
     let r = rgba[i * 4], g = rgba[i * 4 + 1], b = rgba[i * 4 + 2];
     const a = rgba[i * 4 + 3];
-    // Magenta → gris claro con su sombreado + máscara
     const m = Math.max(0, Math.min(1, (Math.min(r, b) - g - 40) / 60)) * (Math.abs(r - b) < 110 ? 1 : 0);
     if (m > 0) {
       const v = Math.min(255, Math.max(r, b) * 1.05);
-      r = r + (v - r) * m; g = g + (v - g) * m; b = b + (v - b) * m;
+      r += (v - r) * m; g += (v - g) * m; b += (v - b) * m;
       mask[o] = mask[o + 1] = mask[o + 2] = 255; mask[o + 3] = Math.round(m * a);
       if (m > 0.5) magenta++;
     }
     piece[o] = r; piece[o + 1] = g; piece[o + 2] = b; piece[o + 3] = a;
   }
+  return { piece, mask, cw, ch, magenta };
+}
 
-  // Escala: edificios por el ancho de la huella (N*128 px a 2x), el resto por altura
-  let k2;
-  if (cfg.kind === 'building') k2 = (item.size * 64 * SCALE * (item.fit ?? 1)) / cw;
-  else k2 = ((item.height ?? 60) * SCALE) / ch;
-  const ow = Math.max(1, Math.round(cw * k2)), oh = Math.max(1, Math.round(ch * k2));
-  const pad = 4;
-  const resize = buf => sharp(buf, { raw: { width: cw, height: ch, channels: 4 } })
-    .resize(ow, oh, { kernel: 'lanczos3' })
-    .extend({ top: pad, bottom: pad, left: pad, right: pad, background: { r: 0, g: 0, b: 0, alpha: 0 } });
-  const fw = ow + pad * 2, fh = oh + pad * 2;
-  // Apoyo: centro abajo; en edificios, centro del rombo (su punta inferior toca el fondo)
+// Cada id es una hoja; sus piezas (de una o varias imágenes) son fotogramas, en orden.
+const groups = new Map();
+for (const s of sources) {
+  const file = join(entrada, s.source);
+  if (!existsSync(file)) { console.log(`No encuentro ${file}`); process.exit(1); }
+  const src = await loadSource(file, s.grid);
+  const lastK = new Map();
+  s.items.forEach((item, k) => {
+    if (!item) return;
+    const ids = new Set(src.cells[k]);
+    if (!ids.size) { console.log(`⚠ ${s.source}: no hay nada en la casilla ${k + 1}`); return; }
+    const cut = cutPiece(src, ids);
+    const g = groupCfg[item.id] ?? {};
+    // Escala: edificios por el ancho de su huella (N*128 px a 2x); el resto por alto o ancho
+    // a zoom 1. Sin medida propia, la misma escala que la pieza anterior de la misma imagen,
+    // así las fases (mina llena → agotada) conservan su tamaño relativo.
+    let scale;
+    if (cfg.kind === 'building') scale = (item.size * 64 * SCALE * (item.fit ?? 1)) / cut.cw;
+    else if (item.width) scale = (item.width * SCALE) / cut.cw;
+    else if (item.height) scale = (item.height * SCALE) / cut.ch;
+    else if (lastK.has(item.id)) scale = lastK.get(item.id);
+    else if (g.width) scale = (g.width * SCALE) / cut.cw;
+    else scale = ((g.height ?? 60) * SCALE) / cut.ch;
+    lastK.set(item.id, scale);
+    if (!groups.has(item.id)) groups.set(item.id, []);
+    groups.get(item.id).push({ item, cut, scale, source: s.source });
+  });
+}
+
+const outDir = resolve('public/sprites', cfg.out);
+mkdirSync(outDir, { recursive: true });
+const previewDir = resolve('art-src/preview');
+mkdirSync(previewDir, { recursive: true });
+const previews = [];
+
+for (const [id, frames] of groups) {
+  const g = groupCfg[id] ?? {};
+  const first = frames[0].item;
+  const sized = await Promise.all(frames.map(async f => {
+    const ow = Math.max(1, Math.round(f.cut.cw * f.scale)), oh = Math.max(1, Math.round(f.cut.ch * f.scale));
+    const resize = buf => sharp(buf, { raw: { width: f.cut.cw, height: f.cut.ch, channels: 4 } }).resize(ow, oh, { kernel: 'lanczos3' }).png().toBuffer();
+    return { ow, oh, piece: await resize(f.cut.piece), mask: await resize(f.cut.mask), magenta: f.cut.magenta };
+  }));
+  const cellW = Math.max(...sized.map(s => s.ow)) + PAD * 2, cellH = Math.max(...sized.map(s => s.oh)) + PAD * 2;
+  const n = sized.length;
+  const place = (s, i) => ({ left: i * cellW + Math.round((cellW - s.ow) / 2), top: cellH - PAD - s.oh });
+  const hasMask = sized.reduce((t, s) => t + s.magenta, 0) > 20;
+  const dx = first.dx ?? g.dx ?? 0, dy = first.dy ?? g.dy ?? 0;
   const anchor = {
-    x: Math.round(fw / 2 + (item.dx ?? 0)),
-    y: Math.round(cfg.kind === 'building' ? fh - pad - item.size * 32 * (item.fit ?? 1) + (item.dy ?? 0) : fh - pad - 2 + (item.dy ?? 0)),
+    x: Math.round(cellW / 2 + dx),
+    y: Math.round(cfg.kind === 'building' ? cellH - PAD - first.size * 32 * (first.fit ?? 1) + dy : cellH - PAD - 2 + dy),
   };
+  const base = age > 0 ? `${id}-${age}` : id;
+  const sheet = (key) => sharp({ create: { width: cellW * n, height: cellH, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } })
+    .composite(sized.map((s, i) => ({ input: s[key], ...place(s, i) }))).png({ compressionLevel: 9 });
+  await sheet('piece').toFile(join(outDir, `${base}.png`));
+  if (hasMask) await sheet('mask').toFile(join(outDir, `${base}-mask.png`));
 
-  const age = cfg.age ?? 0;
-  const base = age > 0 ? `${item.id}-${age}` : item.id;
-  await resize(piece).png({ compressionLevel: 9 }).toFile(join(outDir, `${base}.png`));
-  const hasMask = magenta > 20;
-  if (hasMask) await resize(mask).png({ compressionLevel: 9 }).toFile(join(outDir, `${base}-mask.png`));
-
-  // JSON: la edad 0 es la hoja base; las demás edades se añaden como variantes
-  const jsonPath = join(outDir, `${item.id}.json`);
-  const manifest = existsSync(jsonPath) ? JSON.parse(readFileSync(jsonPath, 'utf8')) : null;
-  const idle = { row: 0, frames: 1 };
-  if (age === 0 || !manifest) {
+  const idle = { row: 0, frames: n, ...(n > 1 ? { pick: g.pick ?? 'variant' } : {}) };
+  const jsonPath = join(outDir, `${id}.json`);
+  const old = existsSync(jsonPath) ? JSON.parse(readFileSync(jsonPath, 'utf8')) : null;
+  if (age === 0 || !old) {
     const m = {
       image: `${base}.png`,
       ...(hasMask ? { mask: `${base}-mask.png` } : {}),
-      cell: { w: fw, h: fh },
+      cell: { w: cellW, h: cellH },
       anchor,
       scale: SCALE,
-      states: { ...(manifest?.states ?? {}), idle },
-      ...(manifest?.ages ? { ages: manifest.ages } : {}),
+      ...(g.shadow !== undefined ? { shadow: g.shadow } : {}),
+      states: { ...(old?.states ?? {}), idle },
+      ...(old?.ages ? { ages: old.ages } : {}),
     };
-    if (cfg.kind === 'resource' && item.shadow !== undefined) m.shadow = item.shadow;
     writeFileSync(jsonPath, JSON.stringify(m, null, 2) + '\n');
   } else {
-    manifest.ages = manifest.ages ?? {};
-    manifest.ages[age] = {
-      image: `${base}.png`,
-      ...(hasMask ? { mask: `${base}-mask.png` } : {}),
-      states: { idle: { ...idle, cell: { w: fw, h: fh }, anchor } },
-    };
-    writeFileSync(jsonPath, JSON.stringify(manifest, null, 2) + '\n');
+    old.ages = old.ages ?? {};
+    old.ages[age] = { image: `${base}.png`, ...(hasMask ? { mask: `${base}-mask.png` } : {}), states: { idle: { ...idle, cell: { w: cellW, h: cellH }, anchor } } };
+    writeFileSync(jsonPath, JSON.stringify(old, null, 2) + '\n');
   }
 
-  // Vista previa: la pieza sobre fondo gris con la huella y el apoyo
-  const out = await sharp(join(outDir, `${base}.png`)).toBuffer();
-  const hw = cfg.kind === 'building' ? item.size * 64 : 12, hh = cfg.kind === 'building' ? item.size * 32 : 6;
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${fw}" height="${fh}">
-    <polygon points="${anchor.x},${anchor.y - hh} ${anchor.x + hw},${anchor.y} ${anchor.x},${anchor.y + hh} ${anchor.x - hw},${anchor.y}" fill="none" stroke="#00e0ff" stroke-width="2"/>
-    <circle cx="${anchor.x}" cy="${anchor.y}" r="4" fill="#ff2020"/></svg>`;
-  previews.push({ buf: await sharp({ create: { width: fw, height: fh, channels: 4, background: '#8a8f7a' } })
-    .composite([{ input: out }, { input: Buffer.from(svg) }]).png().toBuffer(), w: fw, h: fh });
-  console.log(`${item.id}${age ? ` (edad ${age})` : ''}: ${fw}x${fh} px, apoyo (${anchor.x}, ${anchor.y})${hasMask ? ', máscara de color' : ''}`);
+  // Vista previa: la hoja sobre gris, con el apoyo (y la huella en edificios) de cada fotograma
+  const hw = cfg.kind === 'building' ? first.size * 64 : 14, hh = cfg.kind === 'building' ? first.size * 32 : 7;
+  let marks = '';
+  for (let i = 0; i < n; i++) {
+    const ax = i * cellW + anchor.x;
+    marks += `<polygon points="${ax},${anchor.y - hh} ${ax + hw},${anchor.y} ${ax},${anchor.y + hh} ${ax - hw},${anchor.y}" fill="none" stroke="#00e0ff" stroke-width="2"/><circle cx="${ax}" cy="${anchor.y}" r="4" fill="#ff2020"/>`;
+  }
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${cellW * n}" height="${cellH}">${marks}</svg>`;
+  previews.push({ buf: await sharp({ create: { width: cellW * n, height: cellH, channels: 4, background: '#8a8f7a' } })
+    .composite([{ input: join(outDir, `${base}.png`) }, { input: Buffer.from(svg) }]).png().toBuffer(), w: cellW * n, h: cellH });
+  console.log(`${id}${age ? ` (edad ${age})` : ''}: ${n} fotograma(s) de ${cellW}x${cellH} px, apoyo (${anchor.x}, ${anchor.y})${hasMask ? ', máscara de color' : ''}`);
 }
 
 if (previews.length) {
-  const gap = 10, totalW = previews.reduce((s, p) => s + p.w + gap, gap), maxH = Math.max(...previews.map(p => p.h)) + gap * 2;
-  let x = gap;
-  const comps = previews.map(p => { const c = { input: p.buf, left: x, top: gap }; x += p.w + gap; return c; });
+  const gap = 10, maxW = Math.max(...previews.map(p => p.w)) + gap * 2;
+  let y = gap;
+  const comps = previews.map(p => { const c = { input: p.buf, left: gap, top: y }; y += p.h + gap; return c; });
   const name = configPath.replace(/^.*\//, '').replace(/\.json$/, '');
   const file = join(previewDir, `${name}.png`);
-  await sharp({ create: { width: totalW, height: maxH, channels: 4, background: '#40443a' } }).composite(comps).png().toFile(file);
+  await sharp({ create: { width: maxW, height: y, channels: 4, background: '#40443a' } }).composite(comps).png().toFile(file);
   console.log(`Vista previa: ${file}`);
 }

@@ -19,8 +19,14 @@ export const ART: ArtEntry[] = [
   buildingArt('lumberCamp', 'buildings/lumberCamp'),
   buildingArt('miningCamp', 'buildings/miningCamp'),
   buildingArt('barracks', 'buildings/barracks'),
+  // Pack 2 · Naturaleza y recursos (art-src/import/pack2-naturaleza.json)
+  resourceArt('tree', 'resources/tree'),
+  resourceArt('pineTree', 'resources/pineTree'),
+  resourceArt('snowPine', 'resources/snowPine'),
+  resourceArt('goldMine', 'resources/goldMine'),
+  resourceArt('stoneMine', 'resources/stoneMine'),
+  resourceArt('berries', 'resources/berries'),
   // unitArt('villager', 'units/villager'),        → public/sprites/units/villager.json
-  // resourceArt('tree', 'resources/oak'),         → public/sprites/resources/oak.json
 ];
 
 /** Hojas de prueba (public/sprites/ejemplo/). Se activan abriendo el juego con ?arte=ejemplo. */
