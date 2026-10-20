@@ -38,3 +38,20 @@
 ### Partidas completas en las regiones reales
 
 `npm run simulate -- 60 <mapa> 7 easy` (IA difícil contra IA fácil, conquista). Las 12 regiones, Arabia y Pirineos terminan con un ganador: 10 de ellas en 34–56 minutos de juego; Gran San Bernardo (61:42) y Hastings (67:19) necesitan algo más de una hora. Cada partida tarda 3–13 s en simularse.
+
+## Guardado, calidad gráfica y ahorro de batería (feat/guardado-rendimiento)
+
+Escenario: Val d'Aran 120×120, 4 jugadores (3 IA difíciles), minuto 25, unas 5.200 entidades, vista sobre la base, interfaz móvil a 844×390 (densidad de píxeles 2). Medido en el Mac (sin limitar la CPU: el navegador integrado no permite simular un móvil más lento).
+
+| Medida | Antes | Después: alta | Después: media | Después: baja |
+| --- | --- | --- | --- | --- |
+| Píxeles de cada lienzo (hay dos: terreno y entidades) | 1688×780 | 1688×780 | 1266×585 (−44 %) | 844×390 (−75 %) |
+| Dibujo por fotograma (JavaScript) | 0,87 ms (p95 1,1) | 0,76 ms (p95 0,9) | 0,40 ms (p95 0,5) | 0,25 ms (p95 0,3) |
+| Coste por fotograma (dibujo + minimapa + interfaz + simulación) | 0,94 ms | 0,83 ms | 0,48 ms | 0,30 ms |
+| Memoria (montón de JavaScript) | 23–36 MB | 32–51 MB | | 26–33 MB |
+| FPS en el Mac | 60 | 60 | 60 | 60 |
+| FPS con ahorro de batería | — | 30 | 30 | 30 |
+
+- El descarte por coordenadas de mundo evita proyectar las ~5.000 entidades cada fotograma (solo las de la pantalla) y los objetos de la lista de dibujo se reutilizan: menos basura para el recolector.
+- **Móvil de gama media (estimación):** su CPU es unas 4–6 veces más lenta y su GPU unas 8–15 veces. En la calidad media, que es con la que arranca la automática en el móvil, eso da unos 2–3 ms de JavaScript por fotograma, y la GPU tiene que rellenar un 44 % menos de píxeles que antes. Si aun así baja de 30 FPS, la calidad automática pasa a baja: un 75 % menos de píxeles, sin decoración ni sombras y con figuras sencillas a partir de 120 unidades en pantalla. No se ha medido en un móvil real.
+- **Partida guardada:** una partida recién empezada en 96×96 ocupa 231 KB sin comprimir y unos 30 KB con gzip; guardar tarda unos 18 ms en el Mac (contando la compresión).

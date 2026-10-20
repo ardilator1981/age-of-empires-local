@@ -15,13 +15,15 @@ src/
                relief (roca, pasos, conectividad), heightRules (ventaja de altura), vision
     army/      formations (formas y huecos), groups (formaciones en marcha y órdenes tácticas),
                stances (posturas)
+    save.ts    guardar y cargar partidas (formato versionado)
     systems/   core.ts (sistemas básicos) y AISystem.ts (IA por jugador)
-  render/      Camera (con relieve), Renderer (2D), TerrainGL (WebGL2), terrainPatterns,
+  render/      Camera (con relieve), Renderer (2D), TerrainGL (WebGL2), quality (calidad gráfica), terrainPatterns,
                sprites, decorations, icons (retratos), Minimap, imageSprite
-  ui/          HUD, Menu, Input, UIState, svgIcons, StrategyScreen (pantalla de estrategia)
+  ui/          HUD, Menu, Input, UIState, svgIcons, StrategyScreen (pantalla de estrategia),
+               SettingsPanel (ajustes unificados), layout (preferencias de interfaz)
   audio/       AudioManager (eventos → sonido, volúmenes, desbloqueo móvil), Music (generativa), sfx (efectos sintéticos)
   mods/real-maps/  Mapas a partir de relieve y datos reales (JSON en data/)
-  app/         App (ciclo menú → partida) y Session (todo lo de una partida)
+  app/         App (ciclo menú → partida, guardado automático), Session (todo lo de una partida), saves (ranuras en IndexedDB)
   mods/        core/ (contenido base: datos), extra-content/, treasure-hunt/, declared-war/ (modo Guerra declarada)
 scripts/       simulate.ts (partida IA contra IA sin gráficos), real-map.mjs, make-icons.mjs
 .github/       Workflows de GitHub Pages y del APK de Android
@@ -60,6 +62,13 @@ Depuración en el navegador: `window.app` y `window.game` están accesibles desd
 - `reg.addHudPanel(def)`, `reg.addWorldOverlay(fn)`, `reg.addMinimapOverlay(fn)`: paneles HTML y dibujos sobre el mapa y el minimapa. `ui.pickPoint` sirve para pedir un punto del mapa.
 - En las unidades: `maxAlive`, `retrainCooldown` y `aura` (bonificación a las tropas cercanas, la aplica `AuraSystem`).
 - `src/game/formation.ts`: formación sencilla en filas; es el gancho para formaciones de verdad.
+
+## Guardado de partidas (importante al añadir cosas)
+
+- Todo el estado de una partida tiene que poder guardarse: datos simples en `Entity`, `Player`, `game.data` o `entity.data` (números, textos, arrays, objetos, `Map`, `Set` y arrays tipados). Nada de funciones ni referencias a objetos: guarda ids.
+- Un sistema con estado interno (contadores, temporizadores) implementa `save()` y `load()` (ver `AuraSystem`, `AISystem`, el mod `treasure-hunt`).
+- Si cambias el formato de forma incompatible, sube `SAVE_VERSION` en `src/game/save.ts` y añade una migración en `MIGRATIONS`.
+- `tests/save.test.ts` comprueba que una partida cargada sigue exactamente igual que la original.
 
 ## Convenciones
 

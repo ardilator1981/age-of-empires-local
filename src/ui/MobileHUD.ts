@@ -3,9 +3,8 @@ import { Commands } from '../game/commands';
 import type { Entity } from '../game/Entity';
 import { costText } from '../game/rules';
 import { esc, pic, selectionCommands, taskText, type Cmd, type CommandSet } from './commandModel';
-import { LONG_PRESS_MS } from './Input';
-import { haptic, isMobileLayout, setUIPrefs, uiPrefs, UI_SCALES, type LayoutPref } from './layout';
-import { bindSoundControls, soundControlsHtml } from './soundSettings';
+import { haptic, isMobileLayout, longPressMs, setUIPrefs, uiPrefs } from './layout';
+import { bindSettings, settingsHtml } from './SettingsPanel';
 import { ICONS } from './svgIcons';
 
 /** Botón de la interfaz móvil (bandeja u hoja). */
@@ -570,7 +569,7 @@ export class MobileHUD {
     this.onGroupUp(true);
     const k = Number(b.dataset.g);
     const gp = { k, fired: false, timer: 0 };
-    gp.timer = window.setTimeout(() => { gp.fired = true; this.s.input.assignGroup(k); this.acc = 1; }, LONG_PRESS_MS);
+    gp.timer = window.setTimeout(() => { gp.fired = true; this.s.input.assignGroup(k); this.acc = 1; }, longPressMs());
     this.groupPress = gp;
   }
 
@@ -673,20 +672,9 @@ export class MobileHUD {
         <b>${esc(q.name)}</b> <small>${esc(q.civ.name)}</small> — ${q.id === p.id ? 'Tú' : q.defeated ? 'Derrotado' : g.isEnemy(p.id, q.id) ? '⚔ Enemigo' : '🤝 Aliado'}</li>`).join('')}</ul>
         <p class="m-sub">Las alianzas se eligen al crear la partida.</p></div>`;
     } else {
-      const pr = uiPrefs();
-      const lay: [LayoutPref, string][] = [['auto', 'Automática'], ['mobile', 'Móvil'], ['desktop', 'Escritorio']];
-      body = `<div class="m-scroll"><div class="m-set">
-        <label>Interfaz</label><div class="m-seg">${lay.map(([v, l]) => `<button class="${pr.layout === v ? 'on' : ''}" data-layout="${v}">${l}</button>`).join('')}</div>
-        <label>Tamaño de los controles</label><div class="m-seg">${UI_SCALES.map(([v, l]) => `<button class="${pr.scale === v ? 'on' : ''}" data-a="scale" data-v="${v}">${l}</button>`).join('')}</div>
-        <label>Vibración</label><div class="m-seg"><button class="${pr.haptics ? 'on' : ''}" data-a="haptics">${pr.haptics ? 'Activada' : 'Desactivada'}</button></div>
-        ${soundControlsHtml(app.audio, true)}
-      </div></div>`;
+      body = `<div class="m-scroll">${settingsHtml(app)}</div>`;
     }
     this.el['m-screen'].innerHTML = `<div class="m-card wide"><div class="m-tabs">${tabs}<button class="mbtn m-close" data-a="screen-close" aria-label="Cerrar">✖</button></div>${body}</div>`;
-    bindSoundControls(this.el['m-screen'], app.audio, () => this.s.hud.updateSoundButton());
-    this.el['m-screen'].querySelectorAll<HTMLElement>('[data-layout]').forEach(b => b.addEventListener('click', () => {
-      setUIPrefs({ layout: b.dataset.layout as LayoutPref });
-      if (isMobileLayout()) this.renderScreen();
-    }));
+    if (sc === 'settings') bindSettings(this.el['m-screen'], app, () => this.renderScreen(), () => this.s.hud.updateSoundButton());
   }
 }

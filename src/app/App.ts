@@ -1,8 +1,10 @@
-import { TICK_DT } from '../core/constants';
+import { isTouchDevice, TICK_DT } from '../core/constants';
 import { buildRegistry } from '../core/Registry';
 import { AudioManager } from '../audio/AudioManager';
 import { Game, type GameOptions } from '../game/Game';
 import { snapshot, upgradeSave, type SaveData } from '../game/save';
+import { QualityManager, QUALITY_NAMES } from '../render/quality';
+import { uiPrefs } from '../ui/layout';
 import { AUTO_SLOT, clearEmergency, deleteSlot, readSlot, warmUp, writeEmergency, writeSlot } from './saves';
 import { ALL_MODS } from '../mods';
 import { Menu } from '../ui/Menu';
@@ -22,6 +24,24 @@ export class App {
   private acc = 0;
   /** Multiplicador del tiempo (cámara lenta con la pantalla de estrategia abierta). */
   timeScale = 1;
+  /** Calidad gráfica (automática o fija) y ahorro de batería. */
+  readonly quality = new QualityManager(uiPrefs().quality, uiPrefs().battery, isTouchDevice(), () => this.session?.renderer.resize());
+  private fpsEl: HTMLElement | null = null;
+  private fpsAcc = 0;
+
+  /** Contador de FPS en pantalla (ajustes). */
+  private fpsMeter(dt: number) {
+    if (!uiPrefs().showFps) { if (this.fpsEl) this.fpsEl.style.display = 'none'; return; }
+    this.fpsEl ??= Object.assign(document.createElement('div'), { id: 'fps' });
+    if (!this.fpsEl.isConnected) document.body.appendChild(this.fpsEl);
+    this.fpsEl.style.display = '';
+    this.fpsAcc += dt;
+    if (this.fpsAcc < 0.5) return;
+    this.fpsAcc = 0;
+    const q = this.quality;
+    const mem = (performance as any).memory?.usedJSHeapSize;
+    this.fpsEl.textContent = `${Math.round(q.fps)} FPS · ${QUALITY_NAMES[q.level]}${q.pref === 'auto' ? ' (auto)' : ''}${q.battery ? ' · ahorro' : ''}${mem ? ` · ${Math.round(mem / 1048576)} MB` : ''}`;
+  }
   private last = 0;
   private lastOptions: GameOptions | null = null;
   private hud = document.getElementById('hud')!;
@@ -165,10 +185,16 @@ export class App {
 
   private loop = (now: number) => {
     requestAnimationFrame(this.loop);
-    const dt = Math.min(0.1, (now - this.last) / 1000 || 0);
+    // Ahorro de batería: como mucho 30 fotogramas por segundo (la simulación no cambia)
+    const cap = this.quality.fpsCap;
+    if (cap && now - this.last < 1000 / cap - 2) return;
+    const real = (now - this.last) / 1000 || 0;
+    const dt = Math.min(0.1, real);
     this.last = now;
     const s = this.session;
     if (!s) return;
+    if (!this.paused && !this.menuOpen) this.quality.frame(real);
+    this.fpsMeter(real);
     if (now - this.lastAutosave > AUTOSAVE_EVERY_MS && !this.paused && !this.menuOpen) this.autosave();
     if (!this.paused && !this.menuOpen) {
       this.acc += dt * s.game.opts.speed * this.timeScale;

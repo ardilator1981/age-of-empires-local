@@ -799,3 +799,15 @@ table.stats td { padding: 4px; text-shadow: 1px 1px 0 #000; }
   position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 50; padding: 8px 16px;
   background: rgba(20, 16, 12, 0.92); border: 1px solid var(--gold-dark); border-radius: 3px; color: var(--text); text-shadow: 1px 1px 0 #000;
 }
+
+#fps {
+  position: fixed; right: calc(8px + var(--safe-r)); bottom: calc(8px + var(--safe-b)); z-index: 60; pointer-events: none;
+  padding: 2px 8px; font: 12px/1.4 ui-monospace, monospace; color: #9f9; background: rgba(0, 0, 0, 0.6); border-radius: 3px;
+}
+
+/* ---------------------------------------------------------------- ajustes */
+.settings h3 { margin: 14px 0 8px; color: var(--gold); font-size: 14px; letter-spacing: 0.5px; text-transform: uppercase; text-align: left; }
+.settings h3:first-child { margin-top: 0; }
+.settings .set-note { color: var(--parchment); font-size: 12px; opacity: 0.85; text-align: left; }
+.settings-menu { max-height: 92vh; overflow-y: auto; text-align: left; }
+.settings-menu .m-seg button { color: var(--text); text-shadow: 1px 1px 0 #000; font-family: var(--font); }

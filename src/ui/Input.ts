@@ -2,10 +2,11 @@ import { Commands } from '../game/commands';
 import type { Entity } from '../game/Entity';
 import { buildingAvail } from '../game/rules';
 import type { Session } from '../app/Session';
-import { haptic, isMobileLayout } from './layout';
+import { haptic, isMobileLayout, longPressMs, uiPrefs } from './layout';
 
 const HOTKEYS = 'QWERTASDFGZXCVB';
 /** Pulsación larga (ms) = orden contextual / tooltip. */
+/** Pulsación larga por defecto (se puede cambiar en los ajustes: ver `longPressMs`). */
 export const LONG_PRESS_MS = 400;
 /** Distancia (px) a partir de la cual un toque se convierte en arrastre. */
 const TOUCH_SLOP = 12;
@@ -39,7 +40,7 @@ export class Input {
   /** Botón "Ordenar": mientras está activo, tocar el mapa da una orden en vez de seleccionar. */
   orderMode = false;
   /** Interfaz móvil, modo cámara: arrastrar con un dedo mueve la cámara en vez de dibujar un recuadro. */
-  cameraMode = false;
+  cameraMode = uiPrefs().dragMode === 'camera';
   /** Interfaz móvil: posición en pantalla del fantasma al empezar a arrastrarlo. */
   private ghostDrag: { x: number; y: number } | null = null;
   private miniPress = 0;
@@ -349,7 +350,7 @@ export class Input {
     }
     this.gesture = 'tap';
     clearTimeout(this.pressTimer);
-    this.pressTimer = window.setTimeout(() => this.onLongPress(), LONG_PRESS_MS);
+    this.pressTimer = window.setTimeout(() => this.onLongPress(), longPressMs());
   }
 
   private onTouchMove(e: TouchEvent) {
@@ -453,7 +454,7 @@ export class Input {
         if (!this.active || !this.ownSelected().length) return;
         haptic(15);
         this.command(w.x, w.y, null);
-      }, LONG_PRESS_MS);
+      }, longPressMs());
     } else if (Math.hypot(t.clientX - this.miniAt.x, t.clientY - this.miniAt.y) > TOUCH_SLOP) clearTimeout(this.miniPress);
   }
 

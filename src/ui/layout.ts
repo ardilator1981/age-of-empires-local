@@ -18,13 +18,29 @@ export interface UIPrefs {
   hintSeen: boolean;
   /** Pantalla de estrategia: pausa, cámara lenta o nada. */
   strategyTime: StrategyTime;
+  /** Calidad gráfica: automática o fija. */
+  quality: 'auto' | 'low' | 'medium' | 'high';
+  /** Ahorro de batería: 30 FPS y menos efectos. */
+  battery: boolean;
+  /** Mostrar los FPS en pantalla. */
+  showFps: boolean;
+  /** Duración de la pulsación larga (ms) para órdenes, tooltips y guardar grupos. */
+  longPress: number;
+  /** Arrastrar con un dedo en el móvil: recuadro de selección o mover la cámara. */
+  dragMode: 'select' | 'camera';
 }
+
+/** Duración de la pulsación larga elegida. */
+export function longPressMs(): number { return prefs.longPress; }
 
 const KEY = 'aoe-ui-v1';
 /** Escalas de interfaz disponibles. La mínima mantiene los botones por encima de 44 px. */
 export const UI_SCALES: [number, string][] = [[0.92, 'Pequeña'], [1, 'Normal'], [1.15, 'Grande'], [1.3, 'Muy grande']];
 
-const DEFAULTS: UIPrefs = { layout: 'auto', scale: 1, haptics: true, hintSeen: false, strategyTime: 'pause' };
+const DEFAULTS: UIPrefs = {
+  layout: 'auto', scale: 1, haptics: true, hintSeen: false, strategyTime: 'pause',
+  quality: 'auto', battery: false, showFps: false, longPress: 400, dragMode: 'select',
+};
 
 let prefs: UIPrefs = load();
 /** Interfaz forzada por la URL (?ui=movil / ?ui=escritorio): solo para esa visita, no se guarda. */

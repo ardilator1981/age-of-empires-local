@@ -7,8 +7,9 @@ import { Camera } from './Camera';
 import { ellipse, poly, up } from './draw';
 import { TerrainGL } from './TerrainGL';
 import { type Deco, drawDecoration, generateDecorations } from './decorations';
+import { QUALITY, type QualityProfile } from './quality';
 
-interface Drawn { e: Entity; sx: number; sy: number; hb: number }
+interface Drawn { e: Entity; sx: number; sy: number; hb: number; depth: number }
 
 function hash2(x: number, y: number): number {
   let h = (x * 374761393 + y * 668265263) | 0;
@@ -36,6 +37,12 @@ export class Renderer {
   private fogVersion = -1;
   /** Entidades dibujadas en el último frame (para seleccionar con el ratón). */
   drawn: Drawn[] = [];
+  /** Calidad gráfica actual (la pone la sesión; ver render/quality.ts). */
+  profile: () => QualityProfile = () => QUALITY.high;
+  /** Objetos reutilizados de un fotograma a otro (sin basura para el recolector). */
+  private pool: Drawn[] = [];
+  private ground: Drawn[] = [];
+  private items: Drawn[] = [];
   private decos: Deco[] = [];
   private decoVersion = -1;
 
@@ -59,7 +66,7 @@ export class Renderer {
   }
 
   resize() {
-    this.dpr = pixelRatio();
+    this.dpr = Math.min(pixelRatio(), this.profile().maxDpr);
     const w = window.innerWidth, h = window.innerHeight;
     this.canvas.width = Math.floor(w * this.dpr);
     this.canvas.height = Math.floor(h * this.dpr);
@@ -170,14 +177,30 @@ export class Renderer {
     if (!s) return;
     const fn = this.game.reg.sprites.get(s.def.sprite);
     const fogged = isStatic && this.inFog(e);
-    if (fogged) this.ctx.filter = 'brightness(55%)';
+    // El filtro es caro en los móviles: en calidad media y baja, transparencia
+    const filter = fogged && this.profile().fogFilter;
+    if (filter) this.ctx.filter = 'brightness(55%)';
+    else if (fogged) this.ctx.globalAlpha = 0.55;
     if (fn) fn(s);
     else {
       this.ctx.fillStyle = s.color;
       ellipse(this.ctx, d.sx, d.sy - 8 * s.z, 6 * s.z, 6 * s.z);
       this.ctx.fill();
     }
-    if (fogged) this.ctx.filter = 'none';
+    if (filter) this.ctx.filter = 'none';
+    else if (fogged) this.ctx.globalAlpha = 1;
+  }
+
+  /** Unidad sencilla (cuando hay demasiadas en pantalla): sombra, cuerpo y cabeza del color del jugador. */
+  private drawSimple(d: Drawn) {
+    const ctx = this.ctx, z = this.cam.zoom, e = d.e;
+    const big = e.radius > 0.3;
+    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    ellipse(ctx, d.sx, d.sy, (big ? 11 : 7) * z, (big ? 4 : 3) * z); ctx.fill();
+    ctx.fillStyle = this.game.players[e.owner]?.color ?? '#aaa';
+    ctx.fillRect(d.sx - 3 * z, d.sy - (big ? 26 : 20) * z, 6 * z, (big ? 18 : 14) * z);
+    ctx.fillStyle = '#e8c9a0';
+    ellipse(ctx, d.sx, d.sy - (big ? 29 : 23) * z, 3 * z, 3 * z); ctx.fill();
   }
 
   /** Matas, flores, piedras... (solo decorativo). */
@@ -190,7 +213,10 @@ export class Renderer {
     const W = cam.viewW, H = cam.viewH, hw = W / 2, hh = H / 2;
     const p = game.human, elev = cam.elev;
     const all = game.opts.visibility === 'revealed';
+    const density = this.profile().decorations;
+    if (density <= 0) return;
     for (const d of this.decos) {
+      if (density < 1 && (d.tile % 97) / 97 >= density) continue;
       const sx = (d.ix - cam.x) * z + hw;
       if (sx < -30 || sx > W + 30) continue;
       let sy = (d.iy - cam.y) * z + hh;
@@ -244,9 +270,11 @@ export class Renderer {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
 
-    // Restos en el suelo
+    // Restos en el suelo (los más recientes, hasta el límite de la calidad)
     const m = game.map;
-    for (const d of game.decals) {
+    const decals = game.decals, d0 = Math.max(0, decals.length - this.profile().decals);
+    for (let di = d0; di < decals.length; di++) {
+      const d = decals[di];
       const age = game.time - d.time;
       const p = cam.worldToScreen(d.x, d.y);
       if (p.x < -100 || p.y < -100 || p.x > W + 100 || p.y > H + 100) continue;
@@ -274,29 +302,40 @@ export class Renderer {
 
     this.drawDecorations();
 
-    // Clasificar entidades visibles
+    // Clasificar entidades visibles. Primero un descarte barato por coordenadas de mundo
+    // (rectángulo que cubre la pantalla, con margen) para no proyectar las 5.000 entidades.
     const sel = new Set(ui.selection);
-    const ground: Drawn[] = [], items: (Drawn & { depth: number })[] = [];
+    const ground = this.ground, items = this.items;
+    ground.length = 0; items.length = 0;
+    let used = 0;
+    const c0 = cam.screenToWorld(0, 0), c1 = cam.screenToWorld(W, 0), c2 = cam.screenToWorld(0, H), c3 = cam.screenToWorld(W, H);
+    const mg = 6 + cam.elev / 8;
+    const minX = Math.min(c0.x, c1.x, c2.x, c3.x) - mg, maxX = Math.max(c0.x, c1.x, c2.x, c3.x) + mg;
+    const minY = Math.min(c0.y, c1.y, c2.y, c3.y) - mg, maxY = Math.max(c0.y, c1.y, c2.y, c3.y) + mg;
     for (const e of game.list) {
-      if (e.dead) continue;
+      if (e.dead || e.x < minX || e.x > maxX || e.y < minY || e.y > maxY) continue;
       const rx = e.px + (e.x - e.px) * alpha, ry = e.py + (e.y - e.py) * alpha;
       const hb = e.kind === 'unit' ? 0 : this.baseHeight(e);
       const p = e.kind === 'unit' ? cam.worldToScreen(rx, ry) : cam.worldToScreen(rx, ry, hb);
       const margin = (e.size * 50 + 100) * z;
       if (p.x < -margin || p.y < -margin * 0.6 || p.x > W + margin || p.y > H + margin * 1.6) continue;
       if (!this.isVisible(e)) continue;
-      const d: Drawn = { e, sx: p.x, sy: p.y, hb };
+      const d = this.pool[used] ??= { e, sx: 0, sy: 0, hb: 0, depth: 0 };
+      used++;
+      d.e = e; d.sx = p.x; d.sy = p.y; d.hb = hb; d.depth = rx + ry;
       if (e.kind === 'building' && game.reg.building(e.defId).walkable) ground.push(d);
-      else items.push({ ...d, depth: rx + ry });
+      else items.push(d);
     }
     items.sort((a, b) => a.depth - b.depth);
+    const q = this.profile();
 
     for (const d of ground) this.drawEntity(d);
     // Sombras proyectadas de los edificios (la luz viene de arriba a la izquierda)
-    for (const d of items) if (d.e.kind === 'building') this.buildingShadow(d);
+    if (q.shadows) for (const d of items) if (d.e.kind === 'building') this.buildingShadow(d);
 
     // Anillos de selección (debajo de los sprites)
-    for (const d of [...ground, ...items]) {
+    for (let i = 0; i < ground.length + items.length; i++) {
+      const d = i < ground.length ? ground[i] : items[i - ground.length];
       if (!sel.has(d.e.id)) continue;
       const col = d.e.owner === game.humanId ? '#ffffff' : d.e.owner === 0 ? '#f4e6a0' : '#ff6b6b';
       ctx.strokeStyle = col;
@@ -310,11 +349,21 @@ export class Renderer {
       }
     }
 
-    for (const d of items) this.drawEntity(d);
-    this.drawn = [...ground, ...items];
+    // Con muchas unidades en pantalla, a partir del límite de la calidad se dibujan sencillas
+    let full = 0;
+    for (const d of items) {
+      if (d.e.kind === 'unit' && ++full > q.fullUnits && !sel.has(d.e.id)) this.drawSimple(d);
+      else this.drawEntity(d);
+    }
+    const drawn = this.drawn;
+    drawn.length = 0;
+    for (const d of ground) drawn.push(d);
+    for (const d of items) drawn.push(d);
 
-    // Proyectiles
+    // Proyectiles (como mucho los que diga la calidad)
+    let shots = 0;
     for (const pr of game.projectiles) {
+      if (++shots > q.projectiles) break;
       const t = Math.min(1, pr.t);
       const wx = pr.sx + (pr.ex - pr.sx) * t, wy = pr.sy + (pr.ey - pr.sy) * t;
       if (!game.human.visible[Math.floor(wy) * m.w + Math.floor(wx)]) continue;

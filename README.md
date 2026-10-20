@@ -367,6 +367,22 @@ npm run regions -- --only <id>
 
 Descarga el relieve (Copernicus DEM GLO-30, o el ICGC en Cataluña) y los ríos, bosques y pueblos de OpenStreetMap. Las atribuciones aparecen en la pantalla de **Créditos** del juego.
 
+## Guardar y continuar
+
+- La partida se guarda sola cada 45 segundos y al cerrar el navegador o cambiar de app en el móvil. Al volver a abrir el juego, **▶ Continuar la partida** la recupera tal cual.
+- En la pausa (o en ☰ → Partida en el móvil): **💾 Guardar partida** en 5 ranuras, y **📂 Cargar partida**. Las partidas guardadas se pueden borrar.
+- Se guardan en el navegador (IndexedDB), comprimidas: unas decenas de KB por partida.
+
+## Ajustes
+
+⚙️ Ajustes, en el menú principal, en la pausa o en ☰ → Ajustes del móvil:
+- **Sonido:** volumen general, música, efectos y alertas, y silencio.
+- **Gráficos:** calidad automática, baja, media o alta (la automática baja sola si el juego va por debajo de 30 FPS), ahorro de batería (30 FPS y menos efectos) y contador de FPS.
+- **Juego:** velocidad y qué hace la pantalla de estrategia con el tiempo.
+- **Controles:** interfaz de escritorio o móvil, tamaño de los controles, duración de la pulsación larga, qué hace arrastrar con un dedo y vibración.
+
+Todo se recuerda entre partidas.
+
 ## Ejércitos: formaciones, posturas y estrategia
 
 - **Selección rápida:** ⚔️ selecciona todo el ejército (sin aldeanos). En la pantalla de estrategia también se puede seleccionar por tipo (infantería, a distancia, caballería, asedio) y usar los grupos 1–5. Los grupos de siempre siguen funcionando: Ctrl+número en el teclado, mantener pulsado en el móvil.

@@ -2,7 +2,7 @@ import type { Session } from '../app/Session';
 import { Commands } from '../game/commands';
 import { esc, OK, pic, selectionCommands, statsLine, taskText, type Cmd } from './commandModel';
 import { sightRadius } from '../game/vision';
-import { LONG_PRESS_MS } from './Input';
+import { longPressMs } from './layout';
 import { isMobileLayout } from './layout';
 import { ICONS } from './svgIcons';
 
@@ -348,7 +348,7 @@ export class HUD {
       navigator.vibrate?.(10);
       // Por encima del dedo para que no lo tape
       this.showTip(html, tip.x - 60, tip.y, 36);
-    }, LONG_PRESS_MS);
+    }, longPressMs());
     this.tip0 = tip;
   }
 

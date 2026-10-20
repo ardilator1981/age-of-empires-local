@@ -6,6 +6,7 @@ import { ALL_MODS } from '../mods';
 import type { App } from '../app/App';
 import { setUIPrefs, uiPrefs, type LayoutPref } from './layout';
 import { RegionPicker } from './RegionPicker';
+import { bindSettings, settingsHtml } from './SettingsPanel';
 import { ago, AUTO_SLOT, deleteSlot, gameClock, listSlots, MANUAL_SLOTS } from '../app/saves';
 import { bindSoundControls, soundControlsHtml } from './soundSettings';
 
@@ -192,7 +193,7 @@ export class Menu {
           </section>
         </div>
         <button class="start" data-start>⚔️ ¡Comenzar partida!</button>
-        <div class="credits-link"><button class="small" data-credits>📜 Créditos y atribuciones</button></div>
+        <div class="credits-link"><button class="small" data-settings>⚙️ Ajustes</button> <button class="small" data-credits>📜 Créditos y atribuciones</button></div>
         ${this.volumeHtml()}
         ${help()}
       </div>`);
@@ -238,6 +239,7 @@ export class Menu {
     void this.fillContinue(root);
     root.querySelector('[data-regions]')?.addEventListener('click', () => this.showRegions());
     root.querySelector('[data-credits]')?.addEventListener('click', () => this.showCredits());
+    root.querySelector('[data-settings]')?.addEventListener('click', () => this.showSettings(() => this.showMain()));
     this.bindVolume();
   }
 
@@ -344,6 +346,25 @@ export class Menu {
     }));
   }
 
+  /** Velocidad de juego elegida (se recuerda para las partidas nuevas). */
+  get speed() { return this.state.speed; }
+  setSpeed(v: number) { this.state.speed = v; this.save(); }
+
+  /** Ajustes (los mismos que en la interfaz móvil). */
+  showSettings(back: () => void) {
+    const render = () => {
+      this.show(`<div class="menu small settings-menu">
+          <h1>⚙️ Ajustes</h1>
+          ${settingsHtml(this.app)}
+          <div class="buttons"><button data-back>↩ Volver</button></div>
+        </div>`);
+      const root = this.overlay;
+      bindSettings(root, this.app, render, () => this.app.session?.hud.updateSoundButton());
+      root.querySelector('[data-back]')!.addEventListener('click', back);
+    };
+    render();
+  }
+
   showPause() {
     this.show(`
       <div class="menu small">
@@ -352,6 +373,7 @@ export class Menu {
           <button data-a="resume">▶ Continuar</button>
           <button data-a="save">💾 Guardar partida</button>
           <button data-a="load">📂 Cargar partida</button>
+          <button data-a="settings">⚙️ Ajustes</button>
           <button data-a="restart">↻ Reiniciar partida</button>
           <button data-a="menu">☰ Menú principal</button>
         </div>
@@ -459,6 +481,7 @@ export class Menu {
         else if (a === 'menu') this.app.toMenu();
         else if (a === 'observe') { this.hide(); this.app.menuOpen = false; }
         else if (a === 'save') void this.showSaves('save', () => this.showPause());
+        else if (a === 'settings') this.showSettings(() => this.showPause());
         else if (a === 'load') void this.showSaves('load', () => this.showPause());
       });
     });
