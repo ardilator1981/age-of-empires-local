@@ -14,6 +14,36 @@
     "idle": {
       "row": 0,
       "frames": 1
+    },
+    "walk": {
+      "image": "militia-walk.png",
+      "mask": "militia-walk-mask.png",
+      "row": 0,
+      "frames": 6,
+      "fps": 9,
+      "cell": {
+        "w": 51,
+        "h": 102
+      },
+      "anchor": {
+        "x": 26,
+        "y": 96
+      }
+    },
+    "attack": {
+      "image": "militia-attack.png",
+      "mask": "militia-attack-mask.png",
+      "row": 0,
+      "frames": 6,
+      "fps": 8,
+      "cell": {
+        "w": 77,
+        "h": 110
+      },
+      "anchor": {
+        "x": 39,
+        "y": 104
+      }
     }
   }
 }

@@ -14,6 +14,36 @@
     "idle": {
       "row": 0,
       "frames": 1
+    },
+    "walk": {
+      "image": "archer-walk.png",
+      "mask": "archer-walk-mask.png",
+      "row": 0,
+      "frames": 6,
+      "fps": 9,
+      "cell": {
+        "w": 63,
+        "h": 101
+      },
+      "anchor": {
+        "x": 32,
+        "y": 95
+      }
+    },
+    "attack": {
+      "image": "archer-attack.png",
+      "mask": "archer-attack-mask.png",
+      "row": 0,
+      "frames": 6,
+      "fps": 8,
+      "cell": {
+        "w": 72,
+        "h": 112
+      },
+      "anchor": {
+        "x": 36,
+        "y": 106
+      }
     }
   }
 }
