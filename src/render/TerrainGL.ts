@@ -23,6 +23,7 @@ uniform vec2 u_view;
 uniform float u_elev;
 out vec2 v_tile;
 out float v_light;
+out float v_h;
 void main() {
   float ix = (a_pos.x - a_pos.y) * ${HALF_W.toFixed(1)};
   float iy = (a_pos.x + a_pos.y) * ${HALF_H.toFixed(1)} - a_h * u_elev;
@@ -30,6 +31,7 @@ void main() {
   gl_Position = vec4(s.x / u_view.x * 2.0 - 1.0, 1.0 - s.y / u_view.y * 2.0, 0.0, 1.0);
   v_tile = a_pos;
   v_light = a_light;
+  v_h = a_h;
 }`;
 
 const FS = `#version 300 es
@@ -43,8 +45,11 @@ uniform sampler2D u_water;
 uniform sampler2D u_noise;
 uniform vec2 u_map;
 uniform float u_time;
+uniform int u_rock;
+uniform float u_contours;
 in vec2 v_tile;
 in float v_light;
+in float v_h;
 out vec4 o;
 
 vec3 layer(int id, vec2 p) {
@@ -70,6 +75,14 @@ void main() {
   else c = mix(mix(layer(i00, p), layer(i10, p), f.x), mix(layer(i01, p), layer(i11, p), f.x), f.y);
   c *= texture(u_tint, uv).rgb * 2.0;
 
+  // Cantiles: borde oscuro entre la roca y el suelo transitable (se reconocen los pasos de un vistazo)
+  if (u_rock >= 0) {
+    float r = mix(mix(float(i00 == u_rock), float(i10 == u_rock), f.x), mix(float(i01 == u_rock), float(i11 == u_rock), f.x), f.y);
+    float edge = r * (1.0 - r) * 4.0;
+    c *= 1.0 - 0.45 * edge;
+    c = mix(c, c * vec3(0.9, 0.88, 0.86), r * 0.4);
+  }
+
   vec2 wv = texture(u_water, uv).rg;
   if (wv.r > 0.01) {
     float t = u_time;
@@ -84,6 +97,11 @@ void main() {
     c = mix(c, vec3(0.84, 0.88, 0.86), foam * 0.4);
   }
   c *= v_light;
+  // Curvas de nivel suaves (una por nivel de elevación), fuera del agua
+  if (u_contours > 0.0 && wv.r < 0.5) {
+    float lv = abs(fract(v_h + 0.5) - 0.5) / max(fwidth(v_h), 1e-4);
+    c *= 1.0 - u_contours * (1.0 - smoothstep(0.0, 1.2, lv));
+  }
   // Gradación cálida, como en AoE2 DE
   c = pow(max(c, 0.0), vec3(0.96)) * vec3(1.05, 1.0, 0.9);
   float fog = texture(u_fog, uv).r;
@@ -112,17 +130,64 @@ function smoothNoise(x: number, y: number, s: number): number {
   return a + (b - a) * tx + (c - a) * ty + (a - b - c + d) * tx * ty;
 }
 
-/** Iluminación de un vértice según la pendiente (luz de arriba a la izquierda). */
-export function vertexLight(game: Game, vx: number, vy: number): number {
+const lightCache = new WeakMap<object, { version: number; relief: number; light: Float32Array }>();
+
+/**
+ * Iluminación de todos los vértices del relieve (se recalcula solo si cambia el relieve):
+ *  - luz difusa según la pendiente (sol arriba a la izquierda),
+ *  - sombras proyectadas: las montañas tapan el sol a lo que tienen detrás,
+ *  - oclusión ambiental: los valles y hondonadas, más oscuros; las crestas, algo más claras.
+ * Es lo que hace que las montañas se lean como montañas en la vista isométrica.
+ */
+export function lightingField(game: Game): Float32Array {
   const m = game.map;
-  const hx = (m.vh(vx + 1, vy) - m.vh(vx - 1, vy)) / 2, hy = (m.vh(vx, vy + 1) - m.vh(vx, vy - 1)) / 2;
-  const k = ELEV_PX / 35.8;
-  let nx = -hx * k, ny = -hy * k, nz = 1;
-  const nl = Math.hypot(nx, ny, nz);
-  nx /= nl; ny /= nl; nz /= nl;
+  const hit = lightCache.get(m);
+  if (hit && hit.version === m.heightVersion && hit.relief === m.visualRelief) return hit.light;
+  const W = m.w + 1, H = m.h + 1, hs = m.heights;
+  const vh = (x: number, y: number) => hs[Math.max(0, Math.min(H - 1, y)) * W + Math.max(0, Math.min(W - 1, x))];
+  const pxPerLevel = ELEV_PX * m.visualRelief, edge = 35.8;
+  const k = pxPerLevel / edge;
   const lx = -0.62, ly = -0.22, lz = 0.75;
-  const d = (nx * lx + ny * ly + nz * lz) / lz;
-  return Math.min(1.4, Math.max(0.55, 1 + (d - 1) * 2));
+  // Para las sombras, un sol más bajo (32°) alarga las sombras de las montañas
+  const sunDir = { x: -0.94, y: -0.33 }, sunRise = Math.tan((32 * Math.PI) / 180) * edge / pxPerLevel;
+  const light = new Float32Array(W * H);
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const h0 = vh(x, y);
+    // difusa
+    const hx = (vh(x + 1, y) - vh(x - 1, y)) / 2, hy = (vh(x, y + 1) - vh(x, y - 1)) / 2;
+    let nx = -hx * k, ny = -hy * k, nz = 1;
+    const nl = Math.hypot(nx, ny, nz);
+    nx /= nl; ny /= nl; nz /= nl;
+    const d = (nx * lx + ny * ly + nz * lz) / lz;
+    let l = 1 + (d - 1) * 1.7;
+    // sombra proyectada (suave)
+    let excess = 0;
+    for (let s = 1; s <= 36; s++) {
+      const dist = s * 0.8;
+      const hh = vh(Math.round(x + sunDir.x * dist), Math.round(y + sunDir.y * dist));
+      excess = Math.max(excess, hh - (h0 + sunRise * dist));
+      if (h0 + sunRise * dist > 14) break;
+    }
+    l *= 1 - 0.38 * Math.min(1, Math.max(0, excess) / 1.2);
+    // oclusión ambiental
+    let sum = 0;
+    for (let a = 0; a < 8; a++) {
+      const ca = Math.cos(a * Math.PI / 4), sa = Math.sin(a * Math.PI / 4);
+      sum += vh(Math.round(x + ca * 2), Math.round(y + sa * 2)) + vh(Math.round(x + ca * 4), Math.round(y + sa * 4));
+    }
+    const concave = sum / 16 - h0;
+    l *= Math.min(1.08, Math.max(0.72, 1 - concave * 0.05 * m.visualRelief));
+    light[y * W + x] = Math.min(1.45, Math.max(0.36, l));
+  }
+  lightCache.set(m, { version: m.heightVersion, relief: m.visualRelief, light });
+  return light;
+}
+
+/** Iluminación de un vértice (ver lightingField). */
+export function vertexLight(game: Game, vx: number, vy: number): number {
+  const m = game.map, W = m.w + 1;
+  const x = Math.max(0, Math.min(m.w, vx)), y = Math.max(0, Math.min(m.h, vy));
+  return lightingField(game)[y * W + x];
 }
 
 export class TerrainGL {
@@ -152,7 +217,7 @@ export class TerrainGL {
     gl.linkProgram(p);
     if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error('Programa: ' + gl.getProgramInfoLog(p));
     this.prog = p;
-    for (const n of ['u_cam', 'u_zoom', 'u_view', 'u_elev', 'u_detail', 'u_ids', 'u_tint', 'u_fog', 'u_water', 'u_noise', 'u_map', 'u_time']) {
+    for (const n of ['u_cam', 'u_zoom', 'u_view', 'u_elev', 'u_detail', 'u_ids', 'u_tint', 'u_fog', 'u_water', 'u_noise', 'u_map', 'u_time', 'u_rock', 'u_contours']) {
       this.u[n] = gl.getUniformLocation(p, n);
     }
     this.vao = gl.createVertexArray()!;
@@ -363,6 +428,8 @@ export class TerrainGL {
     gl.uniform1f(this.u.u_elev, cam.elev);
     gl.uniform2f(this.u.u_map, m.w, m.h);
     gl.uniform1f(this.u.u_time, time);
+    gl.uniform1i(this.u.u_rock, this.game.reg.terrains.findIndex(t => t.id === 'rock'));
+    gl.uniform1f(this.u.u_contours, 0.1);
     const bind = (unit: number, name: string, target: number = gl.TEXTURE_2D) => {
       gl.activeTexture(gl.TEXTURE0 + unit);
       gl.bindTexture(target, this.tex[name]);

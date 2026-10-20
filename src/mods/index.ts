@@ -1,7 +1,9 @@
 import type { GameMod } from '../core/types';
 import { artMod } from './art';
 import { coreMod } from './core';
+import { declaredWarMod } from './declared-war';
 import { extraContentMod } from './extra-content';
+import { realMapsMod } from './real-maps';
 import { treasureHuntMod } from './treasure-hunt';
 
 /**
@@ -16,5 +18,7 @@ export const ALL_MODS: GameMod[] = [
   coreMod,
   extraContentMod,
   treasureHuntMod,
+  realMapsMod,
+  declaredWarMod,
   artMod,
 ];

@@ -47,6 +47,8 @@ export class Entity {
   working = false;
   attackAnim = 0;
   scanAt = 0;
+  /** Postura de combate ('aggressive' | 'defensive' | 'hold' | 'passive'; ver army/stances). */
+  stance = 'aggressive';
 
   // --- edificios y recursos (huella en casillas)
   tx = 0;
@@ -63,7 +65,8 @@ export class Entity {
   initialAmount = 0;
   gatherRate = 0;
 
-  variant = Math.random();
+  /** Variación visual (0..1): sale del id, así todas las copias de la partida la dibujan igual. */
+  variant = 0;
   lastHitAt = -999;
   /** Almacén libre para mods. */
   data: Record<string, any> = {};
@@ -73,5 +76,16 @@ export class Entity {
     public kind: EntityKind,
     public defId: string,
     public owner: number,
-  ) {}
+  ) {
+    this.variant = idNoise(id);
+  }
+}
+
+/** Número entre 0 y 1 fijo para cada id (mezcla de bits, sin generador aleatorio). */
+function idNoise(id: number): number {
+  let h = Math.imul(id ^ 0x9e3779b9, 0x85ebca6b);
+  h ^= h >>> 13;
+  h = Math.imul(h, 0xc2b2ae35);
+  h ^= h >>> 16;
+  return (h >>> 0) / 4294967296;
 }

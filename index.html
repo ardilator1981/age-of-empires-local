@@ -2,9 +2,16 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>Age of Empires II · Edición local</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏰</text></svg>" />
+    <meta name="description" content="Estrategia en tiempo real inspirada en Age of Empires II, en el navegador y sin conexión." />
+    <meta name="theme-color" content="#2c2621" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="AoE II Local" />
+    <link rel="icon" type="image/svg+xml" href="icons/icon.svg" />
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
   </head>
   <body>
     <canvas id="terrain"></canvas>
@@ -15,14 +22,26 @@
         <div id="age"></div>
         <div class="spacer"></div>
         <div id="clock">00:00</div>
-        <button id="btn-music" data-tip="Música (M)"></button>
-        <button id="btn-menu">Menú (F10)</button>
+        <button id="btn-army" data-tip="Seleccionar todo el ejército">⚔️</button>
+        <button id="btn-strategy" data-tip="Estrategia: formación, postura y órdenes (Tab)">📜<span class="kb"> Estrategia</span></button>
+        <button id="btn-music" data-tip="Sonido (M)"></button>
+        <button id="btn-menu">Menú<span class="kb"> (F10)</span></button>
       </div>
       <div id="notices"></div>
+      <div id="touchbar">
+        <button id="btn-order" class="tbtn off">🎯<span>Ordenar</span></button>
+        <button id="btn-idle" class="tbtn">💤<span>Inactivo</span></button>
+        <button id="btn-panel" class="tbtn"><i class="fold">▾</i><span>Panel</span></button>
+      </div>
       <div id="bottombar">
         <div id="commands"></div>
         <div id="selection"></div>
         <div id="minimap-wrap"><canvas id="minimap"></canvas></div>
+      </div>
+      <div id="rotate">
+        <div class="rot-ic">📱↻</div>
+        <p>Gira el móvil para jugar en horizontal</p>
+        <button id="btn-rotate-ok">Seguir en vertical</button>
       </div>
     </div>
     <div id="tooltip"></div>

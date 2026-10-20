@@ -1,3 +1,4 @@
+import { pixelRatio } from '../core/constants';
 import type { Pt } from '../core/types';
 import type { Game } from '../game/Game';
 import type { UIState } from '../ui/UIState';
@@ -21,8 +22,8 @@ export class Minimap {
 
   resize() {
     const r = this.canvas.getBoundingClientRect();
-    this.size = Math.max(100, Math.floor(Math.min(r.width, r.height)) || 200);
-    const dpr = window.devicePixelRatio || 1;
+    this.size = Math.max(60, Math.floor(Math.min(r.width, r.height)) || 200);
+    const dpr = pixelRatio();
     this.canvas.width = this.size * dpr;
     this.canvas.height = this.size * dpr;
   }
@@ -58,7 +59,7 @@ export class Minimap {
   }
 
   render() {
-    const g = this.game, ctx = this.ctx, k = this.k, S = this.size, dpr = window.devicePixelRatio || 1;
+    const g = this.game, ctx = this.ctx, k = this.k, S = this.size, dpr = pixelRatio();
     if (g.time - this.baseAt > 2 || this.baseAt > g.time) { this.baseAt = g.time; this.rebuildBase(); }
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, S, S);
@@ -78,6 +79,12 @@ export class Minimap {
     ctx.drawImage(this.renderer.fogCanvas, 0, 0);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     void human;
+
+    // Dibujos de los mods (p. ej. el círculo de batalla)
+    if (g.reg.minimapOverlays.length) {
+      const o = { ctx, game: g, ui: this.ui, zoom: k, project: (x: number, y: number) => this.toMini(x, y), unproject: (x: number, y: number) => this.fromMini(x, y) };
+      for (const fn of g.reg.minimapOverlays) fn(o);
+    }
 
     // Avisos de ataque
     const now = g.time;

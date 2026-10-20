@@ -71,6 +71,7 @@ export const units: UnitDef[] = [
     classes: ['cavalry'], cost: { food: 80 }, trainTime: 30, trainedAt: ['stable'],
     hp: 45, attack: 3, attackType: 'melee', reloadTime: 2, armor: { melee: 0, pierce: 2 },
     speed: 1.55, los: 6, pop: 1, age: 1, radius: 0.35,
+    autoExplore: { requiresBuildings: ['stable'] },
     sprite: 'cavalry', spriteParams: { weapon: 'sword', horse: '#9a6a3c' },
   },
   {
@@ -78,6 +79,7 @@ export const units: UnitDef[] = [
     classes: ['cavalry'], cost: { food: 80 }, trainTime: 30, trainedAt: ['stable'],
     hp: 60, attack: 7, attackType: 'melee', reloadTime: 2, armor: { melee: 0, pierce: 2 },
     speed: 1.5, los: 8, pop: 1, age: 2, radius: 0.35,
+    autoExplore: { requiresBuildings: ['stable'] },
     sprite: 'cavalry', spriteParams: { weapon: 'sword', horse: '#9a6a3c', helmet: true },
   },
   {

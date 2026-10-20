@@ -1,8 +1,10 @@
+import { BALANCE } from '../config/balance';
 import type { Order, Pt } from '../core/types';
 import type { Entity } from './Entity';
 import type { Game } from './Game';
 import type { Player } from './Player';
 import { findPath, lineClear, smoothPath, type GoalRect } from './pathfinding';
+import { hypot } from './fmath';
 
 export const MOVING = 0;
 export const ARRIVED = 1;
@@ -10,13 +12,13 @@ export const UNREACHABLE = 2;
 
 /** Distancia del borde de la unidad `u` al borde del objetivo `t`. */
 export function edgeDist(u: Entity, t: Entity): number {
-  if (t.kind === 'unit') return Math.hypot(t.x - u.x, t.y - u.y) - u.radius - t.radius;
+  if (t.kind === 'unit') return hypot(t.x - u.x, t.y - u.y) - u.radius - t.radius;
   const dx = Math.max(t.tx - u.x, 0, u.x - (t.tx + t.size));
   const dy = Math.max(t.ty - u.y, 0, u.y - (t.ty + t.size));
-  return Math.hypot(dx, dy) - u.radius;
+  return hypot(dx, dy) - u.radius;
 }
 
-export function dist(a: Pt, b: Pt): number { return Math.hypot(a.x - b.x, a.y - b.y); }
+export function dist(a: Pt, b: Pt): number { return hypot(a.x - b.x, a.y - b.y); }
 
 function rectOf(t: Entity): GoalRect {
   if (t.kind === 'unit') {
@@ -24,6 +26,18 @@ function rectOf(t: Entity): GoalRect {
     return { x0: x, y0: y, x1: x, y1: y };
   }
   return { x0: t.tx, y0: t.ty, x1: t.tx + t.size - 1, y1: t.ty + t.size - 1 };
+}
+
+/**
+ * ¿Queda presupuesto para calcular un camino largo este tick? (BALANCE.pathfinding.pathsPerTick)
+ * Así, cuando muchas unidades reciben una orden a la vez, el cálculo se reparte entre
+ * varios ticks en lugar de congelar el juego.
+ */
+export function pathBudget(game: Game): boolean {
+  const used = game.data.pathsThisTick ?? 0;
+  if (used >= BALANCE.pathfinding.pathsPerTick) return false;
+  game.data.pathsThisTick = used + 1;
+  return true;
 }
 
 export function setOrder(u: Entity, order: Order | null) {
@@ -80,6 +94,9 @@ function approachStep(game: Game, u: Entity, t: Entity, d: number): number {
       u.pathFor = t.id;
       if (d < 4 && lineClear(m, u.x, u.y, t.x, t.y)) {
         u.path = [{ x: t.x, y: t.y }];
+      } else if (!pathBudget(game)) {
+        u.nextRepath = game.time; // se intentará el próximo tick
+        return MOVING;
       } else {
         const r = findPath(m, u.x, u.y, rectOf(t), 0);
         const raw = r.path;
@@ -91,6 +108,7 @@ function approachStep(game: Game, u: Entity, t: Entity, d: number): number {
     return MOVING;
   }
   if (!u.path.length || u.pathFor !== t.id || game.time >= u.nextRepath) {
+    if (!pathBudget(game)) return MOVING; // sin presupuesto este tick: se sigue con el camino actual
     const walkableTarget = t.kind === 'building' && !!game.reg.building(t.defId).walkable;
     const r = findPath(m, u.x, u.y, rectOf(t), walkableTarget ? 0 : 1);
     u.path = smoothPath(m, u.x, u.y, r.path);
@@ -99,7 +117,7 @@ function approachStep(game: Game, u: Entity, t: Entity, d: number): number {
     if (!u.path.length) {
       // Último tramo en línea recta hasta el borde del objetivo (p. ej. desde una esquina)
       const cx = Math.max(t.tx, Math.min(u.x, t.tx + t.size)), cy = Math.max(t.ty, Math.min(u.y, t.ty + t.size));
-      const dx = u.x - cx, dy = u.y - cy, dd = Math.hypot(dx, dy) || 1;
+      const dx = u.x - cx, dy = u.y - cy, dd = hypot(dx, dy) || 1;
       const px = cx + (dx / dd) * (u.radius + 0.1), py = cy + (dy / dd) * (u.radius + 0.1);
       if (dd < 2 && m.walkable(Math.floor(px), Math.floor(py))) { u.path = [{ x: px, y: py }]; return MOVING; }
       return UNREACHABLE;
@@ -120,7 +138,7 @@ export function nearestDrop(game: Game, p: Player, res: string, x: number, y: nu
     if (e.owner !== p.id || !e.complete || e.dead) continue;
     const def = game.reg.building(e.defId);
     if (!def.dropSite?.includes(res)) continue;
-    const d = Math.hypot(e.x - x, e.y - y) - e.size / 2;
+    const d = hypot(e.x - x, e.y - y) - e.size / 2;
     if (d < bestD) { bestD = d; best = e; }
   }
   return best;
@@ -143,7 +161,7 @@ export function nearestNode(game: Game, x: number, y: number, maxDist: number, f
       if (e.dead || !e.resType || e.amount <= 0) continue;
       const dx = Math.abs(e.x - x), dy = Math.abs(e.y - y);
       if (dx > bestD || dy > bestD) continue;
-      const d = Math.hypot(dx, dy);
+      const d = hypot(dx, dy);
       if (d < bestD && filter(e) && canReach(game, origin, e)) { bestD = d; best = e; }
     }
   }

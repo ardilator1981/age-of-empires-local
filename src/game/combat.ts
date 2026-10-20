@@ -1,7 +1,11 @@
 import type { AttackType, Bonus } from '../core/types';
 import type { Entity } from './Entity';
 import type { Game } from './Game';
+import { BALANCE } from '../config/balance';
 import { edgeDist, setOrder } from './actions';
+import { advantage, heightDamageFactor, heightOf } from './heightRules';
+import { retaliation } from './army/stances';
+import { hypot } from './fmath';
 
 export interface DamageInfo {
   attack: number;
@@ -11,6 +15,8 @@ export interface DamageInfo {
   attackerId: number;
   /** Altura del terreno del atacante. */
   fromHeight?: number;
+  /** Ataque a distancia (las reglas de altura cambian). */
+  ranged?: boolean;
 }
 
 export interface Projectile {
@@ -28,40 +34,51 @@ export interface Projectile {
 
 /** Ataca a `t`: cuerpo a cuerpo aplica el daño ya; a distancia lanza un proyectil. */
 export function performAttack(game: Game, a: Entity, t: Entity) {
+  if (!game.canAttack(a, t, true)) return;
   const p = game.players[a.owner];
   const def = game.defOf(a);
   const info: DamageInfo = {
-    attack: p.getStat(def, 'attack'),
+    attack: p.getStat(def, 'attack') * auraOf(game, a).attackMul,
     type: def.attackType ?? 'melee',
     bonus: def.bonus ?? [],
     owner: a.owner,
     attackerId: a.id,
-    fromHeight: game.map.heightAt(a.x, a.y),
+    fromHeight: heightOf(game, a),
+    ranged: p.getStat(def, 'range') >= 1,
   };
   a.attackAnim = 0.35;
-  if (p.getStat(def, 'range') >= 1) {
-    const d = Math.hypot(t.x - a.x, t.y - a.y);
+  // Marca visible de ventaja de altura (la interfaz la muestra sobre la unidad)
+  const adv = advantage(game, a, t);
+  if (adv.range > 0 || adv.damage !== 0) a.data.heightAdv = { ...adv, until: game.time + 2.5 };
+  else delete a.data.heightAdv;
+  if (info.ranged) {
+    const d = hypot(t.x - a.x, t.y - a.y);
     game.projectiles.push({
       sx: a.x, sy: a.y, ex: t.x, ey: t.y,
       sh: a.kind === 'building' ? 40 : 14,
-      t: 0, dur: Math.max(0.15, d / 9), targetId: t.id, info, style: def.projectile ?? 'arrow',
+      t: 0, dur: Math.max(0.15, d / BALANCE.combat.projectileSpeed), targetId: t.id, info, style: def.projectile ?? 'arrow',
     });
   } else {
     dealDamage(game, t, info);
   }
 }
 
+/** Bonificación del aura de una unidad propia cercana (p. ej. el General), si la tiene ahora. */
+export function auraOf(game: Game, e: Entity): { attackMul: number; armorAdd: number } {
+  const a = e.data.aura as { attackMul: number; armorAdd: number; until: number } | undefined;
+  return a && a.until >= game.time ? a : { attackMul: 1, armorAdd: 0 };
+}
+
 export function computeDamage(game: Game, t: Entity, info: DamageInfo): number {
   const tp = game.players[t.owner];
   const tdef = game.defOf(t);
-  const armor = tp.getStat(tdef, info.type === 'melee' ? 'armorMelee' : 'armorPierce');
+  const armor = tp.getStat(tdef, info.type === 'melee' ? 'armorMelee' : 'armorPierce') + auraOf(game, t).armorAdd;
   let dmg = Math.max(0, info.attack - armor);
   for (const b of info.bonus) if (tdef.classes.includes(b.vs)) dmg += b.amount;
-  // Ventaja de altura, como en AoE2: +25% desde arriba, -25% desde abajo
+  // Ventaja de altura (valores en BALANCE.highGround)
   if (info.fromHeight !== undefined) {
-    const dh = info.fromHeight - game.map.heightAt(t.x, t.y);
-    if (dh > 0.6) dmg *= 1.25;
-    else if (dh < -0.6) dmg *= 0.75;
+    const diff = (info.fromHeight - heightOf(game, t)) / BALANCE.relief.levelStep;
+    dmg *= heightDamageFactor(diff, !!info.ranged);
   }
   return Math.max(1, Math.round(dmg * 10) / 10);
 }
@@ -76,12 +93,19 @@ export function dealDamage(game: Game, t: Entity, info: DamageInfo) {
 
   const tp = game.players[t.owner];
   if (tp.isHuman && game.isEnemy(info.owner, t.owner)) {
-    game.warn(tp, 'attacked', t.kind === 'building' ? '¡Están atacando un edificio!' : '¡Te están atacando!', 20, { x: t.x, y: t.y });
+    const kind = t.kind === 'building' ? 'building' : 'unit';
+    const text = kind === 'building' ? '¡Están atacando un edificio!' : '¡Te están atacando!';
+    if (game.warn(tp, 'attacked:' + kind, text, BALANCE.alerts.attackEvery, { x: t.x, y: t.y })) {
+      game.events.emit('underAttack', { playerId: tp.id, target: t, attacker, kind });
+    }
   }
-  // Contraataque de unidades militares desocupadas
+  // Contraataque de unidades militares desocupadas, según su postura
   if (attacker && t.kind === 'unit' && !t.order) {
     const def = game.unitDef(t);
-    if (!def.gatherer && (def.attack ?? 0) > 0) setOrder(t, { type: 'attack', targetId: attacker.id, auto: true });
+    if (!def.gatherer && (def.attack ?? 0) > 0 && game.canAttack(t, attacker, false)) {
+      const o = retaliation(game, t, attacker);
+      if (o) setOrder(t, o);
+    }
   }
   if (t.hp <= 0) game.kill(t, attacker);
 }
@@ -103,18 +127,20 @@ export function updateProjectiles(game: Game, dt: number) {
  * Enemigo más cercano a `from` dentro de `radius`.
  * Las unidades tienen prioridad sobre los edificios; `buildingsOnly` para asedio.
  */
-export function findEnemyNear(game: Game, from: Entity, radius: number, includeBuildings: boolean, buildingsOnly = false): Entity | null {
+export function findEnemyNear(game: Game, from: Entity, radius: number, includeBuildings: boolean, buildingsOnly = false, accept?: (e: Entity, d: number) => boolean): Entity | null {
   let bestU: Entity | null = null, bestUD = radius;
   let bestB: Entity | null = null, bestBD = radius;
   for (const e of game.actors) {
     if (e.dead || !game.isEnemy(from.owner, e.owner)) continue;
+    // Reglas de los mods (zona de batalla, tregua...); los edificios no se mueven: tienen que poder golpear ya
+    if (game.reg.combatRules.length && !game.canAttack(from, e, from.kind === 'building')) continue;
     if (e.kind === 'unit') {
       if (buildingsOnly) continue;
-      const d = Math.hypot(e.x - from.x, e.y - from.y) - (from.kind === 'building' ? from.size / 2 : 0);
-      if (d < bestUD) { bestUD = d; bestU = e; }
+      const d = hypot(e.x - from.x, e.y - from.y) - (from.kind === 'building' ? from.size / 2 : 0);
+      if (d < bestUD && (!accept || accept(e, d))) { bestUD = d; bestU = e; }
     } else if (includeBuildings || buildingsOnly) {
-      const d = from.kind === 'unit' ? edgeDist(from, e) : Math.hypot(e.x - from.x, e.y - from.y);
-      if (d < bestBD) { bestBD = d; bestB = e; }
+      const d = from.kind === 'unit' ? edgeDist(from, e) : hypot(e.x - from.x, e.y - from.y);
+      if (d < bestBD && (!accept || accept(e, d))) { bestBD = d; bestB = e; }
     }
   }
   return bestU ?? bestB;

@@ -132,6 +132,39 @@ export class MapGenerator {
     m.heightVersion++;
   }
 
+  /**
+   * Meseta de laderas escarpadas (se convierten en roca) con una rampa de subida:
+   * un punto alto para defender. `rampAngle` en radianes (por defecto, aleatorio).
+   */
+  mesa(cx: number, cy: number, r: number, h: number, rampAngle = this.rand(0, Math.PI * 2)) {
+    const m = this.game.map, W = m.w + 1;
+    const half = Math.max(0.45, 2.2 / r); // la rampa mide al menos ~4 casillas de ancho
+    const R = r + h + 2;
+    for (let vy = Math.max(0, Math.floor(cy - R)); vy <= Math.min(m.h, cy + R); vy++) for (let vx = Math.max(0, Math.floor(cx - R)); vx <= Math.min(m.w, cx + R); vx++) {
+      const dx = vx - cx, dy = vy - cy;
+      const d = Math.hypot(dx, dy) / (0.85 + 0.3 * this.noise(vx, vy, 3));
+      let da = Math.abs(Math.atan2(dy, dx) - rampAngle) % (Math.PI * 2);
+      if (da > Math.PI) da = Math.PI * 2 - da;
+      const ramp = da < half;
+      const edge = ramp ? h / 1.1 : 1.1; // rampa suave o cantil
+      const k = d <= r ? 1 : Math.max(0, 1 - (d - r) / edge);
+      if (k > 0) m.heights[vy * W + vx] += h * k;
+    }
+    m.heightVersion++;
+  }
+
+  /** Varias mesetas lejos de los puntos indicados. */
+  mesas(count: number, minR: number, maxR: number, minH: number, maxH: number, avoid: Pt[] = [], avoidR = 0) {
+    for (let i = 0; i < count; i++) {
+      for (let t = 0; t < 40; t++) {
+        const x = this.rand(8, this.w - 8), y = this.rand(8, this.h - 8);
+        if (avoid.some(s => Math.hypot(s.x - x, s.y - y) < avoidR)) continue;
+        this.mesa(x, y, this.rand(minR, maxR), this.rand(minH, maxH));
+        break;
+      }
+    }
+  }
+
   /** Varias colinas repartidas, lejos de los puntos indicados. */
   hills(count: number, minR: number, maxR: number, minH: number, maxH: number, avoid: Pt[] = [], avoidR = 0) {
     for (let i = 0; i < count; i++) {

@@ -1,10 +1,13 @@
+import { BALANCE } from '../../config/balance';
 import type { Cost, Pt, System } from '../../core/types';
 import { isAccessible, nearestDrop, nearestNode, isFarmTaken, setOrder } from '../actions';
 import { Commands } from '../commands';
+import { moveInFormation } from '../formation';
 import type { Entity } from '../Entity';
 import type { Game } from '../Game';
 import type { Player } from '../Player';
 import { buildingAvail, researchablesAt, techAvail, trainablesAt, unitAvail } from '../rules';
+import { cos, hypot, sin } from '../fmath';
 
 interface Difficulty {
   gather: number;
@@ -16,18 +19,9 @@ interface Difficulty {
   think: number;
 }
 
-export const AI_DIFFICULTY: Record<string, Difficulty> = {
-  easy: { gather: 0.75, maxVillagers: 18, firstAttack: 900, wave: 5, waveGrow: 1, villagersForAge: [14, 20, 26], think: 2 },
-  normal: { gather: 1.0, maxVillagers: 28, firstAttack: 600, wave: 8, waveGrow: 2, villagersForAge: [18, 24, 30], think: 1 },
-  hard: { gather: 1.15, maxVillagers: 40, firstAttack: 420, wave: 10, waveGrow: 3, villagersForAge: [20, 26, 32], think: 0.6 },
-};
-
-const RATIOS: Record<string, number>[] = [
-  { food: 0.55, wood: 0.4, gold: 0.05, stone: 0 },
-  { food: 0.45, wood: 0.35, gold: 0.15, stone: 0.05 },
-  { food: 0.4, wood: 0.3, gold: 0.25, stone: 0.05 },
-  { food: 0.38, wood: 0.27, gold: 0.28, stone: 0.07 },
-];
+export const AI_DIFFICULTY: Record<string, Difficulty> = BALANCE.ai.difficulty;
+const RATIOS = BALANCE.ai.ratios;
+const STOCKPILE_ENOUGH = BALANCE.ai.stockpileEnough;
 
 /**
  * IA de un jugador. Lee las definiciones del Registry (no conoce unidades
@@ -40,6 +34,8 @@ export class AIController {
   private cfg: Difficulty;
   private home: Pt = { x: 0, y: 0 };
   private nodes: Entity[] = [];
+  /** Recursos que las extensiones de los mods piden no gastar (del turno anterior). */
+  private pluginReserve: Cost = {};
 
   constructor(private game: Game, private p: Player) {
     this.cfg = AI_DIFFICULTY[p.difficulty] ?? AI_DIFFICULTY.normal;
@@ -53,6 +49,21 @@ export class AIController {
     if (g.time < this.nextThink || this.p.defeated) return;
     this.nextThink = g.time + this.cfg.think;
     this.think();
+  }
+
+  get playerId() { return this.p.id; }
+
+  /** Lo que hay que guardar con la partida (el resto se recalcula en cada turno). */
+  saveState() {
+    return {
+      pid: this.p.id, nextThink: this.nextThink, waveSize: this.waveSize, rebalanceAt: this.rebalanceAt,
+      home: this.home, pluginReserve: this.pluginReserve, postAt: this.postAt, post: this.post,
+    };
+  }
+
+  loadState(s: any) {
+    this.nextThink = s.nextThink; this.waveSize = s.waveSize; this.rebalanceAt = s.rebalanceAt;
+    this.home = s.home; this.pluginReserve = s.pluginReserve ?? {}; this.postAt = s.postAt; this.post = s.post;
   }
 
   private isTC(e: Entity) { return e.kind === 'building' && this.game.buildingDef(e).classes.includes('townCenter'); }
@@ -74,13 +85,15 @@ export class AIController {
     const ageTech = [...g.reg.techs.values()].find(t => t.setsAge === p.age + 1 && techAvail(g, p, t.id).visible);
     const agingUp = blds.some(b => b.queue.some(q => q.kind === 'tech' && g.reg.tech(q.id).setsAge !== undefined));
     const wantAge = !!ageTech && !agingUp && vills.length >= (this.cfg.villagersForAge[p.age] ?? 99);
-    const reserve: Cost = wantAge && ageTech ? p.getCost(ageTech) : {};
+    const reserve: Cost = { ...this.pluginReserve };
+    if (wantAge && ageTech) for (const [r, v] of Object.entries(p.getCost(ageTech))) reserve[r] = (reserve[r] ?? 0) + (v ?? 0);
     const canSpend = (cost: Cost) => Object.entries(cost).every(([r, v]) => (p.res[r] ?? 0) - (reserve[r] ?? 0) >= (v ?? 0));
 
     // 1. Aldeanos
     const queuedVills = tcs.reduce((n, b) => n + b.queue.filter(q => q.kind === 'unit' && g.reg.unit(q.id).gatherer).length, 0);
     for (const b of tcs) {
-      if (vills.length + queuedVills >= this.cfg.maxVillagers || b.queue.length >= 2) continue;
+      // Sin población libre no se encola (un aldeano esperando bloquearía la cola, también la edad)
+      if (vills.length + queuedVills >= this.cfg.maxVillagers || b.queue.length >= 2 || p.popUsed >= p.popCap) continue;
       const vid = trainablesAt(g, p, b.defId).find(id => g.reg.unit(id).gatherer);
       if (vid && canSpend(p.getCost(g.reg.unit(vid)))) Commands.train(g, b, vid);
     }
@@ -119,8 +132,28 @@ export class AIController {
       }
     }
 
-    // 6. Ejército
-    if (vills.length >= 8) {
+    // 6. Extensiones de los mods: pueden pedir edificios y unidades, frenar el entrenamiento
+    //    del ejército para ahorrar (holdTraining) o encargarse del ejército (armyHandled)
+    let armyHandled = false, holdTraining = false;
+    const nextReserve: Cost = {};
+    for (const plugin of g.reg.aiPlugins) {
+      const r = plugin.think({
+        game: g, player: p, home: this.home, army, villagers: vills, buildings: blds, canSpend,
+        build: (defId, near) => this.build(defId, near ?? this.home, 1, vills),
+        train: unitId => {
+          if (!unitAvail(g, p, unitId).ok) return false;
+          const b = blds.find(x => x.complete && x.queue.length < 5 && trainablesAt(g, p, x.defId).includes(unitId));
+          return !!b && !!Commands.train(g, b, unitId);
+        },
+      });
+      if (r?.armyHandled) armyHandled = true;
+      if (r?.holdTraining) holdTraining = true;
+      for (const [k, v] of Object.entries(r?.reserve ?? {})) nextReserve[k] = (nextReserve[k] ?? 0) + (v ?? 0);
+    }
+    this.pluginReserve = nextReserve;
+
+    // 7. Ejército
+    if (vills.length >= 8 && !holdTraining) {
       for (const b of blds) {
         if (!b.complete || b.queue.length >= 2) continue;
         const units = trainablesAt(g, p, b.defId).filter(id => {
@@ -136,11 +169,11 @@ export class AIController {
       }
     }
 
-    // 7. Recolección
+    // 8. Recolección
     this.assignVillagers(vills);
 
-    // 8. Defensa y ataque
-    this.controlArmy(army, blds);
+    // 9. Defensa y ataque
+    if (!armyHandled) this.controlArmy(army, blds);
   }
 
   // ------------------------------------------------------------ construcción
@@ -164,7 +197,7 @@ export class AIController {
     const center = { x: spot.x + g.reg.building(defId).size / 2, y: spot.y + g.reg.building(defId).size / 2 };
     const free = vills.filter(v => v.order?.type !== 'build');
     const pool = free.length ? free : vills;
-    const builders = [...pool].sort((a, b) => Math.hypot(a.x - center.x, a.y - center.y) - Math.hypot(b.x - center.x, b.y - center.y)).slice(0, n);
+    const builders = [...pool].sort((a, b) => hypot(a.x - center.x, a.y - center.y) - hypot(b.x - center.x, b.y - center.y)).slice(0, n);
     return !!Commands.placeBuilding(g, p.id, defId, spot.x, spot.y, builders);
   }
 
@@ -178,6 +211,9 @@ export class AIController {
     const start = Math.floor(g.rng() * 8);
     const free = g.findFreeTile(this.home.x, this.home.y, 8);
     const homeRegion = free ? m.region(Math.floor(free.x), Math.floor(free.y)) : -1;
+    // Torres y castillos: el sitio válido más alto (la altura les da alcance y daño)
+    const defensive = (def.attack ?? 0) > 0;
+    let best: Pt | null = null, bestScore = -Infinity;
     for (let r = minR; r <= maxR; r++) {
       const ring: Pt[] = [];
       for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) {
@@ -200,10 +236,42 @@ export class AIController {
           if (!e) continue;
           if (e.kind === 'building' || (!isDrop && g.nodeDef(e)?.resource !== 'wood')) { ok = false; break; }
         }
-        if (ok) return t;
+        if (!ok) continue;
+        if (!defensive) return t;
+        const score = m.baseHeight(t.x, t.y, s) - r * 0.08;
+        if (score > bestScore) { bestScore = score; best = t; }
       }
     }
-    return null;
+    return best;
+  }
+
+  private postAt = -999;
+  private post: Pt | null = null;
+
+  /** Punto alto cerca de la base, de cara al enemigo más cercano, para esperar defendiendo. */
+  private defensePost(): Pt | null {
+    const g = this.game, m = g.map, h = this.home;
+    if (g.time - this.postAt < 60 && this.post) return this.post;
+    this.postAt = g.time;
+    let foe: Pt | null = null, fd = Infinity;
+    for (const b of g.buildings) {
+      if (b.dead || !g.isEnemy(this.p.id, b.owner)) continue;
+      const d = hypot(b.x - h.x, b.y - h.y);
+      if (d < fd) { fd = d; foe = b; }
+    }
+    if (!foe) return (this.post = null);
+    const dirX = (foe.x - h.x) / fd, dirY = (foe.y - h.y) / fd;
+    const reg = m.regionAt(h.x + dirX * 4, h.y + dirY * 4);
+    const th = m.tileHeights();
+    let best: Pt | null = null, bs = -Infinity;
+    for (let r = 6; r <= 14; r++) for (let a = -0.9; a <= 0.9; a += 0.15) {
+      const ca = cos(a), sa = sin(a);
+      const x = Math.floor(h.x + (dirX * ca - dirY * sa) * r), y = Math.floor(h.y + (dirX * sa + dirY * ca) * r);
+      if (!m.walkable(x, y) || (reg >= 0 && m.region(x, y) !== reg)) continue;
+      const score = th[y * m.w + x] - r * 0.05;
+      if (score > bs) { bs = score; best = { x: x + 0.5, y: y + 0.5 }; }
+    }
+    return (this.post = best);
   }
 
   private dropBuildingFor(res: string): string | null {
@@ -230,7 +298,7 @@ export class AIController {
       if (!dropId || (p.pending.get(dropId) ?? 0) > 0) continue;
       const node = targets[0];
       const drop = nearestDrop(g, p, res, node.x, node.y);
-      const d = drop ? Math.hypot(drop.x - node.x, drop.y - node.y) - drop.size / 2 : Infinity;
+      const d = drop ? hypot(drop.x - node.x, drop.y - node.y) - drop.size / 2 : Infinity;
       if (d > 6) this.build(dropId, node, 1, vills, 1, 6);
     }
   }
@@ -253,7 +321,7 @@ export class AIController {
       if (b.complete) continue;
       if (vills.some(v => v.order?.type === 'build' && v.order.targetId === b.id)) continue;
       const free = vills.filter(v => v.order?.type !== 'build');
-      const v = free.sort((x, y) => Math.hypot(x.x - b.x, x.y - b.y) - Math.hypot(y.x - b.x, y.y - b.y))[0];
+      const v = free.sort((x, y) => hypot(x.x - b.x, x.y - b.y) - hypot(y.x - b.x, y.y - b.y))[0];
       if (v) Commands.build(g, [v], b);
     }
   }
@@ -268,7 +336,11 @@ export class AIController {
 
   private assignVillagers(vills: Entity[]) {
     const g = this.game, p = this.p;
-    const ratio = RATIOS[Math.min(p.age, RATIOS.length - 1)];
+    // Lo que ya sobra en el almacén deja de pedir aldeanos (si no, la IA acumula oro y se queda sin comida ni madera)
+    const ratio = { ...RATIOS[Math.min(p.age, RATIOS.length - 1)] };
+    for (const r of Object.keys(ratio)) if ((p.res[r] ?? 0) > STOCKPILE_ENOUGH) ratio[r] *= 0.15;
+    const sum = Object.values(ratio).reduce((a, b) => a + b, 0) || 1;
+    for (const r of Object.keys(ratio)) ratio[r] /= sum;
     const counts: Record<string, number> = {};
     for (const r of Object.keys(ratio)) counts[r] = 0;
     for (const v of vills) { const r = this.resourceOf(v); if (r) counts[r] = (counts[r] ?? 0) + 1; }
@@ -290,9 +362,16 @@ export class AIController {
       const keys = Object.keys(ratio);
       const under = keys.sort((a, b) => deficit(b) - deficit(a))[0];
       const over = keys.sort((a, b) => deficit(a) - deficit(b))[0];
-      if (under !== over && deficit(under) > 1.5 && deficit(over) < -1.5) {
+      // Si sobra mucho de algo, se reasignan varios a la vez
+      const moves = Math.max(1, Math.min(4, Math.floor(-deficit(over) / 3)));
+      for (let k = 0; k < moves && under !== over && deficit(under) > 1.5 && deficit(over) < -1.5; k++) {
         const v = vills.find(x => this.resourceOf(x) === over && (!x.carry || x.carry.amount < 1));
-        if (v && this.sendToResource(v, under, vills)) { /* reasignado */ }
+        if (!v) break;
+        // Si no se puede (p. ej. granjas sin madera), al siguiente recurso que falte
+        const to = keys.filter(r => r !== over && deficit(r) > 0.5).sort((a, b) => deficit(b) - deficit(a))
+          .find(r => this.sendToResource(v, r, vills));
+        if (!to) break;
+        counts[over]--; counts[to] = (counts[to] ?? 0) + 1;
       }
     }
   }
@@ -302,10 +381,20 @@ export class AIController {
     let best: Entity | null = null, bestD = res === 'food' ? 22 : 40;
     for (const n of this.nodes) {
       if (n.dead || n.resType !== res || n.amount <= 0) continue;
-      const dh = Math.hypot(n.x - h.x, n.y - h.y);
+      const dh = hypot(n.x - h.x, n.y - h.y);
       if (dh > bestD + 10) continue;
-      const d = dh * 0.6 + Math.hypot(n.x - v.x, n.y - v.y) * 0.4;
+      const d = dh * 0.6 + hypot(n.x - v.x, n.y - v.y) * 0.4;
       if (d < bestD && isAccessible(g, n, v)) { bestD = d; best = n; }
+    }
+    if (!best && res !== 'food') {
+      // Se agotó lo cercano (mapas de montaña o desierto): lo más cercano alcanzable, esté donde esté.
+      // ensureDropSites levantará allí un campamento en cuanto vayan varios aldeanos.
+      let far = Infinity;
+      for (const n of this.nodes) {
+        if (n.dead || n.resType !== res || n.amount <= 0) continue;
+        const d = hypot(n.x - h.x, n.y - h.y);
+        if (d < far && isAccessible(g, n, v)) { far = d; best = n; }
+      }
     }
     if (best) { setOrder(v, { type: 'gather', targetId: best.id, phase: 'gather' }); return true; }
     if (res !== 'food') return false;
@@ -329,15 +418,15 @@ export class AIController {
     for (const e of g.units) {
       if (e.dead || !g.isEnemy(p.id, e.owner)) continue;
       for (const b of blds) {
-        if (Math.hypot(e.x - b.x, e.y - b.y) < 12) { threats.push(e); break; }
+        if (hypot(e.x - b.x, e.y - b.y) < 12) { if (g.canAttack(army[0], e, false)) threats.push(e); break; }
       }
     }
     if (threats.length) {
       for (const a of army) {
         if (a.order?.type === 'attack' && !a.order.auto) continue;
-        if (Math.hypot(a.x - this.home.x, a.y - this.home.y) > 35) continue;
+        if (hypot(a.x - this.home.x, a.y - this.home.y) > 35) continue;
         let best = threats[0], bd = Infinity;
-        for (const t of threats) { const d = Math.hypot(t.x - a.x, t.y - a.y); if (d < bd) { bd = d; best = t; } }
+        for (const t of threats) { const d = hypot(t.x - a.x, t.y - a.y); if (d < bd) { bd = d; best = t; } }
         setOrder(a, { type: 'attack', targetId: best.id });
       }
       return;
@@ -345,7 +434,7 @@ export class AIController {
 
     const idle = army.filter(a => !a.order);
     // Las tropas que ya están en territorio enemigo siguen atacando
-    const deep = idle.filter(a => Math.hypot(a.x - this.home.x, a.y - this.home.y) > 25);
+    const deep = idle.filter(a => hypot(a.x - this.home.x, a.y - this.home.y) > 25);
     if (deep.length) {
       const t = this.enemyTarget(deep[0]);
       if (t) Commands.attackMove(g, deep, t.x, t.y);
@@ -354,8 +443,27 @@ export class AIController {
     if (g.time >= this.cfg.firstAttack && atHome.length >= this.waveSize) {
       const t = this.enemyTarget(atHome[0]);
       if (t) {
+        // Al ataque en grupo: postura agresiva y en línea (en cuña si es sobre todo caballería)
+        const cav = atHome.filter(a => g.unitDef(a).classes.includes('cavalry')).length;
+        Commands.setStance(g, atHome, 'aggressive');
+        Commands.setFormation(g, atHome, cav > atHome.length / 2 ? 'wedge' : 'line');
         Commands.attackMove(g, atHome, t.x, t.y);
         this.waveSize += this.cfg.waveGrow;
+      }
+    } else {
+      // Mientras se reúne la oleada, el ejército espera en línea, en un punto alto de cara al
+      // enemigo, en postura defensiva (defiende sin alejarse)
+      const post = this.defensePost();
+      if (post) {
+        const away = atHome.filter(a => hypot(a.x - post.x, a.y - post.y) > 4);
+        const lax = atHome.filter(a => a.stance !== 'defensive');
+        if (lax.length) Commands.setStance(g, lax, 'defensive');
+        if (away.length) {
+          Commands.setFormation(g, away, 'line');
+          const facing = { x: post.x - this.home.x, y: post.y - this.home.y };
+          if (away.length >= 2) moveInFormation(g, away, post, facing, 'line');
+          else Commands.move(g, away, post.x, post.y);
+        }
       }
     }
   }
@@ -364,24 +472,43 @@ export class AIController {
     const g = this.game;
     let best: Entity | null = null, bd = Infinity;
     for (const e of g.buildings) {
-      if (e.dead || !g.isEnemy(this.p.id, e.owner)) continue;
-      const d = Math.hypot(e.x - from.x, e.y - from.y) * (this.isTC(e) ? 0.7 : 1);
+      if (e.dead || !g.canAttack(from, e, false)) continue;
+      const d = hypot(e.x - from.x, e.y - from.y) * (this.isTC(e) ? 0.7 : 1);
       if (d < bd) { bd = d; best = e; }
     }
     if (best) return best;
     for (const e of g.units) {
-      if (e.dead || !g.isEnemy(this.p.id, e.owner)) continue;
-      const d = Math.hypot(e.x - from.x, e.y - from.y);
+      if (e.dead || !g.canAttack(from, e, false)) continue;
+      const d = hypot(e.x - from.x, e.y - from.y);
       if (d < bd) { bd = d; best = e; }
     }
     return best;
   }
 }
 
+/** ¿Juega la IA por este jugador? Los de la IA y los humanos que se han ido de una partida en red. */
+const aiPlays = (p: Player) => !p.isHuman || !!p.data.aiControl;
+
 export class AISystem implements System {
   private ais: AIController[];
-  constructor(game: Game) {
-    this.ais = game.players.slice(1).filter(p => !p.isHuman).map(p => new AIController(game, p));
+  constructor(private game: Game) {
+    this.ais = game.players.slice(1).filter(aiPlays).map(p => new AIController(game, p));
   }
-  update() { for (const ai of this.ais) ai.update(); }
+  update() {
+    // Partida en red: la IA toma (o devuelve) el mando de un humano con la orden `ai`
+    const g = this.game;
+    if (g.tick % 20 === 0) {
+      for (const p of g.players) {
+        if (!p.isHuman) continue;
+        const has = this.ais.some(ai => ai.playerId === p.id);
+        if (aiPlays(p) && !has) this.ais.push(new AIController(g, p));
+        else if (!aiPlays(p) && has) this.ais = this.ais.filter(ai => ai.playerId !== p.id);
+      }
+    }
+    for (const ai of this.ais) ai.update();
+  }
+  save() { return this.ais.map(ai => ai.saveState()); }
+  load(states: any[]) {
+    for (const s of states ?? []) this.ais.find(ai => ai.playerId === s.pid)?.loadState(s);
+  }
 }

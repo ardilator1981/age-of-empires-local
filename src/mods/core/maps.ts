@@ -142,6 +142,8 @@ export const maps: MapTypeDef[] = [
       const sc = (gen.w * gen.h) / (96 * 96);
       gen.hills(Math.round(12 * sc), 4, 9, 1.2, 3.2, starts, 12);
       gen.smoothHeights(1);
+      // Mesetas con cantiles de roca y una rampa: puntos altos que disputar
+      gen.mesas(Math.max(2, Math.round(3 * sc)), 3.5, 6, 3, 4.5, starts, 18);
       dirtPatches(gen, Math.round(gen.w * gen.h / 350), starts);
       // Algún estanque
       for (let i = 0; i < 2; i++) {
@@ -191,6 +193,7 @@ export const maps: MapTypeDef[] = [
       const cx = gen.w / 2, cy = gen.h / 2;
       gen.hills(Math.round(9 * (gen.w * gen.h) / (96 * 96)), 4, 8, 1, 2.6, [...starts, { x: cx, y: cy }], 16);
       gen.smoothHeights(1);
+      gen.mesas(2, 3.5, 5, 3, 4, [...starts, { x: cx, y: cy }], 20);
       gen.blob(cx, cy, Math.min(gen.w, gen.h) * 0.17, (x, y) => { if (!gen.isProtected(x, y)) gen.set(x, y, 'water'); }, 0.5);
       for (let i = 0; i < 3; i++) {
         const x = gen.randInt(8, gen.w - 8), y = gen.randInt(8, gen.h - 8);

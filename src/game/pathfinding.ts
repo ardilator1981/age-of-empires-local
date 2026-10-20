@@ -1,5 +1,7 @@
+import { BALANCE } from '../config/balance';
 import type { Pt } from '../core/types';
 import type { GameMap } from './GameMap';
+import { hypot } from './fmath';
 
 /** Rectángulo objetivo en casillas (inclusivo). */
 export interface GoalRect { x0: number; y0: number; x1: number; y1: number }
@@ -67,6 +69,8 @@ export function findPath(map: GameMap, sx: number, sy: number, goal: GoalRect, n
     seen = new Uint32Array(N); closed = new Uint32Array(N);
   }
   const st = ++stamp;
+  // El desnivel entre casillas encarece el camino: se prefieren el llano y los pasos
+  const th = map.tileHeights(), slopeCost = BALANCE.pathfinding.slopeCost;
   const sxi = Math.min(W - 1, Math.max(0, Math.floor(sx)));
   const syi = Math.min(H - 1, Math.max(0, Math.floor(sy)));
   const start = syi * W + sxi;
@@ -97,7 +101,7 @@ export function findPath(map: GameMap, sx: number, sy: number, goal: GoalRect, n
       if (k >= 4 && (!map.walkable(cx + DX[k], cy) || !map.walkable(cx, cy + DY[k]))) continue;
       const n = ny * W + nx;
       if (closed[n] === st) continue;
-      const ng = gc + (k >= 4 ? 1.41421 : 1);
+      const ng = gc + (k >= 4 ? 1.41421 : 1) + slopeCost * Math.abs(th[n] - th[cur]);
       if (seen[n] !== st || ng < gScore[n]) {
         seen[n] = st; gScore[n] = ng; parent[n] = cur;
         heap.push(n, ng + hfn(nx, ny) * 1.001);
@@ -115,7 +119,7 @@ export function findPath(map: GameMap, sx: number, sy: number, goal: GoalRect, n
 
 /** ¿Puede una unidad de radio r ir en línea recta de A a B? */
 export function lineClear(map: GameMap, ax: number, ay: number, bx: number, by: number, r = 0.2): boolean {
-  const d = Math.hypot(bx - ax, by - ay);
+  const d = hypot(bx - ax, by - ay);
   const steps = Math.max(1, Math.ceil(d / 0.25));
   for (let i = 1; i <= steps; i++) {
     const t = i / steps;

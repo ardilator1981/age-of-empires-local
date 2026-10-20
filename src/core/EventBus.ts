@@ -1,6 +1,11 @@
 import type { Entity } from '../game/Entity';
 import type { Player } from '../game/Player';
 
+/** Tipo de orden aceptada (cada una tiene su sonido de confirmación). */
+export type OrderKind = 'move' | 'gather' | 'build' | 'attack';
+/** Por qué no se ha podido hacer una acción. */
+export type RejectReason = 'resources' | 'placement' | 'population' | 'requirement' | 'queue' | 'other';
+
 /** Eventos del juego. Los mods pueden escuchar cualquiera y emitir los suyos propios. */
 export interface GameEventMap {
   entityCreated: { entity: Entity };
@@ -14,6 +19,16 @@ export interface GameEventMap {
   playerDefeated: { player: Player };
   gameOver: { won: boolean };
   notify: { text: string; playerId?: number; tone?: 'info' | 'warn' | 'good'; at?: { x: number; y: number } };
+  /** Un jugador ha dado una orden válida (mover, recolectar, construir, atacar). */
+  orderIssued: { playerId: number; kind: OrderKind; at: { x: number; y: number } };
+  /** Una acción de un jugador no se ha podido hacer (sin recursos, mal sitio, sin población...). */
+  actionRejected: { playerId: number; reason: RejectReason; text: string };
+  /** Se ha agotado un recurso. `area`: no queda nada igual cerca (mina, bosque o arbustos acabados; granja agotada). */
+  resourceDepleted: { entity: Entity; playerId: number; resType: string; area: boolean };
+  /** Ataque a algo de un jugador, con límite de frecuencia por tipo (`BALANCE.alerts`). */
+  underAttack: { playerId: number; target: Entity; attacker?: Entity; kind: 'unit' | 'building' };
+  /** Un aldeano se ha quedado sin trabajo. Preparado para el aviso de aldeanos inactivos: todavía no lo emite nadie. */
+  villagerIdle: { entity: Entity };
   [custom: string]: any;
 }
 
@@ -21,6 +36,11 @@ type Handler<T> = (payload: T) => void;
 
 export class EventBus {
   private handlers = new Map<string, Handler<any>[]>();
+  /**
+   * Filtro opcional: si devuelve false, el evento no llega a nadie. Lo usa la partida en red para
+   * no repetir la confirmación de las órdenes propias, que ya se dio al dar la orden.
+   */
+  filter: ((evt: string, payload: any) => boolean) | null = null;
 
   /** Suscribe y devuelve una función para cancelar la suscripción. */
   on<K extends keyof GameEventMap & string>(evt: K, fn: Handler<GameEventMap[K]>): () => void {
@@ -35,6 +55,7 @@ export class EventBus {
   }
 
   emit<K extends keyof GameEventMap & string>(evt: K, payload: GameEventMap[K]): void {
+    if (this.filter && !this.filter(evt, payload)) return;
     const list = this.handlers.get(evt);
     if (list) for (const fn of [...list]) fn(payload);
   }

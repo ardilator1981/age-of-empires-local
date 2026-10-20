@@ -8,6 +8,8 @@ export class UIState {
   selection: number[] = [];
   placing: { defId: string; tx: number; ty: number; valid: boolean } | null = null;
   targeting: 'attackMove' | 'rally' | null = null;
+  /** Elegir un punto del mapa para un mod (p. ej. el punto de batalla). El clic o toque llama a onPick. */
+  pickPoint: { owner: string; onPick(p: { x: number; y: number }): void } | null = null;
   dragBox: { x0: number; y0: number; x1: number; y1: number } | null = null;
   mouse = { x: 0, y: 0, inside: false };
   page: 'main' | 'economy' | 'military' = 'main';

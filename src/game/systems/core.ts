@@ -1,8 +1,13 @@
 import type { System } from '../../core/types';
+import { BALANCE } from '../../config/balance';
 import { setOrder } from '../actions';
+import { rangeBonus } from '../heightRules';
+import { castVision, eyeHeight, sightRadius } from '../vision';
 import { findEnemyNear, performAttack, updateProjectiles } from '../combat';
+import { anchorOf, engageOrder, stanceTarget } from '../army/stances';
 import type { Entity } from '../Entity';
 import type { Game } from '../Game';
+import { hypot } from '../fmath';
 
 /**
  * Sistemas básicos de la simulación. Se registran en el Registry desde el mod
@@ -68,18 +73,27 @@ export class MovementSystem implements System {
   }
 
   update(dt: number) {
-    const g = this.game;
+    const g = this.game, m = g.map, mv = BALANCE.movement;
     const units: Entity[] = [];
     for (const u of g.units) {
       if (u.dead) continue;
       units.push(u);
       if (!u.path.length) { u.moving = false; continue; }
-      const speed = g.players[u.owner].getStat(g.unitDef(u), 'speed');
+      let speed = g.players[u.owner].getStat(g.unitDef(u), 'speed');
+      // En formación, las que ya están en su hueco van al paso de la más lenta
+      if (u.order?.type === 'formation' && u.data.speedCap) speed = Math.min(speed, u.data.speedCap);
+      // Cuesta arriba se avanza más despacio (BALANCE.movement)
+      const t0 = u.path[0], dd = hypot(t0.x - u.x, t0.y - u.y);
+      if (dd > 0.01) {
+        const k = Math.min(0.5, dd) / dd;
+        const grade = (m.heightAt(u.x + (t0.x - u.x) * k, u.y + (t0.y - u.y) * k) - m.heightAt(u.x, u.y)) / Math.min(0.5, dd);
+        if (grade > 0) speed *= Math.max(mv.minSpeedFactor, 1 - mv.uphillSlowPerGrade * grade);
+      }
       let step = speed * dt;
       u.moving = true;
       while (step > 0 && u.path.length) {
         const t = u.path[0];
-        const dx = t.x - u.x, dy = t.y - u.y, d = Math.hypot(dx, dy);
+        const dx = t.x - u.x, dy = t.y - u.y, d = hypot(dx, dy);
         const sx = dx - dy;
         if (Math.abs(sx) > 0.02) u.facing = sx > 0 ? 1 : -1;
         if (d <= step) {
@@ -118,8 +132,11 @@ export class MovementSystem implements System {
           // Giro ligero para que las unidades se rodeen en vez de chocar de frente
           const ux = d2 === 0 ? 1 : dx / d, uy = d2 === 0 ? 0 : dy / d;
           const nx = (ux * 0.88 - uy * 0.48) * push, ny = (uy * 0.88 + ux * 0.48) * push;
-          // Las unidades en marcha empujan; las paradas ceden el paso
-          const wu = u.moving ? 0.25 : u.working ? 0.6 : 1, wo = o.moving ? 0.25 : o.working ? 0.6 : 1;
+          // Las unidades en marcha empujan; las paradas ceden el paso. Dos unidades que
+          // avanzan casi juntas se empujan poco, para que en los pasos estrechos se encolen
+          // en vez de bloquearse.
+          const both = u.moving && o.moving ? 0.35 : 1;
+          const wu = (u.moving ? 0.25 : u.working ? 0.6 : 1) * both, wo = (o.moving ? 0.25 : o.working ? 0.6 : 1) * both;
           this.tryMove(u, u.x - nx * wu, u.y - ny * wu);
           this.tryMove(o, o.x + nx * wo, o.y + ny * wo);
         }
@@ -130,7 +147,7 @@ export class MovementSystem implements System {
     for (const u of units) {
       if (!u.path.length) { u.stuck = 0; continue; }
       const speed = g.players[u.owner].getStat(g.unitDef(u), 'speed');
-      if (Math.hypot(u.x - u.px, u.y - u.py) < speed * dt * 0.25) u.stuck += dt;
+      if (hypot(u.x - u.px, u.y - u.py) < speed * dt * 0.25) u.stuck += dt;
       else u.stuck = Math.max(0, u.stuck - dt);
       if (u.stuck > 1.5) {
         u.stuck = 0;
@@ -157,7 +174,8 @@ export class ProductionSystem implements System {
         const pop = g.reg.unit(item.id).pop;
         if (p.popUsed + pop > p.popCap) {
           if (p.isHuman) {
-            g.warn(p, 'housed', p.popCap >= g.opts.popLimit ? 'Has alcanzado el límite de población' : 'Necesitas construir más casas', 12);
+            const text = p.popCap >= g.opts.popLimit ? 'Has alcanzado el límite de población' : 'Necesitas construir más casas';
+            if (g.warn(p, 'housed', text, 12)) g.events.emit('actionRejected', { playerId: p.id, reason: 'population', text });
           }
           continue;
         }
@@ -183,7 +201,7 @@ export class ProductionSystem implements System {
       for (let y = b.ty - r; y < b.ty + b.size + r; y++) for (let x = b.tx - r; x < b.tx + b.size + r; x++) {
         const edge = x === b.tx - r || y === b.ty - r || x === b.tx + b.size + r - 1 || y === b.ty + b.size + r - 1;
         if (!edge || !g.map.walkable(x, y)) continue;
-        const d = Math.hypot(x + 0.5 - tx, y + 0.5 - ty);
+        const d = hypot(x + 0.5 - tx, y + 0.5 - ty);
         if (d < bestD) { bestD = d; best = { x: x + 0.5, y: y + 0.5 }; }
       }
     }
@@ -233,16 +251,19 @@ export class CombatSystem implements System {
         e.cooldown -= dt;
         if (e.cooldown > 0) continue;
         const p = g.players[e.owner];
-        const t = findEnemyNear(g, e, p.getStat(def, 'range'), false);
+        const range = p.getStat(def, 'range');
+        // Torres y castillos en alto alcanzan más lejos (BALANCE.highGround)
+        const t = findEnemyNear(g, e, range + BALANCE.highGround.rangeCap, false, false, (en, d) => d <= range + rangeBonus(g, e, en, range));
         if (t) { performAttack(g, e, t); e.cooldown = p.getStat(def, 'reloadTime'); }
         else e.cooldown = 0.5;
       } else if (e.kind === 'unit' && !e.order && g.time >= e.scanAt) {
         e.scanAt = g.time + 0.6;
         const def = g.unitDef(e);
         if (def.gatherer || !(def.attack ?? 0)) continue;
-        const los = g.players[e.owner].getStat(def, 'los');
-        const t = def.classes.includes('siege') ? findEnemyNear(g, e, los, true, true) : findEnemyNear(g, e, los, false);
-        if (t) setOrder(e, { type: 'attack', targetId: t.id, auto: true });
+        // Cada postura decide a qué atacar y hasta dónde (army/stances)
+        const anchor = anchorOf(e);
+        const t = stanceTarget(g, e, anchor);
+        if (t) setOrder(e, engageOrder(e, t, anchor));
       }
     }
   }
@@ -250,18 +271,10 @@ export class CombatSystem implements System {
 
 /** Niebla de guerra del jugador humano. */
 export class VisionSystem implements System {
-  private offsets = new Map<number, number[]>();
-  version = 0;
-  constructor(private game: Game) { this.recompute(); }
-
-  private circle(r: number): number[] {
-    let o = this.offsets.get(r);
-    if (!o) {
-      o = [];
-      for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) if (dx * dx + dy * dy <= r * r + r) o.push(dx, dy);
-      this.offsets.set(r, o);
-    }
-    return o;
+  constructor(private game: Game) {
+    // Solo en una partida nueva: una cargada trae su niebla. Recalcularla aquí, con las posiciones
+    // de este instante, la haría distinta de la original (y `explored` cambia dónde se puede construir)
+    if (game.tick === 0) this.recompute();
   }
 
   private recompute() {
@@ -270,25 +283,52 @@ export class VisionSystem implements System {
       if (!p.isHuman) continue;
       if (g.opts.visibility === 'revealed') { p.visible.fill(1); p.explored.fill(1); continue; }
       p.visible.fill(0);
+      // Varias unidades en la misma casilla ven lo mismo: se calcula una vez
+      const done = new Set<number>();
       for (const e of g.actors) {
         if (e.owner !== p.id || e.dead) continue;
-        const def = g.defOf(e);
-        const r = Math.ceil(p.getStat(def, 'los') + (e.kind === 'building' ? e.size / 2 : 0));
-        const cx = Math.floor(e.x), cy = Math.floor(e.y);
-        const off = this.circle(r);
-        for (let i = 0; i < off.length; i += 2) {
-          const x = cx + off[i], y = cy + off[i + 1];
-          if (x < 0 || y < 0 || x >= m.w || y >= m.h) continue;
-          const k = y * m.w + x;
-          p.visible[k] = 1;
-          p.explored[k] = 1;
-        }
+        const r = sightRadius(g, e), eye = eyeHeight(g, e);
+        const key = ((Math.floor(e.y) * m.w + Math.floor(e.x)) * 64 + Math.round(r * 2)) * 16 + Math.round(eye * 2);
+        if (done.has(key)) continue;
+        done.add(key);
+        castVision(m, e.x, e.y, eye, r, p.visible, p.explored);
       }
     }
     g.data.visionVersion = (g.data.visionVersion ?? 0) + 1;
   }
 
   update() { if (this.game.tick % 5 === 0) this.recompute(); }
+}
+
+/**
+ * Auras (`aura` en la definición de una unidad, p. ej. el General): cada medio segundo
+ * marca a las unidades propias cercanas con la bonificación. Combate la lee en `auraOf`.
+ */
+export class AuraSystem implements System {
+  private next = 0;
+  private any: boolean;
+  constructor(private game: Game) {
+    this.any = [...game.reg.units.values()].some(d => d.aura);
+  }
+  save() { return { next: this.next }; }
+  load(s: any) { this.next = s?.next ?? 0; }
+  update() {
+    const g = this.game;
+    if (!this.any || g.time < this.next) return;
+    this.next = g.time + 0.5;
+    for (const src of g.units) {
+      if (src.dead) continue;
+      const aura = g.unitDef(src).aura;
+      if (!aura) continue;
+      const r2 = aura.radius * aura.radius;
+      for (const u of g.units) {
+        if (u.dead || u === src || u.owner !== src.owner) continue;
+        const dx = u.x - src.x, dy = u.y - src.y;
+        if (dx * dx + dy * dy > r2) continue;
+        u.data.aura = { attackMul: aura.attackMul ?? 1, armorAdd: aura.armorAdd ?? 0, until: g.time + 0.75, from: src.id };
+      }
+    }
+  }
 }
 
 /** Comprueba derrotas y fin de partida según la condición de victoria elegida. */
@@ -305,10 +345,14 @@ export class VictorySystem implements System {
       g.events.emit('playerDefeated', { player: p });
       g.notify(p.isHuman ? 'Has sido derrotado' : `${p.name} ha sido derrotado`, undefined, p.isHuman ? 'warn' : 'good');
     }
-    const human = g.human;
-    const others = g.players.slice(1).filter(p => p.id !== human.id);
-    if (human.defeated) { g.over = true; g.events.emit('gameOver', { won: false }); }
-    else if (others.length && others.every(p => p.defeated)) { g.over = true; g.events.emit('gameOver', { won: true }); }
+    // El final no depende de qué jugador mira esta copia (`humanId`): en una partida en red, cada
+    // cliente tiene el suyo y todos deben acabar en el mismo tick. Termina cuando caen todos los
+    // humanos o cuando solo queda un jugador en pie; `won` es para el jugador de esta copia.
+    const all = g.players.slice(1), humans = all.filter(p => p.isHuman), alive = all.filter(p => !p.defeated);
+    if ((humans.length && humans.every(p => p.defeated)) || (all.length > 1 && alive.length <= 1)) {
+      g.over = true;
+      g.events.emit('gameOver', { won: !g.human.defeated });
+    }
   }
 }
 

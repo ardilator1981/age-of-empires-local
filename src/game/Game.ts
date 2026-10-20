@@ -1,12 +1,15 @@
-import { EventBus } from '../core/EventBus';
+import { EventBus, type RejectReason } from '../core/EventBus';
 import type { Registry } from '../core/Registry';
-import { MAX_BUILD_SLOPE } from '../core/constants';
+import { BALANCE } from '../config/balance';
 import type { AnyDef, BuildingDef, CivDef, Pt, ResourceNodeDef, System, UnitDef } from '../core/types';
 import { Entity } from './Entity';
 import { GameMap } from './GameMap';
 import { MapGenerator } from './MapGenerator';
+import { deriveCliffs, ensurePlayable } from './relief';
 import { Player } from './Player';
 import type { Projectile } from './combat';
+import { decodeState, restoreSystems, restoreWorld, type SaveData } from './save';
+import { hypot } from './fmath';
 
 export interface PlayerSetup {
   name: string;
@@ -28,6 +31,10 @@ export interface GameOptions {
   speed: number;
   seed: number;
   mods: string[];
+  /** Modo Guerra declarada: minutos de preparación entre la declaración y la batalla. */
+  warPrepMinutes?: number;
+  /** Partida en línea (aún no existe): nada pausa ni ralentiza el juego de los demás. */
+  online?: boolean;
 }
 
 export interface Decal {
@@ -57,6 +64,8 @@ export class Game {
   list: Entity[] = [];
   readonly events = new EventBus();
   systems: System[] = [];
+  /** Id de registro de cada sistema (para guardar su estado). */
+  systemIds: string[] = [];
   projectiles: Projectile[] = [];
   decals: Decal[] = [];
   time = 0;
@@ -64,14 +73,25 @@ export class Game {
   humanId = 1;
   over = false;
   rng: () => number;
+  /** Estado del generador aleatorio (mulberry32), para poder guardarlo. */
+  rngState: number;
   /** Almacén libre para sistemas y mods. */
   data: Record<string, any> = {};
   private nextId = 1;
   private anyDead = false;
   private kindCache: { units: Entity[]; buildings: Entity[]; nodes: Entity[]; actors: Entity[] } | null = null;
 
-  constructor(public reg: Registry, public opts: GameOptions) {
-    this.rng = mulberry32(opts.seed);
+  /** Con `restore`, reconstruye una partida guardada en vez de generar el mapa (ver save.ts). */
+  constructor(public reg: Registry, public opts: GameOptions, restore?: SaveData) {
+    this.rngState = opts.seed >>> 0;
+    // Mismo generador que mulberry32, con el estado a la vista
+    this.rng = () => {
+      this.rngState = (this.rngState + 0x6d2b79f5) >>> 0;
+      let t = this.rngState;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
     this.map = new GameMap(opts.mapSize, opts.mapSize, reg);
     this.players.push(new Player(0, 'Naturaleza', '#aaaaaa', GAIA_CIV, false, 'normal', this.map.w, this.map.h));
     const firstCiv = [...reg.civs.values()][0];
@@ -91,12 +111,26 @@ export class Game {
     });
     this.humanId = this.players.find(p => p.isHuman)?.id ?? 1;
 
-    const mt = reg.mapTypes.get(opts.mapType) ?? [...reg.mapTypes.values()][0];
-    mt.generate(new MapGenerator(this));
-
-    if (opts.visibility !== 'normal') for (const p of this.players) p.explored.fill(1);
+    const saved = restore ? decodeState(restore) : null;
+    if (saved) restoreWorld(this, saved);
+    else {
+      const mt = reg.mapTypes.get(opts.mapType) ?? [...reg.mapTypes.values()][0];
+      const gen = new MapGenerator(this);
+      mt.generate(gen);
+      // Reglas de relieve comunes: acantilados infranqueables y pasos garantizados entre bases
+      deriveCliffs(gen);
+      const starts = this.players.slice(1).map(p => {
+        const tc = this.buildings.find(b => b.owner === p.id && !b.dead) ?? this.units.find(u => u.owner === p.id && !u.dead);
+        return tc ? { x: tc.x, y: tc.y } : null;
+      }).filter((s): s is Pt => !!s);
+      this.data.relief = ensurePlayable(gen, starts);
+      if (opts.visibility !== 'normal') for (const p of this.players) p.explored.fill(1);
+    }
     this.systems = reg.systems.map(s => s.factory(this));
-    for (const fn of reg.gameStartHooks) fn(this);
+    this.systemIds = reg.systems.map(s => s.id);
+    // Al crear los sistemas (la IA) se usa el generador: su estado se repone después
+    if (saved) { restoreSystems(this, saved); this.rngState = saved.rng; }
+    else for (const fn of reg.gameStartHooks) fn(this);
   }
 
   get human(): Player { return this.players[this.humanId]; }
@@ -118,7 +152,11 @@ export class Game {
 
   update(dt: number) {
     this.tick++;
+    // Partida en red en pausa (orden `pause`): los ticks siguen, para que corran los turnos con las
+    // órdenes (también la de reanudar), pero no pasa el tiempo de juego
+    if (this.data.netPause) return;
     this.time += dt;
+    this.data.pathsThisTick = 0;
     for (const e of this.units) { e.px = e.x; e.py = e.y; }
     for (const s of this.systems) s.update(dt);
     if (this.anyDead) {
@@ -145,19 +183,50 @@ export class Game {
   /** Definición de unidad o edificio (no nodos de recurso). */
   defOf(e: Entity): AnyDef { return e.kind === 'unit' ? this.reg.unit(e.defId) : this.reg.building(e.defId); }
   isEnemy(a: number, b: number): boolean { return a !== b && a !== 0 && b !== 0; }
+  /**
+   * ¿Puede `a` atacar a `t`? Enemigos y todas las reglas de combate de los mods de acuerdo.
+   * `hitting` = va a golpear ya; si es false, solo se pregunta si puede ir a por él.
+   */
+  canAttack(a: Entity, t: Entity, hitting = true): boolean {
+    if (!this.isEnemy(a.owner, t.owner)) return false;
+    for (const r of this.reg.combatRules) if (!r(this, a, t, hitting)) return false;
+    return true;
+  }
 
   notify(text: string, playerId?: number, tone: 'info' | 'warn' | 'good' = 'info', at?: Pt) {
     this.events.emit('notify', { text, playerId, tone, at });
   }
 
-  /** Aviso con límite de frecuencia por jugador y tipo. */
-  warn(p: Player, key: string, text: string, every = 10, at?: Pt) {
-    if (this.time - (p.warnedAt[key] ?? -999) < every) return;
+  /** Aviso con límite de frecuencia por jugador y tipo. Devuelve si se ha mostrado. */
+  warn(p: Player, key: string, text: string, every = 10, at?: Pt): boolean {
+    if (this.time - (p.warnedAt[key] ?? -999) < every) return false;
     p.warnedAt[key] = this.time;
     this.notify(text, p.id, 'warn', at);
+    return true;
+  }
+
+  /** Una acción de un jugador no se ha podido hacer: lo avisa y emite `actionRejected` (para el sonido de error). */
+  reject(playerId: number, reason: RejectReason, text: string) {
+    this.events.emit('actionRejected', { playerId, reason, text });
+    this.notify(text, playerId, 'warn');
+  }
+
+  /** `reject` a partir del resultado de una comprobación de disponibilidad (`rules.ts`). */
+  rejectAvail(playerId: number, a: { reason?: string; code?: RejectReason }) {
+    this.reject(playerId, a.code ?? 'other', a.reason ?? 'No disponible');
   }
 
   // ------------------------------------------------------------ creación
+
+  /** Siguiente id de entidad (se guarda con la partida). */
+  get nextEntityId() { return this.nextId; }
+  set nextEntityId(v: number) { this.nextId = v; }
+
+  /** Añade una entidad ya creada (al cargar una partida): ocupa sus casillas si es edificio o recurso. */
+  adoptEntity(e: Entity) {
+    if (e.kind !== 'unit') this.occupy(e, true);
+    this.add(e);
+  }
 
   private add(e: Entity) {
     this.entities.set(e.id, e);
@@ -173,6 +242,7 @@ export class Game {
     e.radius = def.radius ?? 0.22;
     e.maxHp = e.hp = this.players[owner].getStat(def, 'hp');
     e.scanAt = this.time + this.rng();
+    e.stance = BALANCE.army.defaultStance;
     this.add(e);
     return e;
   }
@@ -261,16 +331,25 @@ export class Game {
       if (e.kind === 'unit') { kp.stats.kills++; owner.stats.losses++; }
       else if (e.kind === 'building') kp.stats.razed++;
     }
+    if (e.kind === 'unit' && this.reg.unit(e.defId).retrainCooldown) owner.lastDeath[e.defId] = this.time;
     if (e.kind === 'unit') this.decals.push({ x: e.x, y: e.y, kind: 'corpse', color: owner.color, time: this.time, size: 1, defId: e.defId, owner: e.owner, facing: e.facing });
     else if (e.kind === 'building') this.decals.push({ x: e.x, y: e.y, kind: 'rubble', color: '#777', time: this.time, size: e.size });
     this.events.emit('entityDied', { entity: e, killer });
   }
 
-  /** Recurso agotado (árbol talado, granja agotada...). */
-  deplete(e: Entity) {
+  /** Recurso agotado (árbol talado, granja agotada...). `by`: jugador que lo estaba recolectando. */
+  deplete(e: Entity, by?: number) {
     this.remove(e);
-    if (e.kind === 'building' && this.players[e.owner].isHuman) {
+    const playerId = e.kind === 'building' ? e.owner : by ?? 0;
+    // ¿Se acaba la zona? Granja: siempre. Nodo del mapa: si no queda otro igual cerca (último árbol, última veta)
+    const area = e.kind === 'building' || !this.nodes.some(n => !n.dead && n.defId === e.defId && Math.abs(n.x - e.x) < 5 && Math.abs(n.y - e.y) < 5);
+    this.events.emit('resourceDepleted', { entity: e, playerId, resType: e.resType ?? '', area });
+    const p = this.players[playerId];
+    if (!p?.isHuman) return;
+    if (e.kind === 'building') {
       this.notify(`Una ${this.buildingDef(e).name.toLowerCase()} se ha agotado`, e.owner, 'warn', { x: e.x, y: e.y });
+    } else if (area) {
+      this.warn(p, 'depleted:' + e.defId, `Se ha agotado: ${(this.nodeDef(e)?.name ?? 'recurso').toLowerCase()}`, BALANCE.alerts.depletedEvery, { x: e.x, y: e.y });
     }
   }
 
@@ -285,7 +364,7 @@ export class Game {
         if (p?.isHuman && !p.explored[y * this.map.w + x]) return false;
       }
     }
-    return this.map.slopeOf(tx, ty, def.size) <= MAX_BUILD_SLOPE;
+    return this.map.slopeOf(tx, ty, def.size) <= BALANCE.relief.buildMaxSlope;
   }
 
   /** Casilla caminable más cercana (búsqueda en anillos). */
@@ -298,7 +377,7 @@ export class Game {
           if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue;
           const x = fx + dx, y = fy + dy;
           if (!this.map.walkable(x, y)) continue;
-          const d = Math.hypot(x + 0.5 - cx, y + 0.5 - cy);
+          const d = hypot(x + 0.5 - cx, y + 0.5 - cy);
           if (d < bestD) { bestD = d; best = { x: x + 0.5, y: y + 0.5 }; }
         }
       }
