@@ -1,0 +1,75 @@
+{
+  "image": "watchTower.png",
+  "mask": "watchTower-mask.png",
+  "cell": {
+    "w": 174,
+    "h": 289
+  },
+  "anchor": {
+    "x": 87,
+    "y": 243
+  },
+  "scale": 2,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 1
+    }
+  },
+  "ages": {
+    "1": {
+      "image": "watchTower-1.png",
+      "mask": "watchTower-1-mask.png",
+      "states": {
+        "idle": {
+          "row": 0,
+          "frames": 1,
+          "cell": {
+            "w": 174,
+            "h": 307
+          },
+          "anchor": {
+            "x": 87,
+            "y": 261
+          }
+        }
+      }
+    },
+    "2": {
+      "image": "watchTower-2.png",
+      "mask": "watchTower-2-mask.png",
+      "states": {
+        "idle": {
+          "row": 0,
+          "frames": 1,
+          "cell": {
+            "w": 174,
+            "h": 401
+          },
+          "anchor": {
+            "x": 87,
+            "y": 355
+          }
+        }
+      }
+    },
+    "3": {
+      "image": "watchTower-3.png",
+      "mask": "watchTower-3-mask.png",
+      "states": {
+        "idle": {
+          "row": 0,
+          "frames": 1,
+          "cell": {
+            "w": 181,
+            "h": 291
+          },
+          "anchor": {
+            "x": 91,
+            "y": 244
+          }
+        }
+      }
+    }
+  }
+}

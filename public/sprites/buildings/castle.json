@@ -1,0 +1,19 @@
+{
+  "image": "castle.png",
+  "mask": "castle-mask.png",
+  "cell": {
+    "w": 520,
+    "h": 448
+  },
+  "anchor": {
+    "x": 260,
+    "y": 316
+  },
+  "scale": 2,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 1
+    }
+  }
+}

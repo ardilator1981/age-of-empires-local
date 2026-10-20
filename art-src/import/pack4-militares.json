@@ -1,0 +1,22 @@
+{
+  "kind": "building",
+  "out": "buildings",
+  "sources": [
+    { "source": "pack4-militares/militares.jpg", "grid": [3, 2],
+      "items": [
+        { "id": "archeryRange", "size": 3 },
+        { "id": "stable", "size": 3 },
+        { "id": "blacksmith", "size": 3 },
+        { "id": "siegeWorkshop", "size": 3 },
+        null,
+        { "id": "castle", "size": 4 }
+      ] },
+    { "source": "pack4-militares/torres.jpg", "grid": [4, 1],
+      "items": [
+        { "id": "watchTower", "size": 1, "fit": 1.3, "age": 0 },
+        { "id": "watchTower", "size": 1, "fit": 1.3, "age": 1 },
+        { "id": "watchTower", "size": 1, "fit": 1.3, "age": 2 },
+        { "id": "watchTower", "size": 1, "fit": 1.35, "age": 3 }
+      ] }
+  ]
+}

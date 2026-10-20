@@ -1,0 +1,19 @@
+{
+  "image": "siegeWorkshop.png",
+  "mask": "siegeWorkshop-mask.png",
+  "cell": {
+    "w": 392,
+    "h": 311
+  },
+  "anchor": {
+    "x": 196,
+    "y": 211
+  },
+  "scale": 2,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 1
+    }
+  }
+}

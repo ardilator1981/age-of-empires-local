@@ -1,0 +1,18 @@
+{
+  "image": "stable.png",
+  "cell": {
+    "w": 392,
+    "h": 324
+  },
+  "anchor": {
+    "x": 196,
+    "y": 224
+  },
+  "scale": 2,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 1
+    }
+  }
+}

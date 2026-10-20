@@ -19,6 +19,13 @@ export const ART: ArtEntry[] = [
   buildingArt('lumberCamp', 'buildings/lumberCamp'),
   buildingArt('miningCamp', 'buildings/miningCamp'),
   buildingArt('barracks', 'buildings/barracks'),
+  // Pack 4 · Edificios militares y torres por época (art-src/import/pack4-militares.json)
+  buildingArt('archeryRange', 'buildings/archeryRange'),
+  buildingArt('stable', 'buildings/stable'),
+  buildingArt('blacksmith', 'buildings/blacksmith'),
+  buildingArt('siegeWorkshop', 'buildings/siegeWorkshop'),
+  buildingArt('castle', 'buildings/castle'),
+  buildingArt('watchTower', 'buildings/watchTower'),
   // Pack 2 · Naturaleza y recursos (art-src/import/pack2-naturaleza.json)
   resourceArt('tree', 'resources/tree'),
   resourceArt('pineTree', 'resources/pineTree'),

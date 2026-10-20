@@ -1,0 +1,19 @@
+{
+  "image": "archeryRange.png",
+  "mask": "archeryRange-mask.png",
+  "cell": {
+    "w": 392,
+    "h": 306
+  },
+  "anchor": {
+    "x": 196,
+    "y": 206
+  },
+  "scale": 2,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 1
+    }
+  }
+}

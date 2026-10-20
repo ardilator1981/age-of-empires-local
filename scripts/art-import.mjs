@@ -33,6 +33,7 @@
  *   "sources": [ { "source": "...", "grid": [3, 2], "items": [ ... ] }, ... ] }
  * Una pieza sin medida propia usa la escala de la anterior del mismo id y de la misma
  * imagen, para que las fases conserven su tamaño relativo.
+ * Una pieza puede llevar su propia "age" (p. ej. la misma torre en cada época).
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
@@ -177,7 +178,6 @@ async function loadSource(srcFile, grid) {
 // ------------------------------------------------------------ piezas → hojas
 const sources = cfg.sources ?? [{ source: cfg.source, grid: cfg.grid, items: cfg.items }];
 const groupCfg = cfg.groups ?? {};
-const age = cfg.age ?? 0;
 const PAD = 4;
 
 /** Recorta las componentes `ids` y separa el magenta (→ gris claro + máscara). */
@@ -229,8 +229,9 @@ for (const s of sources) {
     else if (g.width) scale = (g.width * SCALE) / cut.cw;
     else scale = ((g.height ?? 60) * SCALE) / cut.ch;
     lastK.set(item.id, scale);
-    if (!groups.has(item.id)) groups.set(item.id, []);
-    groups.get(item.id).push({ item, cut, scale, source: s.source });
+    const key = `${item.id}|${item.age ?? cfg.age ?? 0}`;
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push({ item, cut, scale, source: s.source });
   });
 }
 
@@ -240,7 +241,10 @@ const previewDir = resolve('art-src/preview');
 mkdirSync(previewDir, { recursive: true });
 const previews = [];
 
-for (const [id, frames] of groups) {
+// La edad 0 primero: es la hoja base, las demás se añaden a su JSON como variantes
+const ordered = [...groups].map(([key, frames]) => ({ id: key.split('|')[0], age: Number(key.split('|')[1]), frames }))
+  .sort((a, b) => a.age - b.age);
+for (const { id, age, frames } of ordered) {
   const g = groupCfg[id] ?? {};
   const first = frames[0].item;
   const sized = await Promise.all(frames.map(async f => {
