@@ -3,6 +3,7 @@ import type { Entity } from './Entity';
 import type { Game } from './Game';
 import type { GameMap } from './GameMap';
 import { heightOf } from './heightRules';
+import { cos, sin } from './fmath';
 
 /**
  * Visión con relieve (valores en BALANCE.vision):
@@ -30,7 +31,7 @@ export function heightVisionBonus(map: GameMap, x: number, y: number, ground: nu
   let sum = 0, n = 0;
   for (let k = 0; k < 8; k++) {
     const a = (k / 8) * Math.PI * 2;
-    const tx = Math.floor(x + Math.cos(a) * 4), ty = Math.floor(y + Math.sin(a) * 4);
+    const tx = Math.floor(x + cos(a) * 4), ty = Math.floor(y + sin(a) * 4);
     if (tx < 0 || ty < 0 || tx >= map.w || ty >= map.h) continue;
     sum += th[ty * map.w + tx]; n++;
   }
@@ -54,7 +55,7 @@ function rays(radius: number): Float32Array {
   if (!r) {
     const n = Math.max(16, Math.ceil(2 * Math.PI * key * 1.6));
     r = new Float32Array(n * 2);
-    for (let i = 0; i < n; i++) { const a = (i / n) * Math.PI * 2; r[i * 2] = Math.cos(a); r[i * 2 + 1] = Math.sin(a); }
+    for (let i = 0; i < n; i++) { const a = (i / n) * Math.PI * 2; r[i * 2] = cos(a); r[i * 2 + 1] = sin(a); }
     rayCache.set(key, r);
   }
   return r;

@@ -6,6 +6,7 @@ import { findEnemyNear } from '../combat';
 import type { Entity } from '../Entity';
 import type { Game } from '../Game';
 import { rangeBonus } from '../heightRules';
+import { hypot } from '../fmath';
 
 /**
  * Posturas de combate:
@@ -34,7 +35,7 @@ export function reachOf(game: Game, u: Entity, t: Entity): number {
 /** Sitio al que vuelve una unidad defensiva (su posición cuando se quedó quieta). */
 export function anchorOf(u: Entity): Pt {
   const a = u.data.anchor as Pt | undefined;
-  if (a && Math.hypot(a.x - u.x, a.y - u.y) <= BALANCE.army.defensiveLeash + 1.5) return a;
+  if (a && hypot(a.x - u.x, a.y - u.y) <= BALANCE.army.defensiveLeash + 1.5) return a;
   u.data.anchor = { x: u.x, y: u.y };
   return u.data.anchor;
 }
@@ -56,7 +57,7 @@ export function stanceTarget(game: Game, u: Entity, anchor: Pt, accept?: (e: Ent
   return findEnemyNear(game, u, los, siege || buildings, siege, (e, d) => {
     if (accept && !accept(e)) return false;
     if (st === 'hold') return d <= reachOf(game, u, e) + 0.05;
-    if (st === 'defensive') return Math.hypot(e.x - anchor.x, e.y - anchor.y) <= leash + reachOf(game, u, e);
+    if (st === 'defensive') return hypot(e.x - anchor.x, e.y - anchor.y) <= leash + reachOf(game, u, e);
     return true;
   });
 }
@@ -75,6 +76,6 @@ export function retaliation(game: Game, u: Entity, attacker: Entity): Order | nu
   if (st === 'passive') return null;
   const anchor = anchorOf(u);
   if (st === 'hold') return edgeDist(u, attacker) <= reachOf(game, u, attacker) + 0.05 ? engageOrder(u, attacker, anchor) : null;
-  if (st === 'defensive' && Math.hypot(attacker.x - anchor.x, attacker.y - anchor.y) > BALANCE.army.defensiveLeash + reachOf(game, u, attacker)) return null;
+  if (st === 'defensive' && hypot(attacker.x - anchor.x, attacker.y - anchor.y) > BALANCE.army.defensiveLeash + reachOf(game, u, attacker)) return null;
   return engageOrder(u, attacker, anchor);
 }

@@ -7,6 +7,7 @@ import type { Entity } from '../Entity';
 import type { Game } from '../Game';
 import type { Player } from '../Player';
 import { buildingAvail, researchablesAt, techAvail, trainablesAt, unitAvail } from '../rules';
+import { cos, hypot, sin } from '../fmath';
 
 interface Difficulty {
   gather: number;
@@ -196,7 +197,7 @@ export class AIController {
     const center = { x: spot.x + g.reg.building(defId).size / 2, y: spot.y + g.reg.building(defId).size / 2 };
     const free = vills.filter(v => v.order?.type !== 'build');
     const pool = free.length ? free : vills;
-    const builders = [...pool].sort((a, b) => Math.hypot(a.x - center.x, a.y - center.y) - Math.hypot(b.x - center.x, b.y - center.y)).slice(0, n);
+    const builders = [...pool].sort((a, b) => hypot(a.x - center.x, a.y - center.y) - hypot(b.x - center.x, b.y - center.y)).slice(0, n);
     return !!Commands.placeBuilding(g, p.id, defId, spot.x, spot.y, builders);
   }
 
@@ -255,7 +256,7 @@ export class AIController {
     let foe: Pt | null = null, fd = Infinity;
     for (const b of g.buildings) {
       if (b.dead || !g.isEnemy(this.p.id, b.owner)) continue;
-      const d = Math.hypot(b.x - h.x, b.y - h.y);
+      const d = hypot(b.x - h.x, b.y - h.y);
       if (d < fd) { fd = d; foe = b; }
     }
     if (!foe) return (this.post = null);
@@ -264,7 +265,7 @@ export class AIController {
     const th = m.tileHeights();
     let best: Pt | null = null, bs = -Infinity;
     for (let r = 6; r <= 14; r++) for (let a = -0.9; a <= 0.9; a += 0.15) {
-      const ca = Math.cos(a), sa = Math.sin(a);
+      const ca = cos(a), sa = sin(a);
       const x = Math.floor(h.x + (dirX * ca - dirY * sa) * r), y = Math.floor(h.y + (dirX * sa + dirY * ca) * r);
       if (!m.walkable(x, y) || (reg >= 0 && m.region(x, y) !== reg)) continue;
       const score = th[y * m.w + x] - r * 0.05;
@@ -297,7 +298,7 @@ export class AIController {
       if (!dropId || (p.pending.get(dropId) ?? 0) > 0) continue;
       const node = targets[0];
       const drop = nearestDrop(g, p, res, node.x, node.y);
-      const d = drop ? Math.hypot(drop.x - node.x, drop.y - node.y) - drop.size / 2 : Infinity;
+      const d = drop ? hypot(drop.x - node.x, drop.y - node.y) - drop.size / 2 : Infinity;
       if (d > 6) this.build(dropId, node, 1, vills, 1, 6);
     }
   }
@@ -320,7 +321,7 @@ export class AIController {
       if (b.complete) continue;
       if (vills.some(v => v.order?.type === 'build' && v.order.targetId === b.id)) continue;
       const free = vills.filter(v => v.order?.type !== 'build');
-      const v = free.sort((x, y) => Math.hypot(x.x - b.x, x.y - b.y) - Math.hypot(y.x - b.x, y.y - b.y))[0];
+      const v = free.sort((x, y) => hypot(x.x - b.x, x.y - b.y) - hypot(y.x - b.x, y.y - b.y))[0];
       if (v) Commands.build(g, [v], b);
     }
   }
@@ -380,9 +381,9 @@ export class AIController {
     let best: Entity | null = null, bestD = res === 'food' ? 22 : 40;
     for (const n of this.nodes) {
       if (n.dead || n.resType !== res || n.amount <= 0) continue;
-      const dh = Math.hypot(n.x - h.x, n.y - h.y);
+      const dh = hypot(n.x - h.x, n.y - h.y);
       if (dh > bestD + 10) continue;
-      const d = dh * 0.6 + Math.hypot(n.x - v.x, n.y - v.y) * 0.4;
+      const d = dh * 0.6 + hypot(n.x - v.x, n.y - v.y) * 0.4;
       if (d < bestD && isAccessible(g, n, v)) { bestD = d; best = n; }
     }
     if (!best && res !== 'food') {
@@ -391,7 +392,7 @@ export class AIController {
       let far = Infinity;
       for (const n of this.nodes) {
         if (n.dead || n.resType !== res || n.amount <= 0) continue;
-        const d = Math.hypot(n.x - h.x, n.y - h.y);
+        const d = hypot(n.x - h.x, n.y - h.y);
         if (d < far && isAccessible(g, n, v)) { far = d; best = n; }
       }
     }
@@ -417,15 +418,15 @@ export class AIController {
     for (const e of g.units) {
       if (e.dead || !g.isEnemy(p.id, e.owner)) continue;
       for (const b of blds) {
-        if (Math.hypot(e.x - b.x, e.y - b.y) < 12) { if (g.canAttack(army[0], e, false)) threats.push(e); break; }
+        if (hypot(e.x - b.x, e.y - b.y) < 12) { if (g.canAttack(army[0], e, false)) threats.push(e); break; }
       }
     }
     if (threats.length) {
       for (const a of army) {
         if (a.order?.type === 'attack' && !a.order.auto) continue;
-        if (Math.hypot(a.x - this.home.x, a.y - this.home.y) > 35) continue;
+        if (hypot(a.x - this.home.x, a.y - this.home.y) > 35) continue;
         let best = threats[0], bd = Infinity;
-        for (const t of threats) { const d = Math.hypot(t.x - a.x, t.y - a.y); if (d < bd) { bd = d; best = t; } }
+        for (const t of threats) { const d = hypot(t.x - a.x, t.y - a.y); if (d < bd) { bd = d; best = t; } }
         setOrder(a, { type: 'attack', targetId: best.id });
       }
       return;
@@ -433,7 +434,7 @@ export class AIController {
 
     const idle = army.filter(a => !a.order);
     // Las tropas que ya están en territorio enemigo siguen atacando
-    const deep = idle.filter(a => Math.hypot(a.x - this.home.x, a.y - this.home.y) > 25);
+    const deep = idle.filter(a => hypot(a.x - this.home.x, a.y - this.home.y) > 25);
     if (deep.length) {
       const t = this.enemyTarget(deep[0]);
       if (t) Commands.attackMove(g, deep, t.x, t.y);
@@ -454,7 +455,7 @@ export class AIController {
       // enemigo, en postura defensiva (defiende sin alejarse)
       const post = this.defensePost();
       if (post) {
-        const away = atHome.filter(a => Math.hypot(a.x - post.x, a.y - post.y) > 4);
+        const away = atHome.filter(a => hypot(a.x - post.x, a.y - post.y) > 4);
         const lax = atHome.filter(a => a.stance !== 'defensive');
         if (lax.length) Commands.setStance(g, lax, 'defensive');
         if (away.length) {
@@ -472,13 +473,13 @@ export class AIController {
     let best: Entity | null = null, bd = Infinity;
     for (const e of g.buildings) {
       if (e.dead || !g.canAttack(from, e, false)) continue;
-      const d = Math.hypot(e.x - from.x, e.y - from.y) * (this.isTC(e) ? 0.7 : 1);
+      const d = hypot(e.x - from.x, e.y - from.y) * (this.isTC(e) ? 0.7 : 1);
       if (d < bd) { bd = d; best = e; }
     }
     if (best) return best;
     for (const e of g.units) {
       if (e.dead || !g.canAttack(from, e, false)) continue;
-      const d = Math.hypot(e.x - from.x, e.y - from.y);
+      const d = hypot(e.x - from.x, e.y - from.y);
       if (d < bd) { bd = d; best = e; }
     }
     return best;

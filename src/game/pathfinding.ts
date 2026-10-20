@@ -1,6 +1,7 @@
 import { BALANCE } from '../config/balance';
 import type { Pt } from '../core/types';
 import type { GameMap } from './GameMap';
+import { hypot } from './fmath';
 
 /** Rectángulo objetivo en casillas (inclusivo). */
 export interface GoalRect { x0: number; y0: number; x1: number; y1: number }
@@ -118,7 +119,7 @@ export function findPath(map: GameMap, sx: number, sy: number, goal: GoalRect, n
 
 /** ¿Puede una unidad de radio r ir en línea recta de A a B? */
 export function lineClear(map: GameMap, ax: number, ay: number, bx: number, by: number, r = 0.2): boolean {
-  const d = Math.hypot(bx - ax, by - ay);
+  const d = hypot(bx - ax, by - ay);
   const steps = Math.max(1, Math.ceil(d / 0.25));
   for (let i = 1; i <= steps; i++) {
     const t = i / steps;

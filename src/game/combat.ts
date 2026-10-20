@@ -5,6 +5,7 @@ import { BALANCE } from '../config/balance';
 import { edgeDist, setOrder } from './actions';
 import { advantage, heightDamageFactor, heightOf } from './heightRules';
 import { retaliation } from './army/stances';
+import { hypot } from './fmath';
 
 export interface DamageInfo {
   attack: number;
@@ -51,7 +52,7 @@ export function performAttack(game: Game, a: Entity, t: Entity) {
   if (adv.range > 0 || adv.damage !== 0) a.data.heightAdv = { ...adv, until: game.time + 2.5 };
   else delete a.data.heightAdv;
   if (info.ranged) {
-    const d = Math.hypot(t.x - a.x, t.y - a.y);
+    const d = hypot(t.x - a.x, t.y - a.y);
     game.projectiles.push({
       sx: a.x, sy: a.y, ex: t.x, ey: t.y,
       sh: a.kind === 'building' ? 40 : 14,
@@ -135,10 +136,10 @@ export function findEnemyNear(game: Game, from: Entity, radius: number, includeB
     if (game.reg.combatRules.length && !game.canAttack(from, e, from.kind === 'building')) continue;
     if (e.kind === 'unit') {
       if (buildingsOnly) continue;
-      const d = Math.hypot(e.x - from.x, e.y - from.y) - (from.kind === 'building' ? from.size / 2 : 0);
+      const d = hypot(e.x - from.x, e.y - from.y) - (from.kind === 'building' ? from.size / 2 : 0);
       if (d < bestUD && (!accept || accept(e, d))) { bestUD = d; bestU = e; }
     } else if (includeBuildings || buildingsOnly) {
-      const d = from.kind === 'unit' ? edgeDist(from, e) : Math.hypot(e.x - from.x, e.y - from.y);
+      const d = from.kind === 'unit' ? edgeDist(from, e) : hypot(e.x - from.x, e.y - from.y);
       if (d < bestBD && (!accept || accept(e, d))) { bestBD = d; bestB = e; }
     }
   }

@@ -1,6 +1,7 @@
 import type { GameMod, SpriteFn } from '../../core/types';
 import type { Game } from '../../game/Game';
 import { ellipse } from '../../render/draw';
+import { hypot } from '../../game/fmath';
 
 /**
  * MOD DE EJEMPLO: añade REGLAS nuevas con un sistema propio.
@@ -29,7 +30,7 @@ function spawnTreasure(game: Game): boolean {
     const x = Math.floor(game.rng() * game.map.w), y = Math.floor(game.rng() * game.map.h);
     if (!game.map.buildable(x, y)) continue;
     // Lejos de los centros urbanos
-    const near = game.buildings.some(e => Math.hypot(e.x - x, e.y - y) < 14);
+    const near = game.buildings.some(e => hypot(e.x - x, e.y - y) < 14);
     if (near) continue;
     game.spawnNode('treasure', x, y);
     return true;

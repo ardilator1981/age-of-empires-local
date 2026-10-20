@@ -9,6 +9,7 @@ import { deriveCliffs, ensurePlayable } from './relief';
 import { Player } from './Player';
 import type { Projectile } from './combat';
 import { decodeState, restoreSystems, restoreWorld, type SaveData } from './save';
+import { hypot } from './fmath';
 
 export interface PlayerSetup {
   name: string;
@@ -369,7 +370,7 @@ export class Game {
           if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue;
           const x = fx + dx, y = fy + dy;
           if (!this.map.walkable(x, y)) continue;
-          const d = Math.hypot(x + 0.5 - cx, y + 0.5 - cy);
+          const d = hypot(x + 0.5 - cx, y + 0.5 - cy);
           if (d < bestD) { bestD = d; best = { x: x + 0.5, y: y + 0.5 }; }
         }
       }

@@ -7,6 +7,7 @@ import type { Game } from '../../game/Game';
 import {
   activeWar, battlePointInfo, conditions, declarableTargets, declareWar, enemyOf, GENERAL, inCircle, isTownCenter, warState, type War,
 } from './war';
+import { hypot } from '../../game/fmath';
 
 const W = BALANCE.war;
 
@@ -23,7 +24,7 @@ function baseOf(game: Game, pid: number): Pt | null {
 export function chooseBattlePoint(game: Game, pid: number, target: number): Pt | null {
   const a = baseOf(game, pid), b = baseOf(game, target);
   if (!a || !b) return null;
-  const dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy) || 1;
+  const dx = b.x - a.x, dy = b.y - a.y, d = hypot(dx, dy) || 1;
   const ux = dx / d, uy = dy / d, px = -uy, py = ux;
   const th = game.map.tileHeights(), m = game.map;
   const sideMax = (c: Pt, sign: number) => {
@@ -31,7 +32,7 @@ export function chooseBattlePoint(game: Game, pid: number, target: number): Pt |
     for (let ty = Math.floor(c.y - W.circleRadius); ty <= c.y + W.circleRadius; ty++) for (let tx = Math.floor(c.x - W.circleRadius); tx <= c.x + W.circleRadius; tx++) {
       if (!m.inBounds(tx, ty) || !m.walkable(tx, ty)) continue;
       const rx = tx + 0.5 - c.x, ry = ty + 0.5 - c.y;
-      if (Math.hypot(rx, ry) > W.circleRadius || (rx * ux + ry * uy) * sign > 0) continue;
+      if (hypot(rx, ry) > W.circleRadius || (rx * ux + ry * uy) * sign > 0) continue;
       best = Math.max(best, th[ty * m.w + tx]);
     }
     return best;
@@ -49,15 +50,15 @@ export function chooseBattlePoint(game: Game, pid: number, target: number): Pt |
 /** Puesto de espera dentro del círculo, en su mitad y en lo más alto que encuentre. */
 export function stagingPoint(game: Game, w: War, pid: number): { at: Pt; facing: Pt } {
   const home = baseOf(game, pid) ?? { x: w.x, y: w.y };
-  const d = Math.hypot(home.x - w.x, home.y - w.y) || 1;
+  const d = hypot(home.x - w.x, home.y - w.y) || 1;
   const ux = (home.x - w.x) / d, uy = (home.y - w.y) / d;
   const m = game.map, th = m.tileHeights();
   const c0 = { x: w.x + ux * w.r * 0.5, y: w.y + uy * w.r * 0.5 };
   let best = game.findFreeTile(c0.x, c0.y, 6) ?? c0, bh = -Infinity;
   for (let ty = Math.floor(c0.y - w.r * 0.45); ty <= c0.y + w.r * 0.45; ty++) for (let tx = Math.floor(c0.x - w.r * 0.45); tx <= c0.x + w.r * 0.45; tx++) {
-    if (!m.inBounds(tx, ty) || !m.walkable(tx, ty) || Math.hypot(tx + 0.5 - w.x, ty + 0.5 - w.y) > w.r - 2) continue;
+    if (!m.inBounds(tx, ty) || !m.walkable(tx, ty) || hypot(tx + 0.5 - w.x, ty + 0.5 - w.y) > w.r - 2) continue;
     // Más alto, y sin alejarse mucho del centro de su mitad
-    const h = th[ty * m.w + tx] - Math.hypot(tx + 0.5 - c0.x, ty + 0.5 - c0.y) * 0.08;
+    const h = th[ty * m.w + tx] - hypot(tx + 0.5 - c0.x, ty + 0.5 - c0.y) * 0.08;
     if (h > bh) { bh = h; best = { x: tx + 0.5, y: ty + 0.5 }; }
   }
   return { at: best, facing: { x: -ux, y: -uy } };
@@ -98,7 +99,7 @@ export const warAI: AIPlugin = {
       for (const q of g.players.slice(1)) {
         if (q.id === p.id || q.defeated) continue;
         const b = baseOf(g, q.id);
-        if (b && Math.hypot(b.x - ctx.home.x, b.y - ctx.home.y) < gd) { gd = Math.hypot(b.x - ctx.home.x, b.y - ctx.home.y); goal = b; }
+        if (b && hypot(b.x - ctx.home.x, b.y - ctx.home.y) < gd) { gd = hypot(b.x - ctx.home.x, b.y - ctx.home.y); goal = b; }
       }
       if (rider && goal) Commands.move(g, [rider], goal.x + 4, goal.y + 4);
     }
@@ -109,7 +110,7 @@ export const warAI: AIPlugin = {
       const home = ctx.home;
       const target = targets.sort((a, b) => {
         const pa = baseOf(g, a), pb = baseOf(g, b);
-        return (pa ? Math.hypot(pa.x - home.x, pa.y - home.y) : 1e9) - (pb ? Math.hypot(pb.x - home.x, pb.y - home.y) : 1e9);
+        return (pa ? hypot(pa.x - home.x, pa.y - home.y) : 1e9) - (pb ? hypot(pb.x - home.x, pb.y - home.y) : 1e9);
       })[0];
       const pt = chooseBattlePoint(g, p.id, target);
       if (pt) declareWar(g, p.id, target, pt.x, pt.y);
@@ -127,7 +128,7 @@ export const warAI: AIPlugin = {
       if (g.time - (p.data.warStageAt ?? -999) > 15) {
         p.data.warStageAt = g.time;
         const s = stagingPoint(g, w, p.id);
-        const away = army.filter(u => !u.order && Math.hypot(u.x - s.at.x, u.y - s.at.y) > 5);
+        const away = army.filter(u => !u.order && hypot(u.x - s.at.x, u.y - s.at.y) > 5);
         if (away.length) moveInFormation(g, away.length === army.length ? army : away, s.at, s.facing);
       }
       return { armyHandled: true, holdTraining, reserve };
@@ -142,12 +143,12 @@ export const warAI: AIPlugin = {
         const inside = troops.filter(u => inCircle(w, u));
         const cx = inside.length ? inside.reduce((s, u) => s + u.x, 0) / inside.length : w.x;
         const cy = inside.length ? inside.reduce((s, u) => s + u.y, 0) / inside.length : w.y;
-        const hd = Math.hypot(home.x - cx, home.y - cy) || 1;
+        const hd = hypot(home.x - cx, home.y - cy) || 1;
         let tx = cx + ((home.x - cx) / hd) * 3, ty = cy + ((home.y - cy) / hd) * 3;
-        const cd = Math.hypot(tx - w.x, ty - w.y);
+        const cd = hypot(tx - w.x, ty - w.y);
         if (cd > w.r - 1.5) { tx = w.x + ((tx - w.x) / cd) * (w.r - 1.5); ty = w.y + ((ty - w.y) / cd) * (w.r - 1.5); }
         const spot = g.findFreeTile(tx, ty, 4) ?? { x: tx, y: ty };
-        if (Math.hypot(gen.x - spot.x, gen.y - spot.y) > 2.5 && gen.order?.type !== 'move') Commands.move(g, [gen], spot.x, spot.y);
+        if (hypot(gen.x - spot.x, gen.y - spot.y) > 2.5 && gen.order?.type !== 'move') Commands.move(g, [gen], spot.x, spot.y);
       }
       // A por el enemigo dentro del círculo; las que estén fuera, al círculo
       const foes = g.units.filter(u => !u.dead && u.owner === enemyOf(w, p.id) && inCircle(w, u));

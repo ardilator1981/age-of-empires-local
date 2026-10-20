@@ -3,6 +3,7 @@ import type { CombatRule, Pt } from '../../core/types';
 import type { Entity } from '../../game/Entity';
 import type { Game } from '../../game/Game';
 import type { Player } from '../../game/Player';
+import { cos, hypot, sin } from '../../game/fmath';
 
 /**
  * Reglas del modo "Guerra declarada" (simulación pura: sin DOM).
@@ -101,7 +102,7 @@ export function enemyOf(w: War, pid: number): number { return w.a === pid ? w.b 
 
 export function inCircle(w: Pt & { r: number }, e: Entity, margin = 0): boolean {
   const extra = e.kind === 'building' ? e.size / 2 : 0;
-  return Math.hypot(e.x - w.x, e.y - w.y) <= w.r + extra + margin;
+  return hypot(e.x - w.x, e.y - w.y) <= w.r + extra + margin;
 }
 
 export function generalOf(game: Game, pid: number): Entity | undefined {
@@ -166,7 +167,7 @@ export function battlePointInfo(game: Game, a: number, b: number, x: number, y: 
   const m = game.map, r = W.circleRadius, th = m.tileHeights();
   let minH = Infinity, maxH = -Infinity, blocked = 0, total = 0, peak: Pt | null = null, peakH = -Infinity;
   for (let ty = Math.floor(y - r); ty <= Math.ceil(y + r); ty++) for (let tx = Math.floor(x - r); tx <= Math.ceil(x + r); tx++) {
-    if (!m.inBounds(tx, ty) || Math.hypot(tx + 0.5 - x, ty + 0.5 - y) > r) continue;
+    if (!m.inBounds(tx, ty) || hypot(tx + 0.5 - x, ty + 0.5 - y) > r) continue;
     total++;
     const h = th[ty * m.w + tx];
     minH = Math.min(minH, h); maxH = Math.max(maxH, h);
@@ -175,7 +176,7 @@ export function battlePointInfo(game: Game, a: number, b: number, x: number, y: 
   }
   const n = Math.ceil(2 * Math.PI * r * 1.5), edge: PointInfo['edge'] = [];
   for (let i = 0; i < n; i++) {
-    const t = (i / n) * Math.PI * 2, ex = x + Math.cos(t) * r, ey = y + Math.sin(t) * r;
+    const t = (i / n) * Math.PI * 2, ex = x + cos(t) * r, ey = y + sin(t) * r;
     edge.push({ x: ex, y: ey, ok: m.inBounds(Math.floor(ex), Math.floor(ey)) && m.walkable(Math.floor(ex), Math.floor(ey)) });
   }
   let passes = 0;
@@ -192,7 +193,7 @@ export function battlePointInfo(game: Game, a: number, b: number, x: number, y: 
   if (info.blocked > 0.6) return fail('Casi todo es intransitable');
   for (const tc of game.buildings) {
     if (tc.dead || !isTownCenter(game, tc)) continue;
-    if (Math.hypot(tc.x - x, tc.y - y) < W.minDistFromTownCenter) return fail('Demasiado cerca de un centro urbano');
+    if (hypot(tc.x - x, tc.y - y) < W.minDistFromTownCenter) return fail('Demasiado cerca de un centro urbano');
   }
   const reg = m.region(Math.floor(x), Math.floor(y));
   for (const pid of [a, b]) {
@@ -298,7 +299,7 @@ function updateDiscovery(game: Game) {
         for (const e of game.actors) {
           if (e.dead || e.owner !== p.id) continue;
           const los = p.getStat(game.defOf(e), 'los') + 1;
-          if (theirs.some(b => Math.hypot(b.x - e.x, b.y - e.y) - b.size / 2 <= los)) { found = true; break; }
+          if (theirs.some(b => hypot(b.x - e.x, b.y - e.y) - b.size / 2 <= los)) { found = true; break; }
         }
       }
       if (found) {

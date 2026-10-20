@@ -7,6 +7,7 @@ import { attackStep } from '../orders';
 import { findPath, lineClear, smoothPath } from '../pathfinding';
 import { assignSlots, freeWidth, safeSlot, toWorld, type FormationType, type Offset } from './formations';
 import { reachOf, stanceOf, stanceTarget } from './stances';
+import { cos, hypot } from '../fmath';
 
 /**
  * Grupos en formación. Un grupo tiene un centro "virtual" (el líder) que recorre el camino a la
@@ -72,7 +73,7 @@ export function groups(game: Game): Group[] { return [...store(game).list.values
 
 function speedOf(game: Game, u: Entity) { return game.players[u.owner].getStat(game.unitDef(u), 'speed'); }
 
-function norm(v: Pt): Pt { const d = Math.hypot(v.x, v.y) || 1; return { x: v.x / d, y: v.y / d }; }
+function norm(v: Pt): Pt { const d = hypot(v.x, v.y) || 1; return { x: v.x / d, y: v.y / d }; }
 
 export interface GroupOptions {
   type: FormationType;
@@ -155,7 +156,7 @@ function dissolve(game: Game, grp: Group) {
 function advance(game: Game, grp: Group, units: Entity[], dt: number): boolean {
   const wp = grp.route[grp.ri];
   if (!grp.path.length) {
-    if (Math.hypot(wp.x - grp.pos.x, wp.y - grp.pos.y) < 0.35) return true;
+    if (hypot(wp.x - grp.pos.x, wp.y - grp.pos.y) < 0.35) return true;
     if (!pathBudget(game)) return false;
     const m = game.map, gx = Math.floor(wp.x), gy = Math.floor(wp.y), walk = m.walkable(gx, gy);
     const r = findPath(m, grp.pos.x, grp.pos.y, { x0: gx, y0: gy, x1: gx, y1: gy }, walk ? 0 : 1);
@@ -166,11 +167,11 @@ function advance(game: Game, grp: Group, units: Entity[], dt: number): boolean {
   }
   // Si la tropa va muy atrasada, el centro espera (va despacio)
   let lag = 0;
-  for (const u of units) { const s = grp.world.get(u.id); if (s) lag += Math.hypot(u.x - s.x, u.y - s.y); }
+  for (const u of units) { const s = grp.world.get(u.id); if (s) lag += hypot(u.x - s.x, u.y - s.y); }
   lag /= Math.max(1, units.length);
   let step = grp.speed * dt * (lag > BALANCE.army.regroupDistance ? BALANCE.army.regroupSpeed : 1);
   while (step > 0 && grp.path.length) {
-    const t = grp.path[0], dx = t.x - grp.pos.x, dy = t.y - grp.pos.y, d = Math.hypot(dx, dy);
+    const t = grp.path[0], dx = t.x - grp.pos.x, dy = t.y - grp.pos.y, d = hypot(dx, dy);
     if (d > 0.05) {
       // Giro suave hacia el siguiente tramo
       const want = { x: dx / d, y: dy / d };
@@ -179,7 +180,7 @@ function advance(game: Game, grp: Group, units: Entity[], dt: number): boolean {
     if (d <= step) { grp.pos = { x: t.x, y: t.y }; grp.path.shift(); step -= d; }
     else { grp.pos = { x: grp.pos.x + (dx / d) * step, y: grp.pos.y + (dy / d) * step }; step = 0; }
   }
-  return !grp.path.length && Math.hypot(wp.x - grp.pos.x, wp.y - grp.pos.y) < 0.35;
+  return !grp.path.length && hypot(wp.x - grp.pos.x, wp.y - grp.pos.y) < 0.35;
 }
 
 /** Sistema: mueve los centros de las formaciones, estrecha en los pasos y reasigna al girar. */
@@ -205,7 +206,7 @@ export class FormationSystem implements System {
         if (!t) { dissolve(g, grp); continue; }
         const back = norm({ x: grp.pos.x - t.x, y: grp.pos.y - t.y });
         const wp = { x: t.x + back.x * BALANCE.army.escortDistance, y: t.y + back.y * BALANCE.army.escortDistance };
-        if (Math.hypot(wp.x - grp.route[0].x, wp.y - grp.route[0].y) > 1.5) { grp.route[0] = wp; grp.path = []; }
+        if (hypot(wp.x - grp.route[0].x, wp.y - grp.route[0].y) > 1.5) { grp.route[0] = wp; grp.path = []; }
       }
 
       const halted = fighting && (grp.mode === 'attack' || grp.mode === 'patrol');
@@ -228,7 +229,7 @@ export class FormationSystem implements System {
         if (narrow !== grp.narrow) { grp.narrow = narrow; changed = true; }
         // Giro grande: reasignar huecos para que nadie se cruce
         const dot = grp.facing.x * grp.assignedFacing.x + grp.facing.y * grp.assignedFacing.y;
-        if (dot < Math.cos(Math.PI / 4)) changed = true;
+        if (dot < cos(Math.PI / 4)) changed = true;
       }
       if (changed) {
         if (units.length !== grp.offsets.size) grp.fullWidth = widthOf(assignSlots(g, units, grp.type, grp.facing));
@@ -240,7 +241,7 @@ export class FormationSystem implements System {
       // Llegada: cuando todos están en su sitio (o pasado un rato), se deshace el grupo
       if (grp.arrivedAt !== undefined && grp.mode !== 'zone') {
         let lag = 0;
-        for (const u of units) { const s = grp.world.get(u.id); if (s) lag = Math.max(lag, Math.hypot(u.x - s.x, u.y - s.y)); }
+        for (const u of units) { const s = grp.world.get(u.id); if (s) lag = Math.max(lag, hypot(u.x - s.x, u.y - s.y)); }
         if (lag < 0.7 || g.time - grp.arrivedAt > 8) dissolve(g, grp);
       }
     }
@@ -252,12 +253,12 @@ function acceptFor(game: Game, grp: Group): ((e: Entity) => boolean) | null {
   if (grp.mode === 'retreat' || grp.mode === 'move') return null;
   if (grp.mode === 'zone' && grp.zone) {
     const z = grp.zone;
-    return e => Math.hypot(e.x - z.x, e.y - z.y) <= z.r;
+    return e => hypot(e.x - z.x, e.y - z.y) <= z.r;
   }
   if (grp.mode === 'escort') {
     const t = game.get(grp.escortId);
     if (!t) return null;
-    return e => Math.hypot(e.x - t.x, e.y - t.y) <= BALANCE.army.escortRadius;
+    return e => hypot(e.x - t.x, e.y - t.y) <= BALANCE.army.escortRadius;
   }
   return () => true;
 }
@@ -276,8 +277,8 @@ export const formationOrder: OrderHandler = {
       const st = stanceOf(u);
       if (t) {
         const leashOk = st === 'aggressive' || grp.mode === 'zone' && grp.zone ? true
-          : Math.hypot(u.x - slot.x, u.y - slot.y) <= BALANCE.army.defensiveLeash;
-        const zoneOk = !grp.zone || Math.hypot(t.x - grp.zone.x, t.y - grp.zone.y) <= grp.zone.r + 2;
+          : hypot(u.x - slot.x, u.y - slot.y) <= BALANCE.army.defensiveLeash;
+        const zoneOk = !grp.zone || hypot(t.x - grp.zone.x, t.y - grp.zone.y) <= grp.zone.r + 2;
         if (!leashOk || !zoneOk || !game.canAttack(u, t, false) || (st === 'hold' && edgeDist(u, t) > reachOf(game, u, t) + 0.05)) t = undefined;
       }
       if (!t && game.time >= (o.scanAt ?? 0)) {
@@ -289,7 +290,7 @@ export const formationOrder: OrderHandler = {
           for (const id of grp.foes) {
             const e = game.get(id);
             if (!e || !game.canAttack(u, e, false)) continue;
-            const d = Math.hypot(e.x - u.x, e.y - u.y);
+            const d = hypot(e.x - u.x, e.y - u.y);
             if (d < bd) { bd = d; t = e; }
           }
         }
@@ -301,8 +302,8 @@ export const formationOrder: OrderHandler = {
           const z = area;
           let best: Entity | undefined, bd = Infinity;
           for (const e of game.units) {
-            if (e.dead || !game.canAttack(u, e, false) || Math.hypot(e.x - z.x, e.y - z.y) > z.r) continue;
-            const d = Math.hypot(e.x - u.x, e.y - u.y);
+            if (e.dead || !game.canAttack(u, e, false) || hypot(e.x - z.x, e.y - z.y) > z.r) continue;
+            const d = hypot(e.x - u.x, e.y - u.y);
             if (d < bd) { bd = d; best = e; }
           }
           t = best;
@@ -319,7 +320,7 @@ export const formationOrder: OrderHandler = {
     } else o.target = 0;
 
     // A su hueco
-    const d = Math.hypot(u.x - slot.x, u.y - slot.y);
+    const d = hypot(u.x - slot.x, u.y - slot.y);
     u.data.speedCap = d > 1.5 ? undefined : grp.speed;
     if (d < 0.2) {
       u.path = [];
@@ -327,7 +328,7 @@ export const formationOrder: OrderHandler = {
       return;
     }
     const goal = u.path[u.path.length - 1];
-    const goalMoved = !goal || Math.hypot(goal.x - slot.x, goal.y - slot.y) > 0.3;
+    const goalMoved = !goal || hypot(goal.x - slot.x, goal.y - slot.y) > 0.3;
     if (!goalMoved && game.time < (o.repathAt ?? 0)) return;
     if (d < 5 && lineClear(game.map, u.x, u.y, slot.x, slot.y)) { u.path = [{ x: slot.x, y: slot.y }]; return; }
     if (game.time < (o.repathAt ?? 0) || !pathBudget(game)) return;

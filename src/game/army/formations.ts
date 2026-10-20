@@ -2,6 +2,7 @@ import { BALANCE } from '../../config/balance';
 import type { Pt } from '../../core/types';
 import type { Entity } from '../Entity';
 import type { Game } from '../Game';
+import { hypot } from '../fmath';
 
 /**
  * Formaciones: la forma de un grupo de tropas, como huecos relativos a un centro.
@@ -192,7 +193,7 @@ export function safeSlot(game: Game, p: Pt, region: number, used?: Set<number>):
     let best: Pt | null = null, bd = Infinity;
     for (let r = 1; r <= 4 && !best; r++) for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) {
       if (Math.max(Math.abs(dx), Math.abs(dy)) !== r || !ok(fx + dx, fy + dy)) continue;
-      const d = Math.hypot(fx + dx + 0.5 - p.x, fy + dy + 0.5 - p.y);
+      const d = hypot(fx + dx + 0.5 - p.x, fy + dy + 0.5 - p.y);
       if (d < bd) { bd = d; best = { x: fx + dx + 0.5, y: fy + dy + 0.5 }; }
     }
     if (!best) return p;

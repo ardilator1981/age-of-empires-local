@@ -7,6 +7,7 @@ import { findEnemyNear, performAttack, updateProjectiles } from '../combat';
 import { anchorOf, engageOrder, stanceTarget } from '../army/stances';
 import type { Entity } from '../Entity';
 import type { Game } from '../Game';
+import { hypot } from '../fmath';
 
 /**
  * Sistemas básicos de la simulación. Se registran en el Registry desde el mod
@@ -82,7 +83,7 @@ export class MovementSystem implements System {
       // En formación, las que ya están en su hueco van al paso de la más lenta
       if (u.order?.type === 'formation' && u.data.speedCap) speed = Math.min(speed, u.data.speedCap);
       // Cuesta arriba se avanza más despacio (BALANCE.movement)
-      const t0 = u.path[0], dd = Math.hypot(t0.x - u.x, t0.y - u.y);
+      const t0 = u.path[0], dd = hypot(t0.x - u.x, t0.y - u.y);
       if (dd > 0.01) {
         const k = Math.min(0.5, dd) / dd;
         const grade = (m.heightAt(u.x + (t0.x - u.x) * k, u.y + (t0.y - u.y) * k) - m.heightAt(u.x, u.y)) / Math.min(0.5, dd);
@@ -92,7 +93,7 @@ export class MovementSystem implements System {
       u.moving = true;
       while (step > 0 && u.path.length) {
         const t = u.path[0];
-        const dx = t.x - u.x, dy = t.y - u.y, d = Math.hypot(dx, dy);
+        const dx = t.x - u.x, dy = t.y - u.y, d = hypot(dx, dy);
         const sx = dx - dy;
         if (Math.abs(sx) > 0.02) u.facing = sx > 0 ? 1 : -1;
         if (d <= step) {
@@ -146,7 +147,7 @@ export class MovementSystem implements System {
     for (const u of units) {
       if (!u.path.length) { u.stuck = 0; continue; }
       const speed = g.players[u.owner].getStat(g.unitDef(u), 'speed');
-      if (Math.hypot(u.x - u.px, u.y - u.py) < speed * dt * 0.25) u.stuck += dt;
+      if (hypot(u.x - u.px, u.y - u.py) < speed * dt * 0.25) u.stuck += dt;
       else u.stuck = Math.max(0, u.stuck - dt);
       if (u.stuck > 1.5) {
         u.stuck = 0;
@@ -200,7 +201,7 @@ export class ProductionSystem implements System {
       for (let y = b.ty - r; y < b.ty + b.size + r; y++) for (let x = b.tx - r; x < b.tx + b.size + r; x++) {
         const edge = x === b.tx - r || y === b.ty - r || x === b.tx + b.size + r - 1 || y === b.ty + b.size + r - 1;
         if (!edge || !g.map.walkable(x, y)) continue;
-        const d = Math.hypot(x + 0.5 - tx, y + 0.5 - ty);
+        const d = hypot(x + 0.5 - tx, y + 0.5 - ty);
         if (d < bestD) { bestD = d; best = { x: x + 0.5, y: y + 0.5 }; }
       }
     }

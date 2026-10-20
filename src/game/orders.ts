@@ -8,6 +8,7 @@ import { findEnemyNear, performAttack } from './combat';
 import { rangeBonus } from './heightRules';
 import type { Entity } from './Entity';
 import type { Game } from './Game';
+import { hypot } from './fmath';
 
 /**
  * Manejadores de órdenes básicos. Cada uno se registra en el Registry con un
@@ -66,7 +67,7 @@ function nextTarget(game: Game, u: Entity, radius: number, skip = 0): Entity | n
 
 /** Termina una orden de ataque automática: la unidad defensiva vuelve a su sitio. */
 function endAuto(u: Entity, o: Order) {
-  if (o.anchor && Math.hypot(u.x - o.anchor.x, u.y - o.anchor.y) > 0.6) {
+  if (o.anchor && hypot(u.x - o.anchor.x, u.y - o.anchor.y) > 0.6) {
     setOrder(u, { type: 'move', x: o.anchor.x, y: o.anchor.y });
     u.data.anchor = o.anchor;
   } else setOrder(u, null);
@@ -78,7 +79,7 @@ export const attackOrder: OrderHandler = {
     const t = game.get(o.targetId);
     if (t && o.auto && edgeDist(u, t) > los + 2) { endAuto(u, o); return; }
     // Postura defensiva: no se aleja más de la correa
-    if (o.anchor && Math.hypot(u.x - o.anchor.x, u.y - o.anchor.y) > o.leash) { endAuto(u, o); return; }
+    if (o.anchor && hypot(u.x - o.anchor.x, u.y - o.anchor.y) > o.leash) { endAuto(u, o); return; }
     if (!t || t.kind === 'resource' || !attackStep(game, u, o, t)) {
       if (o.auto) { endAuto(u, o); return; }
       // Una orden dada por el jugador no se acaba al caer el objetivo (o si no se llega a él):
@@ -137,7 +138,7 @@ export const exploreOrder: OrderHandler = {
       const los = p.getStat(game.unitDef(u), 'los');
       for (let cy = 0; cy < ch; cy++) for (let cx = 0; cx < cw; cx++) {
         const x = cx * EXPLORE_STEP + EXPLORE_STEP / 2, y = cy * EXPLORE_STEP + EXPLORE_STEP / 2;
-        if (Math.hypot(x - u.x, y - u.y) <= los) seen[cy * cw + cx] = 1;
+        if (hypot(x - u.x, y - u.y) <= los) seen[cy * cw + cx] = 1;
       }
     }
     const done = (cx: number, cy: number) => p.isHuman
@@ -160,7 +161,7 @@ export const exploreOrder: OrderHandler = {
       if (bad.has(c) || done(cx, cy)) continue;
       const x = Math.min(m.w - 1, cx * EXPLORE_STEP + (EXPLORE_STEP >> 1)), y = Math.min(m.h - 1, cy * EXPLORE_STEP + (EXPLORE_STEP >> 1));
       if (!m.walkable(x, y) || (reg >= 0 && m.region(x, y) !== reg)) continue;
-      const dx = x - u.x, dy = y - u.y, d = Math.hypot(dx, dy) || 1;
+      const dx = x - u.x, dy = y - u.y, d = hypot(dx, dy) || 1;
       const score = d - 6 * ((dx * hx + dy * hy) / d); // girar poco: barre el mapa en vez de zigzaguear
       if (score < bs) { bs = score; best = c; }
     }
@@ -170,7 +171,7 @@ export const exploreOrder: OrderHandler = {
       return;
     }
     const tx = (best % cw) * EXPLORE_STEP + (EXPLORE_STEP >> 1) + 0.5, ty = ((best / cw) | 0) * EXPLORE_STEP + (EXPLORE_STEP >> 1) + 0.5;
-    const d = Math.hypot(tx - u.x, ty - u.y) || 1;
+    const d = hypot(tx - u.x, ty - u.y) || 1;
     o.hx = (tx - u.x) / d; o.hy = (ty - u.y) / d;
     o.cell = best;
     moveTo(game, u, tx, ty);
@@ -272,7 +273,7 @@ function afterBuild(game: Game, u: Entity, b: Entity) {
   let other: Entity | null = null, best = 12;
   for (const e of game.buildings) {
     if (e.owner !== u.owner || e.complete || e.dead) continue;
-    const d = Math.hypot(e.x - u.x, e.y - u.y);
+    const d = hypot(e.x - u.x, e.y - u.y);
     if (d < best) { best = d; other = e; }
   }
   setOrder(u, other ? { type: 'build', targetId: other.id } : null);
