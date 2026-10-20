@@ -8,6 +8,8 @@ import { uiPrefs } from '../ui/layout';
 import { AUTO_SLOT, clearEmergency, deleteSlot, readSlot, warmUp, writeEmergency, writeSlot } from './saves';
 import { ALL_MODS } from '../mods';
 import { Menu } from '../ui/Menu';
+import type { NetGame } from '../net/NetGame';
+import { LocalOrders } from './orders';
 import { Session } from './Session';
 
 /** Cada cuánto se guarda la partida sola mientras se juega (además de al salir). */
@@ -16,6 +18,9 @@ const AUTOSAVE_EVERY_MS = 45_000;
 /** Ciclo de vida de la aplicación: menú → partida → menú. */
 export class App {
   session: Session | null = null;
+  /** Partida en red en curso (o sala), si la hay. */
+  net: NetGame | null = null;
+  private netOffs: (() => void)[] = [];
   paused = false;
   menuOpen = true;
   /** Todo el sonido: música, efectos y alertas. */
@@ -52,21 +57,76 @@ export class App {
     this.menu.showMain();
     requestAnimationFrame(this.loop);
     (window as any).app = this;
-    // Guardado automático al pasar a segundo plano o cerrar (en el móvil, al cambiar de app)
-    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') this.autosave(true); });
+    // Guardado automático al pasar a segundo plano o cerrar (en el móvil, al cambiar de app).
+    // En red se avisa al anfitrión: si tarda en volver, la IA juega por él
+    document.addEventListener('visibilitychange', () => {
+      const hidden = document.visibilityState === 'hidden';
+      this.net?.setAway(hidden);
+      if (hidden) this.autosave(true);
+    });
     window.addEventListener('pagehide', () => this.autosave(true));
   }
 
   /** Empieza una partida nueva o, con `restore`, continúa una guardada. */
   async start(opts: GameOptions, restore?: SaveData) {
+    this.leaveNet();
     const reg = buildRegistry(ALL_MODS.filter(m => m.core || opts.mods.includes(m.id)));
     // Los mapas reales cargan sus datos (incluidos en el juego: no hace falta red) antes de empezar
     if (!restore) await reg.mapTypes.get(opts.mapType)?.load?.();
+    this.begin(new Game(reg, opts, restore));
+  }
+
+  /**
+   * Partida en red: la sala (`ui/Lobby`) ya ha creado la `NetGame`. Cada vez que esta tiene una
+   * partida (al empezar, o al volver a cargarla tras una reconexión o desincronización), se juega.
+   */
+  playNet(net: NetGame) {
+    this.leaveNet();
+    this.net = net;
+    this.netOffs = [
+      net.on('game', ({ game, resync }) => {
+        const cam = resync ? this.session?.renderer.cam.center : null;
+        this.begin(game, net);
+        if (cam) this.session?.renderer.cam.centerOn(cam.x, cam.y);
+      }),
+      net.on('info', text => this.session?.game.notify(text, this.session.game.humanId, 'info')),
+      net.on('hostLost', () => this.menu.showHostLost()),
+    ];
+  }
+
+  /** Sale de la partida en red (o de la sala) si la hay. */
+  leaveNet() {
+    this.netOffs.forEach(f => f());
+    this.netOffs = [];
+    this.net?.leave();
+    this.net = null;
+  }
+
+  /**
+   * Se ha perdido al anfitrión: se sigue en local, contra la IA, que juega por los demás humanos.
+   * La partida es la misma; solo deja de ser en red.
+   */
+  continueOffline() {
+    const s = this.session;
+    if (!s) return;
+    const g = s.game;
+    for (const p of g.players) if (p.isHuman && p.id !== g.humanId) p.data.aiControl = true;
+    delete g.data.netPause;
+    g.events.filter = null;
+    g.opts.online = false;
+    this.leaveNet();
+    s.orders = new LocalOrders(g);
+    this.menu.hide();
+    this.paused = false;
+    this.menuOpen = false;
+    g.notify('Sigues en solitario: la IA juega por los demás', g.humanId, 'info');
+  }
+
+  private begin(game: Game, net?: NetGame) {
     this.session?.dispose();
     this.session = null;
-    const game = new Game(reg, opts, restore);
     this.hud.style.display = '';
-    const session = this.session = new Session(this, game);
+    const session = this.session = new Session(this, game, net);
     // El sonido del combate depende de lo que se esté mirando
     this.audio.attach(game, () => {
       const cam = session.renderer.cam, c = cam.center, corner = cam.screenToWorld(0, 0);
@@ -74,12 +134,15 @@ export class App {
     });
     game.events.on('gameOver', ({ won }) => {
       // Una partida terminada ya no se puede continuar
-      void deleteSlot(AUTO_SLOT).catch(() => {});
-      clearEmergency();
+      if (!net) { void deleteSlot(AUTO_SLOT).catch(() => {}); clearEmergency(); }
       setTimeout(() => { if (this.session?.game === game) this.menu.showGameOver(won); }, 1500);
     });
+    // En red, quien cae puede seguir mirando mientras los demás juegan
+    game.events.on('playerDefeated', ({ player }) => {
+      if (net && player.id === game.humanId) setTimeout(() => { if (this.session?.game === game && !game.over) this.menu.showDefeated(); }, 1500);
+    });
     this.lastAutosave = performance.now();
-    this.lastOptions = opts;
+    if (!net) this.lastOptions = game.opts;
     this.paused = false;
     this.audio.setPaused(false);
     this.menuOpen = false;
@@ -119,7 +182,8 @@ export class App {
    * comprimir, para que dé tiempo antes de que el navegador cierre la página.
    */
   autosave(leaving = false) {
-    if (!this.session || this.session.game.over) return;
+    // Las partidas en red no se guardan solas (no se pueden continuar sin los demás)
+    if (!this.session || this.session.game.over || this.net) return;
     this.lastAutosave = performance.now();
     if (leaving) {
       const save = snapshot(this.session.game);
@@ -150,10 +214,14 @@ export class App {
   }
 
   restart() {
+    if (this.net) return;
     if (this.lastOptions) void this.start({ ...this.lastOptions, seed: Math.floor(Math.random() * 1e9) });
   }
 
   toMenu() {
+    // Salir a propósito: al recargar ya no se vuelve a la sala
+    try { sessionStorage.removeItem('aoe-net-room'); } catch { /* sin almacenamiento */ }
+    this.leaveNet();
     this.session?.dispose();
     this.session = null;
     this.paused = false;
@@ -178,7 +246,8 @@ export class App {
     if (!this.session) return;
     this.paused = paused;
     this.menuOpen = paused;
-    this.audio.setPaused(paused);
+    // En red el juego no se para por abrir un menú (la pausa para todos es una orden)
+    if (!this.net) this.audio.setPaused(paused);
     if (paused && showMenu) this.menu.showPause();
     else this.menu.hide();
   }
@@ -196,6 +265,12 @@ export class App {
     if (!this.paused && !this.menuOpen) this.quality.frame(real);
     this.fpsMeter(real);
     if (now - this.lastAutosave > AUTOSAVE_EVERY_MS && !this.paused && !this.menuOpen) this.autosave();
+    if (this.net && this.net.game === s.game) {
+      // En red manda el reloj de la partida en red: avanza si están los turnos de todos
+      this.net.frame(dt);
+      s.frame(dt, this.net.alpha);
+      return;
+    }
     if (!this.paused && !this.menuOpen) {
       this.acc += dt * s.game.opts.speed * this.timeScale;
       let steps = 0;

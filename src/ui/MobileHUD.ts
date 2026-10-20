@@ -544,6 +544,7 @@ export class MobileHUD {
       case 'screen-close': this.closeScreen(true); break;
       case 'hint-ok': setUIPrefs({ hintSeen: true }); this.closeScreen(true); break;
       case 'resume': this.closeScreen(true); break;
+      case 'net-pause': this.s.orders.send({ t: 'pause', on: !g.data.netPause }); this.closeScreen(true); break;
       case 'saves': {
         // El juego sigue en pausa mientras se elige la ranura; al volver, se reanuda
         this.closeScreen(false);
@@ -645,7 +646,18 @@ export class MobileHUD {
     const tabs = SCREENS.map(([id, name]) => `<button class="m-tab${id === sc ? ' on' : ''}" data-screen="${id}">${name}</button>`).join('');
     let body = '';
     const armed = (k: string) => this.armed?.key === k;
-    if (sc === 'game') {
+    if (sc === 'game' && this.s.orders.online) {
+      // Partida en red: el juego no se para con el menú; la pausa es para todos
+      const net = this.s.app.net, t = Math.floor(g.time);
+      const players = (net?.status ?? []).map(q => `<li><b>${esc(q.name)}</b> <small>${q.state === 'ok' ? (q.rtt ? `📶 ${q.rtt} ms` : 'anfitrión') : q.state === 'away' ? '💤 fuera de la app' : q.state === 'ai' ? '🤖 la IA juega por él' : '❌ desconectado'}</small></li>`).join('');
+      body = `<div class="m-col">
+        <p class="m-sub">Partida en red · ${esc(g.reg.ageName(p.age))} · ${Math.floor(t / 60)} min · el juego no se para</p>
+        ${players ? `<ul class="m-list">${players}</ul>` : ''}
+        <button class="m-wide" data-a="resume">▶ Volver al juego</button>
+        <button class="m-wide" data-a="net-pause">${g.data.netPause ? '▶ Reanudar para todos' : '⏸ Pausar para todos'}</button>
+        <button class="m-wide${armed('to-menu') ? ' armed' : ''}" data-a="to-menu">${armed('to-menu') ? '¿Seguro? Toca otra vez' : '🚪 Abandonar la partida'}</button>
+        <button class="m-wide" data-a="show-hint">✋ Ayuda de gestos</button></div>`;
+    } else if (sc === 'game') {
       const t = Math.floor(g.time);
       body = `<div class="m-col">
         <p class="m-sub">${esc(g.reg.ageName(p.age))} · ${esc(p.civ.name)} · ${Math.floor(t / 60)} min</p>

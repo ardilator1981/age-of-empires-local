@@ -332,8 +332,8 @@ export class NetGame implements OrderSink {
   }
 
   private guestMessage(msg: NetMessage, from: string) {
-    if (this.hostPeer && from !== this.hostPeer && msg.k !== 'lobby' && msg.k !== 'ping') return;
-    if (msg.k !== 'ping') { this.lastHostMsg = this.now(); this.hostLostSent = false; }
+    if (this.hostPeer && from !== this.hostPeer && msg.k !== 'lobby') return;
+    if (from === this.hostPeer || msg.k === 'lobby') { this.lastHostMsg = this.now(); this.hostLostSent = false; }
     switch (msg.k) {
       case 'lobby':
         // Quien manda la sala es el anfitrión
@@ -351,9 +351,10 @@ export class NetGame implements OrderSink {
       case 'drop':
         this.peer?.drop(msg.pid, msg.last);
         if (msg.pid === this.pid) {
+          // Pide volver en el próximo fotograma (si está en segundo plano o congelado, no avanza:
+          // pedirlo ya haría que lo esperasen otra vez)
           this.droppedSelf = true;
           this.emit('info', 'La IA juega por ti mientras vuelves');
-          if (!this.away) this.askResync('vuelta');
         }
         return;
       case 'add': this.peer?.add(msg.pid, msg.from); return;
@@ -491,7 +492,6 @@ export class NetGame implements OrderSink {
     this.toGame({ k: 'drop', pid, last }, this.gamePeers());
     peer.issue({ t: 'ai', pid, on: true });
     this.waitStart.delete(pid);
-    this.emit('info', `La IA juega ahora por ${c.name}`);
   }
 
   // ------------------------------------------------------------ órdenes
@@ -534,6 +534,9 @@ export class NetGame implements OrderSink {
     } else { this.waitSince = 0; this.waitingMs = 0; }
   }
 
+  /** Fracción del tick en curso, para que el dibujo interpole entre ticks. */
+  get alpha() { return Math.min(1, this.acc / TICK_DT); }
+
   /** ¿Hay turnos de sobra (los demás van por delante)? Entonces se ejecutan sin esperar al reloj. */
   private behind(): boolean {
     const p = this.peer!;
@@ -574,7 +577,16 @@ export class NetGame implements OrderSink {
     return p.waitingFor().map(pid => g.players[pid]?.name ?? `Jugador ${pid}`);
   }
 
+  private lastFrameAt = 0;
+
   private housekeeping(now: number) {
+    // Si este dispositivo ha estado parado (congelado, dormido), las esperas cuentan desde ahora
+    if (this.lastFrameAt && now - this.lastFrameAt > 2000) {
+      this.lastHostMsg = Math.max(this.lastHostMsg, now);
+      this.waitStart.clear();
+    }
+    this.lastFrameAt = now;
+    if (this.droppedSelf && !this.away && !this.loading) this.askResync('vuelta');
     if (now - this.lastPing >= NB.pingEvery) {
       this.lastPing = now;
       if (this.isHost) {
@@ -650,15 +662,13 @@ export class NetGame implements OrderSink {
     this.away = away;
     if (this.isHost) return;
     if (this.hostPeer) this.t.send({ k: 'away', on: away }, this.hostPeer);
-    if (!away) {
-      this.lastHostMsg = this.now();
-      if (this.droppedSelf) this.askResync('vuelta');
-    }
+    if (!away) this.lastHostMsg = this.now();
   }
 
   /** Invitado: vuelve a pedir la partida (p. ej. tras perder la conexión con el anfitrión). */
   retry() {
     this.hostLostSent = false;
+    this.resyncAsked = false;
     this.lastHostMsg = this.now();
     for (const p of this.t.peers()) this.onJoin(p);
   }

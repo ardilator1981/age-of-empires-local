@@ -6,6 +6,8 @@ import { Input } from '../ui/Input';
 import { onLayoutChange } from '../ui/layout';
 import { MobileHUD } from '../ui/MobileHUD';
 import { StrategyScreen } from '../ui/StrategyScreen';
+import { NetHud } from '../ui/NetHud';
+import { NetGame } from '../net/NetGame';
 import { UIState } from '../ui/UIState';
 import type { App } from './App';
 import { LocalOrders, type OrderSink } from './orders';
@@ -22,7 +24,9 @@ export class Session {
   /** Pantalla de estrategia (formaciones, posturas y órdenes tácticas). */
   readonly strategy: StrategyScreen;
   /** Adónde van las órdenes del jugador (al momento contra la IA, por la red en línea). */
-  readonly orders: OrderSink;
+  orders: OrderSink;
+  /** Partida en red: latencia, esperas y pausa para todos. */
+  readonly netHud: NetHud | null;
   private onResize: () => void;
   private offLayout: () => void;
 
@@ -36,6 +40,7 @@ export class Session {
     this.input = new Input(this);
     this.mobile = new MobileHUD(this);
     this.strategy = new StrategyScreen(this);
+    this.netHud = this.orders instanceof NetGame ? new NetHud(this, this.orders) : null;
     this.onResize = () => { this.renderer.resize(); this.minimap.resize(); };
     window.addEventListener('resize', this.onResize);
     this.offLayout = onLayoutChange(() => { this.mobile.applyLayout(); this.onResize(); });
@@ -48,12 +53,14 @@ export class Session {
     this.hud.update(dt);
     this.mobile.update(dt);
     this.strategy.update(dt);
+    this.netHud?.update();
   }
 
   dispose() {
     window.removeEventListener('resize', this.onResize);
     this.offLayout();
     this.strategy.dispose();
+    this.netHud?.dispose();
     this.mobile.dispose();
     this.input.dispose();
     this.hud.dispose();

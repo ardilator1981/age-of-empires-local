@@ -54,8 +54,12 @@ export function bindSettings(root: HTMLElement, app: App, rerender: () => void, 
     const k = b.dataset.set as keyof UIPrefs | 'speed', raw = b.dataset.v!;
     const v: any = raw === 'true' ? true : raw === 'false' ? false : Number.isNaN(Number(raw)) ? raw : Number(raw);
     if (k === 'speed') {
-      app.menu.setSpeed(v);
-      if (app.session) app.session.game.opts.speed = v;
+      // En red, la velocidad es de todos: va como orden y cambia a la vez en todos los clientes
+      if (app.session?.orders.online) app.session.orders.send({ t: 'speed', v });
+      else {
+        app.menu.setSpeed(v);
+        if (app.session) app.session.game.opts.speed = v;
+      }
     } else {
       setUIPrefs({ [k]: v } as Partial<UIPrefs>);
       if (k === 'quality' || k === 'battery') app.quality.set(uiPrefs().quality, uiPrefs().battery);

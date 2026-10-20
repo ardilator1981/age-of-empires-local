@@ -9,8 +9,8 @@ import { RegionPicker } from './RegionPicker';
 import { bindSettings, settingsHtml } from './SettingsPanel';
 import { ago, AUTO_SLOT, deleteSlot, gameClock, listSlots, MANUAL_SLOTS } from '../app/saves';
 import { bindSoundControls, soundControlsHtml } from './soundSettings';
+import { DIFFS, esc, opt, SIZES, SPEEDS, type Diff } from './menuOptions';
 
-type Diff = 'easy' | 'normal' | 'hard';
 
 interface MenuState {
   name: string;
@@ -42,18 +42,6 @@ const DEFAULTS: MenuState = {
   visibility: 'normal', popLimit: 125, speed: 1.5, warPrepMinutes: BALANCE.war.prepMinutes,
   mods: ALL_MODS.filter(m => !m.core && m.defaultEnabled).map(m => m.id),
 };
-
-const SIZES: [number, string][] = [[64, 'Diminuto (64×64)'], [80, 'Pequeño (80×80)'], [96, 'Mediano (96×96)'], [120, 'Grande (120×120)'], [144, 'Enorme (144×144)']];
-const SPEEDS: [number, string][] = [[1, 'Lenta'], [1.5, 'Normal'], [2, 'Rápida'], [3, 'Muy rápida']];
-const DIFFS: [Diff, string][] = [['easy', 'Fácil'], ['normal', 'Normal'], ['hard', 'Difícil']];
-
-function esc(s: string) {
-  return s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
-}
-
-function opt<T extends string | number>(value: T, label: string, cur: T) {
-  return `<option value="${value}"${value === cur ? ' selected' : ''}>${esc(label)}</option>`;
-}
 
 const HELP_MOUSE = `
   <div class="help">
@@ -366,6 +354,8 @@ export class Menu {
   }
 
   showPause() {
+    const net = this.app.net;
+    if (net) { this.showNetPause(); return; }
     this.show(`
       <div class="menu small">
         <h1>Pausa</h1>
@@ -379,6 +369,60 @@ export class Menu {
         </div>
         ${this.volumeHtml()}
         ${help()}
+      </div>`);
+    this.bindButtons();
+  }
+
+  /** Pausa en red: el juego sigue para todos; la pausa de verdad es para todos a la vez. */
+  private showNetPause() {
+    const g = this.app.session?.game;
+    if (!g) return;
+    const paused = !!g.data.netPause;
+    const players = this.app.net!.status.map(p => `<li><b>${esc(p.name)}</b> <small>${p.state === 'ok' ? (p.rtt ? `📶 ${p.rtt} ms` : 'anfitrión') : p.state === 'away' ? '💤 fuera de la app' : p.state === 'ai' ? '🤖 la IA juega por él' : '❌ desconectado'}</small></li>`).join('');
+    this.show(`
+      <div class="menu small">
+        <h1>Partida en red</h1>
+        <div class="sub">El juego no se para mientras miras este menú.</div>
+        ${players ? `<ul class="net-players">${players}</ul>` : ''}
+        <div class="buttons">
+          <button data-a="resume">▶ Volver al juego</button>
+          <button data-a="net-pause">${paused ? '▶ Reanudar para todos' : '⏸ Pausar para todos'}</button>
+          <button data-a="settings">⚙️ Ajustes</button>
+          <button data-a="leave" class="${this.armedSlot === 'leave' ? 'armed' : ''}">${this.armedSlot === 'leave' ? '¿Seguro? Toca otra vez' : '🚪 Abandonar la partida'}</button>
+        </div>
+        ${this.volumeHtml()}
+        ${help()}
+      </div>`);
+    this.bindButtons();
+  }
+
+  /** En red: te han derrotado, pero los demás siguen jugando. */
+  showDefeated() {
+    this.app.menuOpen = true;
+    this.show(`
+      <div class="menu small">
+        <h1>💀 Te falta barrio</h1>
+        <div class="sub">Te han derrotado. La partida sigue para los demás: puedes quedarte mirando.</div>
+        <div class="buttons">
+          <button data-a="observe">👁 Seguir observando</button>
+          <button data-a="menu">☰ Salir al menú principal</button>
+        </div>
+      </div>`);
+    this.bindButtons();
+  }
+
+  /** En red: no hay noticias del anfitrión. */
+  showHostLost() {
+    this.app.menuOpen = true;
+    this.show(`
+      <div class="menu small">
+        <h1>📡 Se ha perdido al anfitrión</h1>
+        <div class="sub">No llegan noticias de quien creó la partida. Si vuelve, la partida sigue donde estaba.</div>
+        <div class="buttons">
+          <button data-a="net-retry">⏳ Esperar a que vuelva</button>
+          <button data-a="offline">🤖 Seguir yo solo contra la IA</button>
+          <button data-a="menu">☰ Salir al menú principal</button>
+        </div>
       </div>`);
     this.bindButtons();
   }
@@ -399,7 +443,7 @@ export class Menu {
         <table class="stats"><tr><th>Jugador</th><th>Civ.</th><th>Edad</th><th>Bajas causadas</th><th>Pérdidas</th><th>Edificios destruidos</th><th>Recursos</th><th>Estado</th></tr>${rows}</table>
         <div class="buttons">
           <button data-a="observe">👁 Seguir observando</button>
-          <button data-a="restart">↻ Nueva partida</button>
+          ${this.app.net ? '' : '<button data-a="restart">↻ Nueva partida</button>'}
           <button data-a="menu">☰ Menú principal</button>
         </div>
       </div>`);
@@ -483,6 +527,10 @@ export class Menu {
         else if (a === 'save') void this.showSaves('save', () => this.showPause());
         else if (a === 'settings') this.showSettings(() => this.showPause());
         else if (a === 'load') void this.showSaves('load', () => this.showPause());
+        else if (a === 'net-pause') { const g = this.app.session?.game; if (g) this.app.session!.orders.send({ t: 'pause', on: !g.data.netPause }); this.app.togglePause(); }
+        else if (a === 'leave') { if (this.armedSlot === 'leave') { this.armedSlot = ''; this.app.toMenu(); } else { this.armedSlot = 'leave'; this.showNetPause(); } }
+        else if (a === 'net-retry') { this.hide(); this.app.menuOpen = false; this.app.net?.retry(); }
+        else if (a === 'offline') this.app.continueOffline();
       });
     });
   }
