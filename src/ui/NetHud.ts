@@ -42,6 +42,7 @@ export class NetHud {
       const secs = Math.floor(net.waitingMs / 1000);
       lines.push(`<div class="nh-banner wait">⏳ Esperando a ${esc(who.join(', ') || 'los demás')}…${secs >= 2 ? ` ${secs} s` : ''}${net.isHost && secs >= 2 ? '<small>Si no vuelve pronto, la IA jugará por él</small>' : ''}</div>`);
     }
+    if (net.hostAway) lines.push('<div class="nh-banner wait">💤 El anfitrión ha salido de la app<small>La partida sigue cuando vuelva</small></div>');
     if (g.human.data.aiControl) lines.push('<div class="nh-banner">🤖 La IA juega por ti mientras vuelves…</div>');
     if (net.loading) lines.push('<div class="nh-banner">⏳ Cargando la partida del anfitrión…</div>');
     const html = chip + lines.join('');

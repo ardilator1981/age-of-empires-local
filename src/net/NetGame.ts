@@ -118,6 +118,8 @@ export class NetGame implements OrderSink {
   private waitSince = 0;
   private applyingOwn = false;
   private droppedSelf = false;
+  /** El anfitrión ha avisado de que está en segundo plano. */
+  hostAway = false;
   private away = false;
   private resyncAsked = false;
   private reg: Registry | null = null;
@@ -361,6 +363,10 @@ export class NetGame implements OrderSink {
       case 'delay': this.peer?.setDelay(msg.d); return;
       case 'snap': this.hostPeer ??= from; void this.handleSnap(msg); return;
       case 'status': this.status = msg.players; this.emit('status', msg.players); return;
+      case 'away':
+        this.hostAway = msg.on;
+        this.emit('info', msg.on ? 'El anfitrión ha salido de la app: la partida sigue cuando vuelva' : 'El anfitrión ha vuelto');
+        return;
     }
   }
 
@@ -595,7 +601,7 @@ export class NetGame implements OrderSink {
       } else if (this.hostPeer) this.t.send({ k: 'ping', t: now }, this.hostPeer);
     }
     if (this.isHost) this.hostHousekeeping(now);
-    else if (!this.hostLostSent && !this.away && (this.lobby || this.game) && now - this.lastHostMsg > NB.hostLost) {
+    else if (!this.hostLostSent && !this.away && (this.lobby || this.game) && now - this.lastHostMsg > (this.hostAway ? NB.hostAwayLost : NB.hostLost)) {
       this.hostLostSent = true;
       this.emit('hostLost', undefined);
     }
@@ -660,7 +666,8 @@ export class NetGame implements OrderSink {
   setAway(away: boolean) {
     if (this.away === away) return;
     this.away = away;
-    if (this.isHost) return;
+    // El anfitrión avisa a todos: la partida se para hasta que vuelva (no se le puede sustituir)
+    if (this.isHost) { if (this.game) this.toGame({ k: 'away', on: away }, this.gamePeers()); return; }
     if (this.hostPeer) this.t.send({ k: 'away', on: away }, this.hostPeer);
     if (!away) this.lastHostMsg = this.now();
   }

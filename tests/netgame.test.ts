@@ -173,6 +173,27 @@ describe('partida en red (NetGame, transporte en memoria)', () => {
     expect(compare(host, g1, t).diff).toBeNull();
   }, 60_000);
 
+  it('el anfitrión sale de la app: los demás esperan sin darlo por perdido y siguen cuando vuelve', async () => {
+    const { hub, host, guests, all } = await started(2, 0);
+    const [g1] = guests;
+    let lost = 0;
+    g1.net.on('hostLost', () => lost++);
+    await play(hub, all, 3);
+    host.net.setAway(true);
+    host.paused = true;
+    await play(hub, all, 20);
+    expect(g1.net.hostAway).toBe(true);
+    expect(lost).toBe(0);
+    expect(g1.net.waitingMs).toBeGreaterThan(10_000);
+    host.paused = false;
+    host.net.setAway(false);
+    const t = host.net.game!.tick;
+    await play(hub, all, 5);
+    expect(g1.net.hostAway).toBe(false);
+    expect(g1.net.game!.tick).toBeGreaterThan(t + 50);
+    expect(compare(host, g1).diff).toBeNull();
+  }, 60_000);
+
   it('una desincronización se detecta y se arregla cargando la partida del anfitrión', async () => {
     const { hub, host, guests, all } = await started(2, 0);
     const [g1] = guests;

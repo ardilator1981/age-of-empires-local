@@ -189,6 +189,8 @@ export const BALANCE = {
     dropSilent: 12000,
     /** Sin noticias del anfitrión durante esto, se da por perdido. */
     hostLost: 10000,
+    /** Si el anfitrión ha avisado de que sale de la app, se le espera más. */
+    hostAwayLost: 120000,
     /** "Esperando a..." aparece tras esta espera. */
     waitNotice: 400,
     /** Al ir por detrás, como mucho tantos ms de CPU por fotograma para ponerse al día. */
