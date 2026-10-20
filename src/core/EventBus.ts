@@ -36,6 +36,11 @@ type Handler<T> = (payload: T) => void;
 
 export class EventBus {
   private handlers = new Map<string, Handler<any>[]>();
+  /**
+   * Filtro opcional: si devuelve false, el evento no llega a nadie. Lo usa la partida en red para
+   * no repetir la confirmación de las órdenes propias, que ya se dio al dar la orden.
+   */
+  filter: ((evt: string, payload: any) => boolean) | null = null;
 
   /** Suscribe y devuelve una función para cancelar la suscripción. */
   on<K extends keyof GameEventMap & string>(evt: K, fn: Handler<GameEventMap[K]>): () => void {
@@ -50,6 +55,7 @@ export class EventBus {
   }
 
   emit<K extends keyof GameEventMap & string>(evt: K, payload: GameEventMap[K]): void {
+    if (this.filter && !this.filter(evt, payload)) return;
     const list = this.handlers.get(evt);
     if (list) for (const fn of [...list]) fn(payload);
   }

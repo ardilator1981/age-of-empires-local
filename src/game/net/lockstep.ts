@@ -33,7 +33,11 @@ export interface Turn {
 
 export interface Desync { tick: number; from: number; mine: number; theirs: number }
 
-/** Ticks en los que juega cada jugador (ambos incluidos). */
+/**
+ * Un tramo de ticks en el que juega un jugador (ambos incluidos). Un jugador que se va y vuelve
+ * tiene varios tramos: los anteriores se conservan porque otros clientes pueden ir unos ticks
+ * por delante y haber ejecutado ya sus órdenes de entonces.
+ */
 export interface Membership { pid: number; from: number; until: number }
 
 export interface LockstepOptions {
@@ -63,7 +67,7 @@ export class LockstepPeer {
   private hashes = new Map<number, number>();
   private pendingChecks: { from: number; tick: number; hash: number }[] = [];
   private lastHash: { tick: number; hash: number } | null = null;
-  private members = new Map<number, Membership>();
+  private members: Membership[] = [];
   /** Último tick para el que este cliente ha enviado su turno. */
   private lastSent: number;
   /** Último tick del que se ha recibido turno de cada jugador. */
@@ -74,24 +78,27 @@ export class LockstepPeer {
     this.delay = Math.max(1, opts.delay);
     this.hashEvery = opts.hashEvery ?? 20;
     for (const p of players) {
-      const m = typeof p === 'number' ? { pid: p, from: game.tick + 1, until: Infinity } : { ...p, until: p.until ?? Infinity };
-      this.members.set(m.pid, m);
+      this.members.push(typeof p === 'number' ? { pid: p, from: game.tick + 1, until: Infinity } : { ...p, until: p.until ?? Infinity });
     }
     this.lastSent = game.tick;
     // Los primeros ticks no tienen órdenes de nadie
     if (opts.prefill !== false) {
       for (let t = game.tick + 1; t <= game.tick + this.delay; t++) {
-        for (const m of this.members.values()) if (this.plays(m, t)) this.slot(t).set(m.pid, []);
+        for (const pid of this.playersAt(t)) this.slot(t).set(pid, []);
       }
       this.lastSent = game.tick + this.delay;
     } else {
       // Se une a una partida empezada: sus turnos empiezan cuando le toque jugar
-      const mine = this.members.get(me);
+      const mine = this.openSpan(me);
       if (mine) this.lastSent = Math.max(game.tick, mine.from - 1);
     }
   }
 
-  private plays(m: Membership, t: number) { return t >= m.from && t <= m.until; }
+  /** ¿Juega `pid` en el tick `t`? */
+  plays(pid: number, t: number) { return this.members.some(m => m.pid === pid && t >= m.from && t <= m.until); }
+
+  /** Tramo abierto (sin final) de un jugador, si sigue jugando. */
+  private openSpan(pid: number) { return this.members.find(m => m.pid === pid && m.until === Infinity); }
 
   private slot(tick: number) {
     let m = this.turns.get(tick);
@@ -101,11 +108,14 @@ export class LockstepPeer {
 
   /** Jugadores que juegan en el tick `t`, por orden de id. */
   playersAt(t: number): number[] {
-    return [...this.members.values()].filter(m => this.plays(m, t)).map(m => m.pid).sort((a, b) => a - b);
+    return [...new Set(this.members.filter(m => t >= m.from && t <= m.until).map(m => m.pid))].sort((a, b) => a - b);
   }
 
-  /** Quién juega y desde cuándo (para quien se une a la partida). */
-  membership(): Membership[] { return [...this.members.values()].map(m => ({ ...m })); }
+  /** Quién juega y en qué ticks (para quien se une a la partida). */
+  membership(): Membership[] { return this.members.map(m => ({ ...m })); }
+
+  /** ¿Sigue jugando (sin fecha de salida)? */
+  active(pid: number) { return !!this.openSpan(pid); }
 
   /** Orden del jugador local: sale en el próximo `endTurn()`. */
   issue(cmd: NetCommand) { this.local.push(cmd); }
@@ -149,13 +159,12 @@ export class LockstepPeer {
    * esperan al siguiente).
    */
   endTurn(): Turn[] {
-    const mine = this.members.get(this.me);
     const target = this.game.tick + this.delay;
     const out: Turn[] = [];
-    if (!mine) { this.local = []; return out; }
+    if (!this.members.some(m => m.pid === this.me && m.until > this.lastSent)) { this.local = []; return out; }
     while (this.lastSent < target) {
       const tick = ++this.lastSent;
-      if (!this.plays(mine, tick)) continue;
+      if (!this.plays(this.me, tick)) continue;
       const turn: Turn = { from: this.me, tick, cmds: tick === target ? this.local : [] };
       if (tick === target) this.local = [];
       this.slot(tick).set(this.me, turn.cmds);
@@ -170,8 +179,7 @@ export class LockstepPeer {
 
   /** Turno de otro jugador recibido por la red. */
   receive(turn: Turn) {
-    const m = this.members.get(turn.from);
-    if (turn.tick > this.game.tick && m && this.plays(m, turn.tick)) this.slot(turn.tick).set(turn.from, turn.cmds);
+    if (turn.tick > this.game.tick && this.plays(turn.from, turn.tick)) this.slot(turn.tick).set(turn.from, turn.cmds);
     this.lastFrom.set(turn.from, Math.max(this.lastFrom.get(turn.from) ?? 0, turn.tick));
     if (turn.check) {
       const c = { from: turn.from, ...turn.check };
@@ -182,22 +190,36 @@ export class LockstepPeer {
   /** Último tick del que ha llegado (o se ha enviado, si es el propio) turno de un jugador. */
   lastTurnOf(pid: number): number {
     if (pid === this.me) return this.lastSent;
-    return this.lastFrom.get(pid) ?? this.members.get(pid)?.from ?? this.game.tick;
+    return this.lastFrom.get(pid) ?? this.game.tick;
+  }
+
+  /** Cuántos ticks seguidos se podrían ejecutar ya (si son muchos, los demás van por delante). */
+  readyAhead(max = 64): number {
+    let n = 0;
+    for (let t = this.game.tick + 1; n < max; t++, n++) {
+      const slot = this.turns.get(t);
+      if (this.playersAt(t).some(p => !slot?.has(p))) break;
+    }
+    return n;
   }
 
   /** El jugador deja de jugar después del tick `last`: sus turnos posteriores ya no se esperan. */
   drop(pid: number, last: number) {
-    const m = this.members.get(pid);
+    const m = this.openSpan(pid);
     if (!m) return;
-    m.until = last;
-    for (const [t, slot] of this.turns) if (t > last) slot.delete(pid);
+    m.until = Math.max(m.from - 1, last);
+    for (const [t, slot] of this.turns) if (t > m.until) slot.delete(pid);
   }
 
-  /** El jugador vuelve (o entra) a jugar desde el tick `from`. */
+  /** El jugador vuelve (o entra) a jugar desde el tick `from` (después de su último tramo). */
   add(pid: number, from: number) {
-    this.members.set(pid, { pid, from, until: Infinity });
+    if (this.openSpan(pid)) return;
+    this.members.push({ pid, from, until: Infinity });
     if (pid === this.me) this.lastSent = Math.max(this.lastSent, from - 1);
   }
+
+  /** Olvida una desincronización ya atendida. */
+  clearDesync() { this.desync = null; }
 
   /** Turnos ya conocidos para ticks futuros (para quien se une: no le llegarán de otra forma). */
   pendingTurns(): Turn[] {

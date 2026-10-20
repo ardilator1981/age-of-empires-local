@@ -166,4 +166,32 @@ export const BALANCE = {
     /** Con más de esto en el almacén, la IA aparta aldeanos de ese recurso. */
     stockpileEnough: 1200,
   },
+
+  /** Partidas en red (pasos sincronizados; ver docs/multijugador.md). Tiempos en ms salvo que se diga. */
+  net: {
+    /** Jugadores como mucho en una sala (humanos e IA). */
+    maxPlayers: 8,
+    /** Retardo de entrada en ticks de 50 ms: al empezar, mínimo y máximo (se adapta a la latencia). */
+    delayStart: 4,
+    delayMin: 2,
+    delayMax: 14,
+    /** Margen sobre la latencia de ida medida al calcular el retardo. */
+    delayMargin: 40,
+    /** Cada cuántos ms se recalcula el retardo; para bajarlo hace falta que sobre varias veces seguidas. */
+    delayEvery: 2000,
+    delayLowerAfter: 2,
+    /** Huella del estado cada tantos ticks (comprobación de sincronía). */
+    hashEvery: 20,
+    pingEvery: 1000,
+    /** Esperando a un jugador desconectado o en segundo plano: la IA juega por él pasado esto. */
+    dropAway: 4000,
+    /** Esperando a un jugador que sigue conectado pero no manda sus turnos. */
+    dropSilent: 12000,
+    /** Sin noticias del anfitrión durante esto, se da por perdido. */
+    hostLost: 10000,
+    /** "Esperando a..." aparece tras esta espera. */
+    waitNotice: 400,
+    /** Al ir por detrás, como mucho tantos ms de CPU por fotograma para ponerse al día. */
+    catchUpBudget: 14,
+  },
 };
