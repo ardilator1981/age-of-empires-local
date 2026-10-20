@@ -16,6 +16,9 @@ src/
     army/      formations (formas y huecos), groups (formaciones en marcha y órdenes tácticas),
                stances (posturas)
     save.ts    guardar y cargar partidas (formato versionado)
+    fmath.ts   hypot, sin y cos deterministas (iguales en todos los navegadores)
+    net/       prototipo de multijugador: huella del estado (hash), órdenes serializables
+               (netCommands) y pasos sincronizados (lockstep); ver docs/multijugador.md
     systems/   core.ts (sistemas básicos) y AISystem.ts (IA por jugador)
   render/      Camera (con relieve), Renderer (2D), TerrainGL (WebGL2), quality (calidad gráfica), terrainPatterns,
                sprites, decorations, icons (retratos), Minimap, imageSprite
@@ -27,7 +30,7 @@ src/
   mods/        core/ (contenido base: datos), extra-content/, treasure-hunt/, declared-war/ (modo Guerra declarada)
 scripts/       simulate.ts (partida IA contra IA sin gráficos), real-map.mjs, make-icons.mjs
 .github/       Workflows de GitHub Pages y del APK de Android
-docs/          decisiones.md (decisiones de diseño), riesgos.md (riesgos técnicos)
+docs/          decisiones.md (decisiones de diseño), riesgos.md (riesgos técnicos), multijugador.md (viabilidad)
 ```
 
 ## Estado de las ramas (actualizar al fusionar)
@@ -36,6 +39,7 @@ docs/          decisiones.md (decisiones de diseño), riesgos.md (riesgos técni
 - `feat/fusion-movil-mapas`, `feat/relieve-mapas-reales`, `feat/audio-efectos`, `feat/pequenos-cambios`, `feat/guerra-declarada`, `feat/ejercitos` y `feat/guardado-rendimiento`: ya están en `main`.
 - `feat/interfaz-movil`: **interfaz móvil** (capa `MobileHUD`, elección automática de interfaz, gestos y grupos táctiles; capturas y medición en `docs/movil/`). Ya está en `main`. Al añadir comandos nuevos al HUD, añádelos en `ui/commandModel.ts` para que salgan también en el móvil.
 - `claude/arte-ia`: gráficos con sprites generados por IA (otra sesión).
+- `feat/multijugador-viabilidad`: informe de viabilidad del multijugador (`docs/multijugador.md`), prototipo de lockstep (`game/net/`) y arreglos de determinismo (`fmath`, niebla al cargar, fin de partida sin `humanId`). Sin fusionar.
 - Remoto: `origin` = github.com/ardilator1981/age-of-empires-local. La web publicada y la Release v0.1.0 salieron de `claude/upbeat-ishizaka-5d23f0`.
 
 ## Comandos
@@ -48,6 +52,8 @@ docs/          decisiones.md (decisiones de diseño), riesgos.md (riesgos técni
 | Build | `npm run build` (incluye la comprobación de tipos) |
 | Prueba de humo | `npm run simulate -- <minutos> <mapa> <semilla> [dificultad]`: partida IA contra IA sin gráficos; debe terminar sin errores, y las IAs deben avanzar de edad y combatir |
 | Tests | `npm test` (Vitest, carpeta `tests/`): conectividad de todos los mapas, reglas de altura, visión, caminos, órdenes y Guerra declarada. Los modos de juego (`declared-war`) solo se activan en las pruebas que los piden (`newGame(map, { war: true })`) |
+| Determinismo entre navegadores | `npm run engines -- [minutos]`: la misma partida en Node (V8) y en el `jsc` de macOS (JavaScriptCore, el de Safari); compara la huella del estado cada segundo |
+| Multijugador (prototipo) | `npm run lockstep -- [minutos]`: dos clientes por red simulada; determinismo, retardo de las órdenes y paradas |
 | Rendimiento | `npm run bench`: A*, partida con 4 IA, estrés de 300 unidades y visión. Resultados en `docs/rendimiento.md` |
 | Regiones reales | `npm run regions` (todas las de `src/mods/real-maps/regions.json`, con `--all` u `--only <id>`); `npm run world-map` regenera el mapamundi del selector |
 | Mapa real | `npm run real-map -- ...` (ver README): descarga relieve del ICGC o de Copernicus y datos de OpenStreetMap, y genera `src/mods/real-maps/data/<id>.json` |
@@ -78,6 +84,7 @@ Depuración en el navegador: `window.app` y `window.game` están accesibles desd
 - Usa `game.units`, `game.buildings`, `game.nodes` y `game.actors` en vez de recorrer `game.list` en código que se ejecute cada tick. Comprueba siempre `e.dead`.
 - Las acciones de jugadores van por `Commands`. Las comprobaciones de disponibilidad (edad, coste, requisitos) van en `rules.ts`.
 - Aleatoriedad de la simulación: `game.rng()` (determinista por semilla), nunca `Math.random()`.
+- Determinismo (para el multijugador): en el código que corre cada tick, `hypot`, `sin` y `cos` de `src/game/fmath.ts`, nunca `Math.hypot`, `Math.sin`, `Math.cos`, `Math.atan2` ni `Math.exp`, que dan distinto en Chrome y Safari. Tampoco `Date.now` ni nada de la interfaz. Un test lo comprueba en `src/game`; en los mods, a mano. El dibujo puede usar `Math`.
 - Sonido: para que algo suene, emite un evento del juego (o usa `game.reject` para los errores de una acción) y añade el efecto en `audio/sfx.ts` y su escucha en `AudioManager`. Nada de archivos con copyright; documenta cada sonido en `CREDITS.md`.
 - Sprites: funciones registradas por id. La luz viene de arriba a la izquierda. Casilla de 64×32 px a zoom 1, y `ELEV_PX` píxeles por nivel de elevación.
 

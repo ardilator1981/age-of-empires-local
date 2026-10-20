@@ -427,4 +427,4 @@ referencia a algo que no existe (un edificio, una tecnología o un sprite).
 - Formaciones y posturas de combate
 - Guardado y carga de partida (todas las acciones pasan por `Commands`)
 - Efectos de sonido (golpes, flechas, construcción)
-- Multijugador en red local
+- Multijugador en red (viabilidad y plan en `docs/multijugador.md`)

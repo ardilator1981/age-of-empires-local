@@ -42,14 +42,14 @@ console.log(`- Fallo provocado en el tick 500 (+0,001 de alimento en un cliente)
 console.log(`- Tiempo: ${(det.wallMs / 1000).toFixed(1)} s para ${minutes} min de 2 clientes con huella en cada tick.\n`);
 
 console.log(`## Redes (${minutes} min por fila, 2 humanos + 2 IA)\n`);
-console.log('| Red | Latencia ida (variación) | Pérdidas | Retardo de entrada | Orden → efecto (media) | Velocidad del juego | Tiempo parado | Parón más largo | Huellas |');
+console.log('| Red | Latencia de ida (+ variación) | Pérdidas | Retardo de entrada | Orden → efecto (media) | Velocidad del juego | Tiempo parado | Parón más largo | Huellas |');
 console.log('| --- | --- | --- | --- | --- | --- | --- | --- | --- |');
 for (const net of PROFILES) {
   for (const delay of net.latency >= 100 ? [4, 6, 10, 14] : [2, 4, 6]) {
     const r = runMatch({ reg, opts: opts(2, 2), humans: 2, minutes, delay, net, hashEvery: 20, seed });
     const ok = r.firstDiff === null && !r.desync ? 'iguales' : `distintas (tick ${r.firstDiff ?? r.desync?.tick})`;
     const freeze = net.freezePerSec ? ` + tirones de ${net.freezeMs} ms` : '';
-    console.log(`| ${net.name} | ${net.latency} ms (±${net.jitter})${freeze} | ${(net.loss * 100).toFixed(1)} % | ${delay} ticks (${delay * 50} ms) | ${r.orderDelayMs} ms | ${r.speedPct} % | ${r.stallPct} % | ${r.longestStallMs} ms | ${ok} |`);
+    console.log(`| ${net.name} | ${net.latency} ms (+0 a ${net.jitter})${freeze} | ${(net.loss * 100).toFixed(1)} % | ${delay} ticks (${delay * 50} ms) | ${r.orderDelayMs} ms | ${r.speedPct} % | ${r.stallPct} % | ${r.longestStallMs} ms | ${ok} |`);
   }
 }
 const bw = runMatch({ reg, opts: opts(2, 2), humans: 2, minutes: Math.min(minutes, 5), delay: 4, net: PROFILES[0], hashEvery: 20, seed });
