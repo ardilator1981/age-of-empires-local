@@ -8,6 +8,7 @@ import { MobileHUD } from '../ui/MobileHUD';
 import { StrategyScreen } from '../ui/StrategyScreen';
 import { UIState } from '../ui/UIState';
 import type { App } from './App';
+import { LocalOrders, type OrderSink } from './orders';
 
 /** Todo lo que vive mientras dura una partida: juego, render, interfaz y entrada. */
 export class Session {
@@ -20,10 +21,13 @@ export class Session {
   readonly mobile: MobileHUD;
   /** Pantalla de estrategia (formaciones, posturas y órdenes tácticas). */
   readonly strategy: StrategyScreen;
+  /** Adónde van las órdenes del jugador (al momento contra la IA, por la red en línea). */
+  readonly orders: OrderSink;
   private onResize: () => void;
   private offLayout: () => void;
 
-  constructor(public app: App, public game: Game) {
+  constructor(public app: App, public game: Game, orders?: OrderSink) {
+    this.orders = orders ?? new LocalOrders(game);
     this.renderer = new Renderer(document.getElementById('game') as HTMLCanvasElement, document.getElementById('terrain') as HTMLCanvasElement, game, this.ui);
     this.renderer.profile = () => app.quality.profile;
     this.renderer.resize();

@@ -1,5 +1,4 @@
 import type { Session } from '../app/Session';
-import { Commands } from '../game/commands';
 import type { Entity } from '../game/Entity';
 import { costText } from '../game/rules';
 import { esc, pic, selectionCommands, taskText, type Cmd, type CommandSet } from './commandModel';
@@ -509,7 +508,7 @@ export class MobileHUD {
       const key = `q${q.dataset.q}`;
       if (!this.confirmed(key)) return;
       const bld = ui.selected(g)[0];
-      if (bld && bld.owner === g.humanId) Commands.cancel(g, bld, Number(q.dataset.q));
+      if (bld && bld.owner === g.humanId) this.s.orders.send({ t: 'cancel', at: bld.id, index: Number(q.dataset.q) });
       this.acc = 1;
       return;
     }

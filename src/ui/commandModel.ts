@@ -1,5 +1,5 @@
 import type { AnyDef, TechDef } from '../core/types';
-import { Commands } from '../game/commands';
+import { ids } from '../game/net/netCommands';
 import { groupOf } from '../game/army/groups';
 import type { Entity } from '../game/Entity';
 import type { Game } from '../game/Game';
@@ -112,7 +112,7 @@ export function selectionCommands(s: Session): CommandSet {
   if (!sel.length) return set;
   const del: Cmd = {
     icon: '❌', label: 'Eliminar', avail: OK, tip: '<b>Eliminar</b> (Supr)<br>Destruye la selección.',
-    action: () => { sel.forEach(e => Commands.delete(g, e)); ui.setSelection([]); },
+    action: () => { s.orders.send({ t: 'delete', ids: ids(sel) }); ui.setSelection([]); },
   };
   set.del = del;
 
@@ -160,11 +160,11 @@ export function selectionCommands(s: Session): CommandSet {
         action: () => {
           const av = exploreAvail(g, p, scouts[0].defId);
           if (!av.ok) { g.rejectAvail(p.id, av); return; }
-          Commands.explore(g, scouts);
+          s.orders.send({ t: 'explore', units: ids(scouts) });
         },
       };
     }
-    set.stop = { icon: '✋', label: 'Detener', avail: OK, tip: '<b>Detener</b>', action: () => Commands.stop(g, units) };
+    set.stop = { icon: '✋', label: 'Detener', avail: OK, tip: '<b>Detener</b>', action: () => { s.orders.send({ t: 'stop', units: ids(units) }); } };
     return set;
   }
 
@@ -186,12 +186,11 @@ export function selectionCommands(s: Session): CommandSet {
       tip: tipHtml(def.name, cost, def.description, a, statsLine(g, def)) + '<br><small>Mayús+clic: 5 unidades</small>',
       action: shift => {
         for (let i = 0; i < (shift ? 5 : 1); i++) {
-          if (!Commands.train(g, target(), id)) {
-            const av = unitAvail(g, p, id);
-            if (av.ok) g.reject(p.id, 'queue', 'Cola llena');
-            else g.rejectAvail(p.id, av);
-            break;
-          }
+          // Se comprueba aquí para responder al momento (en red, la orden se ejecuta después)
+          const b = target(), av = unitAvail(g, p, p.resolveUnit(id));
+          if (!av.ok) { g.rejectAvail(p.id, av); break; }
+          if (b.queue.length >= 15) { g.reject(p.id, 'queue', 'Cola llena'); break; }
+          if (s.orders.send({ t: 'train', at: b.id, unit: id }) === false) break;
         }
       },
     });
@@ -204,10 +203,9 @@ export function selectionCommands(s: Session): CommandSet {
       icon: def.icon, label: def.name, avail: a, cost,
       tip: tipHtml(def.name, cost, def.description, a, `⏱ ${def.researchTime}s`),
       action: () => {
-        if (!Commands.research(g, target(), id)) {
-          const av = techAvail(g, p, id);
-          g.rejectAvail(p.id, av);
-        }
+        const av = techAvail(g, p, id);
+        if (!av.ok) { g.rejectAvail(p.id, av); return; }
+        s.orders.send({ t: 'research', at: target().id, tech: id });
       },
     });
   }

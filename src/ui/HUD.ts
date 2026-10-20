@@ -1,5 +1,4 @@
 import type { Session } from '../app/Session';
-import { Commands } from '../game/commands';
 import { esc, OK, pic, selectionCommands, statsLine, taskText, type Cmd } from './commandModel';
 import { sightRadius } from '../game/vision';
 import { longPressMs } from './layout';
@@ -301,7 +300,7 @@ export class HUD {
     const c = t.closest('[data-cancel]') as HTMLElement | null;
     if (c) {
       const b = ui.selected(g)[0];
-      if (b && b.owner === g.humanId) Commands.cancel(g, b, Number(c.dataset.cancel));
+      if (b && b.owner === g.humanId) this.s.orders.send({ t: 'cancel', at: b.id, index: Number(c.dataset.cancel) });
       this.acc = 1;
     }
   }

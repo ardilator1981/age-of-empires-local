@@ -1,4 +1,5 @@
-import { Commands } from '../game/commands';
+import { smartKind } from '../game/commands';
+import { ids } from '../game/net/netCommands';
 import type { Entity } from '../game/Entity';
 import { buildingAvail } from '../game/rules';
 import type { Session } from '../app/Session';
@@ -161,16 +162,15 @@ export class Input {
     if (!ui.placing) return;
     const { defId, tx, ty } = ui.placing;
     const builders = this.ownSelected().filter(u => u.kind === 'unit' && game.unitDef(u).builder);
-    const b = Commands.placeBuilding(game, game.humanId, defId, tx, ty, builders);
-    if (b) {
-      this.marker(b.x, b.y, '#7dff7d');
-      haptic(12);
-      if (!keep || !buildingAvail(game, game.human, defId).ok) { ui.placing = null; ui.page = 'main'; }
-    } else {
-      const a = buildingAvail(game, game.human, defId);
-      if (a.ok) game.reject(game.humanId, 'placement', 'No se puede construir ahí');
-      else game.rejectAvail(game.humanId, a);
-    }
+    // Se comprueba aquí para responder al momento (en red, la orden se ejecuta unos ticks después)
+    const a = buildingAvail(game, game.human, defId);
+    if (!a.ok) { game.rejectAvail(game.humanId, a); return; }
+    if (!game.canPlace(defId, tx, ty, game.humanId)) { game.reject(game.humanId, 'placement', 'No se puede construir ahí'); return; }
+    if (this.s.orders.send({ t: 'place', building: defId, tx, ty, builders: ids(builders) }) === false) return;
+    const size = game.reg.building(defId).size;
+    this.marker(tx + size / 2, ty + size / 2, '#7dff7d');
+    haptic(12);
+    if (!keep || !buildingAvail(game, game.human, defId).ok) { ui.placing = null; ui.page = 'main'; }
   }
 
   private attackMoveAt(sx: number, sy: number, keep: boolean, touch: boolean) {
@@ -178,8 +178,8 @@ export class Input {
     const w = this.s.renderer.cam.screenToWorld(sx, sy);
     const units = this.ownSelected().filter(u => u.kind === 'unit');
     const target = this.pick(sx, sy, touch);
-    if (target && target.kind !== 'resource' && units.some(u => game.canAttack(u, target, false))) Commands.smart(game, game.humanId, units, w.x, w.y, target);
-    else Commands.attackMove(game, units, w.x, w.y);
+    if (target && target.kind !== 'resource' && units.some(u => game.canAttack(u, target, false))) this.s.orders.send({ t: 'smart', units: ids(units), x: w.x, y: w.y, target: target.id });
+    else this.s.orders.send({ t: 'attackMove', units: ids(units), x: w.x, y: w.y });
     this.marker(w.x, w.y, '#ff6b6b');
     if (!keep) ui.targeting = null;
   }
@@ -257,14 +257,15 @@ export class Input {
     const sel = this.ownSelected();
     const units = sel.filter(u => u.kind === 'unit');
     if (units.length) {
-      const res = Commands.smart(game, game.humanId, units, x, y, target);
+      const res = smartKind(game, game.humanId, units, target);
+      this.s.orders.send({ t: 'smart', units: ids(units), x, y, target: target?.id });
       const color = res === 'attack' ? '#ff6b6b' : res === 'gather' || res === 'build' ? '#ffd866' : '#7dff7d';
       this.marker(target ? target.x : x, target ? target.y : y, color);
       return;
     }
     const blds = sel.filter(b => b.kind === 'building' && b.complete);
     if (blds.length) {
-      for (const b of blds) Commands.setRally(game, b, target ? target.x : x, target ? target.y : y, target);
+      this.s.orders.send({ t: 'rally', at: ids(blds), x: target ? target.x : x, y: target ? target.y : y, target: target?.id });
       this.marker(x, y, '#ffffff');
     }
   }
@@ -504,7 +505,8 @@ export class Input {
       return;
     }
     if (e.key === 'Delete' || e.key === 'Backspace') {
-      for (const s of this.ownSelected()) Commands.delete(game, s);
+      const own = this.ownSelected();
+      if (own.length) this.s.orders.send({ t: 'delete', ids: ids(own) });
       ui.setSelection([]);
       return;
     }

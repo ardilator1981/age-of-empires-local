@@ -4,7 +4,8 @@ import type { Pt } from '../core/types';
 import { FORMATIONS, type FormationType } from '../game/army/formations';
 import { groups, type GroupMode } from '../game/army/groups';
 import { STANCES, stanceOf, type Stance } from '../game/army/stances';
-import { Commands, formationFor } from '../game/commands';
+import { formationFor } from '../game/commands';
+import { ids } from '../game/net/netCommands';
 import type { Entity } from '../game/Entity';
 import { setUIPrefs, uiPrefs, type StrategyTime } from './layout';
 
@@ -217,10 +218,10 @@ export class StrategyScreen {
     } else if (d.a === 'save-mode') this.saveMode = !this.saveMode;
     else if (d.form) {
       if (!troops.length) return;
-      Commands.setFormation(g, troops, d.form as FormationType);
+      this.s.orders.send({ t: 'formation', units: ids(troops), formation: d.form as FormationType });
     } else if (d.stance) {
       if (!troops.length) return;
-      Commands.setStance(g, troops, d.stance as Stance);
+      this.s.orders.send({ t: 'stance', units: ids(troops), stance: d.stance as Stance });
     } else if (d.tool) {
       this.tool = this.tool === d.tool ? null : d.tool as Tool;
       this.points = []; this.escortId = 0;
@@ -229,7 +230,7 @@ export class StrategyScreen {
         const gen = g.units.find(u => !u.dead && u.owner === g.humanId && g.unitDef(u).aura && !troops.includes(u));
         if (gen) this.escortId = gen.id;
       }
-    } else if (d.a === 'stop') { Commands.stop(g, troops); g.notify('✋ Alto', g.humanId); }
+    } else if (d.a === 'stop') { this.s.orders.send({ t: 'stop', units: ids(troops) }); g.notify('✋ Alto', g.humanId); }
     else if (d.a === 'undo') this.points.pop();
     else if (d.a === 'tool-cancel') { this.tool = null; this.points = []; }
     else if (d.a === 'confirm') { this.confirm(troops); return; }
@@ -244,7 +245,7 @@ export class StrategyScreen {
       const p = this.points[0];
       if (!p) { g.notify('Toca un punto en el mapa', g.humanId, 'warn'); return; }
       const blds = g.buildings.filter(b => !b.dead && b.complete && b.owner === g.humanId && g.buildingDef(b).category === 'military');
-      for (const b of blds) Commands.setRally(g, b, p.x, p.y);
+      if (blds.length) this.s.orders.send({ t: 'rally', at: ids(blds), x: p.x, y: p.y });
       g.notify(`🚩 Punto de reunión para ${blds.length} edificios militares`, g.humanId);
       this.tool = null; this.points = [];
       this.render();
@@ -262,8 +263,8 @@ export class StrategyScreen {
     }
     if (tool === 'escort' && !g.get(this.escortId)) { g.notify('Toca la unidad que quieres proteger', g.humanId, 'warn'); return; }
     if (tool !== 'escort' && !points.length) { g.notify('Toca un punto en el mapa', g.humanId, 'warn'); return; }
-    const grp = Commands.army(g, troops, { kind: tool, points, targetId: this.escortId || undefined });
-    if (!grp) { g.notify('No se pudo dar la orden', g.humanId, 'warn'); return; }
+    const ok = this.s.orders.send({ t: 'army', units: ids(troops), order: { kind: tool, points, targetId: this.escortId || undefined } });
+    if (ok === false) { g.notify('No se pudo dar la orden', g.humanId, 'warn'); return; }
     // Orden dada: se cierra y sigue el juego
     this.close();
   }

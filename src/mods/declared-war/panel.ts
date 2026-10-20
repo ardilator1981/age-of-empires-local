@@ -1,10 +1,9 @@
 import type { Session } from '../../app/Session';
 import type { HudPanelDef, Pt } from '../../core/types';
-import { moveInFormation } from '../../game/formation';
 import { unitAvail } from '../../game/rules';
 import { stagingPoint } from './ai';
 import {
-  activeWar, armyInCircle, battlePointInfo, conditions, declarableTargets, declareWar, enemyOf, fmt, GENERAL, isMilitary, isTownCenter,
+  activeWar, armyInCircle, battlePointInfo, conditions, declarableTargets, enemyOf, fmt, GENERAL, isMilitary, isTownCenter,
   townLeft, warState,
 } from './war';
 import { BALANCE } from '../../config/balance';
@@ -64,9 +63,9 @@ export const warPanel: HudPanelDef = {
       else if (a === 'confirm') {
         const p = pick();
         if (p?.pending && p.target !== null) {
-          const r = declareWar(g, g.humanId, p.target, p.pending.x, p.pending.y);
-          if (typeof r === 'string') g.notify(r, g.humanId, 'warn');
-          else ui.pickPoint = null;
+          // Es una orden de jugador: en red se ejecuta en todos a la vez (y avisa si no se puede)
+          const ok = session.orders.send({ t: 'mod', id: 'declare-war', args: { target: p.target, x: p.pending.x, y: p.pending.y } });
+          if (ok !== false) ui.pickPoint = null;
         }
       } else if (a === 'view' && w) session.renderer.cam.centerOn(w.x, w.y);
       else if (a === 'foe' && w) {
@@ -77,7 +76,7 @@ export const warPanel: HudPanelDef = {
         const units = myArmy();
         if (!units.length) { g.notify('No tienes tropas', g.humanId, 'warn'); return; }
         const s = stagingPoint(g, w, g.humanId);
-        moveInFormation(g, units, s.at, s.facing);
+        session.orders.send({ t: 'army', units: units.map((u: any) => u.id), order: { kind: 'move', points: [s.at], facing: s.facing } });
         g.notify(`🚩 ${units.length} unidades en marcha hacia el punto de batalla`, g.humanId, 'info');
       }
       sig = '';
