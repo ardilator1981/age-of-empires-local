@@ -8,6 +8,7 @@ import { MapGenerator } from './MapGenerator';
 import { deriveCliffs, ensurePlayable } from './relief';
 import { Player } from './Player';
 import type { Projectile } from './combat';
+import { decodeState, restoreSystems, restoreWorld, type SaveData } from './save';
 
 export interface PlayerSetup {
   name: string;
@@ -58,6 +59,8 @@ export class Game {
   list: Entity[] = [];
   readonly events = new EventBus();
   systems: System[] = [];
+  /** Id de registro de cada sistema (para guardar su estado). */
+  systemIds: string[] = [];
   projectiles: Projectile[] = [];
   decals: Decal[] = [];
   time = 0;
@@ -65,14 +68,25 @@ export class Game {
   humanId = 1;
   over = false;
   rng: () => number;
+  /** Estado del generador aleatorio (mulberry32), para poder guardarlo. */
+  rngState: number;
   /** Almacén libre para sistemas y mods. */
   data: Record<string, any> = {};
   private nextId = 1;
   private anyDead = false;
   private kindCache: { units: Entity[]; buildings: Entity[]; nodes: Entity[]; actors: Entity[] } | null = null;
 
-  constructor(public reg: Registry, public opts: GameOptions) {
-    this.rng = mulberry32(opts.seed);
+  /** Con `restore`, reconstruye una partida guardada en vez de generar el mapa (ver save.ts). */
+  constructor(public reg: Registry, public opts: GameOptions, restore?: SaveData) {
+    this.rngState = opts.seed >>> 0;
+    // Mismo generador que mulberry32, con el estado a la vista
+    this.rng = () => {
+      this.rngState = (this.rngState + 0x6d2b79f5) >>> 0;
+      let t = this.rngState;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
     this.map = new GameMap(opts.mapSize, opts.mapSize, reg);
     this.players.push(new Player(0, 'Naturaleza', '#aaaaaa', GAIA_CIV, false, 'normal', this.map.w, this.map.h));
     const firstCiv = [...reg.civs.values()][0];
@@ -92,20 +106,26 @@ export class Game {
     });
     this.humanId = this.players.find(p => p.isHuman)?.id ?? 1;
 
-    const mt = reg.mapTypes.get(opts.mapType) ?? [...reg.mapTypes.values()][0];
-    const gen = new MapGenerator(this);
-    mt.generate(gen);
-    // Reglas de relieve comunes: acantilados infranqueables y pasos garantizados entre bases
-    deriveCliffs(gen);
-    const starts = this.players.slice(1).map(p => {
-      const tc = this.buildings.find(b => b.owner === p.id && !b.dead) ?? this.units.find(u => u.owner === p.id && !u.dead);
-      return tc ? { x: tc.x, y: tc.y } : null;
-    }).filter((s): s is Pt => !!s);
-    this.data.relief = ensurePlayable(gen, starts);
-
-    if (opts.visibility !== 'normal') for (const p of this.players) p.explored.fill(1);
+    const saved = restore ? decodeState(restore) : null;
+    if (saved) restoreWorld(this, saved);
+    else {
+      const mt = reg.mapTypes.get(opts.mapType) ?? [...reg.mapTypes.values()][0];
+      const gen = new MapGenerator(this);
+      mt.generate(gen);
+      // Reglas de relieve comunes: acantilados infranqueables y pasos garantizados entre bases
+      deriveCliffs(gen);
+      const starts = this.players.slice(1).map(p => {
+        const tc = this.buildings.find(b => b.owner === p.id && !b.dead) ?? this.units.find(u => u.owner === p.id && !u.dead);
+        return tc ? { x: tc.x, y: tc.y } : null;
+      }).filter((s): s is Pt => !!s);
+      this.data.relief = ensurePlayable(gen, starts);
+      if (opts.visibility !== 'normal') for (const p of this.players) p.explored.fill(1);
+    }
     this.systems = reg.systems.map(s => s.factory(this));
-    for (const fn of reg.gameStartHooks) fn(this);
+    this.systemIds = reg.systems.map(s => s.id);
+    // Al crear los sistemas (la IA) se usa el generador: su estado se repone después
+    if (saved) { restoreSystems(this, saved); this.rngState = saved.rng; }
+    else for (const fn of reg.gameStartHooks) fn(this);
   }
 
   get human(): Player { return this.players[this.humanId]; }
@@ -189,6 +209,16 @@ export class Game {
   }
 
   // ------------------------------------------------------------ creación
+
+  /** Siguiente id de entidad (se guarda con la partida). */
+  get nextEntityId() { return this.nextId; }
+  set nextEntityId(v: number) { this.nextId = v; }
+
+  /** Añade una entidad ya creada (al cargar una partida): ocupa sus casillas si es edificio o recurso. */
+  adoptEntity(e: Entity) {
+    if (e.kind !== 'unit') this.occupy(e, true);
+    this.add(e);
+  }
 
   private add(e: Entity) {
     this.entities.set(e.id, e);

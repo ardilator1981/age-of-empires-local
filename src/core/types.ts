@@ -254,7 +254,13 @@ export interface OrderHandler {
   update(game: Game, unit: Entity, order: Order, dt: number): void;
 }
 
-export interface System { update(dt: number): void }
+export interface System {
+  update(dt: number): void;
+  /** Estado interno que hay que guardar con la partida (datos simples). */
+  save?(): unknown;
+  /** Restaura lo devuelto por `save` al cargar una partida. */
+  load?(state: any): void;
+}
 export type SystemFactory = (game: Game) => System;
 
 export interface SpriteContext {

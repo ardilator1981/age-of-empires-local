@@ -50,6 +50,21 @@ export class AIController {
     this.think();
   }
 
+  get playerId() { return this.p.id; }
+
+  /** Lo que hay que guardar con la partida (el resto se recalcula en cada turno). */
+  saveState() {
+    return {
+      pid: this.p.id, nextThink: this.nextThink, waveSize: this.waveSize, rebalanceAt: this.rebalanceAt,
+      home: this.home, pluginReserve: this.pluginReserve, postAt: this.postAt, post: this.post,
+    };
+  }
+
+  loadState(s: any) {
+    this.nextThink = s.nextThink; this.waveSize = s.waveSize; this.rebalanceAt = s.rebalanceAt;
+    this.home = s.home; this.pluginReserve = s.pluginReserve ?? {}; this.postAt = s.postAt; this.post = s.post;
+  }
+
   private isTC(e: Entity) { return e.kind === 'building' && this.game.buildingDef(e).classes.includes('townCenter'); }
 
   private think() {
@@ -476,4 +491,8 @@ export class AISystem implements System {
     this.ais = game.players.slice(1).filter(p => !p.isHuman).map(p => new AIController(game, p));
   }
   update() { for (const ai of this.ais) ai.update(); }
+  save() { return this.ais.map(ai => ai.saveState()); }
+  load(states: any[]) {
+    for (const s of states ?? []) this.ais.find(ai => ai.playerId === s.pid)?.loadState(s);
+  }
 }

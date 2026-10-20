@@ -782,3 +782,20 @@ table.stats td { padding: 4px; text-shadow: 1px 1px 0 #000; }
   .st-side { overflow: visible; }
 }
 .ui-movil #btn-army, .ui-movil #btn-strategy { display: none; }
+
+/* ---------------------------------------------------------------- partidas guardadas */
+.continue-box { display: flex; flex-direction: column; align-items: center; gap: 6px; margin: 6px 0 10px; }
+.continue-box:empty { display: none; }
+.start.continue { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.start.continue small { font-size: 13px; opacity: 0.85; font-weight: normal; }
+.menu.saves .slots { display: flex; flex-direction: column; gap: 6px; margin: 8px 0; max-height: 60vh; overflow-y: auto; }
+.menu.saves .slot { display: flex; align-items: center; gap: 8px; padding: 6px 8px; background: rgba(0, 0, 0, 0.3); border: 1px solid var(--gold-dark); border-radius: 3px; }
+.menu.saves .slot > div { flex: 1; display: flex; flex-direction: column; text-align: left; min-width: 0; }
+.menu.saves .slot small { color: var(--parchment); font-size: 12px; }
+.menu.saves .slot.empty { opacity: 0.7; }
+.menu.saves .slot button { min-height: 44px; white-space: nowrap; }
+.menu.saves .slot button.armed { background: linear-gradient(#a0402a, #6a2418); }
+.menu-toast {
+  position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 50; padding: 8px 16px;
+  background: rgba(20, 16, 12, 0.92); border: 1px solid var(--gold-dark); border-radius: 3px; color: var(--text); text-shadow: 1px 1px 0 #000;
+}

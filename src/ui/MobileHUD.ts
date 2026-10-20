@@ -546,6 +546,14 @@ export class MobileHUD {
       case 'screen-close': this.closeScreen(true); break;
       case 'hint-ok': setUIPrefs({ hintSeen: true }); this.closeScreen(true); break;
       case 'resume': this.closeScreen(true); break;
+      case 'saves': {
+        // El juego sigue en pausa mientras se elige la ranura; al volver, se reanuda
+        this.closeScreen(false);
+        const app = this.s.app;
+        app.setPaused(true, false);
+        void app.menu.showSaves('save', () => { app.menu.hide(); app.setPaused(false); });
+        break;
+      }
       case 'restart': if (this.confirmed('restart')) this.s.app.restart(); else this.renderScreen(); break;
       case 'to-menu': if (this.confirmed('to-menu')) this.s.app.toMenu(); else this.renderScreen(); break;
       case 'show-hint': this.closeScreen(false); this.showHint(); break;
@@ -646,6 +654,7 @@ export class MobileHUD {
         <button class="m-wide" data-a="resume">▶ Continuar</button>
         <button class="m-wide${armed('restart') ? ' armed' : ''}" data-a="restart">${armed('restart') ? '¿Seguro? Toca otra vez' : '↻ Reiniciar partida'}</button>
         <button class="m-wide${armed('to-menu') ? ' armed' : ''}" data-a="to-menu">${armed('to-menu') ? '¿Seguro? Toca otra vez' : '☰ Menú principal'}</button>
+        <button class="m-wide" data-a="saves">💾 Guardar o cargar partida</button>
         <button class="m-wide" data-a="show-hint">✋ Ayuda de gestos</button></div>`;
     } else if (sc === 'stats') {
       const rows = g.players.slice(1).map(q => `<tr style="color:${q.color}"><td>${esc(q.name)}</td><td>${esc(g.reg.ageName(q.age))}</td>

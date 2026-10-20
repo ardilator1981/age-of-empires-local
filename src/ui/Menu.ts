@@ -6,6 +6,7 @@ import { ALL_MODS } from '../mods';
 import type { App } from '../app/App';
 import { setUIPrefs, uiPrefs, type LayoutPref } from './layout';
 import { RegionPicker } from './RegionPicker';
+import { ago, AUTO_SLOT, deleteSlot, gameClock, listSlots, MANUAL_SLOTS } from '../app/saves';
 import { bindSoundControls, soundControlsHtml } from './soundSettings';
 
 type Diff = 'easy' | 'normal' | 'hard';
@@ -151,6 +152,7 @@ export class Menu {
       <div class="menu">
         <h1>Age of Empires II</h1>
         <div class="sub">Edición local · motor modular</div>
+        <div class="continue-box"></div>
         <div class="cols">
           <section>
             <h2>Jugadores</h2>
@@ -233,6 +235,7 @@ export class Menu {
       this.showMain();
     });
     root.querySelector('[data-start]')!.addEventListener('click', () => void this.app.start(this.buildOptions()));
+    void this.fillContinue(root);
     root.querySelector('[data-regions]')?.addEventListener('click', () => this.showRegions());
     root.querySelector('[data-credits]')?.addEventListener('click', () => this.showCredits());
     this.bindVolume();
@@ -265,12 +268,90 @@ export class Menu {
 
   // ------------------------------------------------------------ pausa y fin de partida
 
+  /** Botón "Continuar" con la última partida (guardado automático) y acceso a las guardadas. */
+  private async fillContinue(root: HTMLElement) {
+    await this.app.ready;
+    const slots = await listSlots();
+    const box = root.querySelector('.continue-box');
+    if (!box || !slots.length) return;
+    const auto = slots.find(s => s.id === AUTO_SLOT);
+    box.innerHTML = `${auto ? `<button class="start continue" data-cont>▶ Continuar la partida<small>${esc(auto.meta.mapName)} · ${gameClock(auto.meta.time)} de juego · ${esc(auto.meta.civ)} · ${ago(auto.savedAt)}</small></button>` : ''}
+      <button class="small" data-saves>📂 Partidas guardadas (${slots.length})</button>`;
+    box.querySelector('[data-cont]')?.addEventListener('click', () => void this.loadSlot(AUTO_SLOT));
+    box.querySelector('[data-saves]')!.addEventListener('click', () => this.showSaves('load', () => this.showMain()));
+  }
+
+  private async loadSlot(id: string) {
+    const err = await this.app.load(id);
+    if (err) this.toast(err);
+  }
+
+  private toast(text: string) {
+    const d = document.createElement('div');
+    d.className = 'menu-toast';
+    d.textContent = text;
+    this.overlay.appendChild(d);
+    setTimeout(() => d.remove(), 3500);
+  }
+
+  private armedSlot = '';
+
+  /**
+   * Partidas guardadas. `save`: las 5 ranuras manuales para guardar la partida en curso;
+   * `load`: todas las ocupadas (también el guardado automático) para cargarlas o borrarlas.
+   */
+  async showSaves(mode: 'save' | 'load', back: () => void) {
+    await this.app.ready;
+    const slots = await listSlots();
+    const by = new Map(slots.map(s => [s.id, s]));
+    const ids = mode === 'save' ? MANUAL_SLOTS : slots.map(s => s.id);
+    const row = (id: string) => {
+      const s = by.get(id);
+      const title = id === AUTO_SLOT ? '⟳ Guardado automático' : `Ranura ${id}`;
+      const info = s ? `${esc(s.meta.mapName)} · ${gameClock(s.meta.time)} · ${esc(s.meta.civ)}, ${esc(s.meta.age)} · ${ago(s.savedAt)} · ${(s.size / 1024).toFixed(0)} KB` : 'Vacía';
+      const armed = (a: string) => this.armedSlot === `${a}:${id}`;
+      const main = mode === 'save'
+        ? `<button data-save="${id}" class="${armed('save') ? 'armed' : ''}">${armed('save') ? '¿Sobrescribir? Toca otra vez' : '💾 Guardar aquí'}</button>`
+        : `<button data-load="${id}">▶ Cargar</button>`;
+      return `<div class="slot${s ? '' : ' empty'}"><div><b>${title}</b><small>${info}</small></div>
+        ${main}${s ? `<button class="small${armed('del') ? ' armed' : ''}" data-del="${id}">${armed('del') ? '¿Borrar?' : '🗑'}</button>` : ''}</div>`;
+    };
+    this.show(`
+      <div class="menu small saves">
+        <h1>${mode === 'save' ? '💾 Guardar partida' : '📂 Partidas guardadas'}</h1>
+        <div class="slots">${ids.length ? ids.map(row).join('') : '<p class="note">No hay partidas guardadas.</p>'}</div>
+        <p class="note">La partida también se guarda sola cada poco y al salir del juego.</p>
+        <div class="buttons"><button data-back>↩ Volver</button></div>
+      </div>`);
+    const root = this.overlay;
+    root.querySelector('[data-back]')!.addEventListener('click', () => { this.armedSlot = ''; back(); });
+    root.querySelectorAll<HTMLElement>('[data-save]').forEach(b => b.addEventListener('click', async () => {
+      const id = b.dataset.save!;
+      if (by.has(id) && this.armedSlot !== `save:${id}`) { this.armedSlot = `save:${id}`; void this.showSaves(mode, back); return; }
+      this.armedSlot = '';
+      const g = this.app.session?.game;
+      const name = g ? `${g.reg.mapTypes.get(g.opts.mapType)?.name ?? g.opts.mapType}` : 'Partida';
+      const err = await this.app.saveTo(id, name);
+      if (err) this.toast(err); else { void this.showSaves(mode, back); this.toast(`Partida guardada en la ranura ${id}`); }
+    }));
+    root.querySelectorAll<HTMLElement>('[data-load]').forEach(b => b.addEventListener('click', () => void this.loadSlot(b.dataset.load!)));
+    root.querySelectorAll<HTMLElement>('[data-del]').forEach(b => b.addEventListener('click', async () => {
+      const id = b.dataset.del!;
+      if (this.armedSlot !== `del:${id}`) { this.armedSlot = `del:${id}`; void this.showSaves(mode, back); return; }
+      this.armedSlot = '';
+      await deleteSlot(id).catch(() => {});
+      void this.showSaves(mode, back);
+    }));
+  }
+
   showPause() {
     this.show(`
       <div class="menu small">
         <h1>Pausa</h1>
         <div class="buttons">
           <button data-a="resume">▶ Continuar</button>
+          <button data-a="save">💾 Guardar partida</button>
+          <button data-a="load">📂 Cargar partida</button>
           <button data-a="restart">↻ Reiniciar partida</button>
           <button data-a="menu">☰ Menú principal</button>
         </div>
@@ -377,6 +458,8 @@ export class Menu {
         else if (a === 'restart') this.app.restart();
         else if (a === 'menu') this.app.toMenu();
         else if (a === 'observe') { this.hide(); this.app.menuOpen = false; }
+        else if (a === 'save') void this.showSaves('save', () => this.showPause());
+        else if (a === 'load') void this.showSaves('load', () => this.showPause());
       });
     });
   }

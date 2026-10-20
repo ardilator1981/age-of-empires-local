@@ -56,6 +56,8 @@ export const treasureHuntMod: GameMod = {
     reg.addSystem('treasure-hunt', game => {
       let next = 90;
       return {
+        save: () => ({ next }),
+        load: (s: any) => { next = s?.next ?? next; },
         update() {
           if (game.time < next) return;
           next = game.time + 90;

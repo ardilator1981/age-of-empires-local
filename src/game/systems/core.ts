@@ -305,6 +305,8 @@ export class AuraSystem implements System {
   constructor(private game: Game) {
     this.any = [...game.reg.units.values()].some(d => d.aura);
   }
+  save() { return { next: this.next }; }
+  load(s: any) { this.next = s?.next ?? 0; }
   update() {
     const g = this.game;
     if (!this.any || g.time < this.next) return;

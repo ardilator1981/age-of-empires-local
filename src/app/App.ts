@@ -2,9 +2,14 @@ import { TICK_DT } from '../core/constants';
 import { buildRegistry } from '../core/Registry';
 import { AudioManager } from '../audio/AudioManager';
 import { Game, type GameOptions } from '../game/Game';
+import { snapshot, upgradeSave, type SaveData } from '../game/save';
+import { AUTO_SLOT, clearEmergency, deleteSlot, readSlot, warmUp, writeEmergency, writeSlot } from './saves';
 import { ALL_MODS } from '../mods';
 import { Menu } from '../ui/Menu';
 import { Session } from './Session';
+
+/** Cada cuánto se guarda la partida sola mientras se juega (además de al salir). */
+const AUTOSAVE_EVERY_MS = 45_000;
 
 /** Ciclo de vida de la aplicación: menú → partida → menú. */
 export class App {
@@ -27,15 +32,19 @@ export class App {
     this.menu.showMain();
     requestAnimationFrame(this.loop);
     (window as any).app = this;
+    // Guardado automático al pasar a segundo plano o cerrar (en el móvil, al cambiar de app)
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') this.autosave(true); });
+    window.addEventListener('pagehide', () => this.autosave(true));
   }
 
-  async start(opts: GameOptions) {
+  /** Empieza una partida nueva o, con `restore`, continúa una guardada. */
+  async start(opts: GameOptions, restore?: SaveData) {
     const reg = buildRegistry(ALL_MODS.filter(m => m.core || opts.mods.includes(m.id)));
     // Los mapas reales cargan sus datos (incluidos en el juego: no hace falta red) antes de empezar
-    await reg.mapTypes.get(opts.mapType)?.load?.();
+    if (!restore) await reg.mapTypes.get(opts.mapType)?.load?.();
     this.session?.dispose();
     this.session = null;
-    const game = new Game(reg, opts);
+    const game = new Game(reg, opts, restore);
     this.hud.style.display = '';
     const session = this.session = new Session(this, game);
     // El sonido del combate depende de lo que se esté mirando
@@ -43,7 +52,13 @@ export class App {
       const cam = session.renderer.cam, c = cam.center, corner = cam.screenToWorld(0, 0);
       return { x: c.x, y: c.y, r: Math.max(4, Math.hypot(corner.x - c.x, corner.y - c.y)) };
     });
-    game.events.on('gameOver', ({ won }) => setTimeout(() => { if (this.session?.game === game) this.menu.showGameOver(won); }, 1500));
+    game.events.on('gameOver', ({ won }) => {
+      // Una partida terminada ya no se puede continuar
+      void deleteSlot(AUTO_SLOT).catch(() => {});
+      clearEmergency();
+      setTimeout(() => { if (this.session?.game === game) this.menu.showGameOver(won); }, 1500);
+    });
+    this.lastAutosave = performance.now();
     this.lastOptions = opts;
     this.paused = false;
     this.audio.setPaused(false);
@@ -52,6 +67,66 @@ export class App {
     this.menu.hide();
     // Acceso desde la consola del navegador para depurar o probar mods
     (window as any).game = game;
+  }
+
+  // ------------------------------------------------------------ partidas guardadas
+
+  private lastAutosave = 0;
+  /** Almacenamiento listo (incluida la recuperación del guardado de urgencia). */
+  ready: Promise<void> = warmUp();
+  private saving = false;
+
+  /** Guarda la partida en curso en una ranura. Devuelve un mensaje de error o null. */
+  async saveTo(slot: string, name: string): Promise<string | null> {
+    const g = this.session?.game;
+    if (!g) return 'No hay ninguna partida en curso';
+    if (g.over && slot === AUTO_SLOT) return null;
+    if (this.saving) return null;
+    this.saving = true;
+    try {
+      await writeSlot(slot, name, snapshot(g));
+      return null;
+    } catch (err) {
+      console.error(err);
+      return `No se pudo guardar: ${(err as Error).message ?? err}`;
+    } finally {
+      this.saving = false;
+    }
+  }
+
+  /**
+   * Guardado automático. Periódico: comprimido y sin prisa. Al salir (`leaving`): inmediato y sin
+   * comprimir, para que dé tiempo antes de que el navegador cierre la página.
+   */
+  autosave(leaving = false) {
+    if (!this.session || this.session.game.over) return;
+    this.lastAutosave = performance.now();
+    if (leaving) {
+      const save = snapshot(this.session.game);
+      if (writeEmergency(save)) return;
+      void writeSlot(AUTO_SLOT, 'Guardado automático', save).catch(() => {});
+      return;
+    }
+    void this.saveTo(AUTO_SLOT, 'Guardado automático').then(err => { if (!err) clearEmergency(); });
+  }
+
+  /** Carga una partida guardada. Devuelve un mensaje de error o null. */
+  async load(slot: string): Promise<string | null> {
+    let save: SaveData | null;
+    try { save = await readSlot(slot); } catch (err) { return `No se pudo leer la partida: ${(err as Error).message}`; }
+    if (!save) return 'La ranura está vacía';
+    const up = upgradeSave(save);
+    if (typeof up === 'string') return up;
+    const missing = up.opts.mods.filter(id => !ALL_MODS.some(m => m.id === id));
+    if (missing.length) console.warn('[partida] Mods que ya no existen:', missing);
+    up.opts.mods = up.opts.mods.filter(id => ALL_MODS.some(m => m.id === id));
+    try {
+      await this.start(up.opts, up);
+    } catch (err) {
+      console.error(err);
+      return 'La partida no se pudo reconstruir';
+    }
+    return null;
   }
 
   restart() {
@@ -94,6 +169,7 @@ export class App {
     this.last = now;
     const s = this.session;
     if (!s) return;
+    if (now - this.lastAutosave > AUTOSAVE_EVERY_MS && !this.paused && !this.menuOpen) this.autosave();
     if (!this.paused && !this.menuOpen) {
       this.acc += dt * s.game.opts.speed * this.timeScale;
       let steps = 0;
