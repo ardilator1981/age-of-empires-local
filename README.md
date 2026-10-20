@@ -250,6 +250,10 @@ Para sustituir los dibujos por imágenes pieza a pieza (generadas con IA o dibuj
 
 ## Arte con imágenes
 
+Los prompts para generar todo el arte con Nano Banana (terreno, árboles, recursos, animales, edificios por
+edad, unidades y sus animaciones, efectos, decoración e interfaz) están en
+[docs/prompts-nano-banana.md](docs/prompts-nano-banana.md).
+
 El motor puede usar imágenes en lugar de los gráficos procedurales, **pieza a pieza**: lo que tenga imagen se
 dibuja con ella y todo lo demás sigue dibujándose por código. Si falta un archivo, o tiene un error, el juego
 avisa en la consola (`[arte] ...`) y usa el dibujo procedural, así que nunca se rompe nada.
