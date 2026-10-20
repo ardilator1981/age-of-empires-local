@@ -1,3 +1,4 @@
+import type { OrderKind } from '../core/EventBus';
 import type { Pt } from '../core/types';
 import { setOrder } from './actions';
 import type { Entity } from './Entity';
@@ -24,6 +25,11 @@ function ownUnits(units: Entity[], pid: number) {
   return units.filter(u => u.kind === 'unit' && !u.dead && u.owner === pid);
 }
 
+/** Avisa de una orden aceptada (la interfaz la confirma con un sonido). */
+function issued(game: Game, playerId: number, kind: OrderKind, at: Pt) {
+  game.events.emit('orderIssued', { playerId, kind, at: { x: at.x, y: at.y } });
+}
+
 export const Commands = {
   move(game: Game, units: Entity[], x: number, y: number) {
     const spots = formation(units.length, x, y);
@@ -44,6 +50,7 @@ export const Commands = {
   attackMove(game: Game, units: Entity[], x: number, y: number) {
     const spots = formation(units.length, x, y);
     units.forEach((u, i) => setOrder(u, { type: 'attackMove', x: spots[i].x, y: spots[i].y, scanAt: 0 }));
+    if (units.length) issued(game, units[0].owner, 'attack', { x, y });
   },
 
   gather(game: Game, units: Entity[], target: Entity) {
@@ -69,44 +76,10 @@ export const Commands = {
   },
 
   /** Clic derecho: decide qué hacer según el objetivo. Devuelve el tipo de acción. */
-  smart(game: Game, pid: number, units: Entity[], x: number, y: number, target: Entity | null): 'attack' | 'gather' | 'build' | 'move' | null {
-    const mine = ownUnits(units, pid);
-    if (!mine.length) return null;
-    if (target && !target.dead) {
-      if (game.isEnemy(pid, target.owner) && target.kind !== 'resource' && mine.some(u => game.canAttack(u, target, false))) {
-        const fighters = mine.filter(u => (game.unitDef(u).attack ?? 0) > 0);
-        Commands.attack(game, fighters, target);
-        const rest = mine.filter(u => !fighters.includes(u));
-        if (rest.length) Commands.move(game, rest, x, y);
-        return 'attack';
-      }
-      const gatherable = target.kind === 'resource' || (target.kind === 'building' && !!target.resType && target.owner === pid && target.complete);
-      if (gatherable) {
-        const g = mine.filter(u => game.unitDef(u).gatherer);
-        Commands.gather(game, g, target);
-        const rest = mine.filter(u => !g.includes(u));
-        if (rest.length) Commands.move(game, rest, target.x, target.y);
-        return 'gather';
-      }
-      if (target.kind === 'building' && target.owner === pid) {
-        const builders = mine.filter(u => game.unitDef(u).builder);
-        const rest = mine.filter(u => !builders.includes(u));
-        if (!target.complete || target.hp < target.maxHp) {
-          Commands.build(game, builders, target);
-        } else {
-          const def = game.buildingDef(target);
-          for (const u of builders) {
-            if (u.carry && u.carry.amount > 0 && def.dropSite?.includes(u.carry.type)) {
-              setOrder(u, { type: 'gather', phase: 'return', targetId: 0, lastX: u.data.lastNodeX ?? u.x, lastY: u.data.lastNodeY ?? u.y, nodeKind: u.data.lastNodeKind });
-            } else rest.push(u);
-          }
-        }
-        if (rest.length) Commands.move(game, rest, x, y);
-        return 'build';
-      }
-    }
-    Commands.move(game, mine, x, y);
-    return 'move';
+  smart(game: Game, pid: number, units: Entity[], x: number, y: number, target: Entity | null): OrderKind | null {
+    const kind = smartOrder(game, pid, units, x, y, target);
+    if (kind) issued(game, pid, kind, target && !target.dead ? target : { x, y });
+    return kind;
   },
 
   placeBuilding(game: Game, pid: number, defId: string, tx: number, ty: number, builders: Entity[]): Entity | null {
@@ -116,6 +89,7 @@ export const Commands = {
     p.pay(p.getCost(def));
     const b = game.placeBuilding(defId, pid, tx, ty, false);
     Commands.build(game, ownUnits(builders, pid), b);
+    issued(game, pid, 'build', b);
     return b;
   },
 
@@ -151,6 +125,7 @@ export const Commands = {
 
   setRally(game: Game, building: Entity, x: number, y: number, target?: Entity | null) {
     building.rally = { x, y, targetId: target?.id };
+    issued(game, building.owner, 'move', { x, y });
   },
 
   delete(game: Game, e: Entity) {
@@ -163,3 +138,44 @@ export const Commands = {
     game.kill(e);
   },
 };
+
+/** Orden contextual: decide qué hacer según el objetivo y la da. */
+function smartOrder(game: Game, pid: number, units: Entity[], x: number, y: number, target: Entity | null): OrderKind | null {
+  const mine = ownUnits(units, pid);
+  if (!mine.length) return null;
+  if (target && !target.dead) {
+    if (game.isEnemy(pid, target.owner) && target.kind !== 'resource' && mine.some(u => game.canAttack(u, target, false))) {
+      const fighters = mine.filter(u => (game.unitDef(u).attack ?? 0) > 0);
+      Commands.attack(game, fighters, target);
+      const rest = mine.filter(u => !fighters.includes(u));
+      if (rest.length) Commands.move(game, rest, x, y);
+      return 'attack';
+    }
+    const gatherable = target.kind === 'resource' || (target.kind === 'building' && !!target.resType && target.owner === pid && target.complete);
+    if (gatherable) {
+      const g = mine.filter(u => game.unitDef(u).gatherer);
+      Commands.gather(game, g, target);
+      const rest = mine.filter(u => !g.includes(u));
+      if (rest.length) Commands.move(game, rest, target.x, target.y);
+      return 'gather';
+    }
+    if (target.kind === 'building' && target.owner === pid) {
+      const builders = mine.filter(u => game.unitDef(u).builder);
+      const rest = mine.filter(u => !builders.includes(u));
+      if (!target.complete || target.hp < target.maxHp) {
+        Commands.build(game, builders, target);
+      } else {
+        const def = game.buildingDef(target);
+        for (const u of builders) {
+          if (u.carry && u.carry.amount > 0 && def.dropSite?.includes(u.carry.type)) {
+            setOrder(u, { type: 'gather', phase: 'return', targetId: 0, lastX: u.data.lastNodeX ?? u.x, lastY: u.data.lastNodeY ?? u.y, nodeKind: u.data.lastNodeKind });
+          } else rest.push(u);
+        }
+      }
+      if (rest.length) Commands.move(game, rest, x, y);
+      return 'build';
+    }
+  }
+  Commands.move(game, mine, x, y);
+  return 'move';
+}

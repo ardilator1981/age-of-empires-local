@@ -34,8 +34,10 @@ export const warPanel: HudPanelDef = {
     const el = document.createElement('div');
     el.className = 'war-panel';
     let sig = '';
-    // En un móvil en vertical el panel empieza plegado (se despliega tocando la cabecera)
-    let folded = window.innerWidth < 600 && window.innerHeight > window.innerWidth;
+    // En la interfaz móvil (o un móvil en vertical) empieza plegado, para dejar ver el mapa:
+    // la cabecera sigue mostrando el estado y la cuenta atrás, y se despliega al tocarla
+    let folded = document.documentElement.classList.contains('ui-movil') || (window.innerWidth < 600 && window.innerHeight > window.innerWidth);
+    let lastCls = '';
 
     const pick = (): WarPick | null => (ui.pickPoint?.owner === 'declared-war' ? ui.pickPoint : null);
     const startPick = (target: number | null) => {
@@ -161,6 +163,9 @@ export const warPanel: HudPanelDef = {
 
     function update() {
       const b = body();
+      // Al cambiar de fase (te declaran la guerra, empieza la batalla...) se despliega solo
+      if (lastCls && b.cls !== lastCls) folded = false;
+      lastCls = b.cls;
       const s = `${b.cls}|${b.head}|${b.html}|${folded}`;
       if (s !== sig) {
         sig = s;

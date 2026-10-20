@@ -91,7 +91,11 @@ export function dealDamage(game: Game, t: Entity, info: DamageInfo) {
 
   const tp = game.players[t.owner];
   if (tp.isHuman && game.isEnemy(info.owner, t.owner)) {
-    game.warn(tp, 'attacked', t.kind === 'building' ? '¡Están atacando un edificio!' : '¡Te están atacando!', 20, { x: t.x, y: t.y });
+    const kind = t.kind === 'building' ? 'building' : 'unit';
+    const text = kind === 'building' ? '¡Están atacando un edificio!' : '¡Te están atacando!';
+    if (game.warn(tp, 'attacked:' + kind, text, BALANCE.alerts.attackEvery, { x: t.x, y: t.y })) {
+      game.events.emit('underAttack', { playerId: tp.id, target: t, attacker, kind });
+    }
   }
   // Contraataque de unidades militares desocupadas
   if (attacker && t.kind === 'unit' && !t.order) {

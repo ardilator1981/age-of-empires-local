@@ -2,6 +2,7 @@ import { Commands } from '../game/commands';
 import type { Entity } from '../game/Entity';
 import { buildingAvail } from '../game/rules';
 import type { Session } from '../app/Session';
+import { haptic, isMobileLayout } from './layout';
 
 const HOTKEYS = 'QWERTASDFGZXCVB';
 /** Pulsación larga (ms) = orden contextual / tooltip. */
@@ -12,8 +13,11 @@ const TOUCH_SLOP = 12;
 const TOUCH_MOUSE_GUARD = 800;
 
 interface TouchPt { x: number; y: number; x0: number; y0: number }
-/** tap: un dedo aún sin moverse · box: recuadro de selección · place: colocando un edificio · pan: dos dedos · done: ya se dio la orden */
-type Gesture = 'none' | 'tap' | 'box' | 'place' | 'pan' | 'done';
+/**
+ * tap: un dedo aún sin moverse · box: recuadro de selección · drag: mover la cámara con un dedo (modo cámara)
+ * place: colocando un edificio · pan: dos dedos · done: ya se dio la orden
+ */
+type Gesture = 'none' | 'tap' | 'box' | 'drag' | 'place' | 'pan' | 'done';
 
 /** Ratón, teclado y pantalla táctil durante la partida. */
 export class Input {
@@ -34,6 +38,13 @@ export class Input {
   private orderBtnState = '';
   /** Botón "Ordenar": mientras está activo, tocar el mapa da una orden en vez de seleccionar. */
   orderMode = false;
+  /** Interfaz móvil, modo cámara: arrastrar con un dedo mueve la cámara en vez de dibujar un recuadro. */
+  cameraMode = false;
+  /** Interfaz móvil: posición en pantalla del fantasma al empezar a arrastrarlo. */
+  private ghostDrag: { x: number; y: number } | null = null;
+  private miniPress = 0;
+  private miniAt = { x: 0, y: 0 };
+  private dragPrev: { x: number; y: number } | null = null;
 
   constructor(private s: Session) {
     const canvas = s.renderer.canvas;
@@ -59,6 +70,7 @@ export class Input {
     this.listen(canvas, 'touchcancel', e => this.onTouchEnd(e as TouchEvent, true), touchOpts);
     this.listen(mm, 'touchstart', e => this.onMinimapTouch(e as TouchEvent, true), touchOpts);
     this.listen(mm, 'touchmove', e => this.onMinimapTouch(e as TouchEvent, false), touchOpts);
+    this.listen(mm, 'touchend', () => clearTimeout(this.miniPress));
     this.listen(window, 'touchstart', () => this.noteTouch(), { capture: true, passive: true });
     // iOS ignora user-scalable=no: evita el zoom de página con dos dedos
     this.listen(document, 'gesturestart', e => e.preventDefault(), touchOpts);
@@ -75,7 +87,7 @@ export class Input {
     this.off.push(() => t.removeEventListener(type, fn, opts));
   }
 
-  dispose() { this.off.forEach(f => f()); clearTimeout(this.pressTimer); }
+  dispose() { this.off.forEach(f => f()); clearTimeout(this.pressTimer); clearTimeout(this.miniPress); }
 
   private get game() { return this.s.game; }
   private get ui() { return this.s.ui; }
@@ -103,6 +115,45 @@ export class Input {
     ui.placing.valid = game.canPlace(def.id, ui.placing.tx, ui.placing.ty, game.humanId);
   }
 
+  /** Centro en pantalla del fantasma del edificio que se está colocando. */
+  private ghostScreen(): { x: number; y: number } {
+    const { ui, game } = this;
+    const cam = this.s.renderer.cam;
+    if (!ui.placing) return { x: cam.viewW / 2, y: cam.viewH / 2 };
+    const def = game.reg.building(ui.placing.defId);
+    return cam.worldToScreen(ui.placing.tx + def.size / 2, ui.placing.ty + def.size / 2);
+  }
+
+  /** Lleva el fantasma al hueco válido más cercano (si donde está no se puede construir). */
+  private nudgeGhost() {
+    const { ui, game } = this;
+    const pl = ui.placing;
+    if (!pl || pl.valid) return;
+    for (let r = 1; r <= 10; r++) {
+      for (let dy = -r; dy <= r; dy++) {
+        for (let dx = -r; dx <= r; dx++) {
+          if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue;
+          if (game.canPlace(pl.defId, pl.tx + dx, pl.ty + dy, game.humanId)) {
+            pl.tx += dx; pl.ty += dy; pl.valid = true;
+            return;
+          }
+        }
+      }
+    }
+  }
+
+  /** Interfaz móvil: botón «Confirmar» al colocar un edificio. */
+  confirmPlacement() {
+    if (!this.active || !this.ui.placing) return;
+    this.placeBuilding(false);
+  }
+
+  /** Cancela la colocación de un edificio o el modo de apuntar (ataque-movimiento). */
+  cancelTargeting() {
+    this.ui.placing = null;
+    this.ui.targeting = null;
+  }
+
   /** Coloca el edificio del fantasma. `keep` = seguir colocando otro igual (Mayús). */
   private placeBuilding(keep: boolean) {
     const { ui, game } = this;
@@ -112,10 +163,12 @@ export class Input {
     const b = Commands.placeBuilding(game, game.humanId, defId, tx, ty, builders);
     if (b) {
       this.marker(b.x, b.y, '#7dff7d');
+      haptic(12);
       if (!keep || !buildingAvail(game, game.human, defId).ok) { ui.placing = null; ui.page = 'main'; }
     } else {
       const a = buildingAvail(game, game.human, defId);
-      game.notify(a.ok ? 'No se puede construir ahí' : a.reason ?? 'No disponible', game.humanId, 'warn');
+      if (a.ok) game.reject(game.humanId, 'placement', 'No se puede construir ahí');
+      else game.rejectAvail(game.humanId, a);
     }
   }
 
@@ -124,7 +177,7 @@ export class Input {
     const w = this.s.renderer.cam.screenToWorld(sx, sy);
     const units = this.ownSelected().filter(u => u.kind === 'unit');
     const target = this.pick(sx, sy, touch);
-    if (target && target.kind !== 'resource' && units.some(u => game.canAttack(u, target, false))) Commands.attack(game, units, target);
+    if (target && target.kind !== 'resource' && units.some(u => game.canAttack(u, target, false))) Commands.smart(game, game.humanId, units, w.x, w.y, target);
     else Commands.attackMove(game, units, w.x, w.y);
     this.marker(w.x, w.y, '#ff6b6b');
     if (!keep) ui.targeting = null;
@@ -287,7 +340,13 @@ export class Input {
     }
     if (this.gesture !== 'none') return;
     const p = this.firstTouch()!;
-    if (this.ui.placing) { this.gesture = 'place'; this.setGhost(p.x, p.y); return; }
+    if (this.ui.placing) {
+      this.gesture = 'place';
+      // Interfaz móvil: el fantasma se arrastra desde donde está (el dedo no lo tapa) y se confirma con un botón
+      if (isMobileLayout()) this.ghostDrag = this.ghostScreen();
+      else this.setGhost(p.x, p.y);
+      return;
+    }
     this.gesture = 'tap';
     clearTimeout(this.pressTimer);
     this.pressTimer = window.setTimeout(() => this.onLongPress(), LONG_PRESS_MS);
@@ -313,10 +372,22 @@ export class Input {
     }
     const p = this.firstTouch();
     if (!p) return;
-    if (this.gesture === 'place') { this.setGhost(p.x, p.y); return; }
+    if (this.gesture === 'place') {
+      if (this.ghostDrag) this.setGhost(this.ghostDrag.x + p.x - p.x0, this.ghostDrag.y + p.y - p.y0);
+      else this.setGhost(p.x, p.y);
+      return;
+    }
     if (this.gesture === 'tap' && Math.hypot(p.x - p.x0, p.y - p.y0) > TOUCH_SLOP) {
       clearTimeout(this.pressTimer);
-      this.gesture = 'box';
+      this.gesture = this.cameraMode && isMobileLayout() ? 'drag' : 'box';
+      if (this.gesture === 'drag') { this.dragPrev = { x: p.x0, y: p.y0 }; }
+    }
+    if (this.gesture === 'drag' && this.dragPrev) {
+      const cam = this.s.renderer.cam;
+      cam.x -= (p.x - this.dragPrev.x) / cam.zoom;
+      cam.y -= (p.y - this.dragPrev.y) / cam.zoom;
+      cam.clamp(this.game.map.w, this.game.map.h);
+      this.dragPrev = { x: p.x, y: p.y };
     }
     if (this.gesture === 'box') ui.dragBox = { x0: p.x0, y0: p.y0, x1: p.x, y1: p.y };
   }
@@ -325,6 +396,7 @@ export class Input {
     e.preventDefault();
     const gesture = this.gesture;
     const end = e.changedTouches[0];
+    const start = end ? this.touches.get(end.identifier) : undefined;
     for (const t of e.changedTouches) this.touches.delete(t.identifier);
     if (gesture === 'pan' && this.touches.size >= 2) { this.pinch = this.pinchState(); return; }
     // Al levantar uno de los dos dedos, el que queda no hace nada hasta soltarlo
@@ -332,12 +404,19 @@ export class Input {
     clearTimeout(this.pressTimer);
     this.gesture = 'none';
     this.pinch = null;
+    this.dragPrev = null;
+    const drag = this.ghostDrag;
+    this.ghostDrag = null;
     const { ui } = this;
     const box = ui.dragBox;
     ui.dragBox = null;
     if (cancelled || !this.active || !end) return;
     const x = end.clientX, y = end.clientY;
-    if (gesture === 'place') { this.setGhost(x, y); this.placeBuilding(false); }
+    if (gesture === 'place') {
+      if (!drag) { this.setGhost(x, y); this.placeBuilding(false); }
+      // Interfaz móvil: un toque sin arrastrar lleva el fantasma a ese punto (se coloca con «Confirmar»)
+      else if (start && Math.hypot(x - start.x0, y - start.y0) <= TOUCH_SLOP) this.setGhost(x, y);
+    }
     else if (gesture === 'box' && box) this.boxSelect(box, false);
     else if (gesture === 'tap') {
       if (ui.pickPoint) ui.pickPoint.onPick(this.s.renderer.cam.screenToWorld(x, y));
@@ -352,7 +431,7 @@ export class Input {
     const p = this.firstTouch();
     if (!p) return;
     this.gesture = 'done';
-    navigator.vibrate?.(15);
+    haptic(15);
     this.orderAt(p.x, p.y, true);
   }
 
@@ -366,6 +445,16 @@ export class Input {
     const w = mm.fromMini(t.clientX - rect.left, t.clientY - rect.top);
     if (this.orderMode) { if (start) this.command(w.x, w.y, null); return; }
     this.s.renderer.cam.centerOn(w.x, w.y);
+    // Interfaz móvil, pulsación larga en el minimapa: orden a ese punto (mover, punto de reunión...)
+    if (start && isMobileLayout()) {
+      clearTimeout(this.miniPress);
+      this.miniAt = { x: t.clientX, y: t.clientY };
+      this.miniPress = window.setTimeout(() => {
+        if (!this.active || !this.ownSelected().length) return;
+        haptic(15);
+        this.command(w.x, w.y, null);
+      }, LONG_PRESS_MS);
+    } else if (Math.hypot(t.clientX - this.miniAt.x, t.clientY - this.miniAt.y) > TOUCH_SLOP) clearTimeout(this.miniPress);
   }
 
   private toggleOrderMode() {
@@ -422,23 +511,14 @@ export class Input {
       const k = Number(e.key);
       if (e.ctrlKey || e.metaKey) {
         e.preventDefault();
-        ui.groups[k] = this.ownSelected().map(s => s.id);
-        game.notify(`Grupo ${k} asignado`, game.humanId);
-      } else {
-        const ids = ui.groups[k].filter(id => game.get(id));
-        if (ids.length) {
-          ui.setSelection(ids);
-          const now = performance.now();
-          if (this.lastGroupKey.k === k && now - this.lastGroupKey.t < 400) this.centerOnSelection();
-          this.lastGroupKey = { t: now, k };
-        }
-      }
+        this.assignGroup(k);
+      } else this.selectGroup(k);
       return;
     }
     if ((e.key === 'm' || e.key === 'M') && !e.ctrlKey && !e.metaKey) {
-      const muted = app.music.toggleMute();
-      this.s.hud.updateMusicButton();
-      game.notify(muted ? 'Música desactivada' : 'Música activada', game.humanId);
+      const muted = app.audio.toggleMute();
+      this.s.hud.updateSoundButton();
+      game.notify(muted ? 'Sonido desactivado' : 'Sonido activado', game.humanId);
       return;
     }
     if (e.key === ' ') { e.preventDefault(); this.centerOnSelection(); return; }
@@ -459,7 +539,37 @@ export class Input {
     }
   }
 
-  private nextIdleVillager() {
+  /** Guarda la selección propia como grupo `k`. */
+  assignGroup(k: number) {
+    const { ui, game } = this;
+    ui.groups[k] = this.ownSelected().map(s => s.id);
+    game.notify(`Grupo ${k} asignado`, game.humanId);
+    haptic(12);
+  }
+
+  /** Selecciona el grupo `k`; dos veces seguidas, además, centra la cámara en él. */
+  selectGroup(k: number) {
+    const { ui, game } = this;
+    const ids = ui.groups[k].filter(id => game.get(id));
+    if (!ids.length) return false;
+    ui.setSelection(ids);
+    const now = performance.now();
+    if (this.lastGroupKey.k === k && now - this.lastGroupKey.t < (isMobileLayout() ? 450 : 400)) this.centerOnSelection();
+    this.lastGroupKey = { t: now, k };
+    return true;
+  }
+
+  /** Selecciona todo el ejército propio (unidades con ataque que no son aldeanos); dos veces seguidas, centra. */
+  selectArmy() {
+    const { ui, game } = this;
+    const army = game.units.filter(x => !x.dead && x.owner === game.humanId && !game.unitDef(x).gatherer && (game.unitDef(x).attack ?? 0) > 0);
+    if (!army.length) { game.notify('No tienes ejército', game.humanId); return; }
+    const same = army.length === ui.selection.length && army.every(u => ui.selection.includes(u.id));
+    ui.setSelection(army.map(u => u.id));
+    if (same) this.centerOnSelection();
+  }
+
+  nextIdleVillager() {
     const { ui, game } = this;
     const idle = game.units.filter(x => !x.dead && x.owner === game.humanId && !x.order && game.unitDef(x).gatherer);
     if (!idle.length) { game.notify('No hay aldeanos inactivos', game.humanId); return; }
@@ -468,7 +578,7 @@ export class Input {
     this.s.renderer.cam.centerOn(u.x, u.y);
   }
 
-  private centerOnSelection() {
+  centerOnSelection() {
     const sel = this.ui.selected(this.game);
     if (!sel.length) return;
     const x = sel.reduce((a, s) => a + s.x, 0) / sel.length, y = sel.reduce((a, s) => a + s.y, 0) / sel.length;
@@ -483,9 +593,10 @@ export class Input {
     // En táctil, el fantasma de un edificio recién elegido aparece en el centro de la vista
     if (ui.placing !== this.lastPlacing) {
       this.lastPlacing = ui.placing;
-      if (ui.placing && document.documentElement.classList.contains('touch') && this.gesture !== 'place') {
+      if (ui.placing && (document.documentElement.classList.contains('touch') || isMobileLayout()) && this.gesture !== 'place') {
         const cam = this.s.renderer.cam;
         this.setGhost(cam.viewW / 2, cam.viewH * 0.4);
+        if (isMobileLayout()) this.nudgeGhost();
       }
     }
     const cam = this.s.renderer.cam;

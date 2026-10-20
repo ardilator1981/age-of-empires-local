@@ -10,7 +10,7 @@ import type { Game } from '../game/Game';
  */
 
 export type MoodId = 'menu' | 'peace' | 'battle';
-type StingerId = 'ageUp' | 'victory' | 'defeat';
+type StingerId = 'victory' | 'defeat';
 type Voice = 'flute' | 'vielle' | 'shawm' | 'trumpet';
 type Character = 'menu' | 'battle' | 'drift' | 'song';
 
@@ -113,7 +113,6 @@ interface Piece {
 }
 
 const LOOKAHEAD = 0.3;
-const STORAGE_KEY = 'aoe-local-audio-v1';
 const LEAD_OCTAVE: Record<Voice, number> = { flute: 12, vielle: 0, shawm: 0, trumpet: 12 };
 
 const mtof = (m: number) => 440 * Math.pow(2, (m - 69) / 12);
@@ -130,9 +129,11 @@ function nearest(from: number, ok: (d: number) => boolean): number {
   return from;
 }
 
+/**
+ * El `AudioContext`, el desbloqueo en móvil, el volumen y el silencio los gestiona `AudioManager`, que
+ * conecta la música a su bus con `connect`.
+ */
 export class Music {
-  volume = 0.6;
-  muted = false;
   private ctx: BaseAudioContext | null = null;
   private mix!: GainNode;
   private filter!: BiquadFilterNode;
@@ -158,23 +159,14 @@ export class Music {
   /** Tiempo simulado para renderizar sin tiempo real (OfflineAudioContext). */
   private simTime: number | null = null;
 
-  constructor() {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const s = JSON.parse(raw);
-        if (typeof s.volume === 'number') this.volume = Math.max(0, Math.min(1, s.volume));
-        this.muted = !!s.muted;
-      }
-    } catch { /* sin almacenamiento */ }
-    // Los navegadores solo dejan sonar audio tras un gesto del usuario
-    const unlock = () => this.unlock();
-    window.addEventListener('pointerdown', unlock);
-    window.addEventListener('keydown', unlock);
-    document.addEventListener('visibilitychange', () => this.syncRunning());
-  }
-
   // ------------------------------------------------------------ API pública
+
+  /** Empieza a sonar en el contexto ya desbloqueado, hacia `out` (el bus de música). */
+  connect(ctx: AudioContext, out: AudioNode) {
+    if (this.ctx) return;
+    this.init(ctx, out);
+    window.setInterval(() => this.pump(), 40);
+  }
 
   /** Conecta la música a una partida: escucha combates, cambios de edad y el final. */
   attach(game: Game) {
@@ -189,7 +181,8 @@ export class Music {
         if (a <= 0 || d <= 0 || a === d || (a !== h && d !== h)) return;
         this.heat = Math.min(1.5, this.heat + (d === h ? 0.05 : 0.035));
       }),
-      game.events.on('ageReached', ({ player }) => { if (player.id === h) this.stinger('ageUp'); }),
+      // La fanfarria de la nueva edad es un efecto de sonido: la música le deja sitio
+      game.events.on('ageReached', ({ player }) => { if (player.id === h) this.rest(4.5); }),
       game.events.on('gameOver', ({ won }) => { this.over = true; this.stinger(won ? 'victory' : 'defeat'); }),
     ];
     this.transition();
@@ -204,40 +197,20 @@ export class Music {
     this.transition();
   }
 
+  /** En pausa la música suena amortiguada y más baja. */
   setPaused(paused: boolean) {
     this.paused = paused;
     if (!this.ctx) return;
     const t = this.now();
     this.filter.frequency.setTargetAtTime(paused ? 900 : 18000, t, 0.15);
-    this.applyLevel();
-  }
-
-  setVolume(v: number) {
-    this.volume = Math.max(0, Math.min(1, v));
-    if (this.volume > 0) this.muted = false;
-    this.save();
-    this.applyLevel();
-    this.syncRunning();
-  }
-
-  /** Activa o silencia la música; devuelve si queda silenciada. */
-  toggleMute(): boolean {
-    this.muted = !this.muted;
-    this.save();
-    this.applyLevel();
-    if (this.muted) setTimeout(() => this.syncRunning(), 300);
-    else this.syncRunning();
-    return this.muted;
+    this.out.gain.setTargetAtTime(paused ? 0.7 : 1, t, 0.08);
   }
 
   /** Renderiza unos segundos de un ambiente a un AudioBuffer (para escucharlo o depurar). */
   async render(mood: MoodId, seconds: number, age = 1): Promise<AudioBuffer> {
     const off = new OfflineAudioContext(2, Math.ceil(44100 * seconds), 44100);
     const m = new Music();
-    m.volume = 1;
-    m.muted = false;
-    m.init(off);
-    m.out.gain.value = 1;
+    m.init(off, off.destination);
     m.game = { human: { age } } as unknown as Game;
     if (mood === 'battle') m.heat = 1.5;
     m.lastMood = mood === 'battle' ? 'battle' : 'peace';
@@ -252,15 +225,7 @@ export class Music {
 
   // ------------------------------------------------------------ motor
 
-  private unlock() {
-    if (!this.ctx) {
-      try { this.init(new AudioContext({ latencyHint: 'playback' })); } catch { return; }
-      window.setInterval(() => this.pump(), 40);
-    }
-    this.syncRunning();
-  }
-
-  private init(ctx: BaseAudioContext) {
+  private init(ctx: BaseAudioContext, dest: AudioNode) {
     this.ctx = ctx;
     this.mix = ctx.createGain();
     this.filter = ctx.createBiquadFilter();
@@ -274,7 +239,7 @@ export class Music {
     comp.attack.value = 0.01;
     comp.release.value = 0.25;
     this.out = ctx.createGain();
-    this.out.gain.value = this.level();
+    this.out.gain.value = this.paused ? 0.7 : 1;
     const verb = ctx.createConvolver();
     verb.buffer = this.impulse(4);
     const wet = ctx.createGain();
@@ -285,7 +250,7 @@ export class Music {
     wet.connect(this.filter);
     this.filter.connect(comp);
     comp.connect(this.out);
-    this.out.connect(ctx.destination);
+    this.out.connect(dest);
 
     this.noise = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
     const nd = this.noise.getChannelData(0);
@@ -296,31 +261,18 @@ export class Music {
 
   private now() { return this.simTime ?? this.ctx!.currentTime; }
 
-  private level() { return this.muted ? 0 : this.volume * this.volume * 0.9 * (this.paused ? 0.7 : 1); }
-
-  private applyLevel() {
-    if (this.ctx) this.out.gain.setTargetAtTime(this.level(), this.now(), 0.08);
-  }
-
-  private save() {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ volume: this.volume, muted: this.muted })); } catch { /* ignorar */ }
-  }
-
-  private syncRunning() {
-    const ctx = this.ctx;
-    if (!(ctx instanceof AudioContext)) return;
-    const want = !this.muted && this.volume > 0 && !document.hidden;
-    if (want && ctx.state === 'suspended') ctx.resume().catch(() => {});
-    else if (!want && ctx.state === 'running') ctx.suspend().catch(() => {});
-  }
-
   /** Corta la pieza actual con un fundido y deja paso a la que toque. */
   private transition() {
+    this.rest(1.2);
+  }
+
+  /** Silencio de `seconds` (con fundido de la pieza que sonaba) antes de la siguiente pieza. */
+  private rest(seconds: number) {
     if (!this.ctx) return;
     const now = this.now();
     if (this.piece) this.endPiece(this.piece, now, 1.2);
     this.piece = null;
-    this.gapUntil = now + 1.2;
+    this.gapUntil = now + seconds;
   }
 
   private wantMood(): MoodId {
@@ -567,10 +519,8 @@ export class Music {
       dur = 9.5 * beat + 3;
     } else {
       // Fanfarria de trompetas con timbal y arpa
-      const beat = kind === 'ageUp' ? 0.28 : 0.3;
-      const line: [number, number, number][] = kind === 'ageUp'
-        ? [[0, 0, 1], [4, 1, 1], [7, 2, 1], [7, 3, 0.5], [9, 3.5, 0.5], [11, 4, 5]]
-        : [[0, 0, 1], [0, 1, 0.5], [0, 1.5, 0.5], [4, 2, 1], [2, 3, 1], [4, 4, 1], [7, 5, 6]];
+      const beat = 0.3;
+      const line: [number, number, number][] = [[0, 0, 1], [0, 1, 0.5], [0, 1.5, 0.5], [4, 2, 1], [2, 3, 1], [4, 4, 1], [7, 5, 6]];
       for (const [d, at, len] of line) {
         this.voice(ch.lead, t0 + at * beat, 'trumpet', this.midi(key, d), len * beat, 0.9);
         if (len >= 1) this.voice(ch.lead, t0 + at * beat, 'trumpet', this.midi(key, d - 2), len * beat, 0.5);

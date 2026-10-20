@@ -71,6 +71,14 @@ export const BALANCE = {
     pathsPerTick: 30,
   },
 
+  /** Avisos al jugador: segundos mínimos entre dos iguales. */
+  alerts: {
+    /** «Te están atacando» (por separado para unidades y edificios). */
+    attackEvery: 10,
+    /** Recurso de una zona agotado. */
+    depletedEvery: 4,
+  },
+
   combat: {
     projectileSpeed: 9,
     /** La reparación tarda este múltiplo del tiempo de construcción. */

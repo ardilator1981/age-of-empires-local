@@ -1,31 +1,12 @@
-import type { AnyDef, TechDef } from '../core/types';
-import { Commands } from '../game/commands';
-import type { Entity } from '../game/Entity';
-import {
-  buildablesFor, buildingAvail, costText, exploreAvail, researchablesAt, techAvail, trainablesAt, unitAvail, type Avail,
-} from '../game/rules';
 import type { Session } from '../app/Session';
-import { portrait } from '../render/icons';
+import { Commands } from '../game/commands';
+import { esc, OK, pic, selectionCommands, statsLine, taskText, type Cmd } from './commandModel';
 import { sightRadius } from '../game/vision';
 import { LONG_PRESS_MS } from './Input';
+import { isMobileLayout } from './layout';
 import { ICONS } from './svgIcons';
 
 const HOTKEYS = 'QWERTASDFGZXCVB';
-
-interface Cmd {
-  icon: string;
-  label: string;
-  avail: Avail;
-  tip: string;
-  badge?: string;
-  action: (shift: boolean) => void;
-}
-
-function esc(s: string) {
-  return s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
-}
-
-const OK: Avail = { visible: true, ok: true };
 
 /** Interfaz HTML superpuesta: barra superior, comandos, selección y avisos. */
 export class HUD {
@@ -37,6 +18,8 @@ export class HUD {
   private lastTouch = -1e9;
   private tip0: { x: number; y: number; timer: number; shown: boolean } | null = null;
   private tipHide = 0;
+  /** Tooltips de otros elementos (interfaz móvil): texto HTML para un elemento con `data-mt`. */
+  tipProvider: ((el: HTMLElement) => string) | null = null;
   /** Paneles de los mods (p. ej. Guerra declarada). */
   private panels: { el: HTMLElement; update(): void; dispose?(): void }[] = [];
   private panelBox: HTMLElement | null = null;
@@ -65,8 +48,8 @@ export class HUD {
     this.on(hud, 'mousemove', e => this.onHover(e as MouseEvent));
     this.on(hud, 'mouseleave', () => { this.el.tooltip.style.display = 'none'; });
     this.on(document.getElementById('btn-menu')!, 'click', () => s.app.togglePause());
-    this.on(document.getElementById('btn-music')!, 'click', () => { s.app.music.toggleMute(); this.updateMusicButton(); });
-    this.updateMusicButton();
+    this.on(document.getElementById('btn-music')!, 'click', () => { s.app.audio.toggleMute(); this.updateSoundButton(); });
+    this.updateSoundButton();
     // Tooltips con pulsación larga en pantallas táctiles
     this.on(hud, 'touchstart', e => this.onTouchTipStart(e as TouchEvent));
     this.on(hud, 'touchmove', e => this.onTouchTipMove(e as TouchEvent));
@@ -93,10 +76,8 @@ export class HUD {
     }
   }
 
-  /** Retrato (imagen) de una unidad, edificio o recurso, con el color del jugador. */
   private pic(kind: 'unit' | 'building' | 'resource', defId: string, owner: number): string {
-    const g = this.s.game, p = g.players[owner];
-    return `<img class="pic" alt="" decoding="sync" src="${portrait(g.reg, kind, defId, p?.color ?? '#aaa', p?.age ?? 0)}">`;
+    return pic(this.s.game, kind, defId, owner);
   }
 
   private on(t: EventTarget, type: string, fn: (e: Event) => void) {
@@ -104,11 +85,11 @@ export class HUD {
     this.off.push(() => t.removeEventListener(type, fn));
   }
 
-  /** Refleja en la barra superior si la música suena o está silenciada. */
-  updateMusicButton() {
-    const b = document.getElementById('btn-music')!, m = this.s.app.music;
-    const off = m.muted || m.volume === 0;
-    b.textContent = off ? '🔇' : '🎵';
+  /** Refleja en la barra superior si el sonido está activado o silenciado. */
+  updateSoundButton() {
+    const b = document.getElementById('btn-music')!;
+    const off = this.s.app.audio.silent;
+    b.textContent = off ? '🔇' : '🔊';
     b.classList.toggle('off', off);
   }
 
@@ -143,11 +124,14 @@ export class HUD {
     this.acc += dt;
     if (this.selVersion !== this.s.ui.selectionVersion) { this.selVersion = this.s.ui.selectionVersion; this.acc = 1; }
     if (this.acc < 0.2) return;
+    // Los paneles de los mods se ven en las dos interfaces
+    for (const p of this.panels) p.update();
+    // Con la interfaz móvil este panel está oculto: no se actualiza (y se fuerza a redibujarlo al volver)
+    if (isMobileLayout()) { this.acc = 0; this.cmdSig = ''; this.lastSelHtml = ''; return; }
     this.acc = 0;
     this.refreshTop();
     this.refreshCommands();
     this.refreshSelection();
-    for (const p of this.panels) p.update();
   }
 
   // ------------------------------------------------------------ barra superior
@@ -175,132 +159,25 @@ export class HUD {
 
   // ------------------------------------------------------------ comandos
 
-  private statsLine(def: AnyDef): string {
-    const g = this.s.game, p = g.human;
-    const parts = [`❤ ${Math.round(p.getStat(def, 'hp'))}`];
-    const atk = p.getStat(def, 'attack');
-    if (atk) parts.push(`⚔ ${Math.round(atk * 10) / 10}`);
-    parts.push(`🛡 ${p.getStat(def, 'armorMelee')}/${p.getStat(def, 'armorPierce')}`);
-    const rng = p.getStat(def, 'range');
-    if (rng >= 1) parts.push(`🏹 ${rng}`);
-    if (def.bonus?.length) parts.push(def.bonus.map(b => `+${b.amount} vs ${b.vs}`).join(', '));
-    void g;
-    return parts.join(' · ');
-  }
-
-  private tip(name: string, cost: string, desc: string, a: Avail, extra = '') {
-    return `<b>${esc(name)}</b>${cost ? ` <span class="cost">${cost}</span>` : ''}<br>${esc(desc)}${extra ? `<br><span class="stats">${extra}</span>` : ''}${!a.ok && a.reason ? `<br><span class="bad">${esc(a.reason)}</span>` : ''}`;
-  }
-
   private computeCommands(): (Cmd | null)[] {
-    const s = this.s, g = s.game, p = g.human, ui = s.ui;
-    const sel = ui.selected(g).filter(e => e.owner === p.id);
+    const ui = this.s.ui;
     const out: (Cmd | null)[] = new Array(15).fill(null);
-    if (!sel.length) return out;
-    const units = sel.filter(e => e.kind === 'unit');
-    const blds = sel.filter(e => e.kind === 'building');
-    const del: Cmd = {
-      icon: '❌', label: 'Eliminar', avail: OK, tip: '<b>Eliminar</b> (Supr)<br>Destruye la selección.',
-      action: () => { sel.forEach(e => Commands.delete(g, e)); ui.setSelection([]); },
-    };
-
-    if (units.length) {
-      const builders = units.filter(u => g.unitDef(u).builder);
-      if (builders.length && ui.page !== 'main') {
-        const ids = buildablesFor(g, p, ui.page).filter(id => buildingAvail(g, p, id).visible);
-        ids.slice(0, 14).forEach((id, i) => {
-          const def = g.reg.building(id);
-          const a = buildingAvail(g, p, id);
-          out[i] = {
-            icon: this.pic('building', id, p.id), label: def.name, avail: a,
-            tip: this.tip(def.name, costText(g, p.getCost(def)), def.description, a),
-            action: () => {
-              const av = buildingAvail(g, p, id);
-              if (!av.ok) { g.notify(av.reason ?? 'No disponible', p.id, 'warn'); return; }
-              ui.placing = { defId: id, tx: 0, ty: 0, valid: false };
-            },
-          };
-        });
+    const set = selectionCommands(this.s);
+    if (set.units.length) {
+      if (set.build && ui.page !== 'main') {
+        set.build[ui.page].items.slice(0, 14).forEach((c, i) => { out[i] = c; });
         out[14] = { icon: '↩️', label: 'Volver', avail: OK, tip: '<b>Volver</b> (Esc)', action: () => { ui.page = 'main'; } };
         return out;
       }
-      if (builders.length) {
-        const eco = g.reg.buildings.has('house') ? this.pic('building', 'house', p.id) : '🏠';
-        const mil = g.reg.buildings.has('barracks') ? this.pic('building', 'barracks', p.id) : '⚔️';
-        out[0] = { icon: eco, label: 'Construir eco', avail: OK, tip: '<b>Construir edificio económico</b>', action: () => { ui.page = 'economy'; } };
-        out[1] = { icon: mil, label: 'Construir mil', avail: OK, tip: '<b>Construir edificio militar</b>', action: () => { ui.page = 'military'; } };
-      }
-      if (units.some(u => (g.unitDef(u).attack ?? 0) > 0 && !g.unitDef(u).gatherer)) {
-        out[5] = {
-          icon: '🎯', label: 'Ataque-movimiento', avail: OK,
-          tip: '<b>Ataque-movimiento</b><br>Avanza hacia un punto atacando a todo enemigo que encuentre. Haz clic en el mapa.',
-          action: () => { ui.targeting = 'attackMove'; },
-        };
-      }
-      const scouts = units.filter(u => g.unitDef(u).autoExplore);
-      if (scouts.length) {
-        const a = exploreAvail(g, p, scouts[0].defId);
-        out[6] = {
-          icon: '🧭', label: 'Auto-exploración', avail: a,
-          tip: this.tip('Auto-exploración', '', 'Explora el mapa sola, zona por zona, hasta que no quede nada por descubrir. Cualquier otra orden la detiene.', a),
-          action: () => {
-            const av = exploreAvail(g, p, scouts[0].defId);
-            if (!av.ok) { g.notify(av.reason ?? 'No disponible', p.id, 'warn'); return; }
-            Commands.explore(g, scouts);
-          },
-        };
-      }
-      out[10] = { icon: '✋', label: 'Detener', avail: OK, tip: '<b>Detener</b>', action: () => Commands.stop(g, units) };
-      out[14] = del;
+      if (set.build) { out[0] = set.build.economy.cmd; out[1] = set.build.military.cmd; }
+      out[5] = set.attackMove;
+      out[6] = set.explore;
+      out[10] = set.stop;
+      out[14] = set.del;
       return out;
     }
-
-    if (blds.length) {
-      const defId = blds[0].defId;
-      if (!blds.every(b => b.defId === defId)) { out[14] = del; return out; }
-      const b = blds[0];
-      if (!b.complete) {
-        out[14] = { ...del, icon: '🚫', tip: '<b>Cancelar construcción</b><br>Recuperas los recursos no gastados.' };
-        return out;
-      }
-      const target = () => [...blds].sort((x, y) => x.queue.length - y.queue.length)[0];
-      const items: Cmd[] = [];
-      for (const id of trainablesAt(g, p, defId)) {
-        const a = unitAvail(g, p, id);
-        if (!a.visible) continue;
-        const def = g.reg.unit(id);
-        const queued = blds.reduce((n, x) => n + x.queue.filter(q => q.id === id).length, 0);
-        items.push({
-          icon: this.pic('unit', id, p.id), label: def.name, avail: a, badge: queued ? String(queued) : undefined,
-          tip: this.tip(def.name, costText(g, p.getCost(def)), def.description, a, this.statsLine(def)) + '<br><small>Mayús+clic: 5 unidades</small>',
-          action: shift => {
-            for (let i = 0; i < (shift ? 5 : 1); i++) {
-              if (!Commands.train(g, target(), id)) {
-                const av = unitAvail(g, p, id);
-                g.notify(av.ok ? 'Cola llena' : av.reason ?? 'No disponible', p.id, 'warn');
-                break;
-              }
-            }
-          },
-        });
-      }
-      for (const id of researchablesAt(g, p, defId)) {
-        const def: TechDef = g.reg.tech(id);
-        const a = techAvail(g, p, id);
-        items.push({
-          icon: def.icon, label: def.name, avail: a,
-          tip: this.tip(def.name, costText(g, p.getCost(def)), def.description, a, `⏱ ${def.researchTime}s`),
-          action: () => {
-            if (!Commands.research(g, target(), id)) {
-              const av = techAvail(g, p, id);
-              g.notify(av.reason ?? 'No disponible', p.id, 'warn');
-            }
-          },
-        });
-      }
-      items.slice(0, 14).forEach((c, i) => { out[i] = c; });
-      out[14] = del;
-    }
+    [...set.train, ...set.research].slice(0, 14).forEach((c, i) => { out[i] = c; });
+    out[14] = set.del;
     return out;
   }
 
@@ -318,7 +195,7 @@ export class HUD {
     const c = this.cmds[i];
     if (!c) return;
     if (!c.avail.ok && c.avail.reason) {
-      this.s.game.notify(c.avail.reason, this.s.game.humanId, 'warn');
+      this.s.game.rejectAvail(this.s.game.humanId, c.avail);
       return;
     }
     c.action(shift);
@@ -333,28 +210,6 @@ export class HUD {
   }
 
   // ------------------------------------------------------------ panel de selección
-
-  private taskText(e: Entity): string {
-    const g = this.s.game;
-    const o = e.order;
-    if (!o) return 'Inactivo';
-    switch (o.type) {
-      case 'gather': {
-        const t = g.get(o.targetId);
-        const r = g.reg.resources.get(t?.resType ?? o.resType ?? '');
-        return o.phase === 'return' ? 'Llevando recursos' : `Recolectando ${(r?.name ?? '').toLowerCase()}`;
-      }
-      case 'build': {
-        const t = g.get(o.targetId);
-        return t?.complete ? 'Reparando' : 'Construyendo';
-      }
-      case 'attack': return 'Atacando';
-      case 'attackMove': return 'Ataque-movimiento';
-      case 'explore': return 'Explorando';
-      case 'move': return 'Moviéndose';
-      default: return o.type;
-    }
-  }
 
   private refreshSelection() {
     const g = this.s.game, ui = this.s.ui;
@@ -384,7 +239,7 @@ export class HUD {
       icon = this.pic(e.kind === 'unit' ? 'unit' : 'building', e.defId, e.owner); name = def.name;
       const pct = Math.max(0, e.hp / e.maxHp) * 100;
       body += `<div class="hp"><i style="width:${pct}%"></i><span>${Math.ceil(e.hp)} / ${Math.round(e.maxHp)}</span></div>`;
-      body += `<div class="line stats">${this.statsLine(def)}</div>`;
+      body += `<div class="line stats">${statsLine(g, def)}</div>`;
       // Relieve: ventaja o desventaja de altura y visión extra
       const adv = e.data.heightAdv as { range: number; damage: number; until: number } | undefined;
       if (adv && adv.until >= g.time && (adv.range > 0 || adv.damage !== 0)) {
@@ -401,7 +256,7 @@ export class HUD {
           const c = e.carry && e.carry.amount > 0 ? `${g.reg.resources.get(e.carry.type)?.icon ?? ''} ${Math.floor(e.carry.amount)}/${cap}` : 'nada';
           body += `<div class="line">Carga: ${c}</div>`;
         }
-        if (e.owner === g.humanId) body += `<div class="line task">${this.taskText(e)}</div>`;
+        if (e.owner === g.humanId) body += `<div class="line task">${taskText(g, e)}</div>`;
       } else {
         const bdef = g.buildingDef(e);
         if (!e.complete) body += `<div class="line">En construcción: ${Math.floor(e.progress * 100)}%</div>`;
@@ -450,6 +305,8 @@ export class HUD {
 
   /** Texto del tooltip del elemento (botón de comando o cualquier cosa con data-tip). */
   private tipFor(t: HTMLElement): string {
+    const mt = t.closest('[data-mt]') as HTMLElement | null;
+    if (mt) return this.tipProvider?.(mt) ?? '';
     const ci = t.closest('[data-tipi]') as HTMLElement | null;
     const ti = t.closest('[data-tip]') as HTMLElement | null;
     if (ci) return this.cmds[Number(ci.dataset.tipi)]?.tip ?? '';

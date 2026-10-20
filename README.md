@@ -37,7 +37,8 @@ Abre <http://localhost:5173>.
 - **Mapas reales** con el relieve, los ríos, los bosques y los pueblos de verdad: **Val d'Aran** y **Plana de Vic**, y un script para crear el de cualquier zona (ver «Un mapa de una zona real»).
 - Relieve: colinas y montañas con iluminación, y ventaja de altura en combate (+25 % desde arriba, -25 % desde abajo).
 - Estética inspirada en el original: terreno con texturas detalladas y agua animada, edificios que cambian con la edad (madera y paja → entramado y tejas → piedra), retratos de unidades e interfaz de piedra y oro.
-- Música medieval generativa (laúd, flauta dulce, viela, zanfona, arpa y tambores) que se compone sobre la marcha: nunca se repite, suma instrumentos con cada edad, cambia a un tema de batalla en combate y tiene fanfarrias al subir de edad, ganar o perder.
+- Música medieval generativa, tranquila y casi hipnótica (laúd, flauta dulce, viela, zanfona, arpa y tambores), que se compone sobre la marcha y cambia a un tema más tenso en combate.
+- Efectos de sonido sintéticos, sin archivos: confirmación de órdenes, edificio terminado, unidad entrenada, tecnología y nueva edad, recurso agotado, alertas de ataque (cuerno para unidades, campana para edificios) y errores (sin recursos, mal sitio, población). Combate y ambiente a volumen bajo, según lo que se ve. Volumen general, de música, de efectos y de alertas, y botón de silencio (ver `CREDITS.md`).
 - Niebla de guerra, minimapa, grupos de unidades, puntos de reunión, ataque-movimiento y colas de producción.
 - Opciones de partida: rivales (hasta 5), mapa, tamaño, recursos, edad inicial, victoria, visibilidad, población y velocidad.
 
@@ -57,7 +58,7 @@ Abre <http://localhost:5173>.
 | Centrar en la selección | `Espacio` |
 | Eliminar | `Supr` |
 | Pausa | `P`, `F10` o `Esc` |
-| Activar / silenciar la música | `M` (volumen en el menú) |
+| Activar / silenciar el sonido | `M` o el botón 🔊 (volúmenes en el menú) |
 
 ## Jugar en el móvil (iPhone y Android)
 
@@ -71,16 +72,28 @@ El juego es una **PWA**: se instala desde el navegador y funciona sin conexión.
 
 Se juega en horizontal. En pantallas táctiles el mapa por defecto es *Pequeño*.
 
+En móviles y tabletas se usa la **interfaz móvil**: el mapa ocupa toda la pantalla y los controles flotan encima
+(recursos en una línea arriba, minimapa en una esquina y una bandeja abajo solo cuando hay algo seleccionado).
+Se elige sola según la pantalla y el tipo de entrada; en **☰ › Ajustes** (o en el menú de pausa en el ordenador) se
+puede forzar la de escritorio o la móvil, y cambiar el tamaño de los controles. Para probarla en el ordenador: `?ui=movil`.
+
 | Acción | Gesto |
 | --- | --- |
 | Seleccionar | Tocar |
 | Todas las unidades de un tipo en pantalla | Tocar dos veces |
-| Seleccionar varias | Arrastrar con un dedo |
-| Ordenar (mover / atacar / recolectar / construir / reunión) | Mantener pulsado, o activar 🎯 **Ordenar** y tocar |
+| Seleccionar varias | Arrastrar con un dedo (con el modo ✥ **Cámara**, arrastrar mueve el mapa) |
+| Ordenar (mover / atacar / recolectar / construir / reunión) | Mantener pulsado en el mapa o en el minimapa |
 | Mover la cámara / zoom | Dos dedos / pellizcar (o tocar el minimapa) |
-| Construir | Elegir el edificio, arrastrar el fantasma y soltar para colocarlo (✖ cancela) |
-| Ver la descripción de un botón | Mantenerlo pulsado |
-| Aldeano inactivo / plegar el panel | 💤 / ▾ |
+| Construir | Bandeja › **Construir** › pestaña › edificio; arrastrar el fantasma y **✔ Construir** (✖ cancela) |
+| Entrenar / investigar | Bandeja (las 4 primeras) o **⋯ Más** (pestañas Unidades, Tecnologías, Acciones) |
+| Eliminar / quitar de la cola | Dos toques seguidos (el primero pide confirmación) |
+| Grupos 1–5 | Tocar = seleccionar (dos veces: centrar) · Mantener pulsado = guardar la selección |
+| Aldeano inactivo / ejército / alertas | 💤 / ⚔️ / 🔔 |
+| Minimapa | ⇲ plegar · ⤢ a pantalla completa (tocar un punto para ir allí) |
+| Ver coste y descripción de un botón | Mantenerlo pulsado |
+| Pausa, estadísticas, tecnologías, diplomacia, ajustes | ☰ |
+
+Capturas y medición de la interfaz en móvil: `docs/movil/` (`npm run shots:movil -- --url http://localhost:5173/ --prefix despues`).
 
 ### Publicar en GitHub Pages
 
@@ -102,7 +115,7 @@ src/
   game/        Simulación: Game, entidades, jugadores, mapa, caminos (A*), combate,
                órdenes de unidades, comandos y reglas de disponibilidad
     systems/   Sistemas que se ejecutan cada tick (movimiento, producción, combate, IA...)
-  audio/       Música generativa con Web Audio (sin archivos de sonido)
+  audio/       AudioManager (único punto de salida del sonido), música generativa y efectos sintéticos
   render/      Cámara isométrica con relieve, terreno en WebGL (TerrainGL), texturas procedurales,
                sprites, retratos de la interfaz y minimapa
   ui/          HUD, menús y entrada de ratón y teclado

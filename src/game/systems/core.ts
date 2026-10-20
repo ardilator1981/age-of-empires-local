@@ -170,7 +170,8 @@ export class ProductionSystem implements System {
         const pop = g.reg.unit(item.id).pop;
         if (p.popUsed + pop > p.popCap) {
           if (p.isHuman) {
-            g.warn(p, 'housed', p.popCap >= g.opts.popLimit ? 'Has alcanzado el límite de población' : 'Necesitas construir más casas', 12);
+            const text = p.popCap >= g.opts.popLimit ? 'Has alcanzado el límite de población' : 'Necesitas construir más casas';
+            if (g.warn(p, 'housed', text, 12)) g.events.emit('actionRejected', { playerId: p.id, reason: 'population', text });
           }
           continue;
         }

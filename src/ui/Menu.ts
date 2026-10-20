@@ -4,7 +4,9 @@ import { buildRegistry, type Registry } from '../core/Registry';
 import type { GameOptions } from '../game/Game';
 import { ALL_MODS } from '../mods';
 import type { App } from '../app/App';
+import { setUIPrefs, uiPrefs, type LayoutPref } from './layout';
 import { RegionPicker } from './RegionPicker';
+import { bindSoundControls, soundControlsHtml } from './soundSettings';
 
 type Diff = 'easy' | 'normal' | 'hard';
 
@@ -324,7 +326,7 @@ export class Menu {
     this.show(`
       <div class="menu small credits">
         <h1>Créditos</h1>
-        <div class="sub">Age of Empires II · Edición local — proyecto personal sin ánimo de lucro inspirado en <i>Age of Empires II</i> (marca de Microsoft). No usa ningún recurso gráfico ni sonoro del juego original: los gráficos y la música se generan por código.</div>
+        <div class="sub">Age of Empires II · Edición local — proyecto personal sin ánimo de lucro inspirado en <i>Age of Empires II</i> (marca de Microsoft). No usa ningún recurso gráfico ni sonoro del juego original: los gráficos, la música y los efectos de sonido se generan por código (detalle en <code>CREDITS.md</code>).</div>
         <h2>Relieve y datos de las regiones reales</h2>
         <ul>
           <li><b>Copernicus DEM GLO-30</b>: © DLR e.V. 2010-2014 y © Airbus Defence and Space GmbH 2014-2018, proporcionado bajo el programa COPERNICUS de la Unión Europea y la ESA.</li>
@@ -352,14 +354,16 @@ export class Menu {
   }
 
   private volumeHtml() {
-    const m = this.app.music;
-    return `<label class="vol">🎵 Música <input type="range" min="0" max="100" step="1" value="${m.muted ? 0 : Math.round(m.volume * 100)}" data-vol></label>`;
+    const lay = uiPrefs().layout;
+    return soundControlsHtml(this.app.audio, false)
+      + `<label class="vol">Interfaz <select data-layout>${opt('auto', 'Automática', lay)}${opt('desktop', 'Escritorio', lay)}${opt('mobile', 'Móvil', lay)}</select></label>`;
   }
 
   private bindVolume() {
-    this.overlay.querySelector<HTMLInputElement>('[data-vol]')?.addEventListener('input', e => {
-      this.app.music.setVolume(Number((e.target as HTMLInputElement).value) / 100);
-      this.app.session?.hud.updateMusicButton();
+    bindSoundControls(this.overlay, this.app.audio, () => this.app.session?.hud.updateSoundButton());
+    // Interfaz de escritorio o móvil (automática según la pantalla, o forzada)
+    this.overlay.querySelector<HTMLSelectElement>('[data-layout]')?.addEventListener('change', e => {
+      setUIPrefs({ layout: (e.target as HTMLSelectElement).value as LayoutPref });
     });
   }
 
