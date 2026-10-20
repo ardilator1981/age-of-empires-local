@@ -345,10 +345,14 @@ export class VictorySystem implements System {
       g.events.emit('playerDefeated', { player: p });
       g.notify(p.isHuman ? 'Has sido derrotado' : `${p.name} ha sido derrotado`, undefined, p.isHuman ? 'warn' : 'good');
     }
-    const human = g.human;
-    const others = g.players.slice(1).filter(p => p.id !== human.id);
-    if (human.defeated) { g.over = true; g.events.emit('gameOver', { won: false }); }
-    else if (others.length && others.every(p => p.defeated)) { g.over = true; g.events.emit('gameOver', { won: true }); }
+    // El final no depende de qué jugador mira esta copia (`humanId`): en una partida en red, cada
+    // cliente tiene el suyo y todos deben acabar en el mismo tick. Termina cuando caen todos los
+    // humanos o cuando solo queda un jugador en pie; `won` es para el jugador de esta copia.
+    const all = g.players.slice(1), humans = all.filter(p => p.isHuman), alive = all.filter(p => !p.defeated);
+    if ((humans.length && humans.every(p => p.defeated)) || (all.length > 1 && alive.length <= 1)) {
+      g.over = true;
+      g.events.emit('gameOver', { won: !g.human.defeated });
+    }
   }
 }
 
