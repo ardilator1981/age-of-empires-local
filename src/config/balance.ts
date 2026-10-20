@@ -85,6 +85,33 @@ export const BALANCE = {
     repairTimeFactor: 1.5,
   },
 
+  /** Ejércitos: formaciones, posturas y órdenes tácticas. */
+  army: {
+    /** Separación entre huecos de una formación (casillas). */
+    spacing: 0.9,
+    /** La formación dispersa multiplica la separación por esto. */
+    looseFactor: 2,
+    /** Dónde va cada tipo de tropa: front (delante), back (detrás), flank (flancos), rear (al fondo). */
+    placement: { infantry: 'front', ranged: 'back', cavalry: 'flank', siege: 'rear' } as Record<string, 'front' | 'back' | 'flank' | 'rear'>,
+    /** Formación por defecto al mover varias tropas. */
+    defaultFormation: 'line' as 'line' | 'column' | 'box' | 'wedge' | 'loose',
+    /** Postura por defecto de las unidades nuevas. */
+    defaultStance: 'aggressive' as 'aggressive' | 'defensive' | 'hold' | 'passive',
+    /** Postura defensiva: cuánto se aleja de su sitio persiguiendo (casillas). */
+    defensiveLeash: 5,
+    /** Si la tropa va de media más lejos que esto de su hueco, la formación espera. */
+    regroupDistance: 3,
+    /** Velocidad del centro de la formación mientras espera a los rezagados (fracción). */
+    regroupSpeed: 0.3,
+    /** Segundos sin enemigos a la vista para que una formación detenida por el combate siga. */
+    resumeAfter: 1.5,
+    /** Escolta: distancia a la que se pone detrás de la unidad protegida y radio en el que la defiende. */
+    escortDistance: 2.5,
+    escortRadius: 6,
+    /** Mantener zona: radio por defecto. */
+    zoneRadius: 6,
+  },
+
   /** Modo "Guerra declarada" (mod declared-war). */
   war: {
     /** Edad necesaria para declarar la guerra (índice: 2 = Edad de los Castillos). */

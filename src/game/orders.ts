@@ -26,8 +26,11 @@ export const moveOrder: OrderHandler = {
   },
 };
 
-/** Un paso de ataque contra `t`. Devuelve false si hay que abandonar. */
-function attackStep(game: Game, u: Entity, o: Order, t: Entity): boolean {
+/**
+ * Un paso de ataque contra `t`. Devuelve false si hay que abandonar.
+ * Con `o.hold` (mantener posición) no se mueve: si el objetivo no está a su alcance, lo deja.
+ */
+export function attackStep(game: Game, u: Entity, o: Order, t: Entity): boolean {
   if (!game.canAttack(u, t, false)) return false;
   const p = game.players[u.owner];
   const def = game.unitDef(u);
@@ -36,7 +39,8 @@ function attackStep(game: Game, u: Entity, o: Order, t: Entity): boolean {
   let r = range >= 1 ? range + rangeBonus(game, u, t, range) : MELEE_RANGE + (t.kind === 'unit' ? 0 : 0.25);
   // Si una regla de los mods no le deja golpear desde donde está (p. ej. fuera de la zona de batalla), se acerca más
   if (game.reg.combatRules.length && !game.canAttack(u, t, true)) r = MELEE_RANGE;
-  const st = approach(game, u, t, r);
+  if (o.hold && edgeDist(u, t) > r + 0.05) return false;
+  const st = o.hold ? ARRIVED : approach(game, u, t, r);
   if (st === ARRIVED) {
     face(u, t);
     if (u.cooldown <= 0) {
@@ -60,15 +64,26 @@ function nextTarget(game: Game, u: Entity, radius: number, skip = 0): Entity | n
   return findEnemyNear(game, u, radius, true, siege, e => e.id !== skip && canReach(game, u, e));
 }
 
+/** Termina una orden de ataque automática: la unidad defensiva vuelve a su sitio. */
+function endAuto(u: Entity, o: Order) {
+  if (o.anchor && Math.hypot(u.x - o.anchor.x, u.y - o.anchor.y) > 0.6) {
+    setOrder(u, { type: 'move', x: o.anchor.x, y: o.anchor.y });
+    u.data.anchor = o.anchor;
+  } else setOrder(u, null);
+}
+
 export const attackOrder: OrderHandler = {
   update(game, u, o) {
     const los = game.players[u.owner].getStat(game.unitDef(u), 'los');
     const t = game.get(o.targetId);
-    if (t && o.auto && edgeDist(u, t) > los + 2) { setOrder(u, null); return; }
+    if (t && o.auto && edgeDist(u, t) > los + 2) { endAuto(u, o); return; }
+    // Postura defensiva: no se aleja más de la correa
+    if (o.anchor && Math.hypot(u.x - o.anchor.x, u.y - o.anchor.y) > o.leash) { endAuto(u, o); return; }
     if (!t || t.kind === 'resource' || !attackStep(game, u, o, t)) {
+      if (o.auto) { endAuto(u, o); return; }
       // Una orden dada por el jugador no se acaba al caer el objetivo (o si no se llega a él):
       // sigue con lo más cercano, como al asaltar un pueblo edificio a edificio.
-      const next = o.auto ? null : nextTarget(game, u, los + 2, o.targetId);
+      const next = nextTarget(game, u, los + 2, o.targetId);
       if (!next) { setOrder(u, null); return; }
       o.targetId = next.id; o.fails = 0; u.path = [];
     }

@@ -202,6 +202,7 @@ export class Game {
     e.radius = def.radius ?? 0.22;
     e.maxHp = e.hp = this.players[owner].getStat(def, 'hp');
     e.scanAt = this.time + this.rng();
+    e.stance = BALANCE.army.defaultStance;
     this.add(e);
     return e;
   }

@@ -4,6 +4,7 @@ import type { Game } from './Game';
 import { BALANCE } from '../config/balance';
 import { edgeDist, setOrder } from './actions';
 import { advantage, heightDamageFactor, heightOf } from './heightRules';
+import { retaliation } from './army/stances';
 
 export interface DamageInfo {
   attack: number;
@@ -97,10 +98,13 @@ export function dealDamage(game: Game, t: Entity, info: DamageInfo) {
       game.events.emit('underAttack', { playerId: tp.id, target: t, attacker, kind });
     }
   }
-  // Contraataque de unidades militares desocupadas
+  // Contraataque de unidades militares desocupadas, según su postura
   if (attacker && t.kind === 'unit' && !t.order) {
     const def = game.unitDef(t);
-    if (!def.gatherer && (def.attack ?? 0) > 0 && game.canAttack(t, attacker, false)) setOrder(t, { type: 'attack', targetId: attacker.id, auto: true });
+    if (!def.gatherer && (def.attack ?? 0) > 0 && game.canAttack(t, attacker, false)) {
+      const o = retaliation(game, t, attacker);
+      if (o) setOrder(t, o);
+    }
   }
   if (t.hp <= 0) game.kill(t, attacker);
 }

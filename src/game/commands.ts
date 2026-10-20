@@ -1,6 +1,10 @@
 import type { OrderKind } from '../core/EventBus';
 import type { Pt } from '../core/types';
+import { BALANCE } from '../config/balance';
 import { setOrder } from './actions';
+import { createGroup, groupOf, reshape, type Group, type GroupMode } from './army/groups';
+import type { FormationType } from './army/formations';
+import type { Stance } from './army/stances';
 import type { Entity } from './Entity';
 import type { Game } from './Game';
 import { buildingAvail, exploreAvail, techAvail, unitAvail } from './rules';
@@ -25,6 +29,30 @@ function ownUnits(units: Entity[], pid: number) {
   return units.filter(u => u.kind === 'unit' && !u.dead && u.owner === pid);
 }
 
+/** Tropas que van en formación (no los aldeanos ni lo que no ataca). */
+function soldiers(game: Game, units: Entity[]) {
+  return units.filter(u => u.kind === 'unit' && !u.dead && !game.unitDef(u).gatherer && (game.unitDef(u).attack ?? 0) > 0);
+}
+
+/** Formación elegida para estas unidades (la más repetida) o la de por defecto. */
+export function formationFor(units: Entity[]): FormationType {
+  const n = new Map<string, number>();
+  for (const u of units) { const f = u.data.formation ?? BALANCE.army.defaultFormation; n.set(f, (n.get(f) ?? 0) + 1); }
+  return ([...n.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? BALANCE.army.defaultFormation) as FormationType;
+}
+
+/** Orden táctica para un grupo en formación. */
+export interface TacticalOrder {
+  kind: GroupMode;
+  /** Destino (move, attack, retreat, zone) o ruta (patrol, 2 o más puntos). */
+  points?: Pt[];
+  /** escort: unidad a proteger. */
+  targetId?: number;
+  zoneRadius?: number;
+  /** Hacia dónde mirar al llegar. */
+  facing?: Pt;
+}
+
 /** Avisa de una orden aceptada (la interfaz la confirma con un sonido). */
 function issued(game: Game, playerId: number, kind: OrderKind, at: Pt) {
   game.events.emit('orderIssued', { playerId, kind, at: { x: at.x, y: at.y } });
@@ -32,6 +60,13 @@ function issued(game: Game, playerId: number, kind: OrderKind, at: Pt) {
 
 export const Commands = {
   move(game: Game, units: Entity[], x: number, y: number) {
+    // Las tropas, en formación; el resto (aldeanos...), en un grupo sencillo
+    const army = soldiers(game, units);
+    if (army.length >= 2) {
+      Commands.army(game, army, { kind: 'move', points: [{ x, y }] }, false);
+      units = units.filter(u => !army.includes(u));
+      if (!units.length) return;
+    }
     const spots = formation(units.length, x, y);
     // Asigna los huecos por orden de cercanía para que no se crucen
     const sorted = [...units].sort((a, b) => (a.x + a.y) - (b.x + b.y));
@@ -48,9 +83,58 @@ export const Commands = {
   },
 
   attackMove(game: Game, units: Entity[], x: number, y: number) {
+    const army = soldiers(game, units);
+    if (army.length >= 2) {
+      Commands.army(game, army, { kind: 'attack', points: [{ x, y }] }, false);
+      units = units.filter(u => !army.includes(u));
+      if (!units.length) { issued(game, army[0].owner, 'attack', { x, y }); return; }
+    }
     const spots = formation(units.length, x, y);
     units.forEach((u, i) => setOrder(u, { type: 'attackMove', x: spots[i].x, y: spots[i].y, scanAt: 0 }));
     if (units.length) issued(game, units[0].owner, 'attack', { x, y });
+  },
+
+  /**
+   * Orden táctica en formación: mover, avanzar atacando, patrullar, retirada, escoltar o
+   * mantener una zona. Los aldeanos y lo que no ataca no entran en la formación.
+   */
+  army(game: Game, units: Entity[], order: TacticalOrder, notify = true): Group | null {
+    const army = order.kind === 'retreat' || order.kind === 'move' ? units.filter(u => u.kind === 'unit' && !u.dead && !game.unitDef(u).gatherer) : soldiers(game, units);
+    let route = order.points ?? [];
+    if (order.kind === 'escort') {
+      const t = game.get(order.targetId);
+      if (!t) return null;
+      route = [{ x: t.x, y: t.y }];
+    }
+    if (!army.length || !route.length) return null;
+    const grp = createGroup(game, army.filter(u => u.id !== order.targetId), {
+      type: formationFor(army), mode: order.kind, route, escortId: order.targetId, zoneRadius: order.zoneRadius, finalFacing: order.facing,
+    });
+    if (grp && notify) issued(game, army[0].owner, order.kind === 'attack' || order.kind === 'patrol' ? 'attack' : 'move', route[0]);
+    return grp;
+  },
+
+  /** Elige la formación de estas unidades (y la aplica ya si van en grupo). */
+  setFormation(game: Game, units: Entity[], type: FormationType) {
+    const touched = new Set<Group>();
+    for (const u of units) {
+      if (u.kind !== 'unit') continue;
+      u.data.formation = type;
+      const grp = groupOf(game, u);
+      if (grp) touched.add(grp);
+    }
+    for (const grp of touched) reshape(game, grp, type);
+  },
+
+  /** Cambia la postura de combate. */
+  setStance(game: Game, units: Entity[], stance: Stance) {
+    for (const u of units) {
+      if (u.kind !== 'unit') continue;
+      u.stance = stance;
+      u.data.anchor = { x: u.x, y: u.y };
+      // Una orden automática de antes ya no vale con la nueva postura
+      if (u.order?.type === 'attack' && u.order.auto) setOrder(u, null);
+    }
   },
 
   gather(game: Game, units: Entity[], target: Entity) {

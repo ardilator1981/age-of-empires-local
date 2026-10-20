@@ -47,6 +47,8 @@ export class Entity {
   working = false;
   attackAnim = 0;
   scanAt = 0;
+  /** Postura de combate ('aggressive' | 'defensive' | 'hold' | 'passive'; ver army/stances). */
+  stance = 'aggressive';
 
   // --- edificios y recursos (huella en casillas)
   tx = 0;

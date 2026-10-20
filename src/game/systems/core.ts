@@ -4,6 +4,7 @@ import { setOrder } from '../actions';
 import { rangeBonus } from '../heightRules';
 import { castVision, eyeHeight, sightRadius } from '../vision';
 import { findEnemyNear, performAttack, updateProjectiles } from '../combat';
+import { anchorOf, engageOrder, stanceTarget } from '../army/stances';
 import type { Entity } from '../Entity';
 import type { Game } from '../Game';
 
@@ -78,6 +79,8 @@ export class MovementSystem implements System {
       units.push(u);
       if (!u.path.length) { u.moving = false; continue; }
       let speed = g.players[u.owner].getStat(g.unitDef(u), 'speed');
+      // En formación, las que ya están en su hueco van al paso de la más lenta
+      if (u.order?.type === 'formation' && u.data.speedCap) speed = Math.min(speed, u.data.speedCap);
       // Cuesta arriba se avanza más despacio (BALANCE.movement)
       const t0 = u.path[0], dd = Math.hypot(t0.x - u.x, t0.y - u.y);
       if (dd > 0.01) {
@@ -256,9 +259,10 @@ export class CombatSystem implements System {
         e.scanAt = g.time + 0.6;
         const def = g.unitDef(e);
         if (def.gatherer || !(def.attack ?? 0)) continue;
-        const los = g.players[e.owner].getStat(def, 'los');
-        const t = def.classes.includes('siege') ? findEnemyNear(g, e, los, true, true) : findEnemyNear(g, e, los, false);
-        if (t) setOrder(e, { type: 'attack', targetId: t.id, auto: true });
+        // Cada postura decide a qué atacar y hasta dónde (army/stances)
+        const anchor = anchorOf(e);
+        const t = stanceTarget(g, e, anchor);
+        if (t) setOrder(e, engageOrder(e, t, anchor));
       }
     }
   }
