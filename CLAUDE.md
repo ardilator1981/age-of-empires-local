@@ -13,10 +13,12 @@ src/
   game/        Simulación pura: Game, Entity, Player, GameMap (alturas, regiones),
                MapGenerator, pathfinding, combat, orders, commands, rules,
                relief (roca, pasos, conectividad), heightRules (ventaja de altura), vision
+    army/      formations (formas y huecos), groups (formaciones en marcha y órdenes tácticas),
+               stances (posturas)
     systems/   core.ts (sistemas básicos) y AISystem.ts (IA por jugador)
   render/      Camera (con relieve), Renderer (2D), TerrainGL (WebGL2), terrainPatterns,
                sprites, decorations, icons (retratos), Minimap, imageSprite
-  ui/          HUD, Menu, Input, UIState, svgIcons
+  ui/          HUD, Menu, Input, UIState, svgIcons, StrategyScreen (pantalla de estrategia)
   audio/       AudioManager (eventos → sonido, volúmenes, desbloqueo móvil), Music (generativa), sfx (efectos sintéticos)
   mods/real-maps/  Mapas a partir de relieve y datos reales (JSON en data/)
   app/         App (ciclo menú → partida) y Session (todo lo de una partida)

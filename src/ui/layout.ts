@@ -4,6 +4,8 @@
  */
 
 export type LayoutPref = 'auto' | 'desktop' | 'mobile';
+/** Qué pasa con el tiempo mientras está abierta la pantalla de estrategia (contra la IA). */
+export type StrategyTime = 'pause' | 'slow' | 'normal';
 
 export interface UIPrefs {
   /** Interfaz: automática (según entrada y pantalla) o forzada. */
@@ -14,13 +16,15 @@ export interface UIPrefs {
   haptics: boolean;
   /** Ya se ha visto (y cerrado) la pista de gestos. */
   hintSeen: boolean;
+  /** Pantalla de estrategia: pausa, cámara lenta o nada. */
+  strategyTime: StrategyTime;
 }
 
 const KEY = 'aoe-ui-v1';
 /** Escalas de interfaz disponibles. La mínima mantiene los botones por encima de 44 px. */
 export const UI_SCALES: [number, string][] = [[0.92, 'Pequeña'], [1, 'Normal'], [1.15, 'Grande'], [1.3, 'Muy grande']];
 
-const DEFAULTS: UIPrefs = { layout: 'auto', scale: 1, haptics: true, hintSeen: false };
+const DEFAULTS: UIPrefs = { layout: 'auto', scale: 1, haptics: true, hintSeen: false, strategyTime: 'pause' };
 
 let prefs: UIPrefs = load();
 /** Interfaz forzada por la URL (?ui=movil / ?ui=escritorio): solo para esa visita, no se guarda. */

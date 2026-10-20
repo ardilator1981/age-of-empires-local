@@ -31,6 +31,8 @@ export interface GameOptions {
   mods: string[];
   /** Modo Guerra declarada: minutos de preparación entre la declaración y la batalla. */
   warPrepMinutes?: number;
+  /** Partida en línea (aún no existe): nada pausa ni ralentiza el juego de los demás. */
+  online?: boolean;
 }
 
 export interface Decal { x: number; y: number; kind: 'corpse' | 'rubble'; color: string; time: number; size: number }

@@ -367,6 +367,15 @@ npm run regions -- --only <id>
 
 Descarga el relieve (Copernicus DEM GLO-30, o el ICGC en Cataluña) y los ríos, bosques y pueblos de OpenStreetMap. Las atribuciones aparecen en la pantalla de **Créditos** del juego.
 
+## Ejércitos: formaciones, posturas y estrategia
+
+- **Selección rápida:** ⚔️ selecciona todo el ejército (sin aldeanos). En la pantalla de estrategia también se puede seleccionar por tipo (infantería, a distancia, caballería, asedio) y usar los grupos 1–5. Los grupos de siempre siguen funcionando: Ctrl+número en el teclado, mantener pulsado en el móvil.
+- **Formaciones** (línea, columna, caja, cuña y dispersa): al mover o atacar con dos o más tropas van en formación, al paso de la más lenta. La infantería va delante, los arqueros detrás, la caballería en los flancos, el asedio al fondo y el General en el centro (se puede cambiar en `BALANCE.army.placement`). No ponen a nadie en la roca. En un paso de montaña estrecho se hacen columna y al salir recuperan la formación.
+- **Posturas:** agresiva (persigue), defensiva (persigue poco y vuelve a su sitio), mantener posición (no se mueve, solo ataca a lo que alcanza) y sin ataque.
+- **Órdenes tácticas:** avanzar atacando en formación, mover, retirada ordenada (sin luchar; a la base si no eliges punto), patrullar por dos o más puntos, escoltar a una unidad (por ejemplo, el General) y mantener una zona.
+- **Pantalla de estrategia:** 📜 en el HUD, en los comandos de las tropas o la tecla Tab. Trabaja sobre la selección o sobre todo el ejército. Las órdenes se dan tocando el mapa táctico: un punto, o varios para una patrulla. Contra la IA el juego se pausa o va a cámara lenta mientras está abierta (se elige en la propia pantalla).
+- **IA:** espera en línea defensiva de cara al enemigo y ataca en grupo con postura agresiva, en línea o en cuña si lleva sobre todo caballería.
+
 ## Modo "Guerra declarada"
 
 Se activa en el menú, en **Mods → Guerra declarada**. Al activarlo aparece la opción **Preparación**: el tiempo entre la declaración y la batalla (30 min por defecto). Desactivado, el juego funciona como siempre.

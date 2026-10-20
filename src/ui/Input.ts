@@ -528,6 +528,7 @@ export class Input {
       return;
     }
     if (e.key === '.') { this.nextIdleVillager(); return; }
+    if (e.key === 'Tab') { e.preventDefault(); this.s.strategy.toggle(); return; }
     if (e.key === ',') {
       const idle = game.units.filter(x => !x.dead && x.owner === game.humanId && !x.order && !game.unitDef(x).gatherer);
       if (idle.length) ui.setSelection(idle.map(x => x.id));

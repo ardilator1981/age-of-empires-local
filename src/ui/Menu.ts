@@ -64,6 +64,7 @@ const HELP_MOUSE = `
     <span>Q W E R T / A S D F G / Z X C V B: botones de comando</span>
     <span>H: centro urbano · .: aldeano inactivo · ,: ejército inactivo · Espacio: centrar</span>
     <span>Ctrl+1..9: crear grupo · 1..9: seleccionar grupo · Supr: eliminar · P/F10/Esc: pausa · M: música</span>
+    <span>Tab o 📜: estrategia (formación, postura y órdenes) · ⚔️: todo el ejército</span>
   </div>`;
 
 const HELP_TOUCH = `

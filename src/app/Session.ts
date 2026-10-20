@@ -5,6 +5,7 @@ import { HUD } from '../ui/HUD';
 import { Input } from '../ui/Input';
 import { onLayoutChange } from '../ui/layout';
 import { MobileHUD } from '../ui/MobileHUD';
+import { StrategyScreen } from '../ui/StrategyScreen';
 import { UIState } from '../ui/UIState';
 import type { App } from './App';
 
@@ -17,6 +18,8 @@ export class Session {
   readonly input: Input;
   /** Interfaz móvil: se crea siempre y solo se muestra (y actualiza) cuando la interfaz elegida es la móvil. */
   readonly mobile: MobileHUD;
+  /** Pantalla de estrategia (formaciones, posturas y órdenes tácticas). */
+  readonly strategy: StrategyScreen;
   private onResize: () => void;
   private offLayout: () => void;
 
@@ -26,6 +29,7 @@ export class Session {
     this.hud = new HUD(this);
     this.input = new Input(this);
     this.mobile = new MobileHUD(this);
+    this.strategy = new StrategyScreen(this);
     this.onResize = () => { this.renderer.resize(); this.minimap.resize(); };
     window.addEventListener('resize', this.onResize);
     this.offLayout = onLayoutChange(() => { this.mobile.applyLayout(); this.onResize(); });
@@ -37,11 +41,13 @@ export class Session {
     this.minimap.render();
     this.hud.update(dt);
     this.mobile.update(dt);
+    this.strategy.update(dt);
   }
 
   dispose() {
     window.removeEventListener('resize', this.onResize);
     this.offLayout();
+    this.strategy.dispose();
     this.mobile.dispose();
     this.input.dispose();
     this.hud.dispose();

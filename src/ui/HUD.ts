@@ -48,6 +48,8 @@ export class HUD {
     this.on(hud, 'mousemove', e => this.onHover(e as MouseEvent));
     this.on(hud, 'mouseleave', () => { this.el.tooltip.style.display = 'none'; });
     this.on(document.getElementById('btn-menu')!, 'click', () => s.app.togglePause());
+    this.on(document.getElementById('btn-army')!, 'click', () => s.input.selectArmy());
+    this.on(document.getElementById('btn-strategy')!, 'click', () => s.strategy.toggle());
     this.on(document.getElementById('btn-music')!, 'click', () => { s.app.audio.toggleMute(); this.updateSoundButton(); });
     this.updateSoundButton();
     // Tooltips con pulsación larga en pantallas táctiles
@@ -172,6 +174,7 @@ export class HUD {
       if (set.build) { out[0] = set.build.economy.cmd; out[1] = set.build.military.cmd; }
       out[5] = set.attackMove;
       out[6] = set.explore;
+      out[7] = set.strategy;
       out[10] = set.stop;
       out[14] = set.del;
       return out;

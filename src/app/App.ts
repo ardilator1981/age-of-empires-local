@@ -15,6 +15,8 @@ export class App {
   readonly audio = new AudioManager();
   readonly menu: Menu;
   private acc = 0;
+  /** Multiplicador del tiempo (cámara lenta con la pantalla de estrategia abierta). */
+  timeScale = 1;
   private last = 0;
   private lastOptions: GameOptions | null = null;
   private hud = document.getElementById('hud')!;
@@ -93,7 +95,7 @@ export class App {
     const s = this.session;
     if (!s) return;
     if (!this.paused && !this.menuOpen) {
-      this.acc += dt * s.game.opts.speed;
+      this.acc += dt * s.game.opts.speed * this.timeScale;
       let steps = 0;
       while (this.acc >= TICK_DT && steps < 10) {
         s.game.update(TICK_DT);

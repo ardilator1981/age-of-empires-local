@@ -76,7 +76,7 @@ export class MobileHUD {
         <button class="mbtn" data-a="alerts" data-mt="alerts">🔔<i class="mb-badge"></i></button>
         <button class="mbtn" data-a="army" data-mt="army">⚔️</button>
         <button class="mbtn" data-a="idle" data-mt="idle">💤<i class="mb-badge"></i></button>
-        <button class="mbtn soon" data-a="strategy" data-mt="strategy">📜</button>
+        <button class="mbtn" data-a="strategy" data-mt="strategy">📜</button>
         <button class="mbtn" data-a="menu" data-mt="menu">☰</button>
       </div>
       <button id="m-mode" class="mbtn" data-a="mode" data-mt="mode"></button>
@@ -316,6 +316,7 @@ export class MobileHUD {
         });
       }
       if (set.attackMove) out.push(this.btnFromCmd(set.attackMove));
+      if (set.strategy) out.push(this.btnFromCmd(set.strategy, { keepOpen: true }));
       if (set.explore) out.push(this.btnFromCmd(set.explore));
       if (set.stop) out.push(this.btnFromCmd(set.stop));
       out.push(more('actions'));
@@ -530,7 +531,7 @@ export class MobileHUD {
         ui.pings.push({ x: last.x, y: last.y, t: g.time });
         break;
       }
-      case 'strategy': g.notify('Pantalla de estrategia: próximamente', g.humanId); break;
+      case 'strategy': this.s.strategy.toggle(); break;
       case 'mode': input.cameraMode = !input.cameraMode; haptic(8); this.acc = 1; break;
       case 'mini-toggle': this.setMini(this.mini === 'small' ? 'normal' : 'small'); break;
       case 'mini-full': this.setMini(this.mini === 'full' ? 'normal' : 'full'); break;
@@ -593,7 +594,7 @@ export class MobileHUD {
       alerts: '<b>Alertas</b><br>Lleva la cámara al último ataque o aviso.',
       army: '<b>Ejército</b><br>Selecciona todas tus unidades militares (dos veces: centrar).',
       idle: '<b>Aldeano inactivo</b><br>Selecciona el siguiente aldeano sin tarea.',
-      strategy: '<b>Pantalla de estrategia</b><br>Próximamente.',
+      strategy: '<b>Estrategia</b><br>Formación, postura y órdenes (avanzar, retirada, patrulla, escolta, zona) para el ejército.',
       menu: '<b>Menú</b><br>Pausa, estadísticas, tecnologías, diplomacia y ajustes.',
       mode: '<b>Arrastrar con un dedo</b><br>⬚ Selección: dibuja un recuadro · ✥ Cámara: mueve el mapa.',
       'mini-full': '<b>Minimapa a pantalla completa</b><br>Toca un punto para ir allí.',

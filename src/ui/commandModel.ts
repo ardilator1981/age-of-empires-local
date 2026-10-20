@@ -1,5 +1,6 @@
 import type { AnyDef, TechDef } from '../core/types';
 import { Commands } from '../game/commands';
+import { groupOf } from '../game/army/groups';
 import type { Entity } from '../game/Entity';
 import type { Game } from '../game/Game';
 import {
@@ -35,6 +36,8 @@ export interface CommandSet {
   /** Auto-exploración (unidades con `autoExplore`). */
   explore: Cmd | null;
   stop: Cmd | null;
+  /** Pantalla de estrategia (formación, postura y órdenes tácticas) para las tropas. */
+  strategy: Cmd | null;
   /** Unidades que entrenar y tecnologías que investigar en los edificios seleccionados. */
   train: Cmd[];
   research: Cmd[];
@@ -87,6 +90,13 @@ export function taskText(g: Game, e: Entity): string {
     case 'attack': return 'Atacando';
     case 'attackMove': return 'Ataque-movimiento';
     case 'explore': return 'Explorando';
+    case 'formation': {
+      const grp = groupOf(g, e);
+      const mode: Record<string, string> = {
+        move: 'En formación', attack: 'Avanzando al ataque', patrol: 'Patrullando', retreat: 'En retirada', escort: 'Escoltando', zone: 'Defendiendo la zona',
+      };
+      return `${mode[grp?.mode ?? 'move']}${o.target ? ' · luchando' : ''}`;
+    }
     case 'move': return 'Moviéndose';
     default: return o.type;
   }
@@ -98,7 +108,7 @@ export function selectionCommands(s: Session): CommandSet {
   const sel = ui.selected(g).filter(e => e.owner === p.id);
   const units = sel.filter(e => e.kind === 'unit');
   const blds = sel.filter(e => e.kind === 'building');
-  const set: CommandSet = { units, blds, build: null, attackMove: null, explore: null, stop: null, train: [], research: [], del: null };
+  const set: CommandSet = { units, blds, build: null, attackMove: null, explore: null, stop: null, strategy: null, train: [], research: [], del: null };
   if (!sel.length) return set;
   const del: Cmd = {
     icon: '❌', label: 'Eliminar', avail: OK, tip: '<b>Eliminar</b> (Supr)<br>Destruye la selección.',
@@ -130,6 +140,11 @@ export function selectionCommands(s: Session): CommandSet {
       };
     }
     if (units.some(u => (g.unitDef(u).attack ?? 0) > 0 && !g.unitDef(u).gatherer)) {
+      set.strategy = {
+        icon: '📜', label: 'Estrategia', avail: OK,
+        tip: '<b>Estrategia</b> (Tab)<br>Formación, postura y órdenes: avanzar atacando, retirada, patrulla, escolta y mantener zona.',
+        action: () => s.strategy.toggle(),
+      };
       set.attackMove = {
         icon: '🎯', label: 'Ataque-movimiento', avail: OK,
         tip: '<b>Ataque-movimiento</b><br>Avanza hacia un punto atacando a todo enemigo que encuentre. Haz clic en el mapa.',
