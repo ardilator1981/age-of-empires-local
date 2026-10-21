@@ -1,9 +1,11 @@
-import { defineConfig } from 'vite';
+import { configDefaults, defineConfig } from 'vitest/config';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
   // Rutas relativas: el mismo build sirve en local, en GitHub Pages (/<repo>/) y dentro de un APK
   base: './',
+  // Las copias de trabajo de las sesiones (.claude/worktrees) no son parte de las pruebas
+  test: { exclude: [...configDefaults.exclude, '.claude/**'] },
   plugins: [
     VitePWA({
       registerType: 'autoUpdate',
