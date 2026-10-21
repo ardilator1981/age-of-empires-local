@@ -230,7 +230,19 @@ Para que subir de era no sea solo «más rápido = mejor»:
 | **Estaciones / clima** 🔶 | Invierno que ralentiza (útil para Rusia y la defensa) | Alto coste de balance y renderizado; no recomendable en primeras fases |
 | **Edificios móviles** | Katama etíope; Ordu persa | Orden `pack`/`unpack` nueva |
 
-Fuera de alcance recomendado: aviación, armas nucleares, ciberguerra, y política interna detallada (partidos, elecciones).
+**Futuro previsto por el usuario (no entra en las primeras fases):** aviación, armas nucleares y espionaje. Quedan fuera de ciberguerra y de política interna detallada (partidos, elecciones). Ver §8b.
+
+## 8b. Aviación, armas nucleares y espionaje (planeado, fase posterior)
+
+Todo esto es la parte más cara del motor; se deja diseñado como hueco para no cerrarle la puerta, no para la primera entrega.
+
+| Sistema | Idea | Encaje / hueco del motor |
+| --- | --- | --- |
+| **Aviación** | Unidades aéreas que ignoran terreno y relieve: caza, bombardero, transporte. Aeródromo como edificio; cuestan combustible (petróleo). Solo atacadas por antiaéreos y otros aviones | Clase `air` en `UnitDef`; el pathfinding las salta (movimiento en línea recta, sin A*); combate con regla `addCombatRule` (quién puede golpear a qué); visión y dibujo sobre las entidades terrestres (capa de render nueva) |
+| **Armas nucleares** | Proyecto de varias etapas (investigación + edificio + coste enorme). Efecto: arma de área con enfriamiento largo. Variantes de diseño 🔶: *disuasión* (tenerla impide al rival atacar el centro urbano), *poder activo* limitado, o *amenaza de victoria* | Poder activo vía `addNetCommand`; daño en área; la guerra declarada ya tiene reglas para la paz que se pueden extender; añadir alerta y fin de partida distinto si se usa |
+| **Espionaje** | Espías que se infiltran (ven recursos y edificios enemigos, sabotean, roban tecnología, envenenan el suministro, convierten unidades). Contraespionaje. Desde la era 1 en versión simple (mensajeros, informantes) hasta la Moderna (agencia) | Unidad `spy` invisible salvo contra contraespionaje (necesita una capa de visión nueva en `vision`); órdenes `infiltrate` y `sabotage`; la niebla de guerra ya existe, lo cual ayuda |
+
+Cada civilización podría tener su **versión histórica** del espionaje (🔶 y con cuidado): informantes y espías bizantinos del mundo mediterráneo, el sistema postal y de información del Estado chino (*yizhan*), servicios de seguridad de las cortes persas, el *Cabinet Noir* francés del s. XVIII, el Servicio Secreto británico (Walsingham en los Tudor), la Cheka/KGB, la CIA/OSS. Solo hace falta una mecánica común más un par de variantes por civilización.
 
 ## 9. Traducción al código actual
 
@@ -277,7 +289,8 @@ Determinismo: los poderes y el comercio deben usar `fmath`, `game.rng()` y datos
 | **4** | **China, Francia y Británicos → EE. UU.** (solo datos más lo de fases 2–3; el crédito y la ayuda a aliados quedan para la fase 5) | Bajo | Simulaciones IA contra IA equilibradas |
 | **5** | **Comercio y diplomacia** (mercado, caravana, relaciones, crédito, ayuda a aliados). **Persia** y **Etiopía** (que lo aprovechan) y la rama EE. UU. completa | Alto | Rutas funcionan en red y guardado |
 | **6** | **Recursos modernos y mantenimiento**; era Moderna completa | Alto (balance) | Partida completa a la era 6 sin bloqueos |
-| **7** | **IA por civilización/era**, victorias alternativas, pulido de interfaz y arte | Medio | Todas las civilizaciones juegan con la IA |
+| **7** | **Aviación, armas nucleares y espionaje** (§8b) | Alto (render, visión, balance) | Aviones, un arma de área y espías funcionan en red y guardado |
+| **8** | **IA por civilización/era**, victorias alternativas, pulido de interfaz y arte | Medio | Todas las civilizaciones juegan con la IA |
 
 Cada fase se hace en su propia rama (`feat/...`) y pasa `npm run build`, `npm run simulate -- 20 arabia 1` y `npm test`.
 
@@ -287,8 +300,8 @@ Cada fase se hace en su propia rama (`feat/...`) y pasa `npm run build`, `npm ru
 2. **Lista de civilizaciones:** Rus, China, Francia, Persia, Etiopía y Británicos → EE. UU. (decidido). ¿Se añade Japón o Turcos como séptima?
 3. ~~Civilizaciones actuales~~ **Decidido:** Británicos → línea británica/EE. UU., Francos → Francia, Godos y Mongoles se eliminan. Pendiente: ¿se migran las partidas guardadas con esas civilizaciones o se descartan (`SAVE_VERSION`)?
 3b. **Traspaso británico → EE. UU.:** ¿automático al llegar a la Moderna, o el jugador elige en la era 5 entre seguir como Reino Unido o dar el salto a EE. UU.? (Por defecto, automático.)
-4. **Giro de la era Moderna:** ¿se ofrece elegir entre dos regímenes (URSS/Rusia) o una sola identidad? Tema sensible: ¿se quieren eras políticas recientes o se corta antes de 1945?
-5. **Armas nucleares, aviación y ciberguerra:** ¿fuera de alcance?
+4. ~~Giro de la era Moderna~~ **Decidido: el giro político está bien** (URSS / Rusia posterior a 1991, y los equivalentes de otras civilizaciones). Se modela como mecánicas, sin juicios.
+5. ~~Armas nucleares, aviación~~ **Decidido: se incluirán más adelante, junto con espionaje.** Pendiente: ¿en qué fase, y las nucleares como victoria, como disuasión o como poder de civilización?
 6. **Carreras de eras:** ¿doctrinas excluyentes, mantenimiento, era global «Cronología»? ¿Cuál de ellas?
 7. **Civilizaciones de ciclo corto** (mexicas, incas, Mali): ¿se admiten civilizaciones que terminan en la era 3 o 4?
 8. **Comercio y diplomacia:** ¿son prioridad (fase 5) o se adelantan?
