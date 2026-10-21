@@ -8,3 +8,4 @@ dist/
 dev-dist/
 android/
 art-src/preview/
+.sim-art/
