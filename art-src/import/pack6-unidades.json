@@ -76,6 +76,12 @@
         "walk": 8,
         "attack": 8
       }
+    },
+    "cavalier": {
+      "fps": {
+        "walk": 8,
+        "attack": 8
+      }
     }
   },
   "sources": [
@@ -1430,6 +1436,70 @@
         },
         {
           "id": "knight",
+          "state": "attack"
+        }
+      ]
+    },
+    {
+      "source": "pack6-unidades/paladin-andar.jpg",
+      "grid": "auto",
+      "sharedScale": true,
+      "items": [
+        {
+          "id": "cavalier",
+          "state": "walk",
+          "height": 72
+        },
+        {
+          "id": "cavalier",
+          "state": "walk"
+        },
+        {
+          "id": "cavalier",
+          "state": "walk"
+        },
+        {
+          "id": "cavalier",
+          "state": "walk"
+        },
+        {
+          "id": "cavalier",
+          "state": "walk"
+        },
+        {
+          "id": "cavalier",
+          "state": "walk"
+        }
+      ]
+    },
+    {
+      "source": "pack6-unidades/paladin-atacar.jpg",
+      "grid": "auto",
+      "sharedScale": true,
+      "items": [
+        {
+          "id": "cavalier",
+          "state": "attack",
+          "height": 72
+        },
+        {
+          "id": "cavalier",
+          "state": "attack"
+        },
+        {
+          "id": "cavalier",
+          "state": "attack"
+        },
+        {
+          "id": "cavalier",
+          "state": "attack"
+        },
+        {
+          "id": "cavalier",
+          "state": "attack"
+        },
+        {
+          "id": "cavalier",
           "state": "attack"
         }
       ]

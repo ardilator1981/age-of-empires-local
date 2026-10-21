@@ -14,6 +14,36 @@
     "idle": {
       "row": 0,
       "frames": 1
+    },
+    "walk": {
+      "image": "cavalier-walk.png",
+      "mask": "cavalier-walk-mask.png",
+      "row": 0,
+      "frames": 6,
+      "fps": 8,
+      "cell": {
+        "w": 136,
+        "h": 153
+      },
+      "anchor": {
+        "x": 68,
+        "y": 147
+      }
+    },
+    "attack": {
+      "image": "cavalier-attack.png",
+      "mask": "cavalier-attack-mask.png",
+      "row": 0,
+      "frames": 6,
+      "fps": 8,
+      "cell": {
+        "w": 165,
+        "h": 165
+      },
+      "anchor": {
+        "x": 83,
+        "y": 159
+      }
     }
   }
 }

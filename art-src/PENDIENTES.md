@@ -23,7 +23,6 @@
 - P2 · **unidad villager**: attack
 - P2 · **unidad longSwordsman**: walk, attack, death
 - P2 · **unidad pikeman**: walk, attack, death
-- P2 · **unidad cavalier**: walk, attack, death
 - P2 · **unidad batteringRam**: walk, attack, death
 - P2 · **unidad druzhinnik**: idle, walk, attack, death
 - P2 · **unidad boyarSon**: idle, walk, attack, death
@@ -35,6 +34,7 @@
 - P2 · **unidad warElephant**: idle, walk, attack, death
 - P2 · **unidad general**: idle, walk, attack, death
 - P2 · **unidad king**: idle, walk, death
+- P3 · **unidad manAtArms**: death
 
 ## Unidades
 
@@ -52,7 +52,7 @@
 | scoutCavalry | Caballería de exploración | 🟡 sin animar | death | units/scoutCavalry-death.png (+ -mask.png) | 3 | `anim:death:mounted` |
 | lightCavalry | Caballería ligera | 🟡 sin animar | death | units/lightCavalry-death.png (+ -mask.png) | 3 | `anim:death:mounted` |
 | knight | Caballero | 🟡 sin animar | death | units/knight-death.png (+ -mask.png) | 3 | `anim:death:mounted` |
-| cavalier | Paladín | 🟡 sin animar | walk, attack, death | units/cavalier-walk.png (+ -mask.png)<br>units/cavalier-attack.png (+ -mask.png)<br>units/cavalier-death.png (+ -mask.png) | 2 | `anim:walk:mounted` `anim:attack-melee:mounted` `anim:death:mounted` |
+| cavalier | Paladín | 🟡 sin animar | death | units/cavalier-death.png (+ -mask.png) | 3 | `anim:death:mounted` |
 | batteringRam | Ariete | 🟡 sin animar | walk, attack, death | units/batteringRam-walk.png (+ -mask.png)<br>units/batteringRam-attack.png (+ -mask.png)<br>units/batteringRam-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack-melee` `anim:death` |
 | longbowman | Arquero de tiro largo | 🟡 sin animar | death | units/longbowman-death.png (+ -mask.png) | 3 | `anim:death` |
 | throwingAxeman | Lanzador de hachas | 🟡 sin animar | death | units/throwingAxeman-death.png (+ -mask.png) | 3 | `anim:death` |
