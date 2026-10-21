@@ -8,13 +8,13 @@
 
 | Tipo | Hecho | Sin animar | Pendiente |
 | --- | ---: | ---: | ---: |
-| unidad | 0 | 17 | 3 |
-| edificio | 7 | 5 | 1 |
-| recurso | 6 | 0 | 1 |
+| unidad | 0 | 17 | 7 |
+| edificio | 7 | 5 | 2 |
+| recurso | 6 | 0 | 4 |
 | terreno | 9 | 0 | 0 |
 | decoración | 0 | 0 | 9 |
 | efecto | 0 | 0 | 9 |
-| interfaz | 0 | 0 | 45 |
+| interfaz | 0 | 0 | 46 |
 
 ## Siguiente en generar (por prioridad)
 
@@ -58,8 +58,12 @@
 | throwingAxeman | Lanzador de hachas | 🟡 sin animar | walk, attack, death | units/throwingAxeman-walk.png (+ -mask.png)<br>units/throwingAxeman-attack.png (+ -mask.png)<br>units/throwingAxeman-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack` `anim:death` |
 | huskarl | Huscarle | 🔴 pendiente | idle, walk, attack, death | units/huskarl.png (+ -mask.png)<br>units/huskarl-walk.png (+ -mask.png)<br>units/huskarl-attack.png (+ -mask.png)<br>units/huskarl-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack-melee` `anim:death` |
 | mangudai | Mangudai | 🟡 sin animar | walk, attack, death | units/mangudai-walk.png (+ -mask.png)<br>units/mangudai-attack.png (+ -mask.png)<br>units/mangudai-death.png (+ -mask.png) | 2 | `anim:walk:mounted` `anim:attack:mounted` `anim:death:mounted` |
+| deer | Ciervo | 🔴 pendiente | idle, walk, death | units/deer.png (+ -mask.png)<br>units/deer-walk.png (+ -mask.png)<br>units/deer-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:death` |
+| boar | Jabalí | 🔴 pendiente | idle, walk, attack, death | units/boar.png (+ -mask.png)<br>units/boar-walk.png (+ -mask.png)<br>units/boar-attack.png (+ -mask.png)<br>units/boar-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack-melee` `anim:death` |
+| sheep | Oveja | 🔴 pendiente | idle, walk, death | units/sheep.png (+ -mask.png)<br>units/sheep-walk.png (+ -mask.png)<br>units/sheep-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:death` |
 | warElephant | Elefante de guerra | 🔴 pendiente | idle, walk, attack, death | units/warElephant.png (+ -mask.png)<br>units/warElephant-walk.png (+ -mask.png)<br>units/warElephant-attack.png (+ -mask.png)<br>units/warElephant-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk:mounted` `anim:attack-melee:mounted` `anim:death:mounted` |
 | general | General | 🔴 pendiente | idle, walk, attack, death | units/general.png (+ -mask.png)<br>units/general-walk.png (+ -mask.png)<br>units/general-attack.png (+ -mask.png)<br>units/general-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk:mounted` `anim:attack-melee:mounted` `anim:death:mounted` |
+| king | Rey | 🔴 pendiente | idle, walk, death | units/king.png (+ -mask.png)<br>units/king-walk.png (+ -mask.png)<br>units/king-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:death` |
 
 *primero la imagen quieta (Pack 6a/6b) y luego las animaciones*
 
@@ -80,6 +84,7 @@
 | watchTower | Torre de vigilancia | ✅ hecho | — | — | — | — |
 | siegeWorkshop | Taller de asedio | 🟡 sin animar | Edad Imperial | buildings/siegeWorkshop-3.png (+ -mask.png) | 4 | `building:age` |
 | castle | Castillo | 🟡 sin animar | Edad Imperial | buildings/castle-3.png (+ -mask.png) | 4 | `building:age` |
+| corral | Corral | 🔴 pendiente | imagen base (Edad Feudal), Edad de los Castillos, Edad Imperial | buildings/corral.png (+ -mask.png)<br>buildings/corral-2.png (+ -mask.png)<br>buildings/corral-3.png (+ -mask.png) | 3 | `building:base` |
 
 *huella 2x2*
 *huella 3x3*
@@ -95,6 +100,9 @@
 | goldMine | Mina de oro | ✅ hecho | — | — | — | — |
 | stoneMine | Cantera de piedra | ✅ hecho | — | — | — | — |
 | berries | Arbusto de bayas | ✅ hecho | — | — | — | — |
+| deerCarcass | Ciervo abatido | 🔴 pendiente | imagen | resources/deerCarcass.png | 3 | `resource` |
+| boarCarcass | Jabalí abatido | 🔴 pendiente | imagen | resources/boarCarcass.png | 3 | `resource` |
+| sheepCarcass | Oveja sacrificada | 🔴 pendiente | imagen | resources/sheepCarcass.png | 3 | `resource` |
 | treasure | Cofre del tesoro | 🔴 pendiente | imagen | resources/treasure.png | 3 | `resource` |
 
 ## Terrenos
@@ -191,6 +199,7 @@
 | beardedAxe | Tecnología: Hacha barbada | 🔴 pendiente | imagen | ui/tech/beardedAxe.png | 5 | `ui:tech` |
 | perfusion | Tecnología: Perfusión | 🔴 pendiente | imagen | ui/tech/perfusion.png | 5 | `ui:tech` |
 | drill | Tecnología: Instrucción | 🔴 pendiente | imagen | ui/tech/drill.png | 5 | `ui:tech` |
+| selectiveBreeding | Tecnología: Cría selectiva | 🔴 pendiente | imagen | ui/tech/selectiveBreeding.png | 5 | `ui:tech` |
 | ironTusks | Tecnología: Colmillos de hierro | 🔴 pendiente | imagen | ui/tech/ironTusks.png | 5 | `ui:tech` |
 
 *el motor todavía no usa estas imágenes (se dibuja por código)*
