@@ -19,30 +19,30 @@
       "image": "skirmisher-walk.png",
       "mask": "skirmisher-walk-mask.png",
       "row": 0,
-      "frames": 5,
+      "frames": 7,
       "fps": 8,
       "cell": {
-        "w": 32,
-        "h": 104
+        "w": 57,
+        "h": 106
       },
       "anchor": {
-        "x": 16,
-        "y": 98
+        "x": 29,
+        "y": 100
       }
     },
     "attack": {
       "image": "skirmisher-attack.png",
       "mask": "skirmisher-attack-mask.png",
       "row": 0,
-      "frames": 6,
+      "frames": 7,
       "fps": 8,
       "cell": {
         "w": 93,
-        "h": 199
+        "h": 104
       },
       "anchor": {
         "x": 47,
-        "y": 193
+        "y": 98
       }
     }
   }

@@ -35,6 +35,7 @@
  * imagen, para que las fases conserven su tamaño relativo.
  * Una pieza puede llevar su propia "age" (p. ej. la misma torre en cada época) y su "state"
  * ("walk", "attack"...): esas piezas forman una animación con imagen propia en la hoja.
+ * Con "grid": "auto" cada figura es una casilla (en orden de lectura), sin cuadrícula fija.
  * Con "keep": 0.5 en una imagen solo se usa su mitad de arriba (útil cuando las filas se tocan).
  * Con "sharedScale": true en una imagen, las piezas sin medida usan la escala de la primera
  * (personajes dibujados juntos a la misma escala).
@@ -151,7 +152,7 @@ async function loadSource(srcFile, grid, keep = 1) {
   }
 
   // ------------------------------------------------------------ piezas por casilla de la cuadrícula
-  const [GC, GR] = grid ?? [1, 1];
+  const [GC, GR] = Array.isArray(grid) ? grid : [1, 1];
   const comp = new Int32Array(N).fill(-1);
   const boxes = [];
   for (let i = 0; i < N; i++) {
@@ -170,6 +171,27 @@ async function loadSource(srcFile, grid, keep = 1) {
       }
     }
     boxes.push({ x0, y0, x1, y1, n });
+  }
+  if (grid === 'auto') {
+    // Sin cuadrícula: cada figura (componente grande, con sus piezas sueltas cerca) es una casilla, en orden de lectura
+    const maxN = Math.max(...boxes.map(b => b.n));
+    const big = boxes.map((b, id) => ({ b, id })).filter(o => o.b.n >= maxN * 0.25);
+    const groups = new Map(big.map(o => [o.id, [o.id]]));
+    boxes.forEach((b, id) => {
+      if (b.n < 40 || groups.has(id)) return;
+      const cx = (b.x0 + b.x1) / 2, cy = (b.y0 + b.y1) / 2;
+      let best = -1, bd = Infinity;
+      for (const o of big) {
+        const dx = Math.max(o.b.x0 - cx, 0, cx - o.b.x1), dy = Math.max(o.b.y0 - cy, 0, cy - o.b.y1);
+        const d = Math.hypot(dx, dy);
+        if (d < bd) { bd = d; best = o.id; }
+      }
+      if (best >= 0) groups.get(best).push(id);
+    });
+    const medH = big.map(o => o.b.y1 - o.b.y0).sort((a, b) => a - b)[Math.floor(big.length / 2)] ?? 1;
+    const ordered = big.map(o => ({ id: o.id, cy: (o.b.y0 + o.b.y1) / 2, cx: (o.b.x0 + o.b.x1) / 2 }))
+      .sort((a, b) => (Math.abs(a.cy - b.cy) > medH * 0.5 ? a.cy - b.cy : a.cx - b.cx));
+    return { W, H, rgba, comp, boxes, cells: ordered.map(o => groups.get(o.id)) };
   }
   const cells = Array.from({ length: GC * GR }, () => []);
   boxes.forEach((b, id) => {
