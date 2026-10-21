@@ -35,6 +35,7 @@
  * imagen, para que las fases conserven su tamaño relativo.
  * Una pieza puede llevar su propia "age" (p. ej. la misma torre en cada época) y su "state"
  * ("walk", "attack"...): esas piezas forman una animación con imagen propia en la hoja.
+ * Con "keep": 0.5 en una imagen solo se usa su mitad de arriba (útil cuando las filas se tocan).
  * Con "sharedScale": true en una imagen, las piezas sin medida usan la escala de la primera
  * (personajes dibujados juntos a la misma escala).
  */
@@ -51,9 +52,11 @@ const cfg = JSON.parse(readFileSync(configPath, 'utf8'));
 const SCALE = 2;
 
 /** Quita el fondo de una imagen y agrupa sus piezas por casilla de la cuadrícula. */
-async function loadSource(srcFile, grid) {
+async function loadSource(srcFile, grid, keep = 1) {
   const { data, info } = await sharp(srcFile).removeAlpha().raw().toBuffer({ resolveWithObject: true });
   const W = info.width, H = info.height;
+  // keep < 1: solo se usa la parte de arriba de la imagen (lo de abajo se borra a blanco)
+  if (keep < 1) data.fill(255, Math.floor(H * keep) * W * 3);
   const N = W * H;
   const px = i => [data[i * 3], data[i * 3 + 1], data[i * 3 + 2]];
 
@@ -231,7 +234,7 @@ const groups = new Map();
 for (const s of sources) {
   const file = join(entrada, s.source);
   if (!existsSync(file)) { console.log(`No encuentro ${file}`); process.exit(1); }
-  const src = await loadSource(file, s.grid);
+  const src = await loadSource(file, s.grid, s.keep ?? 1);
   const lastK = new Map();
   let sourceScale = null;
   s.items.forEach((item, k) => {

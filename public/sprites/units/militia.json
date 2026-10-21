@@ -49,14 +49,14 @@
       "image": "militia-death.png",
       "mask": "militia-death-mask.png",
       "row": 0,
-      "frames": 4,
+      "frames": 5,
       "fps": 6,
       "cell": {
-        "w": 81,
+        "w": 96,
         "h": 100
       },
       "anchor": {
-        "x": 41,
+        "x": 48,
         "y": 94
       }
     }

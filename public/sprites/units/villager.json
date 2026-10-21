@@ -124,14 +124,14 @@
       "image": "villager-death.png",
       "mask": "villager-death-mask.png",
       "row": 0,
-      "frames": 4,
+      "frames": 5,
       "fps": 6,
       "cell": {
-        "w": 81,
+        "w": 100,
         "h": 100
       },
       "anchor": {
-        "x": 41,
+        "x": 50,
         "y": 94
       }
     },

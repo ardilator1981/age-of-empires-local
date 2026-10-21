@@ -49,14 +49,14 @@
       "image": "archer-death.png",
       "mask": "archer-death-mask.png",
       "row": 0,
-      "frames": 4,
+      "frames": 5,
       "fps": 6,
       "cell": {
-        "w": 86,
+        "w": 98,
         "h": 100
       },
       "anchor": {
-        "x": 43,
+        "x": 49,
         "y": 94
       }
     }

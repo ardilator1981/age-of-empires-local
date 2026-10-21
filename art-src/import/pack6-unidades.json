@@ -592,8 +592,8 @@
     {
       "source": "pack6-unidades/aldeano-morir.jpg",
       "grid": [
-        6,
-        2
+        5,
+        1
       ],
       "sharedScale": true,
       "items": [
@@ -617,15 +617,9 @@
         {
           "id": "villager",
           "state": "death"
-        },
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null
-      ]
+        }
+      ],
+      "keep": 0.5
     },
     {
       "source": "pack6-unidades/aldeano-comida.jpg",
@@ -753,8 +747,8 @@
     {
       "source": "pack6-unidades/milicia-morir.jpg",
       "grid": [
-        6,
-        2
+        5,
+        1
       ],
       "sharedScale": true,
       "items": [
@@ -778,21 +772,15 @@
         {
           "id": "militia",
           "state": "death"
-        },
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null
-      ]
+        }
+      ],
+      "keep": 0.5
     },
     {
       "source": "pack6-unidades/arquero-morir.jpg",
       "grid": [
-        6,
-        2
+        5,
+        1
       ],
       "sharedScale": true,
       "items": [
@@ -816,15 +804,9 @@
         {
           "id": "archer",
           "state": "death"
-        },
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null
-      ]
+        }
+      ],
+      "keep": 0.5
     },
     {
       "source": "pack6-unidades/ballestero-andar.jpg",
@@ -906,7 +888,8 @@
         null,
         null,
         null
-      ]
+      ],
+      "keep": 0.5
     },
     {
       "source": "pack6-unidades/lancero-andar.jpg",
@@ -988,7 +971,8 @@
         null,
         null,
         null
-      ]
+      ],
+      "keep": 0.5
     },
     {
       "source": "pack6-unidades/hombrearmas-andar.jpg",
@@ -1070,7 +1054,8 @@
         null,
         null,
         null
-      ]
+      ],
+      "keep": 0.5
     },
     {
       "source": "pack6-unidades/tirolargo-andar.jpg",
@@ -1152,7 +1137,8 @@
         null,
         null,
         null
-      ]
+      ],
+      "keep": 0.5
     }
   ]
 }
