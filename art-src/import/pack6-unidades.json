@@ -46,6 +46,12 @@
         "walk": 9,
         "attack": 8
       }
+    },
+    "longbowman": {
+      "fps": {
+        "walk": 9,
+        "attack": 8
+      }
     }
   },
   "sources": [
@@ -1056,6 +1062,88 @@
         },
         {
           "id": "manAtArms",
+          "state": "attack"
+        },
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source": "pack6-unidades/tirolargo-andar.jpg",
+      "grid": [
+        6,
+        2
+      ],
+      "sharedScale": true,
+      "items": [
+        {
+          "id": "longbowman",
+          "state": "walk",
+          "height": 52
+        },
+        {
+          "id": "longbowman",
+          "state": "walk"
+        },
+        {
+          "id": "longbowman",
+          "state": "walk"
+        },
+        {
+          "id": "longbowman",
+          "state": "walk"
+        },
+        {
+          "id": "longbowman",
+          "state": "walk"
+        },
+        {
+          "id": "longbowman",
+          "state": "walk"
+        },
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source": "pack6-unidades/tirolargo-atacar.jpg",
+      "grid": [
+        6,
+        2
+      ],
+      "sharedScale": true,
+      "items": [
+        {
+          "id": "longbowman",
+          "state": "attack",
+          "height": 52
+        },
+        {
+          "id": "longbowman",
+          "state": "attack"
+        },
+        {
+          "id": "longbowman",
+          "state": "attack"
+        },
+        {
+          "id": "longbowman",
+          "state": "attack"
+        },
+        {
+          "id": "longbowman",
+          "state": "attack"
+        },
+        {
+          "id": "longbowman",
           "state": "attack"
         },
         null,
