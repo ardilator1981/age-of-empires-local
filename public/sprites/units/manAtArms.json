@@ -29,6 +29,21 @@
         "x": 33,
         "y": 94
       }
+    },
+    "attack": {
+      "image": "manAtArms-attack.png",
+      "mask": "manAtArms-attack-mask.png",
+      "row": 0,
+      "frames": 6,
+      "fps": 8,
+      "cell": {
+        "w": 73,
+        "h": 100
+      },
+      "anchor": {
+        "x": 37,
+        "y": 94
+      }
     }
   }
 }

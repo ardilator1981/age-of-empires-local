@@ -1024,6 +1024,47 @@
         null,
         null
       ]
+    },
+    {
+      "source": "pack6-unidades/hombrearmas-atacar.jpg",
+      "grid": [
+        6,
+        2
+      ],
+      "sharedScale": true,
+      "items": [
+        {
+          "id": "manAtArms",
+          "state": "attack",
+          "height": 46
+        },
+        {
+          "id": "manAtArms",
+          "state": "attack"
+        },
+        {
+          "id": "manAtArms",
+          "state": "attack"
+        },
+        {
+          "id": "manAtArms",
+          "state": "attack"
+        },
+        {
+          "id": "manAtArms",
+          "state": "attack"
+        },
+        {
+          "id": "manAtArms",
+          "state": "attack"
+        },
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
     }
   ]
 }

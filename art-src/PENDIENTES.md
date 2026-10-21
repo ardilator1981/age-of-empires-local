@@ -21,7 +21,6 @@
 1. Aldeano: recoger, llevar carga y construir · 2. Unidades de combate: andar y atacar · 3. Muerte y edificios por edad · 4. Variantes por edad restantes · 5. Decoración, efectos e interfaz (necesitan además soporte en el motor).
 
 - P2 · **unidad villager**: attack
-- P2 · **unidad manAtArms**: attack, death
 - P2 · **unidad longSwordsman**: walk, attack, death
 - P2 · **unidad pikeman**: walk, attack, death
 - P2 · **unidad skirmisher**: walk, attack, death
@@ -35,6 +34,7 @@
 - P2 · **unidad druzhinnik**: idle, walk, attack, death
 - P2 · **unidad boyarSon**: idle, walk, attack, death
 - P2 · **unidad strelets**: idle, walk, attack, death
+- P2 · **unidad cossack**: idle, walk, attack, death
 
 ## Unidades
 
@@ -42,7 +42,7 @@
 | --- | --- | --- | --- | --- | ---: | --- |
 | villager | Aldeano | 🟡 sin animar | attack | units/villager-attack.png (+ -mask.png) | 2 | `anim:attack-melee` |
 | militia | Milicia | ✅ hecho | — | — | — | — |
-| manAtArms | Hombre de armas | 🟡 sin animar | attack, death | units/manAtArms-attack.png (+ -mask.png)<br>units/manAtArms-death.png (+ -mask.png) | 2 | `anim:attack-melee` `anim:death` |
+| manAtArms | Hombre de armas | 🟡 sin animar | death | units/manAtArms-death.png (+ -mask.png) | 3 | `anim:death` |
 | longSwordsman | Espadachín de mandoble | 🟡 sin animar | walk, attack, death | units/longSwordsman-walk.png (+ -mask.png)<br>units/longSwordsman-attack.png (+ -mask.png)<br>units/longSwordsman-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack-melee` `anim:death` |
 | spearman | Lancero | 🟡 sin animar | death | units/spearman-death.png (+ -mask.png) | 3 | `anim:death` |
 | pikeman | Piquero | 🟡 sin animar | walk, attack, death | units/pikeman-walk.png (+ -mask.png)<br>units/pikeman-attack.png (+ -mask.png)<br>units/pikeman-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack-melee` `anim:death` |
