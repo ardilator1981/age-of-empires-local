@@ -14,6 +14,21 @@
     "idle": {
       "row": 0,
       "frames": 1
+    },
+    "walk": {
+      "image": "throwingAxeman-walk.png",
+      "mask": "throwingAxeman-walk-mask.png",
+      "row": 0,
+      "frames": 6,
+      "fps": 8,
+      "cell": {
+        "w": 61,
+        "h": 106
+      },
+      "anchor": {
+        "x": 31,
+        "y": 100
+      }
     }
   }
 }

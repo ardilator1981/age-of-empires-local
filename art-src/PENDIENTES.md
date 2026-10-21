@@ -29,7 +29,7 @@
 - P2 · **unidad knight**: walk, attack, death
 - P2 · **unidad cavalier**: walk, attack, death
 - P2 · **unidad batteringRam**: walk, attack, death
-- P2 · **unidad throwingAxeman**: walk, attack, death
+- P2 · **unidad throwingAxeman**: attack, death
 - P2 · **unidad druzhinnik**: idle, walk, attack, death
 - P2 · **unidad boyarSon**: idle, walk, attack, death
 - P2 · **unidad strelets**: idle, walk, attack, death
@@ -55,7 +55,7 @@
 | cavalier | Paladín | 🟡 sin animar | walk, attack, death | units/cavalier-walk.png (+ -mask.png)<br>units/cavalier-attack.png (+ -mask.png)<br>units/cavalier-death.png (+ -mask.png) | 2 | `anim:walk:mounted` `anim:attack-melee:mounted` `anim:death:mounted` |
 | batteringRam | Ariete | 🟡 sin animar | walk, attack, death | units/batteringRam-walk.png (+ -mask.png)<br>units/batteringRam-attack.png (+ -mask.png)<br>units/batteringRam-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack-melee` `anim:death` |
 | longbowman | Arquero de tiro largo | 🟡 sin animar | death | units/longbowman-death.png (+ -mask.png) | 3 | `anim:death` |
-| throwingAxeman | Lanzador de hachas | 🟡 sin animar | walk, attack, death | units/throwingAxeman-walk.png (+ -mask.png)<br>units/throwingAxeman-attack.png (+ -mask.png)<br>units/throwingAxeman-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack` `anim:death` |
+| throwingAxeman | Lanzador de hachas | 🟡 sin animar | attack, death | units/throwingAxeman-attack.png (+ -mask.png)<br>units/throwingAxeman-death.png (+ -mask.png) | 2 | `anim:attack` `anim:death` |
 | druzhinnik | Druzhinnik | 🔴 pendiente | idle, walk, attack, death | units/druzhinnik.png (+ -mask.png)<br>units/druzhinnik-walk.png (+ -mask.png)<br>units/druzhinnik-attack.png (+ -mask.png)<br>units/druzhinnik-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack-melee` `anim:death` |
 | boyarSon | Hijo de boyardo | 🔴 pendiente | idle, walk, attack, death | units/boyarSon.png (+ -mask.png)<br>units/boyarSon-walk.png (+ -mask.png)<br>units/boyarSon-attack.png (+ -mask.png)<br>units/boyarSon-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk:mounted` `anim:attack-melee:mounted` `anim:death:mounted` |
 | strelets | Strelets | 🔴 pendiente | idle, walk, attack, death | units/strelets.png (+ -mask.png)<br>units/strelets-walk.png (+ -mask.png)<br>units/strelets-attack.png (+ -mask.png)<br>units/strelets-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack` `anim:death` |

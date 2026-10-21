@@ -52,6 +52,11 @@
         "walk": 9,
         "attack": 8
       }
+    },
+    "throwingAxeman": {
+      "fps": {
+        "walk": 8
+      }
     }
   },
   "sources": [
@@ -1139,6 +1144,41 @@
         null
       ],
       "keep": 0.5
+    },
+    {
+      "source": "pack6-unidades/lanzahachas-andar.jpg",
+      "grid": [
+        3,
+        2
+      ],
+      "sharedScale": true,
+      "items": [
+        {
+          "id": "throwingAxeman",
+          "state": "walk",
+          "height": 48
+        },
+        {
+          "id": "throwingAxeman",
+          "state": "walk"
+        },
+        {
+          "id": "throwingAxeman",
+          "state": "walk"
+        },
+        {
+          "id": "throwingAxeman",
+          "state": "walk"
+        },
+        {
+          "id": "throwingAxeman",
+          "state": "walk"
+        },
+        {
+          "id": "throwingAxeman",
+          "state": "walk"
+        }
+      ]
     }
   ]
 }
