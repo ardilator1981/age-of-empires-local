@@ -48,3 +48,13 @@ for (const [map, seed] of [['arabia', 7], ['arabia', 3], ['pyrenees', 5], ['lake
     console.log(`| ${map} (${seed}) | ${label} | ${mapSame} | ${res} |`);
   }
 }
+
+// 3. Con los poderes activos (todas las IA empiezan en la era 4 y los usan)
+console.log(`\n| Mapa | Inicio | Mapa generado | Poderes activos (era 4, ${Math.min(minutes, 10)} min) |\n| --- | --- | --- | --- |`);
+for (const [map, seed] of [['arabia', 7], ['arabia', 3]]) {
+  const args = ['sim', Math.min(minutes, 10), seed, map, '-', 4].map(String);
+  const a = run(A, args), b = run(B, args);
+  const i = a.findIndex((l, k) => l !== b[k]);
+  const res = i < 0 ? `iguales (${a.length - 2} huellas)` : `difieren desde el tick ${a[i].split(' ')[1]} (${(Number(a[i].split(' ')[1]) / 20).toFixed(0)} s)`;
+  console.log(`| ${map} (${seed}) | era 4 | ${a[0] === b[0] ? 'igual' : 'distinto'} | ${res} |`);
+}

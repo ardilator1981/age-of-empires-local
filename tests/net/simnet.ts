@@ -14,6 +14,7 @@ import type { Entity } from '../../src/game/Entity';
 import { Game, mulberry32, type GameOptions } from '../../src/game/Game';
 import { LockstepPeer, type Desync, type Turn } from '../../src/game/net/lockstep';
 import type { NetCommand } from '../../src/game/net/netCommands';
+import { playerPowers, powerAvail } from '../../src/game/powers';
 import { buildingAvail, unitAvail } from '../../src/game/rules';
 import { snapshot, type SaveData } from '../../src/game/save';
 
@@ -70,6 +71,14 @@ export class ScriptedPlayer {
       if (b.defId !== 'barracks' || !b.complete || b.queue.length >= 2) continue;
       const opts = [...g.reg.units.values()].filter(u => u.trainedAt?.includes('barracks') && unitAvail(g, p, u.id).ok);
       if (opts.length && p.res.food > 120) cmds.push({ t: 'train', at: b.id, unit: opts[Math.floor(this.rnd() * opts.length)].id });
+    }
+
+    // Poderes activos de su civilización (si ya los tiene): de vez en cuando, uno de los disponibles
+    for (const d of playerPowers(g, p)) {
+      if (this.rnd() < 0.3 && powerAvail(g, p, d.id).ok) {
+        const at = army[0] ?? tc;
+        cmds.push({ t: 'mod', id: 'power', args: { id: d.id, x: at ? at.x + (this.rnd() - 0.5) * 10 : 10, y: at ? at.y + (this.rnd() - 0.5) * 10 : 10 } });
+      }
     }
 
     // Cada cierto tiempo, al ataque (en formación o en desorden), y alguna orden suelta de "humano"
@@ -177,6 +186,8 @@ export interface MatchResult {
   /** Retardo medio entre dar una orden y ejecutarla (ms). */
   orderDelayMs: number;
   commands: number;
+  /** Poderes activos lanzados durante la partida (los vistos por el primer cliente: humanos e IA). */
+  powersUsed: number;
   /** Bytes enviados por cliente y segundo (turnos en JSON). */
   bytesPerSec: number;
   wallMs: number;
@@ -199,6 +210,8 @@ export function runMatch(o: MatchOptions): MatchResult {
     // clock: tiempo de juego que lleva este cliente (se para mientras espera turnos o está congelado)
     return { game, peer, bot: new ScriptedPlayer(pid, 1000 + pid), frozenUntil: 0, issuedAt: new Map<number, number>(), clock: 0, streak: 0 };
   });
+  let powersUsed = 0;
+  clients[0].game.events.on('powerUsed', () => { powersUsed++; });
   const targetTicks = Math.round(o.minutes * 60 / TICK_DT);
   const queue: Msg[] = [];
   const linkLast = new Map<string, number>();
@@ -291,6 +304,6 @@ export function runMatch(o: MatchOptions): MatchResult {
     stallPct: Math.round(1000 * stalled / now) / 10,
     longestStallMs: longest,
     orderDelayMs: Math.round(delaySum / Math.max(1, delayN)),
-    commands, bytesPerSec: Math.round(bytes / n / seconds), wallMs: Date.now() - t0,
+    commands, powersUsed, bytesPerSec: Math.round(bytes / n / seconds), wallMs: Date.now() - t0,
   };
 }

@@ -1,7 +1,7 @@
 /**
  * Prototipo de multijugador por pasos sincronizados: mide determinismo, retardo y esperas con
  * redes simuladas (ver tests/net/simnet.ts y docs/multijugador.md).
- * Uso: npm run lockstep -- [minutos] [semilla]
+ * Uso: npm run lockstep -- [minutos] [semilla] [edad inicial]  (con la edad 4 los humanos con guion y las IA usan los poderes activos)
  *
  * Cada partida: 2 humanos "con guion" que dan órdenes por la red + 2 IA hard, en arabia.
  */
@@ -12,13 +12,14 @@ import { runMatch, type NetProfile } from '../tests/net/simnet';
 
 const minutes = Number(process.argv[2] ?? 10);
 const seed = Number(process.argv[3] ?? 3);
+const startAge = Number(process.argv[4] ?? 0);
 const mods = ALL_MODS.filter(m => m.id !== 'declared-war' && m.id !== 'regicide');
 const reg = buildRegistry(mods);
 
 function opts(humans: number, ais: number): GameOptions {
   const civs = ['france', 'britain', 'rus', 'france'];
   return {
-    mapType: 'arabia', mapSize: 96, startingResources: 'standard', startAge: 0, victory: 'conquest', visibility: 'normal',
+    mapType: 'arabia', mapSize: 96, startingResources: 'standard', startAge, victory: 'conquest', visibility: 'normal',
     popLimit: 125, speed: 1, seed, mods: mods.map(m => m.id),
     players: Array.from({ length: humans + ais }, (_, i) => ({ name: `J${i + 1}`, civ: civs[i % 4], color: '#fff', human: i < humans, difficulty: 'hard' as const })),
   };

@@ -10,6 +10,8 @@
  * Modos: `math`; `sim <min> <semilla> <mapa>` (genera el mapa en cada motor); `snap <semilla> <mapa>`
  * (imprime la partida recién creada como JSON) y `sim <min> <semilla> <mapa> <archivo>` (parte de
  * esa partida guardada: todos los motores empiezan del mismo estado, como al unirse a una partida).
+ * Un sexto argumento (`sim <min> <semilla> <mapa> - <edad>`) empieza en esa edad: con la 4, las IA
+ * usan los poderes activos de sus civilizaciones.
  *
  * No usa nada de Node: en el `jsc` de macOS no hay `console` ni `process`.
  */
@@ -52,11 +54,11 @@ if (mode === 'math') {
   const mods = ALL_MODS.filter(m => m.id !== 'declared-war' && m.id !== 'regicide');
   const reg = buildRegistry(mods);
   const civs = ['france', 'britain', 'rus', 'france'];
-  const save: SaveData | undefined = mode === 'sim' && args[4] ? JSON.parse(readText(args[4])) : undefined;
+  const save: SaveData | undefined = mode === 'sim' && args[4] && args[4] !== '-' ? JSON.parse(readText(args[4])) : undefined;
   // Los mapas reales cargan sus datos antes (al partir de una partida guardada no hace falta)
   if (!save) await reg.mapTypes.get(mapType)?.load?.();
   const game = save ? new Game(reg, save.opts, save) : new Game(reg, {
-    mapType, mapSize: 96, startingResources: 'standard', startAge: 0, victory: 'conquest', visibility: 'normal',
+    mapType, mapSize: 96, startingResources: 'standard', startAge: save ? 0 : Number(args[5] ?? 0), victory: 'conquest', visibility: 'normal',
     popLimit: 125, speed: 1, seed, mods: mods.map(m => m.id),
     players: civs.map((civ, i) => ({ name: `IA ${i + 1}`, civ, color: '#fff', human: false, difficulty: 'hard' as const })),
   });
