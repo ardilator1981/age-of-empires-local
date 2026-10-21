@@ -124,6 +124,8 @@ export interface UnitDef extends BaseDef {
   retrainCooldown?: number;
   /** Bonificación a las unidades propias cercanas (p. ej. el General). */
   aura?: UnitAura;
+  /** No se puede eliminar con la orden «Eliminar» (p. ej. el rey: borrarlo sería rendirse). */
+  undeletable?: boolean;
 }
 
 export interface UnitAura {
@@ -148,6 +150,12 @@ export interface BuildingDef extends BaseDef {
   gatherable?: { resource: ResourceId; amount: number; gatherRate: number };
   /** Hace falta tener construido al menos uno de cada uno de estos edificios. */
   requiresBuildings?: string[];
+  /**
+   * Refugio: las unidades propias con alguna de estas clases pueden entrar (órdenes `garrison` y
+   * `ungarrison`), hasta `capacity` a la vez. Dentro no se las puede atacar ni se ven; si el
+   * edificio cae, salen. Ver `game/garrison.ts`.
+   */
+  shelter?: { classes: string[]; capacity: number };
 }
 
 export type AnyDef = UnitDef | BuildingDef;

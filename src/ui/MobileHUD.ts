@@ -287,7 +287,7 @@ export class MobileHUD {
     if (set.build) tabs.push('economy', 'military');
     if (set.train.length) tabs.push('units');
     if (set.research.length) tabs.push('techs');
-    if (set.del || set.stop) tabs.push('actions');
+    if (set.del || set.stop || set.evacuate) tabs.push('actions');
     return tabs;
   }
 
@@ -316,18 +316,20 @@ export class MobileHUD {
       if (set.attackMove) out.push(this.btnFromCmd(set.attackMove));
       if (set.strategy) out.push(this.btnFromCmd(set.strategy, { keepOpen: true }));
       if (set.explore) out.push(this.btnFromCmd(set.explore));
+      if (set.shelter) out.push(this.btnFromCmd(set.shelter));
       if (set.stop) out.push(this.btnFromCmd(set.stop));
       out.push(more('actions'));
       return out;
     }
     if (!set.blds.length) return out;
     const prod = [...set.train, ...set.research];
+    if (set.evacuate) out.push(this.btnFromCmd(set.evacuate));
     if (!prod.length) {
       const d = this.delBtn(set);
       if (d) out.push(d);
       return out;
     }
-    prod.slice(0, 4).forEach(c => out.push(this.btnFromCmd(c)));
+    prod.slice(0, set.evacuate ? 3 : 4).forEach(c => out.push(this.btnFromCmd(c)));
     out.push(more(set.train.length ? 'units' : 'techs'));
     return out;
   }
@@ -431,6 +433,8 @@ export class MobileHUD {
     else if (tab === 'actions') {
       if (set.attackMove) btns.push(this.btnFromCmd(set.attackMove));
       if (set.explore) btns.push(this.btnFromCmd(set.explore));
+      if (set.shelter) btns.push(this.btnFromCmd(set.shelter));
+      if (set.evacuate) btns.push(this.btnFromCmd(set.evacuate));
       if (set.stop) btns.push(this.btnFromCmd(set.stop));
       btns.push({ icon: '🎯', label: 'Centrar', ok: true, tip: '<b>Centrar la cámara</b> en la selección', run: () => this.s.input.centerOnSelection() });
       const d = this.delBtn(set);

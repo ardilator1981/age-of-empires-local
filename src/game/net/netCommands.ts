@@ -34,6 +34,9 @@ export type NetCommand =
   | { t: 'cancel'; at: number; index: number }
   | { t: 'rally'; at: number[]; x: number; y: number; target?: number }
   | { t: 'delete'; ids: number[] }
+  /** Refugiarse en un edificio (`shelter`) / sacar a los refugiados de unos edificios. */
+  | { t: 'garrison'; units: number[]; target: number }
+  | { t: 'ungarrison'; at: number[] }
   /** Pausa (o la quita) para todos. */
   | { t: 'pause'; on: boolean }
   /** Velocidad de la partida para todos. */
@@ -149,6 +152,17 @@ export function applyNetCommand(game: Game, pid: number, c: NetCommand): boolean
       const es = own(game, pid, c.ids);
       for (const e of es) Commands.delete(game, e);
       return !!es.length;
+    }
+    case 'garrison': {
+      const units = own(game, pid, c.units), target = game.get(c.target);
+      if (!units.length || !target || target.owner !== pid) return false;
+      Commands.garrison(game, units, target);
+      return true;
+    }
+    case 'ungarrison': {
+      const blds = own(game, pid, c.at).filter(b => b.kind === 'building');
+      Commands.ungarrison(game, blds);
+      return !!blds.length;
     }
     case 'mod': {
       const fn = game.reg.netCommands.get(c.id);

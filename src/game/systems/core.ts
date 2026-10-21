@@ -8,6 +8,7 @@ import { anchorOf, engageOrder, stanceTarget } from '../army/stances';
 import type { Entity } from '../Entity';
 import type { Game } from '../Game';
 import { hypot } from '../fmath';
+import { leaveShelter } from '../garrison';
 
 /**
  * Sistemas básicos de la simulación. Se registran en el Registry desde el mod
@@ -48,6 +49,8 @@ export class OrderSystem implements System {
     const g = this.game;
     for (const u of g.units) {
       if (u.dead) continue;
+      // Una orden nueva (que no sea refugiarse) saca a la unidad del refugio
+      if (u.inside && u.order && u.order.type !== 'garrison') leaveShelter(g, u);
       if (u.cooldown > 0) u.cooldown -= dt;
       if (u.attackAnim > 0) u.attackAnim -= dt;
       if (!u.order) { u.working = false; continue; }
@@ -76,7 +79,7 @@ export class MovementSystem implements System {
     const g = this.game, m = g.map, mv = BALANCE.movement;
     const units: Entity[] = [];
     for (const u of g.units) {
-      if (u.dead) continue;
+      if (u.dead || u.inside) continue;
       units.push(u);
       if (!u.path.length) { u.moving = false; continue; }
       let speed = g.players[u.owner].getStat(g.unitDef(u), 'speed');

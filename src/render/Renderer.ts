@@ -330,7 +330,7 @@ export class Renderer {
     const minX = Math.min(c0.x, c1.x, c2.x, c3.x) - mg, maxX = Math.max(c0.x, c1.x, c2.x, c3.x) + mg;
     const minY = Math.min(c0.y, c1.y, c2.y, c3.y) - mg, maxY = Math.max(c0.y, c1.y, c2.y, c3.y) + mg;
     for (const e of game.list) {
-      if (e.dead || e.x < minX || e.x > maxX || e.y < minY || e.y > maxY) continue;
+      if (e.dead || e.inside || e.x < minX || e.x > maxX || e.y < minY || e.y > maxY) continue;
       const rx = e.px + (e.x - e.px) * alpha, ry = e.py + (e.y - e.py) * alpha;
       const hb = e.kind === 'unit' ? 0 : this.baseHeight(e);
       const p = e.kind === 'unit' ? cam.worldToScreen(rx, ry) : cam.worldToScreen(rx, ry, hb);

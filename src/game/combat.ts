@@ -84,7 +84,7 @@ export function computeDamage(game: Game, t: Entity, info: DamageInfo): number {
 }
 
 export function dealDamage(game: Game, t: Entity, info: DamageInfo) {
-  if (t.dead || t.kind === 'resource') return;
+  if (t.dead || t.kind === 'resource' || t.inside) return;
   const dmg = computeDamage(game, t, info);
   t.hp -= dmg;
   t.lastHitAt = game.time;

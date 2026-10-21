@@ -22,7 +22,7 @@ export class UIState {
     const out: Entity[] = [];
     for (const id of this.selection) {
       const e = game.get(id);
-      if (e) out.push(e);
+      if (e && !e.inside) out.push(e);
     }
     return out;
   }

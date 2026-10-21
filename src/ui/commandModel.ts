@@ -8,6 +8,7 @@ import {
 } from '../game/rules';
 import type { Session } from '../app/Session';
 import { portrait } from '../render/icons';
+import { canShelterSomewhere, garrisonOf, nearestShelter } from '../game/garrison';
 
 /**
  * Qué se puede hacer con la selección actual. Lo comparten la interfaz de escritorio (rejilla de 15 botones)
@@ -36,6 +37,10 @@ export interface CommandSet {
   /** Auto-exploración (unidades con `autoExplore`). */
   explore: Cmd | null;
   stop: Cmd | null;
+  /** Refugiarse en el edificio propio más cercano que admita a la unidad (unidades con refugio disponible). */
+  shelter: Cmd | null;
+  /** Sacar a los refugiados de los edificios seleccionados. */
+  evacuate: Cmd | null;
   /** Pantalla de estrategia (formación, postura y órdenes tácticas) para las tropas. */
   strategy: Cmd | null;
   /** Unidades que entrenar y tecnologías que investigar en los edificios seleccionados. */
@@ -108,7 +113,7 @@ export function selectionCommands(s: Session): CommandSet {
   const sel = ui.selected(g).filter(e => e.owner === p.id);
   const units = sel.filter(e => e.kind === 'unit');
   const blds = sel.filter(e => e.kind === 'building');
-  const set: CommandSet = { units, blds, build: null, attackMove: null, explore: null, stop: null, strategy: null, train: [], research: [], del: null };
+  const set: CommandSet = { units, blds, build: null, attackMove: null, explore: null, stop: null, shelter: null, evacuate: null, strategy: null, train: [], research: [], del: null };
   if (!sel.length) return set;
   const del: Cmd = {
     icon: '❌', label: 'Eliminar', avail: OK, tip: '<b>Eliminar</b> (Supr)<br>Destruye la selección.',
@@ -164,10 +169,31 @@ export function selectionCommands(s: Session): CommandSet {
         },
       };
     }
+    const sheltering = units.filter(u => canShelterSomewhere(g, u));
+    if (sheltering.length) {
+      set.shelter = {
+        icon: '🏰', label: 'Refugiarse', avail: OK,
+        tip: '<b>Refugiarse</b><br>Entra en el edificio propio más cercano con refugio (también con clic derecho sobre él). Dentro no pueden atacarte.',
+        action: () => {
+          for (const u of sheltering) {
+            const b = nearestShelter(g, u);
+            if (b) s.orders.send({ t: 'garrison', units: [u.id], target: b.id });
+          }
+        },
+      };
+    }
     set.stop = { icon: '✋', label: 'Detener', avail: OK, tip: '<b>Detener</b>', action: () => { s.orders.send({ t: 'stop', units: ids(units) }); } };
     return set;
   }
 
+  const inside = blds.flatMap(b => garrisonOf(g, b));
+  if (inside.length) {
+    set.evacuate = {
+      icon: '🚪', label: 'Sacar', avail: OK, badge: String(inside.length),
+      tip: `<b>Sacar a los refugiados</b><br>${inside.map(u => esc(g.unitDef(u).name)).join(', ')} salen del edificio y quedan a la vista.`,
+      action: () => s.orders.send({ t: 'ungarrison', at: ids(blds) }),
+    };
+  }
   const defId = blds[0].defId;
   if (!blds.every(b => b.defId === defId)) return set;
   if (!blds[0].complete) {

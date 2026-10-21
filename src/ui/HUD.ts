@@ -174,11 +174,13 @@ export class HUD {
       out[5] = set.attackMove;
       out[6] = set.explore;
       out[7] = set.strategy;
+      out[8] = set.shelter;
       out[10] = set.stop;
       out[14] = set.del;
       return out;
     }
-    [...set.train, ...set.research].slice(0, 14).forEach((c, i) => { out[i] = c; });
+    [...set.train, ...set.research].slice(0, 13).forEach((c, i) => { out[i] = c; });
+    out[13] = set.evacuate;
     out[14] = set.del;
     return out;
   }

@@ -8,6 +8,7 @@ import type { Stance } from './army/stances';
 import type { Entity } from './Entity';
 import type { Game } from './Game';
 import { buildingAvail, exploreAvail, techAvail, unitAvail } from './rules';
+import { canShelter, garrisonOf, leaveShelter } from './garrison';
 
 /**
  * Todas las acciones de los jugadores (humano o IA) pasan por aquí.
@@ -155,6 +156,16 @@ export const Commands = {
     }
   },
 
+  /** Las unidades que puedan van a refugiarse en el edificio. */
+  garrison(game: Game, units: Entity[], target: Entity) {
+    for (const u of units) if (canShelter(game, u, target)) setOrder(u, { type: 'garrison', targetId: target.id });
+  },
+
+  /** Saca del refugio a todos los que hay dentro de estos edificios. */
+  ungarrison(game: Game, buildings: Entity[]) {
+    for (const b of buildings) for (const u of garrisonOf(game, b)) leaveShelter(game, u);
+  },
+
   stop(game: Game, units: Entity[]) {
     for (const u of units) if (u.kind === 'unit') setOrder(u, null);
   },
@@ -213,6 +224,7 @@ export const Commands = {
   },
 
   delete(game: Game, e: Entity) {
+    if (e.kind === 'unit' && game.unitDef(e).undeletable) return;
     if (e.kind === 'building' && !e.complete) {
       // Devuelve lo que no se ha llegado a construir
       game.players[e.owner].refund(game.players[e.owner].getCost(game.buildingDef(e)), 1 - e.progress);
@@ -233,7 +245,7 @@ export function smartKind(game: Game, pid: number, units: Entity[], target: Enti
   if (target && !target.dead) {
     if (game.isEnemy(pid, target.owner) && target.kind !== 'resource' && mine.some(u => game.canAttack(u, target, false))) return 'attack';
     if (target.kind === 'resource' || (target.kind === 'building' && !!target.resType && target.owner === pid && target.complete)) return 'gather';
-    if (target.kind === 'building' && target.owner === pid) return 'build';
+    if (target.kind === 'building' && target.owner === pid) return mine.some(u => canShelter(game, u, target)) ? 'move' : 'build';
   }
   return 'move';
 }
@@ -257,6 +269,14 @@ function smartOrder(game: Game, pid: number, units: Entity[], x: number, y: numb
       const rest = mine.filter(u => !g.includes(u));
       if (rest.length) Commands.move(game, rest, target.x, target.y);
       return 'gather';
+    }
+    if (target.kind === 'building' && target.owner === pid && mine.some(u => canShelter(game, u, target))) {
+      // Unidades que el edificio admite en su refugio: entran; el resto, como con cualquier edificio
+      const inn = mine.filter(u => canShelter(game, u, target));
+      Commands.garrison(game, inn, target);
+      const rest = mine.filter(u => !inn.includes(u));
+      if (rest.length) Commands.move(game, rest, x, y);
+      return 'move';
     }
     if (target.kind === 'building' && target.owner === pid) {
       const builders = mine.filter(u => game.unitDef(u).builder);

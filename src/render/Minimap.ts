@@ -69,7 +69,7 @@ export class Minimap {
     ctx.drawImage(this.base, 0, 0);
     const human = g.human;
     for (const e of g.actors) {
-      if (e.dead) continue;
+      if (e.dead || e.inside) continue;
       if (!this.renderer.isVisible(e)) continue;
       ctx.fillStyle = g.players[e.owner].color;
       if (e.kind === 'building') ctx.fillRect(e.tx, e.ty, e.size, e.size);

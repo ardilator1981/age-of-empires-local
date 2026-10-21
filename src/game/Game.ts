@@ -10,6 +10,7 @@ import { Player } from './Player';
 import type { Projectile } from './combat';
 import { decodeState, restoreSystems, restoreWorld, type SaveData } from './save';
 import { hypot } from './fmath';
+import { garrisonOf, leaveShelter } from './garrison';
 
 export interface PlayerSetup {
   name: string;
@@ -188,6 +189,7 @@ export class Game {
    * `hitting` = va a golpear ya; si es false, solo se pregunta si puede ir a por él.
    */
   canAttack(a: Entity, t: Entity, hitting = true): boolean {
+    if (t.inside) return false; // refugiado: no se le puede atacar
     if (!this.isEnemy(a.owner, t.owner)) return false;
     for (const r of this.reg.combatRules) if (!r(this, a, t, hitting)) return false;
     return true;
@@ -320,6 +322,8 @@ export class Game {
     e.dead = true;
     this.anyDead = true;
     if (e.kind !== 'unit') this.occupy(e, false);
+    // Si el edificio cae, quienes estaban refugiados salen (quedan a la vista)
+    if (e.kind === 'building' && this.reg.buildings.get(e.defId)?.shelter) for (const u of garrisonOf(this, e)) leaveShelter(this, u);
   }
 
   kill(e: Entity, killer?: Entity) {

@@ -1,5 +1,6 @@
 import type { GameMod, VictoryDef } from '../../core/types';
 import { attackMoveOrder, attackOrder, exploreOrder, buildOrder, gatherOrder, moveOrder } from '../../game/orders';
+import { garrisonOrder } from '../../game/garrison';
 import { AISystem } from '../../game/systems/AISystem';
 import { FormationSystem, formationOrder } from '../../game/army/groups';
 import {
@@ -56,6 +57,7 @@ export const coreMod: GameMod = {
     reg.addOrder('formation', formationOrder);
     reg.addOrder('gather', gatherOrder);
     reg.addOrder('build', buildOrder);
+    reg.addOrder('garrison', garrisonOrder);
 
     reg.addSystem('playerStats', g => new PlayerStatsSystem(g), 0);
     reg.addSystem('ai', g => new AISystem(g), 5);

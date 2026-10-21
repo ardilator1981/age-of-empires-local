@@ -10,6 +10,9 @@ export type RejectReason = 'resources' | 'placement' | 'population' | 'requireme
 export interface GameEventMap {
   entityCreated: { entity: Entity };
   entityDied: { entity: Entity; killer?: Entity };
+  /** Una unidad entra en el refugio de un edificio / sale de él. */
+  garrisoned: { entity: Entity; building: Entity };
+  ungarrisoned: { entity: Entity; building: Entity };
   unitTrained: { entity: Entity; building: Entity };
   buildingPlaced: { entity: Entity };
   buildingCompleted: { entity: Entity };
