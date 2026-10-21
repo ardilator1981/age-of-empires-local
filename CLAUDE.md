@@ -42,7 +42,7 @@ docs/          flujo-de-trabajo.md (áreas, modelos y esfuerzo), decisiones.md (
 
 ## Qué hay en `main`
 
-Juego base con IA, terreno orgánico con relieve en WebGL2, música y sonido sintéticos, interfaz de escritorio y móvil (PWA, Pages y APK), relieve con roca y pasos, 12 regiones reales sin conexión, arte con imágenes (`src/mods/art/`, flujo en el README), modo Guerra declarada (mod `declared-war`), modo Matar al rey (mod `regicide`, con refugio de unidades en el motor), formaciones, posturas, órdenes tácticas y pantalla de estrategia, guardado y Continuar, calidad gráfica automática y ajustes, y multijugador en red (`docs/multijugador.md`; falta probar WebRTC en dispositivos reales).
+Juego base con IA, civilizaciones que cambian de identidad con la era (Rusia como piloto, eras 0–3), terreno orgánico con relieve en WebGL2, música y sonido sintéticos, interfaz de escritorio y móvil (PWA, Pages y APK), relieve con roca y pasos, 12 regiones reales sin conexión, arte con imágenes (`src/mods/art/`, flujo en el README), modo Guerra declarada (mod `declared-war`), modo Matar al rey (mod `regicide`, con refugio de unidades en el motor), formaciones, posturas, órdenes tácticas y pantalla de estrategia, guardado y Continuar, calidad gráfica automática y ajustes, y multijugador en red (`docs/multijugador.md`; falta probar WebRTC en dispositivos reales).
 
 Reglas que vienen de esas mejoras:
 - **Determinismo (multijugador):** en el código que corre cada tick, `hypot`, `sin` y `cos` de `game/fmath.ts`; nunca `Math.random` ni el reloj.
@@ -79,6 +79,7 @@ Depuración en el navegador: `window.app` y `window.game` están accesibles desd
 - `reg.addAIPlugin(p)`: la IA le pregunta cada turno; puede pedir edificios y unidades, reservar recursos, frenar el entrenamiento o encargarse del ejército.
 - `reg.addHudPanel(def)`, `reg.addWorldOverlay(fn)`, `reg.addMinimapOverlay(fn)`: paneles HTML y dibujos sobre el mapa y el minimapa. `ui.pickPoint` sirve para pedir un punto del mapa.
 - Refugio: un edificio con `shelter: { classes, capacity }` admite unidades propias de esas clases (`game/garrison.ts`, órdenes de red `garrison` y `ungarrison`); dentro no se ven ni se les puede atacar, y si el edificio cae, salen. `UnitDef.undeletable` impide «Eliminar».
+- Civilizaciones por era: `CivDef.eras` (identidad y bonos por edad, `replaces` para sustituir). `Player.rebuildModifiers(game)` recalcula civilización + eras activas + tecnologías + extra (al subir de edad y al cargar; no se guardan). Efecto `gatherYield`: recolectar de un nodo da además otro recurso. La interfaz muestra `player.identity`. Diseño en `docs/civilizaciones.md`.
 - En las unidades: `maxAlive`, `retrainCooldown` y `aura` (bonificación a las tropas cercanas, la aplica `AuraSystem`).
 - `src/game/formation.ts`: formación sencilla en filas; es el gancho para formaciones de verdad.
 

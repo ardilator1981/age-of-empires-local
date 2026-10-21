@@ -15,16 +15,19 @@ const seed = Number(process.argv[4] ?? 12345);
 const war = process.argv.includes('--guerra');
 const prepArg = process.argv.find(a => a.startsWith('--prep='));
 const king = process.argv.includes('--rey');
+const startAge = Number(process.argv.find(a => a.startsWith('--edad='))?.slice(7) ?? 0);
+// --civs=rus,france: civilizaciones de la IA Azul y la Roja (por defecto france y britain)
+const civsArg = process.argv.find(a => a.startsWith('--civs='))?.slice(7).split(',') ?? ['france', 'britain'];
 const mods = ALL_MODS.filter(m => (war || m.id !== 'declared-war') && (king || m.id !== 'regicide'));
 const reg = buildRegistry(mods);
 await reg.mapTypes.get(mapType)?.load?.();
 const game = new Game(reg, {
-  mapType, mapSize: 96, startingResources: 'standard', startAge: 0, victory: king ? 'regicide' : 'conquest', visibility: 'normal',
+  mapType, mapSize: 96, startingResources: 'standard', startAge, victory: king ? 'regicide' : 'conquest', visibility: 'normal',
   popLimit: 125, speed: 1, seed, mods: mods.map(m => m.id),
   warPrepMinutes: prepArg ? Number(prepArg.slice(7)) : undefined,
   players: [
-    { name: 'IA Azul', civ: 'france', color: '#3b6fe0', human: false, difficulty: 'hard' },
-    { name: 'IA Roja', civ: 'britain', color: '#d63a3a', human: false, difficulty: (process.argv[5]?.startsWith('--') ? undefined : process.argv[5] as any) ?? 'normal' },
+    { name: 'IA Azul', civ: civsArg[0], color: '#3b6fe0', human: false, difficulty: 'hard' },
+    { name: 'IA Roja', civ: civsArg[1] ?? 'britain', color: '#d63a3a', human: false, difficulty: (process.argv[5]?.startsWith('--') ? undefined : process.argv[5] as any) ?? 'normal' },
   ],
 });
 const kingLine = (p: number) => { const k = game.units.find(u => !u.dead && u.owner === p && u.defId === 'king'); return k ? (k.inside ? 'rey dentro' : `rey fuera (${Math.round(k.hp)} PV)`) : 'sin rey'; };

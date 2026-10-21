@@ -1,6 +1,6 @@
 # Civilizaciones que evolucionan con las eras (diseño)
 
-Estado: **propuesta de diseño, nada implementado.** Decidido: opción A de §2b (8 eras, la 6 se llama **Contemporánea** y la 7 es el **Futuro próximo**). Decisiones ya tomadas por el usuario: **el juego debe llegar a la era Contemporánea** (7 eras, sin recortar) y **se añade la línea británica, que termina en EE. UU. como potencia actual** (§5.6). Todo lo marcado con 🔶 es especulativo o discutible (decisión de diseño, no hecho histórico). Los hechos históricos están elegidos para ser comprobables; ante la duda se ha preferido omitir.
+Estado: **diseño aprobado. Fase 1 hecha (cimientos del motor y Rusia en las eras 0–3, ver `docs/decisiones.md`); el resto, pendiente.** Decidido: opción A de §2b (8 eras, la 6 se llama **Contemporánea** y la 7 es el **Futuro próximo**). Decisiones ya tomadas por el usuario: **el juego debe llegar a la era Contemporánea** (7 eras, sin recortar) y **se añade la línea británica, que termina en EE. UU. como potencia actual** (§5.6). Todo lo marcado con 🔶 es especulativo o discutible (decisión de diseño, no hecho histórico). Los hechos históricos están elegidos para ser comprobables; ante la duda se ha preferido omitir.
 
 ## 1. La idea
 
