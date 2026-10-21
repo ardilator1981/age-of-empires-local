@@ -293,7 +293,7 @@ Todo esto es la parte más cara del motor; se deja diseñado como hueco para no 
 
 Cada civilización podría tener su **versión histórica** del espionaje (🔶 y con cuidado): informantes y espías bizantinos del mundo mediterráneo, el sistema postal y de información del Estado chino (*yizhan*), servicios de seguridad de las cortes persas, el *Cabinet Noir* francés del s. XVIII, el Servicio Secreto británico (Walsingham en los Tudor), la Cheka/KGB, la CIA/OSS. Solo hace falta una mecánica común más un par de variantes por civilización.
 
-### 8c. Armas nucleares: opciones de jugabilidad (🔶 sin decidir, hay dudas)
+### 8c. Armas nucleares: opciones de jugabilidad (**decidido: propuesta híbrida**)
 
 El riesgo de un arma nuclear en un RTS es que sea un *botón de ganar*: acaba la partida, anula la defensa y deja de ser interesante. Tres enfoques, con sus problemas:
 
@@ -303,7 +303,7 @@ El riesgo de un arma nuclear en un RTS es que sea un *botón de ganar*: acaba la
 | **2. Poder activo táctico** | Un arma de área con enfriamiento largo; destruye todo en un radio y deja una zona contaminada | Espectacular y fácil de entender | Riesgo de snowball y de partidas decididas por quien llega primero |
 | **3. Proyecto de victoria** | Un proyecto largo y visible (como una Maravilla): al completarse ganas, salvo que te lo sabotéen o te destruyan la instalación | Crea un objetivo que obliga a reaccionar; casa con el espionaje | Puede ser monótono; hay que evitar que sea lo único que se haga |
 
-**Propuesta híbrida (a probar con prototipo):** proyecto en 3 etapas (investigación, instalación, ensamblaje) *visible para los rivales con espías*, que da **un solo misil por vez** y con medidas de contención:
+**Propuesta híbrida (aprobada por el usuario; se sigue probando con prototipo):** proyecto en 3 etapas (investigación, instalación, ensamblaje) *visible para los rivales con espías*, que da **un solo misil por vez** y con medidas de contención:
 - coste muy alto y mantenimiento de petróleo y energía;
 - el misil destruye unidades y edificios en un radio, pero **no los búnkeres ni las maravillas**, y deja contaminación temporal (la zona cuesta recursos recolectar);
 - lanzarlo revela la posición del lanzador, y todas las demás civilizaciones reciben una penalización diplomática (embargo) contra el que lo usa;
