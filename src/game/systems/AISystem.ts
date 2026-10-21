@@ -100,7 +100,7 @@ export class AIController {
     }
 
     // 2. Casas
-    const house = [...g.reg.buildings.values()].find(b => (b.popProvided ?? 0) > 0 && b.category === 'economy' && !b.classes.includes('townCenter'));
+    const house = [...g.reg.buildings.values()].find(b => (b.popProvided ?? 0) > 0 && b.category === 'economy' && !b.classes.includes('townCenter') && !b.civs);
     if (house && p.popCap < g.opts.popLimit && p.popCap - p.popUsed <= (p.age >= 2 ? 6 : 3) && (p.pending.get(house.id) ?? 0) === 0) {
       this.build(house.id, this.home, 1, vills);
     }
@@ -142,6 +142,11 @@ export class AIController {
       const r = plugin.think({
         game: g, player: p, home: this.home, army, villagers: vills, buildings: blds, canSpend,
         build: (defId, near) => this.build(defId, near ?? this.home, 1, vills),
+        research: techId => {
+          if (!techAvail(g, p, techId).ok) return false;
+          const b = blds.find(x => x.complete && !x.queue.length && g.reg.tech(techId).researchedAt === x.defId);
+          return !!b && !!Commands.research(g, b, techId);
+        },
         train: unitId => {
           if (!unitAvail(g, p, unitId).ok) return false;
           const b = blds.find(x => x.complete && x.queue.length < 5 && trainablesAt(g, p, x.defId).includes(unitId));
@@ -278,7 +283,7 @@ export class AIController {
 
   private dropBuildingFor(res: string): string | null {
     for (const b of this.game.reg.buildings.values()) {
-      if (b.dropSite?.includes(res) && !b.classes.includes('townCenter') && b.category === 'economy') return b.id;
+      if (b.dropSite?.includes(res) && !b.classes.includes('townCenter') && b.category === 'economy' && !b.civs) return b.id;
     }
     return null;
   }
