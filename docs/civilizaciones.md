@@ -388,7 +388,7 @@ Cada fase se hace en su propia rama (`feat/...`) y pasa `npm run build`, `npm ru
 3. ~~Civilizaciones actuales~~ **Decidido:** Británicos → línea británica/EE. UU., Francos → Francia, Godos y Mongoles se eliminan. **Las partidas guardadas con civilizaciones antiguas se descartan (decidido):** basta subir `SAVE_VERSION` sin escribir migración.
 3b. **Traspaso británico → EE. UU.:** ¿automático al llegar a la Contemporánea, o el jugador elige en la era 5 entre seguir como Reino Unido o dar el salto a EE. UU.? (Por defecto, automático.)
 4. ~~Giro de la era Contemporánea~~ **Decidido: el giro político está bien** (URSS / Rusia posterior a 1991, y los equivalentes de otras civilizaciones). Se modela como mecánicas, sin juicios.
-5. ~~Armas nucleares, aviación~~ **Decidido: se incluirán más adelante, junto con espionaje.** Pendiente: ¿en qué fase, y las nucleares como victoria, como disuasión o como poder de civilización?
+5. ~~Armas nucleares, aviación~~ **Decidido: se incluirán más adelante (fase 7, tras aviación, espionaje y diplomacia) con la propuesta híbrida de §8c.**
 6. **Carreras de eras:** ¿doctrinas excluyentes, mantenimiento, era global «Cronología»? ¿Cuál de ellas?
 7. **Civilizaciones de ciclo corto** (mexicas, incas, Mali): ¿se admiten civilizaciones que terminan en la era 3 o 4?
 8. **Comercio y diplomacia:** ¿son prioridad (fase 5) o se adelantan?
