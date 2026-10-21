@@ -85,6 +85,22 @@ export const BALANCE = {
     repairTimeFactor: 1.5,
   },
 
+  /** Caza y ganadería: animales salvajes y ganado. */
+  wildlife: {
+    /** Segundos entre dos paseos de un animal, mínimo y máximo. */
+    wanderEvery: [6, 16] as [number, number],
+    /** Un animal herido que huye se aleja tantas casillas. */
+    fleeDistance: 8,
+    /** Un animal que contraataca deja de perseguir si el agresor se aleja más de esto de él. */
+    chaseGiveUp: 9,
+    /** Casillas a la redonda donde un cazador busca otro cadáver tras abatir una pieza. */
+    carcassSearch: 10,
+    /** Casillas a la redonda de la base donde la IA caza. */
+    aiHuntRange: 24,
+    /** Ovejas que la IA mantiene por corral. */
+    aiSheepPerCorral: 4,
+  },
+
   /** Ejércitos: formaciones, posturas y órdenes tácticas. */
   army: {
     /** Separación entre huecos de una formación (casillas). */

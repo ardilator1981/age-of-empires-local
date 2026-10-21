@@ -151,7 +151,8 @@ describe('modo Guerra declarada', () => {
     const rest = g.buildings.filter(b => !b.dead && b.owner === 2);
     if (rest.length) {
       expect(g.players[2].defeated).toBe(false);
-      for (const b of rest) g.kill(b, outA);
+      // Sin aldeanos, la IA no puede levantar otro edificio mientras tanto
+      for (const e of g.list.filter(e => !e.dead && e.owner === 2 && (e.kind === 'building' || g.unitDef(e).gatherer))) g.kill(e, outA);
       run(g, 2);
     }
     expect(g.players[2].defeated).toBe(true);

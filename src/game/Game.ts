@@ -124,6 +124,7 @@ export class Game {
         return tc ? { x: tc.x, y: tc.y } : null;
       }).filter((s): s is Pt => !!s);
       this.data.relief = ensurePlayable(gen, starts);
+      gen.wildlife(starts);
       if (opts.visibility !== 'normal') for (const p of this.players) p.explored.fill(1);
     }
     this.systems = reg.systems.map(s => s.factory(this));

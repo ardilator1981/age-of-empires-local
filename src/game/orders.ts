@@ -9,6 +9,7 @@ import { rangeBonus } from './heightRules';
 import type { Entity } from './Entity';
 import type { Game } from './Game';
 import { hypot } from './fmath';
+import { huntStep, wildlifeOf } from './wildlife';
 
 /**
  * Manejadores de órdenes básicos. Cada uno se registra en el Registry con un
@@ -195,7 +196,8 @@ export const gatherOrder: OrderHandler = {
   update(game, u, o, dt) {
     const p = game.players[u.owner];
     const def = game.unitDef(u);
-    const cap = p.getStat(def, 'carryCapacity');
+    const baseCap = p.getStat(def, 'carryCapacity');
+    let cap = baseCap;
     u.working = false;
 
     if (o.phase === 'return') {
@@ -218,6 +220,13 @@ export const gatherOrder: OrderHandler = {
     }
 
     let t = game.get(o.targetId);
+    // Caza: el objetivo es un animal vivo
+    if (t && t.kind === 'unit') {
+      const mul = game.reg.resourceNodes.get(wildlifeOf(game, t)?.carcass ?? '')?.carryMul ?? 1;
+      if (u.carry && u.carry.amount >= baseCap * mul) { o.phase = 'return'; return; }
+      if (!huntStep(game, u, o, t)) setOrder(u, null);
+      return;
+    }
     const valid = t && t.resType && t.amount > 0 && (t.kind === 'resource' || (t.owner === u.owner && t.complete));
     if (!valid) {
       const next = findNextNode(game, u, o);
@@ -230,6 +239,7 @@ export const gatherOrder: OrderHandler = {
     }
     const target = t!;
     o.resType = target.resType;
+    cap = baseCap * (game.nodeDef(target)?.carryMul ?? 1);
     if (!u.carry || u.carry.type !== target.resType) u.carry = { type: target.resType!, amount: 0 };
     if (u.carry.amount >= cap) { o.phase = 'return'; return; }
 

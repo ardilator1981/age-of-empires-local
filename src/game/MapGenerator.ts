@@ -1,6 +1,7 @@
 import type { Pt } from '../core/types';
 import type { Game } from './Game';
 import type { Player } from './Player';
+import { cos, hypot, sin } from './fmath';
 
 /**
  * Herramientas para que los tipos de mapa generen terreno, bosques, recursos y
@@ -342,6 +343,53 @@ export class MapGenerator {
         if (starts.some(s => Math.hypot(s.x - x, s.y - y) < minDistFromStarts)) continue;
         this.forest(x, y, this.rand(minR, maxR));
         break;
+      }
+    }
+  }
+
+  // ------------------------------------------------------------ animales
+
+  /**
+   * Reparte los animales salvajes de `setup.wildlife`: manadas junto a cada base y por el mapa. Se
+   * llama con el mapa ya generado y las bases puestas; las manadas quedan en la zona de las bases
+   * (conectada con ellas) y nunca encima de nada.
+   */
+  wildlife(starts: Pt[]) {
+    const g = this.game, m = g.map, specs = g.reg.setup.wildlife ?? [];
+    if (!starts.length) return;
+    const regions = new Set<number>();
+    for (const s of starts) {
+      const f = g.findFreeTile(s.x, s.y, 10);
+      if (f) regions.add(m.region(Math.floor(f.x), Math.floor(f.y)));
+    }
+    const free = (x: number, y: number) => m.walkable(x, y) && !m.occupant[y * m.w + x] && !m.terrainDef(x, y).water && regions.has(m.region(x, y));
+    const herd = (unit: string, cx: number, cy: number, n: number) => {
+      for (let i = 0; i < n; i++) {
+        for (let t = 0; t < 12; t++) {
+          const x = Math.floor(cx + this.rand(-2, 2)), y = Math.floor(cy + this.rand(-2, 2));
+          if (!free(x, y)) continue;
+          g.spawnUnit(unit, 0, x + 0.5, y + 0.5);
+          break;
+        }
+      }
+    };
+    for (const spec of specs) {
+      if (!g.reg.units.has(spec.unit)) continue;
+      const near = (spec.where === 'base' ? starts : [null]).flatMap(s => Array.from({ length: spec.where === 'base' ? spec.groups : Math.max(1, Math.round(spec.groups * (this.w * this.h) / 2304)) }, () => s));
+      for (const s of near) {
+        for (let t = 0; t < 40; t++) {
+          let x: number, y: number;
+          if (s) {
+            const a = this.rng() * Math.PI * 2, d = this.rand(spec.minDist, spec.maxDist);
+            x = Math.round(s.x + cos(a) * d); y = Math.round(s.y + sin(a) * d);
+          } else {
+            x = this.randInt(2, this.w - 3); y = this.randInt(2, this.h - 3);
+            if (starts.some(p => hypot(p.x - x, p.y - y) < spec.minDist)) continue;
+          }
+          if (!free(x, y)) continue;
+          herd(spec.unit, x + 0.5, y + 0.5, this.randInt(spec.perGroup[0], spec.perGroup[1]));
+          break;
+        }
       }
     }
   }
