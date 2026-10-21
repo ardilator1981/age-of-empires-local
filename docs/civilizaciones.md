@@ -346,20 +346,36 @@ Estado actual (verificado en el código):
 
 Determinismo: los poderes y el comercio deben usar `fmath`, `game.rng()` y datos guardables. Guardado: subir `SAVE_VERSION` con migración cuando cambie `CivDef`/`player.data`. Balance: números de comercio, mantenimiento y doctrinas en `src/config/balance.ts`.
 
-## 10. Orden de implementación por fases
+## 10. Orden de implementación: era por era
+
+**Decidido por el usuario:** producir **una era cada vez**, con todos sus assets y recursos, y sumar la siguiente solo cuando la anterior esté lista. Esto sustituye al plan anterior por «tipo de sistema». Cada era es un «paquete» cerrado y jugable.
+
+### Paquete de una era (definición de «lista»)
+
+1. **Datos:** edificios y tecnologías comunes de la era (§2b), unidades, recursos nuevos de la era y su colocación en el mapa.
+2. **Identidad por civilización:** para cada civilización ya incorporada, su capa de esa era (§5): bonos, unidad única, edificio único, tecnología única.
+3. **Assets:** iconos, sprites (con imágenes o procedurales), prompts de arte (`docs/prompts-nano-banana.md`), sonidos (`sfx.ts` y `CREDITS.md`).
+4. **IA:** que sepa construir e investigar lo de la era (`addAIPlugin` si hace falta).
+5. **Interfaz:** nombres y textos en español, interfaz móvil (`commandModel.ts`).
+6. **Pruebas:** `npm run build`, `npm test`, `npm run simulate -- 20 arabia 1` llegando a esa era; guardado/carga sin diferencias.
+7. **Documentación:** una línea en `docs/decisiones.md`.
+
+### Orden
 
 | Fase | Contenido | Riesgo | Hecho cuando |
 | --- | --- | --- | --- |
-| **0** | Decisiones del §11 y revisión de este documento | — | Usuario aprueba eras y civilizaciones |
-| **1b** | **Árbol común de edificios y tecnologías** (§2b) por eras, en orden: primero Feudal–Imperial (mercado, biblioteca, banco, puerto, universidad…), después Pólvora, Industrial, Contemporánea y, al final, Futuro | Alto (volumen) | Cada era se simula sin bloqueos antes de pasar a la siguiente |
-| **1** | **Eras nuevas (4–6)** como datos vacíos pero con tecnologías de era; sin civilizaciones nuevas aún. Revisar IA y UI para 7 eras | Medio (la IA y el balance asumen 4) | `npm run simulate` llega a la era 6 |
-| **2** | **Bonos por era** (`CivDef.eras`, `rebuildModifiers`, guardado) con una sola civilización: **Rus → Rusia**, solo con datos (unidades únicas, edificios y bonos) | Bajo-medio | Rusia cambia de identidad al subir de era, guardar/cargar sin diferencias |
-| **3** | **Poderes activos** (Tierra quemada, Nagarit…) y `excludes` para doctrinas | Medio | Un poder activo y una doctrina funcionan en red |
-| **4** | **China, Francia y Británicos → EE. UU.** (solo datos más lo de fases 2–3; el crédito y la ayuda a aliados quedan para la fase 5) | Bajo | Simulaciones IA contra IA equilibradas |
-| **5** | **Comercio y diplomacia** (mercado, caravana, relaciones, crédito, ayuda a aliados). **Persia** y **Etiopía** (que lo aprovechan) y la rama EE. UU. completa | Alto | Rutas funcionan en red y guardado |
-| **6** | **Recursos modernos y mantenimiento**; era Contemporánea completa | Alto (balance) | Partida completa a la era 6 sin bloqueos |
-| **7** | **Aviación y armas nucleares** (§8b); el **espionaje** puede adelantarse a la fase 5 junto al comercio y la diplomacia (comparte la visión y las órdenes) | Alto (render, visión, balance) | Aviones, un arma de área y espías funcionan en red y guardado |
-| **8** | **IA por civilización/era**, victorias alternativas, pulido de interfaz y arte | Medio | Todas las civilizaciones juegan con la IA |
+| **0** | Decisiones del §11 | — | Usuario aprueba el diseño |
+| **1** | **Cimientos del motor**, solo lo necesario para la primera era nueva: `CivDef.eras` y recálculo de modificadores (con guardado), `SAVE_VERSION` nuevo (se descartan las partidas antiguas), eliminar Godos y Mongoles, y **Rusia como piloto** limitada a las eras ya existentes (0–3) | Medio | Rusia cambia de identidad de Oscura a Imperial; guardar/cargar iguales |
+| **2** | **Era 4 Pólvora** completa (árbol común + Rusia) y primeras civilizaciones nuevas **solo en eras 0–4**: China, Francia, Británicos | Medio | Las 4 civilizaciones llegan a Pólvora con IA |
+| **3** | **Poderes activos** y `excludes` (doctrinas), porque la era 4–5 los usa (Tierra quemada, levée) | Medio | Funcionan en red |
+| **4** | **Era 5 Industrial** completa: hierro, carbón, ferrocarril, fábrica, aeródromo (aviación básica); Persia y Etiopía entran en eras 0–5 | Alto | Partida a Industrial sin bloqueos |
+| **5** | **Comercio, diplomacia y espionaje** (§8, §8b), porque el árbol de Industrial y Contemporánea ya los necesita (mercado y banco existen en eras anteriores; aquí se activan las rutas) | Alto | Funcionan en red y guardado |
+| **6** | **Era 6 Contemporánea**: petróleo, energía, central nuclear (sin armas todavía), aviación completa, radar; giro político de Rusia y traspaso EE. UU. | Alto (balance) | Partida completa hasta la 6 |
+| **7** | **Armas nucleares** (prototipo descartable, §8c) | Alto | Decidido tras probar si divierte |
+| **8** | **Era 7 Futuro próximo** (IA, robots, drones, fusión) | Muy alto | Solo si la 6 es estable |
+| **9** | **IA por civilización/era**, victorias alternativas y pulido | Medio | Todas las civilizaciones juegan con la IA |
+
+**Regla para sumar eras:** la era N+1 no se empieza hasta que la N cumpla las siete condiciones del paquete. Las civilizaciones se incorporan **con las eras que ya existen** y completan las siguientes a medida que se hacen (una civilización nueva puede entrar con eras 0–N aunque el juego ya llegue más lejos, y se marca «incompleta» en el selector).
 
 Cada fase se hace en su propia rama (`feat/...`) y pasa `npm run build`, `npm run simulate -- 20 arabia 1` y `npm test`.
 
