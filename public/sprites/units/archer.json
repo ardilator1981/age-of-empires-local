@@ -44,6 +44,21 @@
         "x": 36,
         "y": 106
       }
+    },
+    "death": {
+      "image": "archer-death.png",
+      "mask": "archer-death-mask.png",
+      "row": 0,
+      "frames": 4,
+      "fps": 6,
+      "cell": {
+        "w": 86,
+        "h": 100
+      },
+      "anchor": {
+        "x": 43,
+        "y": 94
+      }
     }
   }
 }

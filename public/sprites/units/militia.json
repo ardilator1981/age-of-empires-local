@@ -44,6 +44,21 @@
         "x": 39,
         "y": 104
       }
+    },
+    "death": {
+      "image": "militia-death.png",
+      "mask": "militia-death-mask.png",
+      "row": 0,
+      "frames": 4,
+      "fps": 6,
+      "cell": {
+        "w": 81,
+        "h": 100
+      },
+      "anchor": {
+        "x": 41,
+        "y": 94
+      }
     }
   }
 }

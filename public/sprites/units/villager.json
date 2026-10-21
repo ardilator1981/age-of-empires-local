@@ -134,6 +134,51 @@
         "x": 41,
         "y": 94
       }
+    },
+    "carry-food": {
+      "image": "villager-carry-food.png",
+      "mask": "villager-carry-food-mask.png",
+      "row": 0,
+      "frames": 6,
+      "fps": 9,
+      "cell": {
+        "w": 68,
+        "h": 109
+      },
+      "anchor": {
+        "x": 34,
+        "y": 103
+      }
+    },
+    "carry-gold": {
+      "image": "villager-carry-gold.png",
+      "mask": "villager-carry-gold-mask.png",
+      "row": 0,
+      "frames": 6,
+      "fps": 9,
+      "cell": {
+        "w": 62,
+        "h": 108
+      },
+      "anchor": {
+        "x": 31,
+        "y": 102
+      }
+    },
+    "carry-stone": {
+      "image": "villager-carry-stone.png",
+      "mask": "villager-carry-stone-mask.png",
+      "row": 0,
+      "frames": 6,
+      "fps": 9,
+      "cell": {
+        "w": 62,
+        "h": 108
+      },
+      "anchor": {
+        "x": 31,
+        "y": 102
+      }
     }
   }
 }

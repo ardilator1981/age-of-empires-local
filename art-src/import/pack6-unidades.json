@@ -11,17 +11,22 @@
         "work-stone": 8,
         "work-food": 7,
         "carry-wood": 9,
-        "death": 6
+        "death": 6,
+        "carry-food": 9,
+        "carry-gold": 9,
+        "carry-stone": 9
       }
     },
     "militia": {
       "fps": {
-        "walk": 9
+        "walk": 9,
+        "death": 6
       }
     },
     "archer": {
       "fps": {
-        "walk": 9
+        "walk": 9,
+        "death": 6
       }
     }
   },
@@ -587,6 +592,205 @@
         },
         {
           "id": "villager",
+          "state": "death"
+        },
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source": "pack6-unidades/aldeano-comida.jpg",
+      "grid": [
+        6,
+        2
+      ],
+      "sharedScale": true,
+      "items": [
+        {
+          "id": "villager",
+          "state": "carry-food",
+          "height": 50
+        },
+        {
+          "id": "villager",
+          "state": "carry-food"
+        },
+        {
+          "id": "villager",
+          "state": "carry-food"
+        },
+        {
+          "id": "villager",
+          "state": "carry-food"
+        },
+        {
+          "id": "villager",
+          "state": "carry-food"
+        },
+        {
+          "id": "villager",
+          "state": "carry-food"
+        },
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source": "pack6-unidades/aldeano-mineral.jpg",
+      "grid": [
+        6,
+        2
+      ],
+      "sharedScale": true,
+      "items": [
+        {
+          "id": "villager",
+          "state": "carry-gold",
+          "height": 50
+        },
+        {
+          "id": "villager",
+          "state": "carry-gold"
+        },
+        {
+          "id": "villager",
+          "state": "carry-gold"
+        },
+        {
+          "id": "villager",
+          "state": "carry-gold"
+        },
+        {
+          "id": "villager",
+          "state": "carry-gold"
+        },
+        {
+          "id": "villager",
+          "state": "carry-gold"
+        },
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source": "pack6-unidades/aldeano-mineral.jpg",
+      "grid": [
+        6,
+        2
+      ],
+      "sharedScale": true,
+      "items": [
+        {
+          "id": "villager",
+          "state": "carry-stone",
+          "height": 50
+        },
+        {
+          "id": "villager",
+          "state": "carry-stone"
+        },
+        {
+          "id": "villager",
+          "state": "carry-stone"
+        },
+        {
+          "id": "villager",
+          "state": "carry-stone"
+        },
+        {
+          "id": "villager",
+          "state": "carry-stone"
+        },
+        {
+          "id": "villager",
+          "state": "carry-stone"
+        },
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source": "pack6-unidades/milicia-morir.jpg",
+      "grid": [
+        6,
+        2
+      ],
+      "sharedScale": true,
+      "items": [
+        {
+          "id": "militia",
+          "state": "death",
+          "height": 46
+        },
+        {
+          "id": "militia",
+          "state": "death"
+        },
+        {
+          "id": "militia",
+          "state": "death"
+        },
+        {
+          "id": "militia",
+          "state": "death"
+        },
+        {
+          "id": "militia",
+          "state": "death"
+        },
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source": "pack6-unidades/arquero-morir.jpg",
+      "grid": [
+        6,
+        2
+      ],
+      "sharedScale": true,
+      "items": [
+        {
+          "id": "archer",
+          "state": "death",
+          "height": 46
+        },
+        {
+          "id": "archer",
+          "state": "death"
+        },
+        {
+          "id": "archer",
+          "state": "death"
+        },
+        {
+          "id": "archer",
+          "state": "death"
+        },
+        {
+          "id": "archer",
           "state": "death"
         },
         null,
