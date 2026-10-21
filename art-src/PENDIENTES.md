@@ -20,7 +20,7 @@
 
 1. Aldeano: recoger, llevar carga y construir · 2. Unidades de combate: andar y atacar · 3. Muerte y edificios por edad · 4. Variantes por edad restantes · 5. Decoración, efectos e interfaz (necesitan además soporte en el motor).
 
-- P1 · **unidad villager**: attack, work-food, carry-food, work-wood, carry-wood, work-gold…
+- P1 · **unidad villager**: attack, carry-food, carry-gold, carry-stone, death
 - P2 · **unidad manAtArms**: walk, attack, death
 - P2 · **unidad longSwordsman**: walk, attack, death
 - P2 · **unidad spearman**: walk, attack, death
@@ -40,7 +40,7 @@
 
 | id | nombre | estado | falta | archivos esperados (en public/sprites/) | prio | prompt |
 | --- | --- | --- | --- | --- | ---: | --- |
-| villager | Aldeano | 🟡 sin animar | attack, work-food, carry-food, work-wood, carry-wood, work-gold, carry-gold, work-stone, carry-stone, work-build, death | units/villager-attack.png (+ -mask.png)<br>units/villager-work-food.png (+ -mask.png)<br>units/villager-carry-food.png (+ -mask.png)<br>units/villager-work-wood.png (+ -mask.png)<br>units/villager-carry-wood.png (+ -mask.png)<br>units/villager-work-gold.png (+ -mask.png)<br>units/villager-carry-gold.png (+ -mask.png)<br>units/villager-work-stone.png (+ -mask.png)<br>units/villager-carry-stone.png (+ -mask.png)<br>units/villager-work-build.png (+ -mask.png)<br>units/villager-death.png (+ -mask.png) | 1 | `anim:attack-melee` `anim:work-food` `anim:carry-food` `anim:work-wood` `anim:carry-wood` `anim:work-gold` `anim:carry-gold` `anim:work-stone` `anim:carry-stone` `anim:work-build` `anim:death` |
+| villager | Aldeano | 🟡 sin animar | attack, carry-food, carry-gold, carry-stone, death | units/villager-attack.png (+ -mask.png)<br>units/villager-carry-food.png (+ -mask.png)<br>units/villager-carry-gold.png (+ -mask.png)<br>units/villager-carry-stone.png (+ -mask.png)<br>units/villager-death.png (+ -mask.png) | 1 | `anim:attack-melee` `anim:carry-food` `anim:carry-gold` `anim:carry-stone` `anim:death` |
 | militia | Milicia | 🟡 sin animar | death | units/militia-death.png (+ -mask.png) | 3 | `anim:death` |
 | manAtArms | Hombre de armas | 🟡 sin animar | walk, attack, death | units/manAtArms-walk.png (+ -mask.png)<br>units/manAtArms-attack.png (+ -mask.png)<br>units/manAtArms-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack-melee` `anim:death` |
 | longSwordsman | Espadachín de mandoble | 🟡 sin animar | walk, attack, death | units/longSwordsman-walk.png (+ -mask.png)<br>units/longSwordsman-attack.png (+ -mask.png)<br>units/longSwordsman-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack-melee` `anim:death` |
@@ -241,12 +241,6 @@ Draw a new picture: using the attached character as the exact model (same face, 
 Draw a new picture: using the attached character as the exact model (same face, body, clothes, colors, weapon and magenta cloth), draw 8 poses of walking with a heavy sack of ore over the shoulder. The 8 poses are side by side in a single horizontal row on a plain white background, evenly spaced and not touching. Same viewing angle from slightly above, turned toward the lower right, the same size in every pose, the feet on the same level. Sunlight from the upper left; no shadow, no ground, no motion blur. No writing, no numbers, no frame.
 ```
 
-### `anim:carry-wood`
-
-```text
-Draw a new picture: using the attached character as the exact model (same face, body, clothes, colors, weapon and magenta cloth), draw 8 poses of walking while carrying logs on the shoulder. The 8 poses are side by side in a single horizontal row on a plain white background, evenly spaced and not touching. Same viewing angle from slightly above, turned toward the lower right, the same size in every pose, the feet on the same level. Sunlight from the upper left; no shadow, no ground, no motion blur. No writing, no numbers, no frame.
-```
-
 ### `anim:death`
 
 ```text
@@ -269,36 +263,6 @@ Draw a new picture: using the attached character as the exact model (same face, 
 
 ```text
 Draw a new picture: using the attached character as the exact model (same face, body, clothes, colors, weapon and magenta cloth), draw 6 poses of one complete walking step that loops smoothly: right hoof forward, passing, left hoof forward, passing (the horse moves, the rider stays in the saddle). The 6 poses are side by side in a single horizontal row on a plain white background, evenly spaced and not touching. Same viewing angle from slightly above, turned toward the lower right, the same size in every pose, the feet on the same level. Sunlight from the upper left; no shadow, no ground, no motion blur. No writing, no numbers, no frame.
-```
-
-### `anim:work-build`
-
-```text
-Draw a new picture: using the attached character as the exact model (same face, body, clothes, colors, weapon and magenta cloth), draw 6 poses of hammering with a mallet, crouching. The 6 poses are side by side in a single horizontal row on a plain white background, evenly spaced and not touching. Same viewing angle from slightly above, turned toward the lower right, the same size in every pose, the feet on the same level. Sunlight from the upper left; no shadow, no ground, no motion blur. No writing, no numbers, no frame.
-```
-
-### `anim:work-food`
-
-```text
-Draw a new picture: using the attached character as the exact model (same face, body, clothes, colors, weapon and magenta cloth), draw 6 poses of picking berries from a bush and putting them in a basket (the bush is not drawn). The 6 poses are side by side in a single horizontal row on a plain white background, evenly spaced and not touching. Same viewing angle from slightly above, turned toward the lower right, the same size in every pose, the feet on the same level. Sunlight from the upper left; no shadow, no ground, no motion blur. No writing, no numbers, no frame.
-```
-
-### `anim:work-gold`
-
-```text
-Draw a new picture: using the attached character as the exact model (same face, body, clothes, colors, weapon and magenta cloth), draw 6 poses of swinging a pickaxe down at rocks (the rocks are not drawn). The 6 poses are side by side in a single horizontal row on a plain white background, evenly spaced and not touching. Same viewing angle from slightly above, turned toward the lower right, the same size in every pose, the feet on the same level. Sunlight from the upper left; no shadow, no ground, no motion blur. No writing, no numbers, no frame.
-```
-
-### `anim:work-stone`
-
-```text
-Draw a new picture: using the attached character as the exact model (same face, body, clothes, colors, weapon and magenta cloth), draw 6 poses of swinging a pickaxe down at rocks (the rocks are not drawn). The 6 poses are side by side in a single horizontal row on a plain white background, evenly spaced and not touching. Same viewing angle from slightly above, turned toward the lower right, the same size in every pose, the feet on the same level. Sunlight from the upper left; no shadow, no ground, no motion blur. No writing, no numbers, no frame.
-```
-
-### `anim:work-wood`
-
-```text
-Draw a new picture: using the attached character as the exact model (same face, body, clothes, colors, weapon and magenta cloth), draw 6 poses of chopping a tree trunk with an axe (the tree itself is not drawn). The 6 poses are side by side in a single horizontal row on a plain white background, evenly spaced and not touching. Same viewing angle from slightly above, turned toward the lower right, the same size in every pose, the feet on the same level. Sunlight from the upper left; no shadow, no ground, no motion blur. No writing, no numbers, no frame.
 ```
 
 ### `building:age`

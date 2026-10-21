@@ -4,7 +4,13 @@
   "groups": {
     "villager": {
       "fps": {
-        "walk": 9
+        "walk": 9,
+        "work-wood": 8,
+        "work-build": 8,
+        "work-gold": 8,
+        "work-stone": 8,
+        "work-food": 7,
+        "carry-wood": 9
       }
     },
     "militia": {
@@ -298,6 +304,252 @@
         {
           "id": "archer",
           "state": "attack"
+        },
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source": "pack6-unidades/aldeano-talar.jpg",
+      "grid": [
+        6,
+        2
+      ],
+      "sharedScale": true,
+      "items": [
+        {
+          "id": "villager",
+          "state": "work-wood",
+          "height": 46
+        },
+        {
+          "id": "villager",
+          "state": "work-wood"
+        },
+        {
+          "id": "villager",
+          "state": "work-wood"
+        },
+        {
+          "id": "villager",
+          "state": "work-wood"
+        },
+        {
+          "id": "villager",
+          "state": "work-wood"
+        },
+        {
+          "id": "villager",
+          "state": "work-wood"
+        },
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source": "pack6-unidades/aldeano-construir.jpg",
+      "grid": [
+        6,
+        2
+      ],
+      "sharedScale": true,
+      "items": [
+        {
+          "id": "villager",
+          "state": "work-build",
+          "height": 46
+        },
+        {
+          "id": "villager",
+          "state": "work-build"
+        },
+        {
+          "id": "villager",
+          "state": "work-build"
+        },
+        {
+          "id": "villager",
+          "state": "work-build"
+        },
+        {
+          "id": "villager",
+          "state": "work-build"
+        },
+        {
+          "id": "villager",
+          "state": "work-build"
+        },
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source": "pack6-unidades/aldeano-picar.jpg",
+      "grid": [
+        6,
+        2
+      ],
+      "sharedScale": true,
+      "items": [
+        {
+          "id": "villager",
+          "state": "work-gold",
+          "height": 46
+        },
+        {
+          "id": "villager",
+          "state": "work-gold"
+        },
+        {
+          "id": "villager",
+          "state": "work-gold"
+        },
+        {
+          "id": "villager",
+          "state": "work-gold"
+        },
+        {
+          "id": "villager",
+          "state": "work-gold"
+        },
+        {
+          "id": "villager",
+          "state": "work-gold"
+        },
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source": "pack6-unidades/aldeano-bayas.jpg",
+      "grid": [
+        6,
+        2
+      ],
+      "sharedScale": true,
+      "items": [
+        {
+          "id": "villager",
+          "state": "work-food",
+          "height": 46
+        },
+        {
+          "id": "villager",
+          "state": "work-food"
+        },
+        {
+          "id": "villager",
+          "state": "work-food"
+        },
+        {
+          "id": "villager",
+          "state": "work-food"
+        },
+        {
+          "id": "villager",
+          "state": "work-food"
+        },
+        {
+          "id": "villager",
+          "state": "work-food"
+        },
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source": "pack6-unidades/aldeano-madera.jpg",
+      "grid": [
+        6,
+        2
+      ],
+      "sharedScale": true,
+      "items": [
+        {
+          "id": "villager",
+          "state": "carry-wood",
+          "height": 50
+        },
+        {
+          "id": "villager",
+          "state": "carry-wood"
+        },
+        {
+          "id": "villager",
+          "state": "carry-wood"
+        },
+        {
+          "id": "villager",
+          "state": "carry-wood"
+        },
+        {
+          "id": "villager",
+          "state": "carry-wood"
+        },
+        {
+          "id": "villager",
+          "state": "carry-wood"
+        },
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source": "pack6-unidades/aldeano-picar.jpg",
+      "grid": [
+        6,
+        2
+      ],
+      "sharedScale": true,
+      "items": [
+        {
+          "id": "villager",
+          "state": "work-stone",
+          "height": 46
+        },
+        {
+          "id": "villager",
+          "state": "work-stone"
+        },
+        {
+          "id": "villager",
+          "state": "work-stone"
+        },
+        {
+          "id": "villager",
+          "state": "work-stone"
+        },
+        {
+          "id": "villager",
+          "state": "work-stone"
+        },
+        {
+          "id": "villager",
+          "state": "work-stone"
         },
         null,
         null,
