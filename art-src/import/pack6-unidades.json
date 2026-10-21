@@ -64,6 +64,11 @@
         "walk": 8,
         "attack": 8
       }
+    },
+    "scoutCavalry": {
+      "fps": {
+        "walk": 8
+      }
     }
   },
   "sources": [
@@ -1291,6 +1296,38 @@
         {
           "id": "skirmisher",
           "state": "attack"
+        }
+      ]
+    },
+    {
+      "source": "pack6-unidades/explorador-andar.jpg",
+      "grid": "auto",
+      "sharedScale": true,
+      "items": [
+        {
+          "id": "scoutCavalry",
+          "state": "walk",
+          "height": 62
+        },
+        {
+          "id": "scoutCavalry",
+          "state": "walk"
+        },
+        {
+          "id": "scoutCavalry",
+          "state": "walk"
+        },
+        {
+          "id": "scoutCavalry",
+          "state": "walk"
+        },
+        {
+          "id": "scoutCavalry",
+          "state": "walk"
+        },
+        {
+          "id": "scoutCavalry",
+          "state": "walk"
         }
       ]
     }
