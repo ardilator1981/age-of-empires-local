@@ -29,6 +29,111 @@
         "x": 29,
         "y": 94
       }
+    },
+    "work-wood": {
+      "image": "villager-work-wood.png",
+      "mask": "villager-work-wood-mask.png",
+      "row": 0,
+      "frames": 6,
+      "fps": 8,
+      "cell": {
+        "w": 72,
+        "h": 106
+      },
+      "anchor": {
+        "x": 36,
+        "y": 100
+      }
+    },
+    "work-build": {
+      "image": "villager-work-build.png",
+      "mask": "villager-work-build-mask.png",
+      "row": 0,
+      "frames": 6,
+      "fps": 8,
+      "cell": {
+        "w": 68,
+        "h": 103
+      },
+      "anchor": {
+        "x": 34,
+        "y": 97
+      }
+    },
+    "work-gold": {
+      "image": "villager-work-gold.png",
+      "mask": "villager-work-gold-mask.png",
+      "row": 0,
+      "frames": 6,
+      "fps": 8,
+      "cell": {
+        "w": 68,
+        "h": 105
+      },
+      "anchor": {
+        "x": 34,
+        "y": 99
+      }
+    },
+    "work-food": {
+      "image": "villager-work-food.png",
+      "mask": "villager-work-food-mask.png",
+      "row": 0,
+      "frames": 6,
+      "fps": 7,
+      "cell": {
+        "w": 66,
+        "h": 100
+      },
+      "anchor": {
+        "x": 33,
+        "y": 94
+      }
+    },
+    "carry-wood": {
+      "image": "villager-carry-wood.png",
+      "mask": "villager-carry-wood-mask.png",
+      "row": 0,
+      "frames": 6,
+      "fps": 9,
+      "cell": {
+        "w": 66,
+        "h": 109
+      },
+      "anchor": {
+        "x": 33,
+        "y": 103
+      }
+    },
+    "work-stone": {
+      "image": "villager-work-stone.png",
+      "mask": "villager-work-stone-mask.png",
+      "row": 0,
+      "frames": 6,
+      "fps": 8,
+      "cell": {
+        "w": 68,
+        "h": 105
+      },
+      "anchor": {
+        "x": 34,
+        "y": 99
+      }
+    },
+    "death": {
+      "image": "villager-death.png",
+      "mask": "villager-death-mask.png",
+      "row": 0,
+      "frames": 4,
+      "fps": 6,
+      "cell": {
+        "w": 81,
+        "h": 100
+      },
+      "anchor": {
+        "x": 41,
+        "y": 94
+      }
     }
   }
 }

@@ -30,6 +30,9 @@ const BY_PATTERN: Record<string, [string, number][]> = {
   rock: [['snowRock', 0.12]],
 };
 
+/** Todas las decoraciones posibles (para la lista de arte pendiente, npm run art-todo). */
+export const DECORATION_KINDS: string[] = [...new Set([...Object.values(BY_PATTERN).flat().map(([k]) => k), 'reeds'])];
+
 function hash(x: number, y: number, k: number): number {
   let h = (x * 374761393 + y * 668265263 + k * 2246822519) | 0;
   h = Math.imul(h ^ (h >>> 13), 1274126177);

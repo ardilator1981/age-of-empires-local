@@ -492,6 +492,22 @@ Los ids son los de `src/mods/core/` (`villager`, `militia`, `manAtArms`, `archer
 `barracks`, `townCenter`, `tree`, `goldMine`, `berries`...). Una misma hoja puede servir para varias
 definiciones. Los retratos de la interfaz salen automáticamente de la hoja.
 
+### Flujo completo y lista de pendientes
+
+1. **Mira qué falta:** `npm run art-todo` regenera `art-src/PENDIENTES.md`, una tabla con todo el contenido del juego
+   (unidades con sus animaciones: andar, atacar, recoger, llevar carga, construir y morir; edificios por edad;
+   recursos; terrenos; decoración; efectos; interfaz), su estado (✅ hecho · 🟡 sin animar · 🔴 pendiente), los archivos
+   que se esperan y la clave del prompt. Al final del archivo están los prompts ya rellenados.
+2. **Pide la imagen** a Nano Banana con ese prompt (adjunta la imagen del personaje o edificio) y guárdala sin tocar
+   en `art-src/entrada/<pack>/`.
+3. **Impórtala:** añade la pieza a su configuración de `art-src/import/*.json` (estado `"state": "walk"`, edad
+   `"age": 1`...) y ejecuta `npm run art-import -- art-src/import/<pack>.json`. Si es una unidad o edificio
+   nuevo, declara su hoja en `src/mods/art/index.ts`.
+4. **Actualiza la lista:** `npm run art-todo`. Si añades contenido nuevo al juego (una unidad, un terreno...) o importas
+   arte y no regeneras la lista, `npm test` falla («art-src/PENDIENTES.md está al día») para que no se olvide.
+
+Decoración, efectos e interfaz aparecen en la lista pero el motor todavía no usa sus imágenes: hace falta programarlo.
+
 ### Importar imágenes generadas (varias piezas sobre fondo blanco)
 
 Las imágenes de Nano Banana se dejan sin tocar en `art-src/entrada/<pack>/`. Para cada una se crea una
