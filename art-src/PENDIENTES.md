@@ -23,7 +23,6 @@
 - P2 · **unidad villager**: attack
 - P2 · **unidad longSwordsman**: walk, attack, death
 - P2 · **unidad pikeman**: walk, attack, death
-- P2 · **unidad skirmisher**: walk, attack, death
 - P2 · **unidad scoutCavalry**: walk, attack, death
 - P2 · **unidad lightCavalry**: walk, attack, death
 - P2 · **unidad knight**: walk, attack, death
@@ -35,6 +34,7 @@
 - P2 · **unidad cossack**: idle, walk, attack, death
 - P2 · **unidad deer**: idle, walk, death
 - P2 · **unidad boar**: idle, walk, attack, death
+- P2 · **unidad sheep**: idle, walk, death
 
 ## Unidades
 
@@ -48,7 +48,7 @@
 | pikeman | Piquero | 🟡 sin animar | walk, attack, death | units/pikeman-walk.png (+ -mask.png)<br>units/pikeman-attack.png (+ -mask.png)<br>units/pikeman-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack-melee` `anim:death` |
 | archer | Arquero | ✅ hecho | — | — | — | — |
 | crossbowman | Ballestero | 🟡 sin animar | death | units/crossbowman-death.png (+ -mask.png) | 3 | `anim:death` |
-| skirmisher | Hostigador | 🟡 sin animar | walk, attack, death | units/skirmisher-walk.png (+ -mask.png)<br>units/skirmisher-attack.png (+ -mask.png)<br>units/skirmisher-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack` `anim:death` |
+| skirmisher | Hostigador | 🟡 sin animar | death | units/skirmisher-death.png (+ -mask.png) | 3 | `anim:death` |
 | scoutCavalry | Caballería de exploración | 🟡 sin animar | walk, attack, death | units/scoutCavalry-walk.png (+ -mask.png)<br>units/scoutCavalry-attack.png (+ -mask.png)<br>units/scoutCavalry-death.png (+ -mask.png) | 2 | `anim:walk:mounted` `anim:attack-melee:mounted` `anim:death:mounted` |
 | lightCavalry | Caballería ligera | 🟡 sin animar | walk, attack, death | units/lightCavalry-walk.png (+ -mask.png)<br>units/lightCavalry-attack.png (+ -mask.png)<br>units/lightCavalry-death.png (+ -mask.png) | 2 | `anim:walk:mounted` `anim:attack-melee:mounted` `anim:death:mounted` |
 | knight | Caballero | 🟡 sin animar | walk, attack, death | units/knight-walk.png (+ -mask.png)<br>units/knight-attack.png (+ -mask.png)<br>units/knight-death.png (+ -mask.png) | 2 | `anim:walk:mounted` `anim:attack-melee:mounted` `anim:death:mounted` |

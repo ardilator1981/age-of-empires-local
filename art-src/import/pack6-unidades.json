@@ -58,6 +58,12 @@
         "walk": 8,
         "attack": 8
       }
+    },
+    "skirmisher": {
+      "fps": {
+        "walk": 8,
+        "attack": 8
+      }
     }
   },
   "sources": [
@@ -1212,6 +1218,76 @@
         },
         {
           "id": "throwingAxeman",
+          "state": "attack"
+        }
+      ]
+    },
+    {
+      "source": "pack6-unidades/hostigador-andar.jpg",
+      "grid": [
+        3,
+        2
+      ],
+      "sharedScale": true,
+      "items": [
+        {
+          "id": "skirmisher",
+          "state": "walk",
+          "height": 48
+        },
+        {
+          "id": "skirmisher",
+          "state": "walk"
+        },
+        {
+          "id": "skirmisher",
+          "state": "walk"
+        },
+        {
+          "id": "skirmisher",
+          "state": "walk"
+        },
+        {
+          "id": "skirmisher",
+          "state": "walk"
+        },
+        {
+          "id": "skirmisher",
+          "state": "walk"
+        }
+      ]
+    },
+    {
+      "source": "pack6-unidades/hostigador-atacar.jpg",
+      "grid": [
+        3,
+        2
+      ],
+      "sharedScale": true,
+      "items": [
+        {
+          "id": "skirmisher",
+          "state": "attack",
+          "height": 48
+        },
+        {
+          "id": "skirmisher",
+          "state": "attack"
+        },
+        {
+          "id": "skirmisher",
+          "state": "attack"
+        },
+        {
+          "id": "skirmisher",
+          "state": "attack"
+        },
+        {
+          "id": "skirmisher",
+          "state": "attack"
+        },
+        {
+          "id": "skirmisher",
           "state": "attack"
         }
       ]
