@@ -1,10 +1,10 @@
 # Civilizaciones que evolucionan con las eras (diseño)
 
-Estado: **propuesta de diseño, nada implementado.** Todo lo marcado con 🔶 es especulativo o discutible (decisión de diseño, no hecho histórico). Los hechos históricos están elegidos para ser comprobables; ante la duda se ha preferido omitir.
+Estado: **propuesta de diseño, nada implementado.** Decisiones ya tomadas por el usuario: **el juego debe llegar a la era Moderna** (7 eras, sin recortar) y **se añade la línea británica, que termina en EE. UU. como potencia actual** (§5.6). Todo lo marcado con 🔶 es especulativo o discutible (decisión de diseño, no hecho histórico). Los hechos históricos están elegidos para ser comprobables; ante la duda se ha preferido omitir.
 
 ## 1. La idea
 
-Hoy una civilización es fija (`CivDef`: unos pocos bonos y una unidad única). La propuesta: **cinco linajes históricos cuya identidad cambia al subir de era**. Al pasar de Feudal a Castillos, los rusos dejan de ser «Rus de Kiev» y pasan a ser «Principado de Moscú», con otros bonos, otra unidad única y otro estilo, reflejando a los actores que dominaron cada momento de ese linaje.
+Hoy una civilización es fija (`CivDef`: unos pocos bonos y una unidad única). La propuesta: **seis linajes históricos cuya identidad cambia al subir de era**. Al pasar de Feudal a Castillos, los rusos dejan de ser «Rus de Kiev» y pasan a ser «Principado de Moscú», con otros bonos, otra unidad única y otro estilo, reflejando a los actores que dominaron cada momento de ese linaje.
 
 Principios de diseño:
 
@@ -27,9 +27,9 @@ Hoy: Oscura, Feudal, Castillos, Imperial (índices 0–3, `src/mods/core/world.t
 | 5 | **Industrial** (nueva) | c. 1800–1914 | Fusil, artillería de campaña, ferrocarril, carbón y hierro |
 | 6 | **Moderna** (nueva) | c. 1914–hoy | Motor, petróleo, blindados, aviación; aquí se ofrece un *giro* (§7) |
 
-Alternativas: (a) 6 eras, fundiendo Pólvora en Imperial; (b) 8 eras, partiendo Moderna en «Guerras mundiales» (1914–1945) y «Contemporánea» (1945–hoy). Recomendación: 7, y reservar la Moderna para 2–3 unidades muy potentes en vez de cubrir toda la tecnología del siglo XX. Aviación, armas nucleares y ciberguerra quedan **fuera** (🔶 decisión del usuario, §9).
+Alternativas: (a) 6 eras, fundiendo Pólvora en Imperial; (b) 8 eras, partiendo Moderna en «Guerras mundiales» (1914–1945) y «Contemporánea» (1945–hoy). **Decidido: 7 eras, llegando a la Moderna.** Se reservaría la Moderna para 2–3 unidades muy potentes en vez de cubrir toda la tecnología del siglo XX. Aviación, armas nucleares y ciberguerra quedan **fuera** (🔶 decisión del usuario, §9).
 
-## 3. Elección de las cinco civilizaciones
+## 3. Elección de las civilizaciones
 
 Criterios: (1) *continuidad de linaje* documentable durante 1.500 años o más (aunque cambie de dinastía/régimen); (2) variedad geográfica; (3) variedad de estilo de juego; (4) que cada era tenga una identidad reconocible y diferenciada; (5) que cubran los puntos de extensión que queremos probar (comercio, diplomacia, terreno).
 
@@ -40,6 +40,7 @@ Criterios: (1) *continuidad de linaje* documentable durante 1.500 años o más (
 | **Francia** (francos → Francia) | Europa occidental | Élite montada → fortificación y artillería → movilización | Linaje continuo; encaja con la actual «Francos» del juego; pasa de caballería a ingeniería a ejército de masas |
 | **Persia / Irán** (sasánidas → … → Irán) | Oriente Medio y Asia central | Comercio, movilidad, arquero a caballo, recurso energético | Encrucijada de rutas; hace de banco de pruebas del comercio y de «petróleo» |
 | **Etiopía** (Axum → Zagüe → Salomónica → Etiopía) | Cuerno de África | Defensa en altura, movilización, remontada | Estado cristiano de larga continuidad, uno de los dos estados africanos no colonizados; juega con el relieve (que el motor ya modela) y con la compra de tecnología |
+| **Británicos → EE. UU.** (pedida) | Isla atlántica → Norteamérica | Poder naval, crédito y logística; arqueros → líneas de mosquete → proyección global | Cierra el juego con la superpotencia actual; ver el matiz del «traspaso» en §5.6 |
 
 Alternativas razonadas (sin descartar nada, 🔶 a elegir con el usuario):
 
@@ -49,7 +50,7 @@ Alternativas razonadas (sin descartar nada, 🔶 a elegir con el usuario):
 - **India** (Gupta → sultanatos → mogoles → Raj → India): economía agrícola y comercial enorme; riesgo de cubrir demasiados periodos coloniales.
 - **África occidental** (Ghana → Mali → Songhai → …): comercio transahariano muy rico en la Edad Media, pero el linaje se *rompe* en la era de la pólvora (conquista marroquí de Songhai, 1591) y la colonización. Se podría hacer una civilización «de ciclo corto» (eras 0–4).
 - **Américas:** mexicas y andinos (incas) tienen gran interés, pero su linaje se *interrumpe* hacia la era 3 por la conquista y no hay una continuación comparable. Opciones: civilizaciones «de ciclo corto» (eras 0–3), o un linaje que *cambia de actor* (p. ej. Mesoamérica → Nueva España → México; 🔶 requiere tratar con cuidado la conquista). EE. UU. solo existiría desde la era 4 (civilización de «inicio tardío»).
-- **Civilizaciones actuales** (Británicos, Francos, Godos, Mongoles): se pueden mantener como civilizaciones «clásicas» sin evolución (eras 0–3) en paralelo, o absorberse (Francos → Francia; Británicos → Inglaterra/Reino Unido; Mongoles → como actor que pasa de ser jugador a *evento*). Pregunta §9.
+- **Civilizaciones actuales** (Británicos, Francos, Godos, Mongoles): Británicos se absorben en la nueva línea británica → EE. UU. (decidido), Francos → Francia. Godos y Mongoles se pueden mantener como civilizaciones «clásicas» sin evolución (eras 0–3) en paralelo, o convertirse en linajes futuros / eventos (Mongoles → como actor que pasa de ser jugador a *evento*). Pregunta §9.
 
 ## 4. Convenciones de lectura
 
@@ -167,20 +168,42 @@ Tipos de atributo:
 
 ---
 
+### 5.6 Británicos → Estados Unidos
+
+**Matiz de rigor (importante).** Inglaterra/Reino Unido y EE. UU. no son un linaje de Estado continuo como los otros: EE. UU. nace en 1776 de una ruptura con Gran Bretaña. Lo que sí hay es una **continuidad de tradición** (derecho común, instituciones representativas, lengua, finanzas y poder marítimo anglófonos) y un **relevo del liderazgo mundial** (Gran Bretaña hasta 1914–45, EE. UU. después; el sistema de Bretton Woods de 1944 lo escenifica). El juego lo modela como un **traspaso de testigo** 🔶: al llegar a la era Moderna el jugador pasa de la identidad británica a la americana, conservando los pilares (mar, crédito, logística) y cambiando el resto. Se evita presentar a EE. UU. como «heredero natural» o juzgar su papel: es una mecánica.
+
+**Eje permanente:** poder naval y comercio marítimo, **crédito** (financiación de la guerra mediante deuda y banca: Banco de Inglaterra 1694) y logística a larga distancia. Economía de mercado con comercio; ejército pequeño y de calidad antes de la era 5.
+
+| Era | Identidad | Frase | Bonos / poderes | Únicos |
+| --- | --- | --- | --- | --- |
+| 0 Oscura | **Anglosajones** (Alfredo de Wessex, 871–899; red de *burhs* fortificados; la *fyrd* o leva; Danelaw) | Resistir con ciudades fortificadas | Pasivo: *burhs* (muros y torres de madera baratos). Pasivo: *fyrd*: milicia de aldeanos que aparece al ser atacada una aldea | U: **Fyrdman** (milicia), **Thegn** (guerrero de élite local). E: **Burh**. T: **Reforma de Alfredo** |
+| 1 Feudal | **Inglaterra normanda y angevina** (Hastings 1066; Domesday Book 1086; Magna Carta 1215) | Castillos de piedra y administración | Pasivo: castillos más baratos; censo (Domesday) = más oro por aldea. Pasivo: caballería normanda | U: **Caballero normando**. E: **Castillo de motte-and-bailey** (castillo de mota). T: **Domesday** |
+| 2 Castillos | **Inglaterra Plantagenet** (Eduardo I y los castillos de Gales; arco largo en Crécy 1346 y Agincourt 1415; Parlamento) | El arco largo | Pasivo: arqueros +alcance (el bono actual de Británicos). Pasivo: centros urbanos más baratos | U: **Arquero de tiro largo** (existente). E: **Castillo concéntrico**. T: **Arco largo de tejo** |
+| 3 Imperial | **Inglaterra Tudor** (Armada española derrotada en 1588; East India Company 1600; astilleros reales) | Surge la marina | Pasivo: barcos más baratos; compañías con carta real (comercio marítimo). Primer galeón artillado | U: **Galeón** (marina), **Arcabucero Tudor**. E: **Astillero real**. T: **Carta de compañía** |
+| 4 Pólvora | **Gran Bretaña** (Unión de 1707; Banco de Inglaterra 1694; guerra de los Siete Años 1756–63) + **Trece Colonias** (milicia colonial) | Estado fiscal-militar | Pasivo: **crédito**: pedir oro prestado a devolver con interés 🔶. Pasivo: la Royal Navy bloquea puertos rivales. Pasivo (colonias): milicia local barata | U: **Casaca roja** (infantería de línea con mosquete Brown Bess), **Fragata**. E: **Banco**. T: **Deuda nacional** |
+| 5 Industrial | **Reino Unido** (carbón y hierro; ferrocarril; *Pax Britannica*) y **EE. UU. emergente** (guerra de Secesión 1861–65; ferrocarril transcontinental 1869) | El taller del mundo y el continente que se hace | Pasivo: carbón y hierro con bono de recolección; ferrocarril baratea transporte. Pasivo: la guerra de Secesión es la primera guerra industrial: producción en masa de fusiles (fusil estriado) y buques acorazados | U: **Fusilero Enfield**, **Tirador (rifleman)**, **Acorazado de casco de hierro**. E: **Fábrica**, **Ferrocarril transcontinental** (Maravilla). T: **Intercambiabilidad de piezas** |
+| 6 Moderna | **Estados Unidos como superpotencia** (Primera y Segunda Guerra Mundial; *Lend-Lease* 1941; Bretton Woods 1944; Plan Marshall 1948) | Arsenal de las democracias | Sustituye: bonos de crédito ahora son **ayuda a aliados** (enviar recursos a un aliado le da bono de lealtad) y logística global. Pasivo: producción en masa de vehículos (cadena de montaje); petróleo propio | U: **Carro Sherman**, **Infantería de marina (Marine)**, **Ranger**. E: **Arsenal** (producción en masa), **Base avanzada** (puerto logístico). T: **Préstamo y arriendo** (Lend-Lease), **Plan Marshall** |
+
+**Estilo.** Economía de mercado y crédito, ejército pequeño en la era 3 y gran capacidad de proyección. **Fuertes:** mar, crédito, logística; unidades a distancia. **Débiles:** infantería pesada poco numerosa; la deuda se vuelve un lastre si pierde guerras (el crédito debe devolverse). **Contraataque natural:** caballería rápida y raids en la era 2–3, masas baratas (Rusia, China) en eras 4–5. **Contra quién:** civilizaciones que dependen de rutas terrestres.
+
+**Transiciones.** Se conserva: mar, crédito/comercio y logística. Se sustituye: la unidad (fyrdman → caballero normando → arquero → casaca roja → fusilero → marine/Sherman) y la fuente de oro (aldeas → colonias → banco → industria → ayuda y petróleo). El **traspaso** a EE. UU. conserva el mar y el crédito pero los convierte en logística global y ayuda a aliados.
+
+---
+
 ## 6. Tabla comparativa
 
-| | Rus → Rusia | China | Francia | Persia / Irán | Etiopía |
-| --- | --- | --- | --- | --- | --- |
-| Región | Eurasia norte | Asia oriental | Europa occidental | Oriente Medio | Cuerno de África |
-| Eje | Desgaste y masa | Economía y tecnología | Élite → artillería → masa | Comercio y movilidad | Altura y remontada |
-| Apertura | Lenta | Rápida (granjas) | Media | Media (rutas) | Lenta |
-| Pico | Eras 4–6 | Eras 1–3 | Eras 2–5 | Eras 3–6 | Eras 2 y 5 |
-| Oro | Pieles → tributo → exportación | Moneda → Cantón → exportación | Impuestos → manufactura | Caravanas → seda → petróleo | Puerto → corte → alianzas |
-| Fuerte | Defensa, masa | Economía, tiradores | Élite, fortaleza | Movilidad, comercio | Terreno, milicias |
-| Débil | Apertura | Movilidad | Coste | Infantería | Oro |
-| Contraataque | Caballería arquera | Caballería hostigadora | Masa barata | Raids al comercio | Asedio a distancia |
-| Mecánica propia | Tierra quemada | Granero / muralla | Levée / Legión | Rutas / petróleo | Nagarit / katama |
-| Nueva necesidad del motor | Poderes activos | Ninguna importante | Mercenarios | Comercio | Edificio móvil |
+| | Rus → Rusia | China | Francia | Persia / Irán | Etiopía | Británicos → EE. UU. |
+| --- | --- | --- | --- | --- | --- | --- |
+| Región | Eurasia norte | Asia oriental | Europa occidental | Oriente Medio | Cuerno de África | Isla atlántica → Norteamérica |
+| Eje | Desgaste y masa | Economía y tecnología | Élite → artillería → masa | Comercio y movilidad | Altura y remontada | Mar, crédito, logística |
+| Apertura | Lenta | Rápida (granjas) | Media | Media (rutas) | Lenta | Media (arqueros) |
+| Pico | Eras 4–6 | Eras 1–3 | Eras 2–5 | Eras 3–6 | Eras 2 y 5 | Eras 2 y 6 |
+| Oro | Pieles → tributo → exportación | Moneda → Cantón → exportación | Impuestos → manufactura | Caravanas → seda → petróleo | Puerto → corte → alianzas | Aldeas → banco → ayuda y petróleo |
+| Fuerte | Defensa, masa | Economía, tiradores | Élite, fortaleza | Movilidad, comercio | Terreno, milicias | Mar, crédito, tiradores |
+| Débil | Apertura | Movilidad | Coste | Infantería | Oro | Masa de infantería, deuda |
+| Contraataque | Caballería arquera | Caballería hostigadora | Masa barata | Raids al comercio | Asedio a distancia | Caballería y masas baratas |
+| Mecánica propia | Tierra quemada | Granero / muralla | Levée / Legión | Rutas / petróleo | Nagarit / katama | Crédito / ayuda a aliados |
+| Nueva necesidad del motor | Poderes activos | Ninguna importante | Mercenarios | Comercio | Edificio móvil | Préstamos, marina, ayuda diplomática |
 
 ## 7. Transiciones y «doctrinas» (anti-carrera)
 
@@ -251,8 +274,8 @@ Determinismo: los poderes y el comercio deben usar `fmath`, `game.rng()` y datos
 | **1** | **Eras nuevas (4–6)** como datos vacíos pero con tecnologías de era; sin civilizaciones nuevas aún. Revisar IA y UI para 7 eras | Medio (la IA y el balance asumen 4) | `npm run simulate` llega a la era 6 |
 | **2** | **Bonos por era** (`CivDef.eras`, `rebuildModifiers`, guardado) con una sola civilización: **Rus → Rusia**, solo con datos (unidades únicas, edificios y bonos) | Bajo-medio | Rusia cambia de identidad al subir de era, guardar/cargar sin diferencias |
 | **3** | **Poderes activos** (Tierra quemada, Nagarit…) y `excludes` para doctrinas | Medio | Un poder activo y una doctrina funcionan en red |
-| **4** | **China y Francia** (solo datos más lo de fases 2–3) | Bajo | Simulaciones IA contra IA equilibradas |
-| **5** | **Comercio y diplomacia** (mercado, caravana, relaciones). **Persia** y **Etiopía** (que lo aprovechan) | Alto | Rutas funcionan en red y guardado |
+| **4** | **China, Francia y Británicos → EE. UU.** (solo datos más lo de fases 2–3; el crédito y la ayuda a aliados quedan para la fase 5) | Bajo | Simulaciones IA contra IA equilibradas |
+| **5** | **Comercio y diplomacia** (mercado, caravana, relaciones, crédito, ayuda a aliados). **Persia** y **Etiopía** (que lo aprovechan) y la rama EE. UU. completa | Alto | Rutas funcionan en red y guardado |
 | **6** | **Recursos modernos y mantenimiento**; era Moderna completa | Alto (balance) | Partida completa a la era 6 sin bloqueos |
 | **7** | **IA por civilización/era**, victorias alternativas, pulido de interfaz y arte | Medio | Todas las civilizaciones juegan con la IA |
 
@@ -260,9 +283,10 @@ Cada fase se hace en su propia rama (`feat/...`) y pasa `npm run build`, `npm ru
 
 ## 11. Decisiones que debe tomar el usuario
 
-1. **Cuántas eras:** ¿7 (Pólvora, Industrial, Moderna) o 6 u 8? ¿Dónde se corta la Moderna?
-2. **Lista de civilizaciones:** ¿vale Rus, China, Francia, Persia, Etiopía? ¿Se añade Japón u otra como sexta?
-3. **Civilizaciones actuales** (Británicos, Francos, Godos, Mongoles): ¿conviven sin evolución, se absorben o se eliminan?
+1. ~~Cuántas eras~~ **Decidido: llegar a la Moderna (7 eras).** Queda por ver si la Moderna se parte en dos (guerras mundiales / contemporánea) y los nombres.
+2. **Lista de civilizaciones:** Rus, China, Francia, Persia, Etiopía y Británicos → EE. UU. (decidido). ¿Se añade Japón o Turcos como séptima?
+3. **Civilizaciones actuales:** Británicos se absorben en la nueva línea y Francos en Francia. ¿Godos y Mongoles conviven sin evolución, se convierten en linajes nuevos o se eliminan?
+3b. **Traspaso británico → EE. UU.:** ¿automático al llegar a la Moderna, o el jugador elige en la era 5 entre seguir como Reino Unido o dar el salto a EE. UU.? (Por defecto, automático.)
 4. **Giro de la era Moderna:** ¿se ofrece elegir entre dos regímenes (URSS/Rusia) o una sola identidad? Tema sensible: ¿se quieren eras políticas recientes o se corta antes de 1945?
 5. **Armas nucleares, aviación y ciberguerra:** ¿fuera de alcance?
 6. **Carreras de eras:** ¿doctrinas excluyentes, mantenimiento, era global «Cronología»? ¿Cuál de ellas?
