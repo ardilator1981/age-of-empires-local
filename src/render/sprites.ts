@@ -1,6 +1,7 @@
 import type { Registry } from '../core/Registry';
 import type { Pt, SpriteContext, SpriteFn } from '../core/types';
 import { SpriteCache, ellipse, lerpPt, poly, seeded, shade } from './draw';
+import { registerAnimalSprites } from './animalSprites';
 
 /**
  * Sprites procedurales inspirados en la estética de Age of Empires II (no se usa
@@ -704,6 +705,20 @@ export const building: SpriteFn = s => {
       ctx.fillStyle = '#3a2a1a'; ellipse(ctx, hub.x, hub.y, 2.2 * z, 2.2 * z); ctx.fill();
       break;
     }
+    case 'corral': {
+      // Cercado de estacas con un pesebre de heno
+      const h = 7, post = (px: number, py: number) => { const p = pr(px, py); ctx.strokeStyle = OUTLINE; ctx.lineWidth = Math.max(1.4, 3 * z); line(ctx, p, lift(p, h, z)); ctx.strokeStyle = '#7a5530'; ctx.lineWidth = Math.max(1, 1.8 * z); line(ctx, p, lift(p, h, z)); };
+      const rail = (a: Pt, b: Pt) => { for (const k of [0.45, 0.85]) { const p = lift(a, h * k, z), q = lift(b, h * k, z); ctx.strokeStyle = OUTLINE; ctx.lineWidth = Math.max(1.2, 2.4 * z); line(ctx, p, q); ctx.strokeStyle = '#a97c48'; ctx.lineWidth = Math.max(0.8, 1.4 * z); line(ctx, p, q); } };
+      const m = 0.12, X0 = x0 + m, X1 = x1 - m, Y0 = y0 + m, Y1 = y1 - m;
+      rail(pr(X0, Y0), pr(X1, Y0)); rail(pr(X0, Y0), pr(X0, Y1));
+      for (let i = 0; i <= 4; i++) { post(X0 + ((X1 - X0) * i) / 4, Y0); if (i) post(X0, Y0 + ((Y1 - Y0) * i) / 4); }
+      const c = pr((x0 + x1) / 2, (y0 + y1) / 2);
+      ctx.fillStyle = 'rgba(70,52,22,0.35)'; poly(ctx, [pr(X0, Y0), pr(X1, Y0), pr(X1, Y1), pr(X0, Y1)]); ctx.fill();
+      ctx.fillStyle = '#d6b34a'; ellipse(ctx, c.x + 4 * z, c.y - 2 * z, 7 * z, 3.4 * z); ctx.fill(); outline(ctx, 0.7);
+      rail(pr(X1, Y0), pr(X1, Y1)); rail(pr(X0, Y1), pr(X1, Y1));
+      for (let i = 1; i <= 4; i++) { post(X1, Y0 + ((Y1 - Y0) * i) / 4); post(X0 + ((X1 - X0) * i) / 4, Y1); }
+      break;
+    }
     case 'tower': {
       const stone = material(2, { material: 'stone', wall: P.wall, roof: P.roof });
       towerBox(ctx, pr, x0, y0, x1, y1, 0, 70, z, stone);
@@ -944,4 +959,5 @@ export function registerCoreSprites(reg: Registry) {
   reg.addSprite('tree', tree);
   reg.addSprite('rocks', rocks);
   reg.addSprite('bush', bush);
+  registerAnimalSprites(reg);
 }

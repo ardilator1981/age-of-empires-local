@@ -23,6 +23,7 @@ ningún sonido de *Age of Empires* ni de otros juegos comerciales, ni muestras d
 | Error: no se puede construir ahí | `sfx.ts` (`errPlacement`) | Zumbido grave corto | Original del proyecto |
 | Error: límite de población | `sfx.ts` (`errPopulation`) | Tres golpes de madera que bajan | Original del proyecto |
 | Error genérico (requisitos, cola llena) | `sfx.ts` (`errGeneric`) | Nota grave apagada | Original del proyecto |
+| Animal abatido (caza y sacrificio de ganado) | `sfx.ts` (`animalDeath`) | Dos dientes de sierra con glissando descendente y un soplo de ruido: un balido corto | Original del proyecto |
 | Combate: espada, flecha y golpe a edificio | `sfx.ts` (`hitMelee`, `hitArrow`, `hitBuilding`) | Parciales metálicos inarmónicos; golpe seco; golpe sordo de madera | Original del proyecto |
 | Ambiente: pájaros | `sfx.ts` (`bird`) | Glissandos agudos cortos | Original del proyecto |
 | Ambiente: viento | `src/audio/AudioManager.ts` | Ruido filtrado con ráfagas lentas | Original del proyecto |
