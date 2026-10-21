@@ -27,7 +27,7 @@ Hoy: Oscura, Feudal, Castillos, Imperial (índices 0–3, `src/mods/core/world.t
 | 5 | **Industrial** (nueva) | c. 1800–1914 | Fusil, artillería de campaña, ferrocarril, carbón y hierro |
 | 6 | **Moderna** (nueva) | c. 1914–hoy | Motor, petróleo, blindados, aviación; aquí se ofrece un *giro* (§7) |
 
-Alternativas: (a) 6 eras, fundiendo Pólvora en Imperial; (b) 8 eras, partiendo Moderna en «Guerras mundiales» (1914–1945) y «Contemporánea» (1945–hoy). **Decidido: 7 eras, llegando a la Moderna.** Se reservaría la Moderna para 2–3 unidades muy potentes en vez de cubrir toda la tecnología del siglo XX. Aviación, armas nucleares y ciberguerra quedan **fuera** (🔶 decisión del usuario, §9).
+Alternativas: (a) 6 eras, fundiendo Pólvora en Imperial; (b) 8 eras, partiendo Moderna en «Guerras mundiales» (1914–1945) y «Contemporánea» (1945–hoy). **Decidido: 7 eras, llegando a la Moderna.** Se reservaría la Moderna para 2–3 unidades muy potentes en vez de cubrir toda la tecnología del siglo XX. Aviación, armas nucleares y espionaje **se incluirán más adelante** (decisión del usuario, §8b); la ciberguerra queda fuera.
 
 ## 3. Elección de las civilizaciones
 
