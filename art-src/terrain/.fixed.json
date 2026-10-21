@@ -1,7 +1,11 @@
 {
-  "dirt.jpg": "25cb5001072cda002e2edea8d8da0a10f7d4f32d",
+  "dirt.jpg": "a2571b55661d14fde84bf4b80836b6e759158c14",
   "forest.jpg": "8fae564f3c57a52daf9125c94bf4d7eb08217a5a",
   "grass.jpg": "0b5646c858cb355c388c3345b9a36adc95f35c82",
   "sand.jpg": "c896ac44907ae54c4be1632de661c9db0c90c442",
-  "water.jpg": "8a033465f3042d38e9df887ae806e02f67f3f9d5"
+  "water.jpg": "8a033465f3042d38e9df887ae806e02f67f3f9d5",
+  "desert.jpg": "eb1e5cc6b6b5e07cd84ff9971dd33558191fe23e",
+  "rock.jpg": "e32652fe3609047d850b1f9a7e958790a9a2b7cb",
+  "shallows.jpg": "3b6565ce45f2d458a8264b2363c1beed4b500eeb",
+  "snow.jpg": "9cbfb2fad45239076bf2f7b78b2fa1aa6b7ddc41"
 }
