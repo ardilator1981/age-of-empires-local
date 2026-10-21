@@ -20,7 +20,7 @@ function client(hub: MemoryHub, id: string, role: 'host' | 'guest', clientId = i
   const hashes = new Map<number, number>();
   const net = new NetGame({
     transport: hub.join(id), role, clientId, name: id.toUpperCase(), build: 'test', registry,
-    settings: role === 'host' ? SETTINGS : undefined, me: { civ: 'franks', color: 0 }, now: () => hub.now,
+    settings: role === 'host' ? SETTINGS : undefined, me: { civ: 'france', color: 0 }, now: () => hub.now,
     onHash: (t, h) => hashes.set(t, h),
   });
   return { name: id, net, hashes };
@@ -72,14 +72,14 @@ describe('partida en red (NetGame, transporte en memoria)', () => {
   it('sala: los invitados entran, eligen civilización y color, y el anfitrión añade la IA', async () => {
     const { hub, host, guests, all } = await room(3);
     expect(host.net.lobby!.slots.length).toBe(3);
-    guests[0].net.pick({ civ: 'britons', color: 4, name: 'Ana' });
+    guests[0].net.pick({ civ: 'britain', color: 4, name: 'Ana' });
     guests[1].net.pick({ color: 4 });
     host.net.addAI();
     host.net.setSettings({ mapSize: 80 });
     await play(hub, all, 0.3);
     const l = guests[1].net.lobby!;
     expect(l.slots.map(s => s.kind)).toEqual(['human', 'human', 'human', 'ai']);
-    expect(l.slots[1]).toMatchObject({ name: 'Ana', civ: 'britons', color: 4 });
+    expect(l.slots[1]).toMatchObject({ name: 'Ana', civ: 'britain', color: 4 });
     // El color 4 ya es de Ana: el otro invitado no lo consigue
     expect(l.slots[2].color).not.toBe(4);
     expect(new Set(l.slots.map(s => s.color)).size).toBe(4);

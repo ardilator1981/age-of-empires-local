@@ -29,8 +29,8 @@ describe('guardar y cargar partida', () => {
   it('la partida cargada sigue exactamente igual que la original', async () => {
     const o = options('arabia', { seed: 31 });
     o.players = [
-      { name: 'A', civ: 'franks', color: '#3b6fe0', human: false, difficulty: 'hard' },
-      { name: 'B', civ: 'britons', color: '#d63a3a', human: false, difficulty: 'normal' },
+      { name: 'A', civ: 'france', color: '#3b6fe0', human: false, difficulty: 'hard' },
+      { name: 'B', civ: 'britain', color: '#d63a3a', human: false, difficulty: 'normal' },
     ] as any;
     const a = new Game(reg, o);
     run(a, 13 * 60);

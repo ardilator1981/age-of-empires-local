@@ -11,7 +11,7 @@ import { runMatch, type NetProfile } from './net/simnet';
 /** Partida con `humans` jugadores en red y `ais` de la IA. */
 function netOptions(humans: number, ais: number, seed = 3): GameOptions {
   const o = options('arabia', { seed, players: humans + ais });
-  o.players = o.players.map((p, i) => ({ ...p, civ: ['franks', 'britons', 'goths', 'mongols'][i % 4], human: i < humans, difficulty: 'hard' }));
+  o.players = o.players.map((p, i) => ({ ...p, civ: ['france', 'britain', 'rus', 'france'][i % 4], human: i < humans, difficulty: 'hard' }));
   return o;
 }
 

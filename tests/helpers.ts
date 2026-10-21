@@ -19,7 +19,7 @@ export function options(mapType: string, opts: Partial<GameOptions> & { players?
     popLimit: 125, speed: 1, seed: 1, mods: (opts.war ? ALL_MODS : opts.regicide ? REGICIDE_MODS : BASE_MODS).map(m => m.id),
     ...(opts.regicide ? { victory: 'regicide' } : {}),
     ...opts,
-    players: Array.from({ length: n }, (_, i) => ({ name: `P${i + 1}`, civ: 'franks', color: '#fff', human: i === 0, difficulty: 'normal' as const })),
+    players: Array.from({ length: n }, (_, i) => ({ name: `P${i + 1}`, civ: 'france', color: '#fff', human: i === 0, difficulty: 'normal' as const })),
   } as GameOptions;
 }
 

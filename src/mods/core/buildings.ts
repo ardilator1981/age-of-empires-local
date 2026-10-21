@@ -88,4 +88,38 @@ export const buildings: BuildingDef[] = [
     attack: 11, attackType: 'pierce', range: 8, reloadTime: 2, projectile: 'arrow',
     sprite: 'building', spriteParams: { style: 'castle', inset: 0.05 },
   },
+  // ---- Rusia (rus): un edificio único por era
+  {
+    id: 'gorodishche', name: 'Gorodishche', icon: '🛖', category: 'military', civs: ['rus'],
+    description: 'Edificio único ruso (Edad Oscura): poblado fortificado de madera y tierra. Aloja población y dispara flechas.',
+    classes: ['building', 'tower'], cost: { wood: 130 }, buildTime: 40, size: 2,
+    hp: 900, armor: { melee: 1, pierce: 6 }, los: 7, age: 0, popProvided: 5,
+    attack: 3, attackType: 'pierce', range: 5, reloadTime: 2, projectile: 'arrow',
+    sprite: 'building', spriteParams: { style: 'hall', height: 30, roofHeight: 12, weapons: true },
+  },
+  {
+    id: 'monasteryFortress', name: 'Monasterio-fortaleza', icon: '⛪', category: 'military', civs: ['rus'],
+    description: 'Edificio único ruso (Feudal): refugio para 12 aldeanos, infantería y arqueros; dispara flechas.',
+    classes: ['building'], cost: { wood: 150, stone: 100 }, buildTime: 60, size: 3,
+    hp: 2000, armor: { melee: 2, pierce: 9 }, los: 7, age: 1,
+    attack: 6, attackType: 'pierce', range: 7, reloadTime: 2, projectile: 'arrow',
+    shelter: { classes: ['villager', 'infantry', 'archer'], capacity: 12 },
+    sprite: 'building', spriteParams: { style: 'castle', inset: 0.1, wall: '#d8d0bc', roof: '#3f6f5a' },
+  },
+  {
+    id: 'kremlin', name: 'Kremlin de piedra', icon: '🏰', category: 'economy', civs: ['rus'],
+    description: 'Edificio único ruso (Castillos): centro urbano fortificado. Entrena aldeanos y acepta todos los recursos.',
+    classes: ['building', 'townCenter'], cost: { wood: 200, stone: 450 }, buildTime: 160, size: 4,
+    hp: 3600, armor: { melee: 5, pierce: 8 }, los: 9, age: 2, popProvided: 15, dropSite: ALL, requiresBuildings: ['townCenter'],
+    attack: 8, attackType: 'pierce', range: 7, reloadTime: 2, projectile: 'arrow',
+    sprite: 'building', spriteParams: { style: 'castle', inset: 0.05, wall: '#e9e1cf', roof: '#9a2b2b' },
+  },
+  {
+    id: 'ostrog', name: 'Ostrog', icon: '🗼', category: 'military', civs: ['rus'],
+    description: 'Edificio único ruso (Imperial): puesto fortificado de frontera, barato y de gran alcance.',
+    classes: ['building', 'tower'], cost: { wood: 90, stone: 30 }, buildTime: 50, size: 1,
+    hp: 800, armor: { melee: 1, pierce: 7 }, los: 9, age: 3,
+    attack: 6, attackType: 'pierce', range: 8, reloadTime: 2, projectile: 'arrow',
+    sprite: 'building', spriteParams: { style: 'tower', inset: 0.1 },
+  },
 ];

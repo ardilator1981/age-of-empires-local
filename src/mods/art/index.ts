@@ -51,7 +51,6 @@ export const ART: ArtEntry[] = [
   unitArt('batteringRam', 'units/batteringRam'),
   unitArt('longbowman', 'units/longbowman'),
   unitArt('throwingAxeman', 'units/throwingAxeman'),
-  unitArt('mangudai', 'units/mangudai'),
 ];
 
 /** Hojas de prueba (public/sprites/ejemplo/). Se activan abriendo el juego con ?arte=ejemplo. */

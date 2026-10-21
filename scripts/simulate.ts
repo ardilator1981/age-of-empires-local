@@ -23,8 +23,8 @@ const game = new Game(reg, {
   popLimit: 125, speed: 1, seed, mods: mods.map(m => m.id),
   warPrepMinutes: prepArg ? Number(prepArg.slice(7)) : undefined,
   players: [
-    { name: 'IA Azul', civ: 'franks', color: '#3b6fe0', human: false, difficulty: 'hard' },
-    { name: 'IA Roja', civ: 'britons', color: '#d63a3a', human: false, difficulty: (process.argv[5]?.startsWith('--') ? undefined : process.argv[5] as any) ?? 'normal' },
+    { name: 'IA Azul', civ: 'france', color: '#3b6fe0', human: false, difficulty: 'hard' },
+    { name: 'IA Roja', civ: 'britain', color: '#d63a3a', human: false, difficulty: (process.argv[5]?.startsWith('--') ? undefined : process.argv[5] as any) ?? 'normal' },
   ],
 });
 const kingLine = (p: number) => { const k = game.units.find(u => !u.dead && u.owner === p && u.defId === 'king'); return k ? (k.inside ? 'rey dentro' : `rey fuera (${Math.round(k.hp)} PV)`) : 'sin rey'; };

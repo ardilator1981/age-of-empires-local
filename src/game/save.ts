@@ -151,7 +151,7 @@ export function snapshot(game: Game): SaveData {
     v: SAVE_VERSION, savedAt: Date.now(), opts: { ...game.opts },
     meta: {
       mapType: game.opts.mapType, mapName: (mt?.name ?? game.opts.mapType).replace(' (real)', ''), time: game.time,
-      player: h.name, civ: h.civ.name, age: game.reg.ageName(h.age), players: game.players.length - 1,
+      player: h.name, civ: h.identity, age: game.reg.ageName(h.age), players: game.players.length - 1,
     },
     state: encode(state),
   };
@@ -164,7 +164,7 @@ export function upgradeSave(save: SaveData): SaveData | string {
   let s = save;
   while (s.v < SAVE_VERSION) {
     const mig = MIGRATIONS[s.v];
-    if (!mig) return `No se puede convertir una partida de la versión ${s.v}`;
+    if (!mig) return 'La partida es de una versión antigua (antes de las civilizaciones por eras) y ya no se puede cargar';
     s = mig(s);
   }
   return s;

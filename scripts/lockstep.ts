@@ -16,7 +16,7 @@ const mods = ALL_MODS.filter(m => m.id !== 'declared-war' && m.id !== 'regicide'
 const reg = buildRegistry(mods);
 
 function opts(humans: number, ais: number): GameOptions {
-  const civs = ['franks', 'britons', 'goths', 'mongols'];
+  const civs = ['france', 'britain', 'rus', 'france'];
   return {
     mapType: 'arabia', mapSize: 96, startingResources: 'standard', startAge: 0, victory: 'conquest', visibility: 'normal',
     popLimit: 125, speed: 1, seed, mods: mods.map(m => m.id),

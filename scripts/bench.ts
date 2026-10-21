@@ -21,7 +21,7 @@ function options(mapType: string, mapSize: number, players: number, humanFirst =
     mapType, mapSize, startingResources: 'standard', startAge: 0, victory: 'conquest', visibility: 'normal',
     popLimit: 200, speed: 1, seed: 4242, mods: MODS.map(m => m.id),
     players: Array.from({ length: players }, (_, i) => ({
-      name: `P${i + 1}`, civ: ['franks', 'britons', 'goths', 'mongols'][i % 4], color: '#fff', human: humanFirst && i === 0, difficulty: 'hard' as const,
+      name: `P${i + 1}`, civ: ['france', 'britain', 'rus', 'france'][i % 4], color: '#fff', human: humanFirst && i === 0, difficulty: 'hard' as const,
     })),
   };
 }

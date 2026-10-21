@@ -139,8 +139,8 @@ describe('Matar al rey', () => {
   it('la IA esconde a su rey y juega sin atascarse', async () => {
     const o = options('arabia', { seed: 2, regicide: true });
     o.players = [
-      { name: 'A', civ: 'franks', color: '#3b6fe0', human: false, difficulty: 'hard' },
-      { name: 'B', civ: 'britons', color: '#d63a3a', human: false, difficulty: 'normal' },
+      { name: 'A', civ: 'france', color: '#3b6fe0', human: false, difficulty: 'hard' },
+      { name: 'B', civ: 'britain', color: '#d63a3a', human: false, difficulty: 'normal' },
     ] as any;
     const g = new Game(regicideReg, o);
     run(g, 20 * 60, () => g.over);

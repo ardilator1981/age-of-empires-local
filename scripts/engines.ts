@@ -51,7 +51,7 @@ if (mode === 'math') {
   // Partida de 4 IA en un mapa aleatorio
   const mods = ALL_MODS.filter(m => m.id !== 'declared-war' && m.id !== 'regicide');
   const reg = buildRegistry(mods);
-  const civs = ['franks', 'britons', 'goths', 'mongols'];
+  const civs = ['france', 'britain', 'rus', 'france'];
   const save: SaveData | undefined = mode === 'sim' && args[4] ? JSON.parse(readText(args[4])) : undefined;
   // Los mapas reales cargan sus datos antes (al partir de una partida guardada no hace falta)
   if (!save) await reg.mapTypes.get(mapType)?.load?.();

@@ -153,23 +153,29 @@ export const techs: TechDef[] = [
   },
   // ------------------------------------------------ tecnologías únicas (castillo)
   {
-    id: 'yeomen', name: 'Arqueros ingleses', icon: '🏹', civs: ['britons'], description: 'Arqueros +1 alcance; torres +2 ataque.',
+    id: 'yeomen', name: 'Arqueros ingleses', icon: '🏹', civs: ['britain'], description: 'Arqueros +1 alcance; torres +2 ataque.',
     cost: { food: 750, wood: 450 }, researchTime: 60, age: 2, researchedAt: 'castle',
     effects: [statAll(['archer'], 'range', 1), statAll(['tower'], 'attack', 2)],
   },
   {
-    id: 'beardedAxe', name: 'Hacha barbada', icon: '🪓', civs: ['franks'], description: 'Lanzadores de hachas +1 alcance.',
+    id: 'beardedAxe', name: 'Hacha barbada', icon: '🪓', civs: ['france'], description: 'Lanzadores de hachas +1 alcance.',
     cost: { food: 400, gold: 400 }, researchTime: 60, age: 2, researchedAt: 'castle',
     effects: [{ type: 'stat', target: { ids: ['throwingAxeman'] }, stat: 'range', op: 'add', value: 1 }],
   },
+  // ---- Rusia (rus)
   {
-    id: 'perfusion', name: 'Perfusión', icon: '⏩', civs: ['goths'], description: 'La infantería se entrena el doble de rápido.',
-    cost: { wood: 400, gold: 600 }, researchTime: 40, age: 2, researchedAt: 'castle',
-    effects: [{ type: 'stat', target: { classes: ['infantry'], kind: 'unit' }, stat: 'trainTime', op: 'mul', value: 0.5 }],
+    id: 'russkayaPravda', name: 'Russkaya Pravda', icon: '📜', civs: ['rus'],
+    description: 'Primer código legal de la Rus\' (Feudal): los edificios civiles cuestan un 20% menos.',
+    cost: { food: 200, gold: 100 }, researchTime: 40, age: 1, researchedAt: 'townCenter',
+    effects: [{ type: 'cost', target: { ids: ['house', 'mill', 'lumberCamp', 'miningCamp', 'corral'] }, resource: '*', op: 'mul', value: 0.8 }],
   },
   {
-    id: 'drill', name: 'Instrucción', icon: '🥁', civs: ['mongols'], description: 'Armas de asedio +50% velocidad.',
-    cost: { food: 500, gold: 450 }, researchTime: 60, age: 2, researchedAt: 'castle',
-    effects: [{ type: 'stat', target: { classes: ['siege'] }, stat: 'speed', op: 'mul', value: 1.5 }],
+    id: 'siberianMarch', name: 'Marcha a Siberia', icon: '🧭', civs: ['rus'],
+    description: 'Yermak y los cosacos cruzan los Urales (Imperial): caballería +2 de visión y la caza da un 15% más de oro.',
+    cost: { food: 600, gold: 400 }, researchTime: 60, age: 3, researchedAt: 'castle',
+    effects: [
+      { type: 'stat', target: { classes: ['cavalry'], kind: 'unit' }, stat: 'los', op: 'add', value: 2 },
+      { type: 'gatherYield', nodes: ['deerCarcass', 'boarCarcass'], resource: 'gold', ratio: 0.15 },
+    ],
   },
 ];
