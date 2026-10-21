@@ -265,6 +265,7 @@ export const gatherOrder: OrderHandler = {
     const amt = Math.min(rate * dt, target.amount, cap - u.carry.amount);
     target.amount -= amt;
     u.carry.amount += amt;
+    for (const y of p.yieldBonuses(target.defId)) p.res[y.resource] = (p.res[y.resource] ?? 0) + amt * y.ratio;
     if (target.amount <= 0.001) game.deplete(target, u.owner);
   },
 };

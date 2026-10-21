@@ -198,6 +198,8 @@ export interface Target {
 export type Effect =
   | { type: 'stat'; target: Target; stat: StatKey; op: 'add' | 'mul' | 'set'; value: number }
   | { type: 'gatherRate'; resource: ResourceId | '*'; op: 'add' | 'mul'; value: number }
+  /** Al recolectar de estos nodos (ids de `ResourceNodeDef`), el jugador recibe además `ratio` × lo recolectado en `resource`. */
+  | { type: 'gatherYield'; nodes: string[]; resource: ResourceId; ratio: number }
   | { type: 'cost'; target: Target; resource: ResourceId | '*'; op: 'add' | 'mul'; value: number }
   | { type: 'grant'; resources: Cost }
   | { type: 'upgrade'; from: string; to: string }
@@ -226,13 +228,30 @@ export interface TechDef {
 
 export interface AgeDef { index: number; id: string; name: string }
 
+/** La capa de una civilización en una era: su identidad de ese momento y lo que añade. */
+export interface CivEraDef {
+  /** Identidad vigente desde esta era («Principado de Moscú»). */
+  name: string;
+  description: string;
+  bonuses: Effect[];
+  bonusText: string[];
+  /** Eras anteriores cuyos bonos deja de tener al llegar a esta («sustituye»). */
+  replaces?: number[];
+}
+
 export interface CivDef {
   id: string;
   name: string;
   description: string;
+  /** Bonos permanentes (el eje de la civilización). */
   bonuses: Effect[];
   /** Texto de las bonificaciones para mostrar en el menú. */
   bonusText: string[];
+  /**
+   * Capas por era, por índice de edad. Al subir de edad el jugador suma las de las eras ≤ la suya
+   * (menos las que una posterior sustituya). Ver `Player.rebuildModifiers`.
+   */
+  eras?: Record<number, CivEraDef>;
 }
 
 // ---------------------------------------------------------------- mapas, victoria y partida

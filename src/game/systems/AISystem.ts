@@ -40,7 +40,7 @@ export class AIController {
 
   constructor(private game: Game, private p: Player) {
     this.cfg = AI_DIFFICULTY[p.difficulty] ?? AI_DIFFICULTY.normal;
-    if (this.cfg.gather !== 1) p.addEffects([{ type: 'gatherRate', resource: '*', op: 'mul', value: this.cfg.gather }], game);
+    if (this.cfg.gather !== 1) p.addEffects([{ type: 'gatherRate', resource: '*', op: 'mul', value: this.cfg.gather }], game, true);
     this.waveSize = this.cfg.wave;
     this.nextThink = game.rng() * this.cfg.think;
   }

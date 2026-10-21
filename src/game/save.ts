@@ -18,7 +18,9 @@ import type { Game, GameOptions } from './Game';
  * aplican las migraciones de `MIGRATIONS`; una de una versión posterior no se carga.
  */
 
-export const SAVE_VERSION = 1;
+export const SAVE_VERSION = 2;
+// v2: las civilizaciones cambian de identidad con las eras (Godos y Mongoles desaparecen, Francos →
+// France, Británicos → Britain). Las partidas de la v1 se descartan, sin migración.
 
 /** Migraciones: `MIGRATIONS[v]` convierte una partida de la versión v en la v+1. */
 const MIGRATIONS: Record<number, (s: SaveData) => SaveData> = {};
@@ -181,17 +183,14 @@ export function restoreWorld(game: Game, st: any) {
   m.version++;
   m.obstaclesChanged();
 
-  // Jugadores: civilización y tecnologías otra vez (recalcula los modificadores), luego sus datos
+  // Jugadores: sus datos (edad y tecnologías incluidas) y luego los modificadores, que no se guardan:
+  // civilización + eras ≤ edad + tecnologías, recalculados
   for (const sp of st.players) {
     const p = game.players[sp.id];
     if (!p) continue;
-    for (const id of sp.researched as Set<string>) {
-      if (p.researched.has(id) || !reg.techs.has(id)) continue;
-      const effects = reg.tech(id).effects.filter(e => e.type !== 'grant' && e.type !== 'custom');
-      p.addEffects(effects, game);
-      p.researched.add(id);
-    }
     for (const k of PLAYER_FIELDS) (p as any)[k] = sp[k];
+    for (const id of [...p.researched]) if (!reg.techs.has(id)) p.researched.delete(id);
+    p.rebuildModifiers(game);
     // Partidas de antes sin `visible`: la niebla de este instante se rellena en el siguiente cálculo
     if (sp.visible) p.visible.set(sp.visible);
   }

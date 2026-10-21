@@ -229,10 +229,14 @@ export class ProductionSystem implements System {
     p.researched.add(techId);
     p.addEffects(t.effects, g);
     if (t.setsAge !== undefined) {
+      const before = p.identity;
       p.age = t.setsAge;
+      p.applyEraOneOffs(p.age, g);
+      p.rebuildModifiers(g);
       g.events.emit('ageReached', { player: p, age: p.age });
       const name = g.reg.ageName(p.age);
       g.notify(p.isHuman ? `¡Has avanzado a la ${name}!` : `${p.name} ha avanzado a la ${name}`, undefined, p.isHuman ? 'good' : 'info');
+      if (p.isHuman && p.identity !== before) g.notify(`Tu civilización es ahora: ${p.identity}`, p.id, 'good');
     } else if (p.isHuman) {
       g.notify(`Investigación completada: ${t.name}`, p.id, 'good');
     }

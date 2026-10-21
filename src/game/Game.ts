@@ -101,13 +101,15 @@ export class Game {
       const p = new Player(i + 1, ps.name, ps.color, civ, ps.human, ps.difficulty, this.map.w, this.map.h);
       for (const r of reg.resources.values()) p.res[r.id] = r.start[opts.startingResources];
       p.addEffects(civ.bonuses, this);
+      p.age = Math.min(opts.startAge, reg.ages.length - 1);
+      for (let era = 0; era <= p.age; era++) p.applyEraOneOffs(era, this);
       for (const t of reg.techs.values()) {
         if (t.setsAge !== undefined && t.setsAge <= opts.startAge && (!t.civs || t.civs.includes(civ.id))) {
           p.researched.add(t.id);
           p.addEffects(t.effects, this);
         }
       }
-      p.age = Math.min(opts.startAge, reg.ages.length - 1);
+      p.rebuildModifiers(this);
       this.players.push(p);
     });
     this.humanId = this.players.find(p => p.isHuman)?.id ?? 1;

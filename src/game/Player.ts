@@ -1,4 +1,4 @@
-import type { AnyDef, CivDef, Cost, Effect, StatKey, Target } from '../core/types';
+import type { AnyDef, CivDef, CivEraDef, Cost, Effect, StatKey, Target } from '../core/types';
 import type { Game } from './Game';
 
 interface Matchable { id: string; kind?: string; classes?: string[] }
@@ -27,6 +27,11 @@ function baseStat(def: AnyDef, stat: StatKey): number {
     case 'popProvided': return d.popProvided ?? 0;
     case 'carryCapacity': return d.carryCapacity ?? 0;
   }
+}
+
+/** Los efectos que son modificadores (se recalculan); el resto (`grant`, `upgrade`, `custom`) se aplica una vez. */
+export function isModifier(e: Effect): boolean {
+  return e.type === 'stat' || e.type === 'gatherRate' || e.type === 'cost' || e.type === 'gatherYield';
 }
 
 function applyOp(v: number, op: 'add' | 'mul' | 'set', val: number): number {
@@ -60,7 +65,10 @@ export class Player {
   lastDeath: Record<string, number> = {};
   /** Almacén libre para sistemas y mods. */
   data: Record<string, any> = {};
+  /** Modificadores que no vienen de la civilización ni de las tecnologías (p. ej. el ritmo de la IA): sobreviven a `rebuildModifiers`. */
+  private extraMods: Effect[] = [];
   private cache = new Map<string, number>();
+  private yieldCache = new Map<string, { resource: string; ratio: number }[]>();
 
   constructor(
     public id: number,
@@ -75,6 +83,28 @@ export class Player {
     this.explored = new Uint8Array(mapW * mapH);
     this.visible = new Uint8Array(mapW * mapH);
   }
+
+  /** Eras de la civilización que cuentan a esta edad: las ≤ edad, salvo las que una posterior sustituye. */
+  activeEras(age = this.age): number[] {
+    const eras = this.civ.eras;
+    if (!eras) return [];
+    const upTo = Object.keys(eras).map(Number).filter(i => i <= age).sort((a, b) => a - b);
+    const replaced = new Set<number>();
+    for (const i of upTo) for (const r of eras[i].replaces ?? []) replaced.add(r);
+    return upTo.filter(i => !replaced.has(i));
+  }
+
+  /** La capa de identidad vigente: la de la era más alta ≤ la edad que tenga nombre. */
+  get eraDef(): CivEraDef | undefined {
+    const eras = this.civ.eras;
+    if (!eras) return undefined;
+    let best = -1;
+    for (const k of Object.keys(eras)) { const i = Number(k); if (i <= this.age && i > best) best = i; }
+    return best >= 0 ? eras[best] : undefined;
+  }
+
+  /** Nombre con el que se muestra la civilización ahora («Zarato ruso»; sin eras, el de la civilización). */
+  get identity(): string { return this.eraDef?.name ?? this.civ.name; }
 
   count(defId: string): number { return this.counts.get(defId) ?? 0; }
   countAll(defId: string): number { return this.count(defId) + (this.pending.get(defId) ?? 0); }
@@ -135,7 +165,42 @@ export class Player {
     return cur;
   }
 
-  addEffects(effects: Effect[], game: Game) {
+  /** Rendimiento extra al recolectar de un nodo (ver el efecto `gatherYield`). */
+  yieldBonuses(nodeId: string): { resource: string; ratio: number }[] {
+    let out = this.yieldCache.get(nodeId);
+    if (!out) {
+      out = [];
+      for (const m of this.modifiers) if (m.type === 'gatherYield' && m.nodes.includes(nodeId)) out.push({ resource: m.resource, ratio: m.ratio });
+      this.yieldCache.set(nodeId, out);
+    }
+    return out;
+  }
+
+  /**
+   * Recalcula los modificadores desde cero: civilización + capas de las eras activas + tecnologías
+   * investigadas + los extra. Se llama al cambiar de edad y al cargar una partida (los
+   * modificadores no se guardan). Los efectos de una sola vez (`grant`, `upgrade`, `custom`) no
+   * se repiten: se aplican al conseguirlos (`addEffects`) y su resultado sí se guarda.
+   */
+  rebuildModifiers(game: Game) {
+    const mods: Effect[] = [...this.extraMods];
+    const take = (effects: Effect[]) => { for (const e of effects) if (isModifier(e)) mods.push(e); };
+    take(this.civ.bonuses);
+    for (const i of this.activeEras()) take(this.civ.eras![i].bonuses);
+    for (const id of this.researched) { const t = game.reg.techs.get(id); if (t) take(t.effects); }
+    this.modifiers = mods;
+    this.cache.clear();
+    this.yieldCache.clear();
+    game.refreshHp(this.id);
+  }
+
+  /** Al entrar en una era: los efectos de una sola vez de su capa (los modificadores los recalcula `rebuildModifiers`). */
+  applyEraOneOffs(era: number, game: Game) {
+    const def = this.civ.eras?.[era];
+    if (def) this.addEffects(def.bonuses.filter(e => !isModifier(e)), game);
+  }
+
+  addEffects(effects: Effect[], game: Game, extra = false) {
     for (const e of effects) {
       switch (e.type) {
         case 'grant':
@@ -150,9 +215,11 @@ export class Player {
           break;
         default:
           this.modifiers.push(e);
+          if (extra) this.extraMods.push(e);
       }
     }
     this.cache.clear();
+    this.yieldCache.clear();
     game.refreshHp(this.id);
   }
 }
