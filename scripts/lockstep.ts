@@ -12,7 +12,7 @@ import { runMatch, type NetProfile } from '../tests/net/simnet';
 
 const minutes = Number(process.argv[2] ?? 10);
 const seed = Number(process.argv[3] ?? 3);
-const mods = ALL_MODS.filter(m => m.id !== 'declared-war');
+const mods = ALL_MODS.filter(m => m.id !== 'declared-war' && m.id !== 'regicide');
 const reg = buildRegistry(mods);
 
 function opts(humans: number, ais: number): GameOptions {

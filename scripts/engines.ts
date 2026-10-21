@@ -49,7 +49,7 @@ if (mode === 'math') {
   for (const [name, fn] of tests) for (let i = 0; i < N; i++) out(`math ${name} ${i} ${bits(fn())}`);
 } else {
   // Partida de 4 IA en un mapa aleatorio
-  const mods = ALL_MODS.filter(m => m.id !== 'declared-war');
+  const mods = ALL_MODS.filter(m => m.id !== 'declared-war' && m.id !== 'regicide');
   const reg = buildRegistry(mods);
   const civs = ['franks', 'britons', 'goths', 'mongols'];
   const save: SaveData | undefined = mode === 'sim' && args[4] ? JSON.parse(readText(args[4])) : undefined;

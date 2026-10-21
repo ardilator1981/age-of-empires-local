@@ -112,6 +112,16 @@ export const BALANCE = {
     zoneRadius: 6,
   },
 
+  /** Modo "Matar al rey" (mod regicide). Las estadísticas del rey y los edificios de refugio son datos del mod. */
+  regicide: {
+    /** La IA esconde a su rey si hay tropas enemigas a menos de esta distancia (casillas), y lo mueve lejos de ellas si no tiene refugio. */
+    aiDangerRadius: 16,
+    /** El ejército de la IA que ya está a más de esta distancia de su base va a por el rey rival (o su edificio). */
+    aiHuntDistance: 25,
+    /** Segundos entre los avisos de que el rey propio está siendo atacado fuera de un refugio. */
+    exposedWarnEvery: 12,
+  },
+
   /** Modo "Guerra declarada" (mod declared-war). */
   war: {
     /** Edad necesaria para declarar la guerra (índice: 2 = Edad de los Castillos). */

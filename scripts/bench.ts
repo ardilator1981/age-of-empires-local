@@ -13,7 +13,7 @@ import { findPath } from '../src/game/pathfinding';
 import { ALL_MODS } from '../src/mods';
 import { Commands } from '../src/game/commands';
 
-const MODS = ALL_MODS.filter(m => m.id !== 'declared-war');
+const MODS = ALL_MODS.filter(m => m.id !== 'declared-war' && m.id !== 'regicide');
 const reg = buildRegistry(MODS);
 
 function options(mapType: string, mapSize: number, players: number, humanFirst = false): GameOptions {

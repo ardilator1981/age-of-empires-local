@@ -4,6 +4,7 @@ import { coreMod } from './core';
 import { declaredWarMod } from './declared-war';
 import { extraContentMod } from './extra-content';
 import { realMapsMod } from './real-maps';
+import { regicideMod } from './regicide';
 import { treasureHuntMod } from './treasure-hunt';
 
 /**
@@ -20,5 +21,6 @@ export const ALL_MODS: GameMod[] = [
   treasureHuntMod,
   realMapsMod,
   declaredWarMod,
+  regicideMod,
   artMod,
 ];

@@ -31,7 +31,7 @@ src/
   mods/real-maps/  Mapas a partir de relieve y datos reales (JSON en data/)
   app/         App (ciclo menú → partida, guardado automático, partidas en red), Session (todo lo de una partida),
                saves (ranuras en IndexedDB), orders (adónde van las órdenes del jugador)
-  mods/        core/ (contenido base: datos), extra-content/, treasure-hunt/, declared-war/ (modo Guerra declarada),
+  mods/        core/ (contenido base: datos), extra-content/, treasure-hunt/, declared-war/ (modo Guerra declarada), regicide/ (modo Matar al rey),
                art/ (qué definiciones se dibujan con imágenes)
 scripts/       simulate.ts (partida IA contra IA sin gráficos), real-map.mjs, make-icons.mjs,
                fix-textures.mjs y art-import.mjs (arte con imágenes)
@@ -42,7 +42,7 @@ docs/          flujo-de-trabajo.md (áreas, modelos y esfuerzo), decisiones.md (
 
 ## Qué hay en `main`
 
-Juego base con IA, terreno orgánico con relieve en WebGL2, música y sonido sintéticos, interfaz de escritorio y móvil (PWA, Pages y APK), relieve con roca y pasos, 12 regiones reales sin conexión, arte con imágenes (`src/mods/art/`, flujo en el README), modo Guerra declarada (mod `declared-war`), formaciones, posturas, órdenes tácticas y pantalla de estrategia, guardado y Continuar, calidad gráfica automática y ajustes, y multijugador en red (`docs/multijugador.md`; falta probar WebRTC en dispositivos reales).
+Juego base con IA, terreno orgánico con relieve en WebGL2, música y sonido sintéticos, interfaz de escritorio y móvil (PWA, Pages y APK), relieve con roca y pasos, 12 regiones reales sin conexión, arte con imágenes (`src/mods/art/`, flujo en el README), modo Guerra declarada (mod `declared-war`), modo Matar al rey (mod `regicide`, con refugio de unidades en el motor), formaciones, posturas, órdenes tácticas y pantalla de estrategia, guardado y Continuar, calidad gráfica automática y ajustes, y multijugador en red (`docs/multijugador.md`; falta probar WebRTC en dispositivos reales).
 
 Reglas que vienen de esas mejoras:
 - **Determinismo (multijugador):** en el código que corre cada tick, `hypot`, `sin` y `cos` de `game/fmath.ts`; nunca `Math.random` ni el reloj.
@@ -62,7 +62,7 @@ Ver **`docs/flujo-de-trabajo.md`**: qué área es cada tipo de tarea, con qué m
 | Comprobar tipos | `npm run typecheck` |
 | Build | `npm run build` (incluye la comprobación de tipos) |
 | Prueba de humo | `npm run simulate -- <minutos> <mapa> <semilla> [dificultad]`: partida IA contra IA sin gráficos; debe terminar sin errores, y las IAs deben avanzar de edad y combatir |
-| Tests | `npm test` (Vitest, carpeta `tests/`): conectividad de todos los mapas, reglas de altura, visión, caminos, órdenes y Guerra declarada. Los modos de juego (`declared-war`) solo se activan en las pruebas que los piden (`newGame(map, { war: true })`) |
+| Tests | `npm test` (Vitest, carpeta `tests/`): conectividad de todos los mapas, reglas de altura, visión, caminos, órdenes y Guerra declarada. Los modos de juego (`declared-war`, `regicide`) solo se activan en las pruebas que los piden (`newGame(map, { war: true })`, `newGame(map, { regicide: true })`) |
 | Determinismo entre navegadores | `npm run engines -- [minutos]`: la misma partida en Node (V8) y en el `jsc` de macOS (JavaScriptCore, el de Safari); compara la huella del estado cada segundo |
 | Multijugador (prototipo) | `npm run lockstep -- [minutos]`: dos clientes por red simulada; determinismo, retardo de las órdenes y paradas |
 | Rendimiento | `npm run bench`: A*, partida con 4 IA, estrés de 300 unidades y visión. Resultados en `docs/rendimiento.md` |
@@ -78,6 +78,7 @@ Depuración en el navegador: `window.app` y `window.game` están accesibles desd
 - `reg.addNetCommand(id, fn)`: una orden de jugador propia del mod (en red viaja por la cola de turnos). La interfaz la da con `session.orders.send({ t: 'mod', id, args })`. La usa Guerra declarada para declarar la guerra.
 - `reg.addAIPlugin(p)`: la IA le pregunta cada turno; puede pedir edificios y unidades, reservar recursos, frenar el entrenamiento o encargarse del ejército.
 - `reg.addHudPanel(def)`, `reg.addWorldOverlay(fn)`, `reg.addMinimapOverlay(fn)`: paneles HTML y dibujos sobre el mapa y el minimapa. `ui.pickPoint` sirve para pedir un punto del mapa.
+- Refugio: un edificio con `shelter: { classes, capacity }` admite unidades propias de esas clases (`game/garrison.ts`, órdenes de red `garrison` y `ungarrison`); dentro no se ven ni se les puede atacar, y si el edificio cae, salen. `UnitDef.undeletable` impide «Eliminar».
 - En las unidades: `maxAlive`, `retrainCooldown` y `aura` (bonificación a las tropas cercanas, la aplica `AuraSystem`).
 - `src/game/formation.ts`: formación sencilla en filas; es el gancho para formaciones de verdad.
 

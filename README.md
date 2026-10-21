@@ -592,6 +592,10 @@ La IA juega con las mismas reglas: entrena su General, explora, declara la guerr
 
 Los valores (radio del círculo, tiempos, aura del General...) están en `war` dentro de `src/config/balance.ts`. Para probarlo sin gráficos: `npm run simulate -- 120 arabia 7 normal --guerra --prep=10`.
 
+## Modo "Matar al rey"
+
+En el menú, marca **Mods → Matar al rey** y elige **Victoria → Matar al rey**. Cada jugador empieza con un 👑 rey (resistente, sin ataque, no se puede eliminar). Pierde quien pierde su rey; gana el último con rey vivo. El rey puede **refugiarse** en el centro urbano y en los castillos (botón 🏰 Refugiarse, clic derecho sobre el edificio, o el panel del rey); dentro no se le puede atacar. Si el edificio cae, el rey sale y queda expuesto. La IA esconde a su rey y manda a su ejército a por el rey rival o el edificio donde se esconde. Para dar refugio a otro edificio, basta añadir `shelter: { classes: ['king'], capacity: 1 }` a su definición. Probarlo sin gráficos: `npm run simulate -- 60 arabia 2 --rey`.
+
 ## Probar cambios sin gráficos
 
 ```bash
@@ -606,7 +610,7 @@ referencia a algo que no existe (un edificio, una tecnología o un sprite).
 
 ## Ideas para seguir ampliando
 
-- Murallas y puertas, guarnición en edificios
+- Murallas y puertas, guarnición de tropas en edificios (el refugio del rey ya existe)
 - Monjes (curar y convertir), mercado y comercio
 - Barcos y mapas de agua
 - Caza (ciervos, jabalíes) y pastoreo de ovejas

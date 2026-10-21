@@ -1,7 +1,7 @@
 /**
  * Simulación sin gráficos (IA contra IA) para probar reglas y mods rápidamente.
  * Uso: npm run simulate -- [minutos] [mapa] [semilla] [dificultad roja] [--guerra] [--prep=min]
- * Con --guerra se juega en modo Guerra declarada (por defecto el modo no está activo).
+ * Con --guerra se juega en modo Guerra declarada, y con --rey en Matar al rey (por defecto ningún modo está activo).
  */
 import { buildRegistry } from '../src/core/Registry';
 import { TICK_DT } from '../src/core/constants';
@@ -14,11 +14,12 @@ const seed = Number(process.argv[4] ?? 12345);
 
 const war = process.argv.includes('--guerra');
 const prepArg = process.argv.find(a => a.startsWith('--prep='));
-const mods = ALL_MODS.filter(m => war || m.id !== 'declared-war');
+const king = process.argv.includes('--rey');
+const mods = ALL_MODS.filter(m => (war || m.id !== 'declared-war') && (king || m.id !== 'regicide'));
 const reg = buildRegistry(mods);
 await reg.mapTypes.get(mapType)?.load?.();
 const game = new Game(reg, {
-  mapType, mapSize: 96, startingResources: 'standard', startAge: 0, victory: 'conquest', visibility: 'normal',
+  mapType, mapSize: 96, startingResources: 'standard', startAge: 0, victory: king ? 'regicide' : 'conquest', visibility: 'normal',
   popLimit: 125, speed: 1, seed, mods: mods.map(m => m.id),
   warPrepMinutes: prepArg ? Number(prepArg.slice(7)) : undefined,
   players: [
@@ -26,6 +27,7 @@ const game = new Game(reg, {
     { name: 'IA Roja', civ: 'britons', color: '#d63a3a', human: false, difficulty: (process.argv[5]?.startsWith('--') ? undefined : process.argv[5] as any) ?? 'normal' },
   ],
 });
+const kingLine = (p: number) => { const k = game.units.find(u => !u.dead && u.owner === p && u.defId === 'king'); return k ? (k.inside ? 'rey dentro' : `rey fuera (${Math.round(k.hp)} PV)`) : 'sin rey'; };
 game.events.on('notify', n => { if (n.playerId === undefined) console.log(`[${fmt(game.time)}] ${n.text}`); });
 
 function fmt(t: number) { return `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, '0')}`; }
@@ -40,7 +42,7 @@ for (let i = 0; i < ticks && !game.over; i++) {
       const vills = units.filter(u => reg.unit(u.defId).gatherer).length;
       const blds = game.list.filter(e => e.owner === p.id && e.kind === 'building').length;
       const r = Object.entries(p.res).map(([k, v]) => `${k[0]}${Math.floor(v)}`).join(' ');
-      return `${p.name}: edad ${p.age} ald ${vills} ej ${units.length - vills} edif ${blds} pob ${p.popUsed}/${p.popCap} [${r}] kills ${p.stats.kills}`;
+      return `${p.name}: edad ${p.age} ald ${vills} ej ${units.length - vills} edif ${blds} pob ${p.popUsed}/${p.popCap} [${r}] kills ${p.stats.kills}${king ? ` · ${kingLine(p.id)}` : ''}`;
     }).join(' | ');
     console.log(`${fmt(game.time)}  ${line}`);
   }

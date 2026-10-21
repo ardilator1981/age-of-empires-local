@@ -13,7 +13,7 @@ export const cache = new SpriteCache();
 const OUTLINE = 'rgba(22,14,6,0.85)';
 const SKINS = ['#e6b98f', '#d9a67a', '#c98f62', '#edc7a2'];
 /** Las unidades se dibujan algo más grandes que la escala de las casillas, como en AoE2. */
-const UNIT_SCALE = 1.3;
+export const UNIT_SCALE = 1.3;
 
 function line(ctx: CanvasRenderingContext2D, a: Pt, b: Pt) {
   ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
