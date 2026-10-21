@@ -18,6 +18,8 @@ import { britainBuildings, britainTechs, britainUnits } from './civ-britain';
 import { chinaBuildings, chinaTechs, chinaUnits } from './civ-china';
 import { franceBuildings, franceTechs, franceUnits } from './civ-france';
 import { gunpowderAI, gunpowderBuildings, gunpowderTechs, gunpowderUnits } from './gunpowder';
+import { powers, powersAI } from './powers';
+import { PowerSystem, truceRule, usePower } from '../../game/powers';
 import { WildlifeSystem, retaliateOrder } from '../../game/wildlife';
 
 const victories: VictoryDef[] = [
@@ -58,6 +60,10 @@ export const coreMod: GameMod = {
     [...gunpowderBuildings, ...chinaBuildings, ...franceBuildings, ...britainBuildings].forEach(b => reg.addBuilding(b));
     [...gunpowderTechs, ...chinaTechs, ...franceTechs, ...britainTechs].forEach(t => reg.addTech(t));
     reg.addAIPlugin(gunpowderAI);
+    powers.forEach(w => reg.addPower(w));
+    reg.addAIPlugin(powersAI);
+    reg.addNetCommand('power', usePower);
+    reg.addCombatRule(truceRule);
     civs.forEach(c => reg.addCiv(c));
     maps.forEach(m => reg.addMapType(m));
     victories.forEach(v => reg.addVictory(v));
@@ -76,6 +82,7 @@ export const coreMod: GameMod = {
     reg.addOrder('retaliate', retaliateOrder);
 
     reg.addSystem('playerStats', g => new PlayerStatsSystem(g), 0);
+    reg.addSystem('powers', g => new PowerSystem(g), 3);
     reg.addSystem('ai', g => new AISystem(g), 5);
     reg.addSystem('formations', g => new FormationSystem(g), 9);
     reg.addSystem('wildlife', g => new WildlifeSystem(g), 8);

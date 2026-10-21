@@ -176,6 +176,22 @@ export const BALANCE = {
     aiMaxWait: 420,
   },
 
+  /** Poderes activos de las civilizaciones (docs/civilizaciones.md §5, `game/powers.ts`). Valores indicativos. */
+  powers: {
+    /** Tributo a la Horda: tregua mutua con todos los enemigos (segundos) y su oro. */
+    tribute: { cost: 300, duration: 60, cooldown: 420 },
+    /** Flota del Tesoro: se paga y, pasado el viaje, vuelve con más. */
+    treasureFleet: { cost: 250, delay: 90, returns: 600, cooldown: 360 },
+    /** Crédito: oro ya, a devolver con interés. Mientras haya deuda no se puede pedir otro. */
+    credit: { loan: 500, repay: 650, delay: 150, retryEvery: 20, cooldown: 420 },
+    /** Tierra quemada: radio (casillas), duración y velocidad de los enemigos dentro. */
+    scorchedEarth: { radius: 7, duration: 90, enemySpeed: 0.6, cooldown: 300 },
+    /** Leva: infantería que aparece junto al centro urbano. */
+    levy: { count: 6, unit: 'musketeer', cooldown: 300 },
+    /** La IA: enemigos cerca de su base para recurrir al poder de defensa; oro de sobra para la Flota; oro bajo para pedir crédito. */
+    ai: { threatRadius: 16, threatCount: 6, fleetSurplus: 1600, creditBelow: 120 },
+  },
+
   ai: {
     difficulty: {
       easy: { gather: 0.75, maxVillagers: 18, firstAttack: 900, wave: 5, waveGrow: 1, villagersForAge: [14, 20, 26, 99], think: 2 },

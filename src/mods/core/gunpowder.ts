@@ -1,5 +1,7 @@
 import type { AIPlugin, BuildingDef, Cost, TechDef, UnitDef } from '../../core/types';
-import { buildingAvail, techAvail } from '../../game/rules';
+import type { Game } from '../../game/Game';
+import type { Player } from '../../game/Player';
+import { buildingAvail, excludedBy, techAvail } from '../../game/rules';
 
 /**
  * Era 4 · Pólvora (c. 1650–1800): ejércitos permanentes, fortalezas abaluartadas, mosquete con
@@ -206,11 +208,19 @@ export const gunpowderAI: AIPlugin = {
     // ejército y no llega, aparta sus recursos para la siguiente
     const wanted = [...game.reg.techs.values()]
       .filter(t => t.setsAge === undefined && (t.age >= 4 || t.civs) && techAvail(game, p, t.id).visible)
+      .filter((t, _i, all) => !excludedBy(game, p, t.id) && doctrineWins(game, p, t, all))
       .sort((a, b) => totalCost(p.getCost(a)) - totalCost(p.getCost(b)));
     for (const t of wanted) if (ctx.research(t.id)) return;
     const next = wanted.find(t => techAvail(game, p, t.id).ok === false && p.count(t.researchedAt) > 0 && !ctx.canSpend(p.getCost(t)));
     if (next && ctx.army.length >= 8) return { reserve: p.getCost(next) };
   },
 };
+
+/** Entre dos doctrinas que se excluyen, la IA elige la que más le conviene (`aiWeight`); si empatan, la de id menor. */
+function doctrineWins(game: Game, p: Player, t: TechDef, all: TechDef[]): boolean {
+  const w = (x: TechDef) => x.aiWeight?.(game, p) ?? 1;
+  if (w(t) <= 0) return false;
+  return !all.some(r => r.id !== t.id && (t.excludes?.includes(r.id) || r.excludes?.includes(t.id)) && (w(r) > w(t) || (w(r) === w(t) && r.id < t.id)));
+}
 
 const totalCost = (c: Record<string, number | undefined>) => Object.values(c).reduce<number>((s, v) => s + (v ?? 0), 0);

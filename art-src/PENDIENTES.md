@@ -14,7 +14,7 @@
 | terreno | 9 | 0 | 0 |
 | decoración | 9 | 0 | 0 |
 | efecto | 7 | 0 | 5 |
-| interfaz | 11 | 0 | 60 |
+| interfaz | 11 | 0 | 62 |
 
 ## Siguiente en generar (por prioridad)
 
@@ -270,6 +270,8 @@
 | taille | Tecnología: Taille | 🔴 pendiente | imagen | ui/tech/taille.png | 5 | `ui:tech` |
 | hireMercenaries | Tecnología: Contratar mercenarios | 🔴 pendiente | imagen | ui/tech/hireMercenaries.png | 5 | `ui:tech` |
 | colbertism | Tecnología: Colbertismo | 🔴 pendiente | imagen | ui/tech/colbertism.png | 5 | `ui:tech` |
+| vaubanDoctrine | Tecnología: Doctrina de Vauban | 🔴 pendiente | imagen | ui/tech/vaubanDoctrine.png | 5 | `ui:tech` |
+| gribeauvalDoctrine | Tecnología: Doctrina de Gribeauval | 🔴 pendiente | imagen | ui/tech/gribeauvalDoctrine.png | 5 | `ui:tech` |
 | alfredReform | Tecnología: Reforma de Alfredo | 🔴 pendiente | imagen | ui/tech/alfredReform.png | 5 | `ui:tech` |
 | domesday | Tecnología: Domesday | 🔴 pendiente | imagen | ui/tech/domesday.png | 5 | `ui:tech` |
 | companyCharter | Tecnología: Carta de compañía | 🔴 pendiente | imagen | ui/tech/companyCharter.png | 5 | `ui:tech` |

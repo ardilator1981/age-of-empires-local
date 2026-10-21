@@ -135,4 +135,25 @@ export const franceTechs: TechDef[] = [
     cost: { wood: 300, gold: 200 }, researchTime: 60, age: 4, researchedAt: 'royalManufacture',
     effects: [{ type: 'gatherRate', resource: 'gold', op: 'mul', value: 1.15 }],
   },
+  // Doctrinas excluyentes de la era (docs/civilizaciones.md §7): se elige una de las dos
+  {
+    id: 'vaubanDoctrine', name: 'Doctrina de Vauban', icon: '⭐', civs: FRANCE, excludes: ['gribeauvalDoctrine'],
+    description: 'Doctrina (excluye la de Gribeauval): la guerra de sitios y las plazas fuertes. Torres, castillos y fortalezas: +25% de PV y +1 de alcance.',
+    cost: { food: 350, stone: 250 }, researchTime: 60, age: 4, researchedAt: 'townCenter',
+    aiWeight: (_g, p) => 1 + 0.25 * (p.count('tower') + p.count('castle') + p.count('fortress') + p.count('vaubanFortress')),
+    effects: [
+      { type: 'stat', target: { classes: ['tower', 'castle', 'fortress'], kind: 'building' }, stat: 'hp', op: 'mul', value: 1.25 },
+      { type: 'stat', target: { classes: ['tower', 'castle', 'fortress'], kind: 'building' }, stat: 'range', op: 'add', value: 1 },
+    ],
+  },
+  {
+    id: 'gribeauvalDoctrine', name: 'Doctrina de Gribeauval', icon: '💣', civs: FRANCE, excludes: ['vaubanDoctrine'],
+    description: 'Doctrina (excluye la de Vauban): la artillería de campaña estandarizada. Artillería: +3 de ataque y -20% de coste.',
+    cost: { food: 350, gold: 250 }, researchTime: 60, age: 4, researchedAt: 'townCenter',
+    aiWeight: (_g, p) => 1 + 0.3 * (p.count('gunpowderWorks') + p.count('cannon') + p.count('gribeauvalCannon')),
+    effects: [
+      { type: 'stat', target: { classes: ['artillery'], kind: 'unit' }, stat: 'attack', op: 'add', value: 3 },
+      { type: 'cost', target: { classes: ['artillery'], kind: 'unit' }, resource: '*', op: 'mul', value: 0.8 },
+    ],
+  },
 ];

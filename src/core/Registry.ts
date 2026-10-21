@@ -1,6 +1,6 @@
 import type { Game } from '../game/Game';
 import type {
-  AgeDef, AIPlugin, BuildingDef, CivDef, CombatRule, GameMod, HudPanelDef, MapTypeDef, NetCommandHandler, OrderHandler, OverlayFn,
+  AgeDef, AIPlugin, BuildingDef, CivDef, CombatRule, GameMod, HudPanelDef, MapTypeDef, NetCommandHandler, PowerDef, OrderHandler, OverlayFn,
   ResourceDef, ResourceNodeDef, SetupConfig, SpriteFn, SystemFactory, TechDef, TerrainDef, UnitDef, VictoryDef,
 } from './types';
 
@@ -30,6 +30,8 @@ export class Registry {
   hudPanels: HudPanelDef[] = [];
   /** Órdenes de jugador propias de los mods (ver `NetCommandHandler`). */
   netCommands = new Map<string, NetCommandHandler>();
+  /** Poderes activos de las civilizaciones (ver `PowerDef`). */
+  powers = new Map<string, PowerDef>();
   /** Dibujos de mods sobre el suelo del mapa y sobre el minimapa. */
   worldOverlays: OverlayFn[] = [];
   minimapOverlays: OverlayFn[] = [];
@@ -65,6 +67,7 @@ export class Registry {
   onGameStart(fn: (game: Game) => void) { this.gameStartHooks.push(fn); }
   addCombatRule(rule: CombatRule) { this.combatRules.push(rule); }
   addNetCommand(id: string, handler: NetCommandHandler) { this.netCommands.set(id, handler); }
+  addPower(d: PowerDef) { this.powers.set(d.id, d); }
   addAIPlugin(p: AIPlugin) { this.aiPlugins = this.aiPlugins.filter(x => x.id !== p.id); this.aiPlugins.push(p); }
   addHudPanel(p: HudPanelDef) { this.hudPanels = this.hudPanels.filter(x => x.id !== p.id); this.hudPanels.push(p); }
   addWorldOverlay(fn: OverlayFn) { this.worldOverlays.push(fn); }
@@ -131,6 +134,8 @@ export class Registry {
       for (const r of t.requiresTechs ?? []) if (!this.techs.has(r)) p.push(`Tecnología ${t.id}: requiere "${r}" que no existe`);
       for (const e of t.effects) if (e.type === 'upgrade' && (!this.units.has(e.from) || !this.units.has(e.to))) p.push(`Tecnología ${t.id}: mejora ${e.from}→${e.to} inválida`);
     }
+    for (const t of this.techs.values()) for (const x of t.excludes ?? []) if (!this.techs.has(x)) p.push(`Tecnología ${t.id}: excluye "${x}" que no existe`);
+    for (const w of this.powers.values()) for (const c of w.civs ?? []) if (!this.civs.has(c)) p.push(`Poder ${w.id}: civilización "${c}" no existe`);
     for (const n of this.resourceNodes.values()) if (!this.sprites.has(n.sprite)) p.push(`Recurso ${n.id}: sprite "${n.sprite}" no existe`);
     return p;
   }

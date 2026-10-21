@@ -10,6 +10,7 @@ import type { Game } from '../Game';
 import { hypot } from '../fmath';
 import { leaveShelter } from '../garrison';
 import { isHuntable } from '../wildlife';
+import { zoneSpeedFactor } from '../powers';
 
 /**
  * Sistemas básicos de la simulación. Se registran en el Registry desde el mod
@@ -86,6 +87,7 @@ export class MovementSystem implements System {
       let speed = g.players[u.owner].getStat(g.unitDef(u), 'speed');
       // En formación, las que ya están en su hueco van al paso de la más lenta
       if (u.order?.type === 'formation' && u.data.speedCap) speed = Math.min(speed, u.data.speedCap);
+      speed *= zoneSpeedFactor(g, u); // tierra quemada enemiga
       // Cuesta arriba se avanza más despacio (BALANCE.movement)
       const t0 = u.path[0], dd = hypot(t0.x - u.x, t0.y - u.y);
       if (dd > 0.01) {

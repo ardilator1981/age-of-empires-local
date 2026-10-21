@@ -94,6 +94,16 @@ describe('pasos sincronizados (prototipo)', () => {
     expect(r.desync).toBeNull();
   }, 60_000);
 
+  it('los poderes activos (humanos con guion e IA) no desincronizan a los clientes', () => {
+    const o = netOptions(2, 2, 5);
+    o.startAge = 4;
+    const r = runMatch({ reg, opts: o, humans: 2, minutes: 5, delay: 4, net: WIFI, hashEvery: 5, joinAt: 120 * 20 });
+    expect(r.powersUsed).toBeGreaterThanOrEqual(3);
+    expect(r.firstDiff).toBeNull();
+    expect(r.desync).toBeNull();
+    expect(r.joinDiff).toBeNull();
+  }, 120_000);
+
   it('detecta una desincronización en el tick en que ocurre', () => {
     const r = runMatch({ reg, opts: netOptions(2, 0), humans: 2, minutes: 1, delay: 3, net: WIFI, fault: { client: 1, tick: 400 } });
     expect(r.firstDiff).toBe(401);

@@ -80,6 +80,7 @@ Depuración en el navegador: `window.app` y `window.game` están accesibles desd
 - `reg.addHudPanel(def)`, `reg.addWorldOverlay(fn)`, `reg.addMinimapOverlay(fn)`: paneles HTML y dibujos sobre el mapa y el minimapa. `ui.pickPoint` sirve para pedir un punto del mapa.
 - Refugio: un edificio con `shelter: { classes, capacity }` admite unidades propias de esas clases (`game/garrison.ts`, órdenes de red `garrison` y `ungarrison`); dentro no se ven ni se les puede atacar, y si el edificio cae, salen. `UnitDef.undeletable` impide «Eliminar».
 - Civilizaciones por era: `CivDef.eras` (identidad y bonos por edad, `replaces` para sustituir). `Player.rebuildModifiers(game)` recalcula civilización + eras activas + tecnologías + extra (al subir de edad y al cargar; no se guardan). Efecto `gatherYield`: recolectar de un nodo da además otro recurso. La interfaz muestra `player.identity`. Diseño en `docs/civilizaciones.md`.
+- Poderes activos: `reg.addPower(def)` (`PowerDef`: civilización, edades, coste, enfriamiento, `apply`); se lanzan con `{ t: 'mod', id: 'power', args: { id, x?, y? } }`. Enfriamiento en `player.data.powerReady`, efectos con duración en `game.data.powerFx` (`game/powers.ts`). Doctrinas excluyentes: `TechDef.excludes` (comprueba `rules.ts`, `excludedBy`) y `TechDef.aiWeight` para la IA.
 - En las unidades: `maxAlive`, `retrainCooldown` y `aura` (bonificación a las tropas cercanas, la aplica `AuraSystem`).
 - `src/game/formation.ts`: formación sencilla en filas; es el gancho para formaciones de verdad.
 

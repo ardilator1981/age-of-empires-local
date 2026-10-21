@@ -116,11 +116,26 @@ export function techInProgress(game: Game, p: Player, techId: string): boolean {
   return false;
 }
 
+/**
+ * Doctrinas excluyentes: la tecnología (investigada o en curso) que impide investigar esta, si
+ * la hay. Vale en las dos direcciones: basta con que una de las dos declare `excludes`.
+ */
+export function excludedBy(game: Game, p: Player, id: string): string | null {
+  const mine = game.reg.techs.get(id)?.excludes ?? [];
+  for (const t of game.reg.techs.values()) {
+    if (t.id === id || !(mine.includes(t.id) || t.excludes?.includes(id))) continue;
+    if (p.researched.has(t.id) || techInProgress(game, p, t.id)) return t.id;
+  }
+  return null;
+}
+
 export function techAvail(game: Game, p: Player, id: string): Avail {
   const def = game.reg.techs.get(id);
   if (!def || !civAllowed(def, p) || p.researched.has(id) || techInProgress(game, p, id)) return HIDDEN;
   if (def.setsAge !== undefined && def.setsAge !== p.age + 1) return HIDDEN;
   for (const t of def.requiresTechs ?? []) if (!p.researched.has(t)) return HIDDEN;
+  const rival = excludedBy(game, p, id);
+  if (rival) return { visible: true, ok: false, reason: `Incompatible con ${game.reg.techs.get(rival)?.name ?? rival}`, code: 'requirement' };
   const a = ageCheck(game, p, def.age);
   if (a) return a;
   if (def.requiresBuildings) {

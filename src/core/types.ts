@@ -226,6 +226,37 @@ export interface TechDef {
   setsAge?: number;
   civs?: string[];
   classes?: string[];
+  /**
+   * Doctrina excluyente: ids de tecnologías que dejan de estar disponibles al investigar esta
+   * (y al revés: basta con que una de las dos lo declare, `rules.ts` mira las dos direcciones).
+   */
+  excludes?: string[];
+  /** Solo para la IA: cuánto le conviene a este jugador (0 = no la quiere; mayor = más). Por defecto 1. */
+  aiWeight?: (game: Game, player: Player) => number;
+}
+
+/**
+ * Poder activo de una civilización (Tributo a la Horda, Tierra quemada...). Lo lanza el jugador con
+ * la orden de mod `power` (viaja por la cola de turnos); el enfriamiento y los efectos con duración
+ * viven en `player.data` y `game.data`, así que se guardan y entran en la huella de red.
+ */
+export interface PowerDef {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  /** Civilizaciones que lo tienen (todas si se omite). */
+  civs?: string[];
+  /** Disponible desde esta edad y hasta `maxAge` (inclusive). */
+  minAge: number;
+  maxAge?: number;
+  cost?: Cost;
+  /** Segundos hasta poder volver a usarlo. */
+  cooldown: number;
+  /** Pide un punto del mapa (`args.x`, `args.y`). */
+  target?: 'point';
+  /** Aplica el efecto. Devuelve un texto de rechazo, o null si se ha hecho (el coste y el enfriamiento los pone el motor). */
+  apply(game: Game, player: Player, args: { x: number; y: number }): string | null;
 }
 
 export interface AgeDef { index: number; id: string; name: string }

@@ -32,6 +32,8 @@ export interface GameEventMap {
   underAttack: { playerId: number; target: Entity; attacker?: Entity; kind: 'unit' | 'building' };
   /** Un aldeano se ha quedado sin trabajo. Preparado para el aviso de aldeanos inactivos: todavía no lo emite nadie. */
   villagerIdle: { entity: Entity };
+  /** Un jugador ha lanzado un poder activo de su civilización (`PowerDef`). */
+  powerUsed: { playerId: number; powerId: string; at?: { x: number; y: number } };
   [custom: string]: any;
 }
 
