@@ -50,7 +50,7 @@ Alternativas razonadas (sin descartar nada, 🔶 a elegir con el usuario):
 - **India** (Gupta → sultanatos → mogoles → Raj → India): economía agrícola y comercial enorme; riesgo de cubrir demasiados periodos coloniales.
 - **África occidental** (Ghana → Mali → Songhai → …): comercio transahariano muy rico en la Edad Media, pero el linaje se *rompe* en la era de la pólvora (conquista marroquí de Songhai, 1591) y la colonización. Se podría hacer una civilización «de ciclo corto» (eras 0–4).
 - **Américas:** mexicas y andinos (incas) tienen gran interés, pero su linaje se *interrumpe* hacia la era 3 por la conquista y no hay una continuación comparable. Opciones: civilizaciones «de ciclo corto» (eras 0–3), o un linaje que *cambia de actor* (p. ej. Mesoamérica → Nueva España → México; 🔶 requiere tratar con cuidado la conquista). EE. UU. solo existiría desde la era 4 (civilización de «inicio tardío»).
-- **Civilizaciones actuales** (Británicos, Francos, Godos, Mongoles): Británicos se absorben en la nueva línea británica → EE. UU. (decidido), Francos → Francia. Godos y Mongoles se pueden mantener como civilizaciones «clásicas» sin evolución (eras 0–3) en paralelo, o convertirse en linajes futuros / eventos (Mongoles → como actor que pasa de ser jugador a *evento*). Pregunta §9.
+- **Civilizaciones actuales** (Británicos, Francos, Godos, Mongoles): Británicos se absorben en la nueva línea británica → EE. UU. (decidido), Francos → Francia. **Godos y Mongoles se eliminan (decidido).** Las unidades y contenido existentes de ambos (huscarle, mangudai, etc.) pueden reutilizarse como piezas de otras líneas o de eventos futuros.
 
 ## 4. Convenciones de lectura
 
@@ -285,7 +285,7 @@ Cada fase se hace en su propia rama (`feat/...`) y pasa `npm run build`, `npm ru
 
 1. ~~Cuántas eras~~ **Decidido: llegar a la Moderna (7 eras).** Queda por ver si la Moderna se parte en dos (guerras mundiales / contemporánea) y los nombres.
 2. **Lista de civilizaciones:** Rus, China, Francia, Persia, Etiopía y Británicos → EE. UU. (decidido). ¿Se añade Japón o Turcos como séptima?
-3. **Civilizaciones actuales:** Británicos se absorben en la nueva línea y Francos en Francia. ¿Godos y Mongoles conviven sin evolución, se convierten en linajes nuevos o se eliminan?
+3. ~~Civilizaciones actuales~~ **Decidido:** Británicos → línea británica/EE. UU., Francos → Francia, Godos y Mongoles se eliminan. Pendiente: ¿se migran las partidas guardadas con esas civilizaciones o se descartan (`SAVE_VERSION`)?
 3b. **Traspaso británico → EE. UU.:** ¿automático al llegar a la Moderna, o el jugador elige en la era 5 entre seguir como Reino Unido o dar el salto a EE. UU.? (Por defecto, automático.)
 4. **Giro de la era Moderna:** ¿se ofrece elegir entre dos regímenes (URSS/Rusia) o una sola identidad? Tema sensible: ¿se quieren eras políticas recientes o se corta antes de 1945?
 5. **Armas nucleares, aviación y ciberguerra:** ¿fuera de alcance?
