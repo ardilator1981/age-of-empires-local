@@ -1,0 +1,19 @@
+{
+  "image": "projectile-javelin.png",
+  "cell": {
+    "w": 14,
+    "h": 68
+  },
+  "anchor": {
+    "x": 7,
+    "y": 62
+  },
+  "scale": 2,
+  "shadow": false,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 1
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "image": "smoke.png",
+  "cell": {
+    "w": 93,
+    "h": 133
+  },
+  "anchor": {
+    "x": 47,
+    "y": 127
+  },
+  "scale": 2,
+  "shadow": false,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 4,
+      "pick": "variant"
+    }
+  }
+}

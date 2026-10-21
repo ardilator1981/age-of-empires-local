@@ -1,0 +1,140 @@
+{
+  "kind": "resource",
+  "out": "decorations",
+  "groups": {
+    "deco-tuft": {
+      "shadow": false
+    },
+    "deco-dryTuft": {
+      "shadow": false
+    },
+    "deco-flowers": {
+      "shadow": false
+    },
+    "deco-shrub": {
+      "shadow": false
+    },
+    "deco-pebbles": {
+      "shadow": false
+    },
+    "deco-fern": {
+      "shadow": false
+    },
+    "deco-reeds": {
+      "shadow": false
+    },
+    "deco-dryShrub": {
+      "shadow": false
+    },
+    "deco-snowRock": {
+      "shadow": false
+    }
+  },
+  "sources": [
+    {
+      "source": "pack8-decoracion/suelo.jpg",
+      "grid": [
+        4,
+        3
+      ],
+      "items": [
+        {
+          "id": "deco-tuft",
+          "height": 12
+        },
+        {
+          "id": "deco-tuft",
+          "height": 14
+        },
+        {
+          "id": "deco-flowers",
+          "height": 14
+        },
+        {
+          "id": "deco-flowers",
+          "height": 14
+        },
+        {
+          "id": "deco-flowers",
+          "height": 16
+        },
+        {
+          "id": "deco-pebbles",
+          "width": 10
+        },
+        {
+          "id": "deco-pebbles",
+          "width": 9
+        },
+        {
+          "id": "deco-shrub",
+          "height": 14
+        },
+        {
+          "id": "deco-fern",
+          "height": 12
+        },
+        {
+          "id": "deco-fern",
+          "height": 14
+        },
+        null,
+        {
+          "id": "deco-tuft",
+          "height": 14
+        }
+      ]
+    },
+    {
+      "source": "pack8-decoracion/agua-nieve-desierto.jpg",
+      "grid": [
+        4,
+        3
+      ],
+      "items": [
+        {
+          "id": "deco-reeds",
+          "height": 20
+        },
+        {
+          "id": "deco-reeds",
+          "height": 24
+        },
+        {
+          "id": "deco-reeds",
+          "height": 24
+        },
+        {
+          "id": "deco-dryTuft",
+          "height": 14
+        },
+        {
+          "id": "deco-dryShrub",
+          "height": 18
+        },
+        {
+          "id": "deco-snowRock",
+          "width": 11
+        },
+        {
+          "id": "deco-snowRock",
+          "width": 14
+        },
+        {
+          "id": "deco-pebbles",
+          "width": 14
+        },
+        null,
+        null,
+        {
+          "id": "deco-pebbles",
+          "width": 13
+        },
+        {
+          "id": "deco-shrub",
+          "height": 12
+        }
+      ]
+    }
+  ]
+}

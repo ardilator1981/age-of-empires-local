@@ -90,7 +90,7 @@ export class Sheet {
   readonly loading: Promise<boolean>;
 
   /** `path`: JSON dentro de public/ (p. ej. 'sprites/units/militia.json'). */
-  constructor(readonly path: string, readonly kind: 'unit' | 'building' | 'resource') {
+  constructor(readonly path: string, readonly kind: 'unit' | 'building' | 'resource', private quiet = false) {
     this.loading = this.load();
   }
 
@@ -116,6 +116,7 @@ export class Sheet {
 
   private fail(why: string) {
     this.failed = true;
+    if (this.quiet) return;
     console.warn(`[arte] ${this.path}: ${why}. Se usa el sprite procedural.`);
   }
 
@@ -260,6 +261,30 @@ export class Sheet {
     const fx = this.kind === 'unit' && e && !own ? motion(names[0], e, s.time, s.z) : undefined;
     this.blit(s.ctx, r, this.frameAt(r, t, e), dir, flip, s.x, s.y, s.z, s.color, fx);
   }
+
+  /**
+   * Dibuja un fotograma suelto de la hoja (decoración, proyectil, escombros...) sin máscara de color.
+   * `center`: el punto (x, y) es el centro de la imagen en vez del apoyo; `rot`: giro en radianes.
+   */
+  drawFrame(ctx: CanvasRenderingContext2D, frame: number, x: number, y: number, z: number, o: { rot?: number; center?: boolean } = {}): boolean {
+    if (!this.ready) return false;
+    const r = this.resolve(['idle'], 0, 1);
+    if (!r) return false;
+    const n = r.frames, k = z / this.scale;
+    const f = ((Math.floor(frame) % n) + n) % n;
+    const fx: Motion = { dx: 0, dy: 0, rot: o.rot ?? 0 };
+    if (o.center) { fx.dx = (r.anchor.x - r.cell.w / 2) * k; fx.dy = (r.anchor.y - r.cell.h / 2) * k; }
+    // Con giro, el centro de la imagen debe quedar en (x, y): se compensa el desplazamiento
+    if (o.center && fx.rot) {
+      const c = Math.cos(fx.rot), s = Math.sin(fx.rot), ox = fx.dx, oy = fx.dy;
+      fx.dx = ox * c - oy * s; fx.dy = ox * s + oy * c;
+    }
+    this.blit(ctx, { ...r, mask: undefined }, f, 0, false, x, y, z, '#fff', fx);
+    return true;
+  }
+
+  /** Nº de fotogramas del estado idle. */
+  get frameCount(): number { return this.ready ? Math.max(1, this.manifest!.states.idle?.frames ?? 1) : 0; }
 
   /** Animación de muerte: con imagen si la hoja tiene estado death; si no, la imagen quieta cae por código. */
   death(s: SpriteContext, t: number, facing: number): boolean {

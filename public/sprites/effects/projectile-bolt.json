@@ -1,0 +1,19 @@
+{
+  "image": "projectile-bolt.png",
+  "cell": {
+    "w": 18,
+    "h": 44
+  },
+  "anchor": {
+    "x": 9,
+    "y": 38
+  },
+  "scale": 2,
+  "shadow": false,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 1
+    }
+  }
+}

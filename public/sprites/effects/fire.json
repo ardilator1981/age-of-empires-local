@@ -1,0 +1,20 @@
+{
+  "image": "fire.png",
+  "cell": {
+    "w": 82,
+    "h": 120
+  },
+  "anchor": {
+    "x": 41,
+    "y": 114
+  },
+  "scale": 2,
+  "shadow": false,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 4,
+      "pick": "variant"
+    }
+  }
+}

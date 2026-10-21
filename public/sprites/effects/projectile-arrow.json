@@ -1,0 +1,19 @@
+{
+  "image": "projectile-arrow.png",
+  "cell": {
+    "w": 15,
+    "h": 52
+  },
+  "anchor": {
+    "x": 8,
+    "y": 46
+  },
+  "scale": 2,
+  "shadow": false,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 1
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "image": "deco-flowers.png",
+  "mask": "deco-flowers-mask.png",
+  "cell": {
+    "w": 41,
+    "h": 40
+  },
+  "anchor": {
+    "x": 21,
+    "y": 34
+  },
+  "scale": 2,
+  "shadow": false,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 3,
+      "pick": "variant"
+    }
+  }
+}

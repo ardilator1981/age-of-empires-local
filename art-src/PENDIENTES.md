@@ -12,9 +12,9 @@
 | edificio | 7 | 5 | 6 |
 | recurso | 6 | 0 | 4 |
 | terreno | 9 | 0 | 0 |
-| decoración | 0 | 0 | 9 |
-| efecto | 0 | 0 | 9 |
-| interfaz | 0 | 0 | 46 |
+| decoración | 9 | 0 | 0 |
+| efecto | 7 | 0 | 2 |
+| interfaz | 11 | 0 | 35 |
 
 ## Siguiente en generar (por prioridad)
 
@@ -130,29 +130,27 @@
 
 | id | nombre | estado | falta | archivos esperados (en public/sprites/) | prio | prompt |
 | --- | --- | --- | --- | --- | ---: | --- |
-| tuft | tuft | 🔴 pendiente | imagen | decorations/tuft.png | 5 | `decoration` |
-| dryTuft | dryTuft | 🔴 pendiente | imagen | decorations/dryTuft.png | 5 | `decoration` |
-| flowers | flowers | 🔴 pendiente | imagen | decorations/flowers.png | 5 | `decoration` |
-| shrub | shrub | 🔴 pendiente | imagen | decorations/shrub.png | 5 | `decoration` |
-| pebbles | pebbles | 🔴 pendiente | imagen | decorations/pebbles.png | 5 | `decoration` |
-| fern | fern | 🔴 pendiente | imagen | decorations/fern.png | 5 | `decoration` |
-| reeds | reeds | 🔴 pendiente | imagen | decorations/reeds.png | 5 | `decoration` |
-| dryShrub | dryShrub | 🔴 pendiente | imagen | decorations/dryShrub.png | 5 | `decoration` |
-| snowRock | snowRock | 🔴 pendiente | imagen | decorations/snowRock.png | 5 | `decoration` |
-
-*el motor todavía no usa estas imágenes (se dibuja por código)*
+| tuft | tuft | ✅ hecho | — | — | — | — |
+| dryTuft | dryTuft | ✅ hecho | — | — | — | — |
+| flowers | flowers | ✅ hecho | — | — | — | — |
+| shrub | shrub | ✅ hecho | — | — | — | — |
+| pebbles | pebbles | ✅ hecho | — | — | — | — |
+| fern | fern | ✅ hecho | — | — | — | — |
+| reeds | reeds | ✅ hecho | — | — | — | — |
+| dryShrub | dryShrub | ✅ hecho | — | — | — | — |
+| snowRock | snowRock | ✅ hecho | — | — | — | — |
 
 ## Efectos
 
 | id | nombre | estado | falta | archivos esperados (en public/sprites/) | prio | prompt |
 | --- | --- | --- | --- | --- | ---: | --- |
-| projectile-arrow | Proyectil: arrow | 🔴 pendiente | imagen | effects/projectile-arrow.png | 5 | `effect` |
-| projectile-javelin | Proyectil: javelin | 🔴 pendiente | imagen | effects/projectile-javelin.png | 5 | `effect` |
-| projectile-axe | Proyectil: axe | 🔴 pendiente | imagen | effects/projectile-axe.png | 5 | `effect` |
-| rubble | Escombros de edificio | 🔴 pendiente | imagen | effects/rubble.png | 5 | `effect` |
-| fire | Llama | 🔴 pendiente | imagen | effects/fire.png | 5 | `effect` |
-| smoke | Humo | 🔴 pendiente | imagen | effects/smoke.png | 5 | `effect` |
-| dust | Polvo | 🔴 pendiente | imagen | effects/dust.png | 5 | `effect` |
+| projectile-arrow | Proyectil: arrow | ✅ hecho | — | — | — | — |
+| projectile-javelin | Proyectil: javelin | ✅ hecho | — | — | — | — |
+| projectile-axe | Proyectil: axe | ✅ hecho | — | — | — | — |
+| rubble | Escombros de edificio | ✅ hecho | — | — | — | — |
+| fire | Llama | ✅ hecho | — | — | — | — |
+| smoke | Humo | ✅ hecho | — | — | — | — |
+| dust | Polvo | ✅ hecho | — | — | — | — |
 | rally-flag | Bandera de punto de reunión | 🔴 pendiente | imagen | effects/rally-flag.png | 5 | `effect` |
 | treasure-chest | Cofre del tesoro | 🔴 pendiente | imagen | effects/treasure-chest.png | 5 | `effect` |
 
@@ -162,17 +160,17 @@
 
 | id | nombre | estado | falta | archivos esperados (en public/sprites/) | prio | prompt |
 | --- | --- | --- | --- | --- | ---: | --- |
-| icon-food | Icono de Alimento | 🔴 pendiente | imagen | ui/icon-food.png | 5 | `ui:icon` |
-| icon-wood | Icono de Madera | 🔴 pendiente | imagen | ui/icon-wood.png | 5 | `ui:icon` |
-| icon-gold | Icono de Oro | 🔴 pendiente | imagen | ui/icon-gold.png | 5 | `ui:icon` |
-| icon-stone | Icono de Piedra | 🔴 pendiente | imagen | ui/icon-stone.png | 5 | `ui:icon` |
-| icon-population | Icono de población | 🔴 pendiente | imagen | ui/icon-population.png | 5 | `ui:icon` |
-| icon-idle-villager | Aldeano inactivo | 🔴 pendiente | imagen | ui/icon-idle-villager.png | 5 | `ui:icon` |
-| icon-attack | Atacar | 🔴 pendiente | imagen | ui/icon-attack.png | 5 | `ui:icon` |
-| icon-stop | Parar | 🔴 pendiente | imagen | ui/icon-stop.png | 5 | `ui:icon` |
-| icon-delete | Eliminar | 🔴 pendiente | imagen | ui/icon-delete.png | 5 | `ui:icon` |
-| icon-build | Construir | 🔴 pendiente | imagen | ui/icon-build.png | 5 | `ui:icon` |
-| icon-rally | Punto de reunión | 🔴 pendiente | imagen | ui/icon-rally.png | 5 | `ui:icon` |
+| icon-food | Icono de Alimento | ✅ hecho | — | — | — | — |
+| icon-wood | Icono de Madera | ✅ hecho | — | — | — | — |
+| icon-gold | Icono de Oro | ✅ hecho | — | — | — | — |
+| icon-stone | Icono de Piedra | ✅ hecho | — | — | — | — |
+| icon-population | Icono de población | ✅ hecho | — | — | — | — |
+| icon-idle-villager | Aldeano inactivo | ✅ hecho | — | — | — | — |
+| icon-attack | Atacar | ✅ hecho | — | — | — | — |
+| icon-stop | Parar | ✅ hecho | — | — | — | — |
+| icon-delete | Eliminar | ✅ hecho | — | — | — | — |
+| icon-build | Construir | ✅ hecho | — | — | — | — |
+| icon-rally | Punto de reunión | ✅ hecho | — | — | — | — |
 | panel-stone | Panel de piedra | 🔴 pendiente | imagen | ui/panel-stone.png | 5 | `ui:panel` |
 | panel-wood | Panel de madera | 🔴 pendiente | imagen | ui/panel-wood.png | 5 | `ui:panel` |
 | panel-parchment | Pergamino | 🔴 pendiente | imagen | ui/panel-parchment.png | 5 | `ui:panel` |
@@ -287,12 +285,6 @@ Redraw the attached building as it would look in a later, richer period (feudal:
 Same illustration style, bold dark outlines, painterly texture, warm rich colors and sunlight from the upper left as the picture of the characters you drew. Draw the building seen from high above at a corner so that its ground plan looks like a diamond twice as wide as tall, floating on a plain white background with wide gaps, no shadow, no ground. Flags and awnings in bright magenta. No people, no writing, no numbers, no frame. (See Packs 3 and 4 in docs/prompts-nano-banana.md.)
 ```
 
-### `decoration`
-
-```text
-Same illustration style, bold dark outlines, painterly texture, warm rich colors and sunlight from the upper left as the picture of the characters you drew. Draw small separate ground decorations (about 12 per picture, 4 per row) on a plain white background with wide gaps, seen from high above at an angle, each much smaller than a map tile, no shadow, no ground patch. No writing, no numbers, no frame. (See Pack 8.)
-```
-
 ### `effect`
 
 ```text
@@ -303,12 +295,6 @@ Same illustration style, bold dark outlines, painterly texture, warm rich colors
 
 ```text
 Same illustration style, bold dark outlines, painterly texture, warm rich colors and sunlight from the upper left as the picture of the characters you drew. Draw the resource, in stages from full to nearly exhausted, on a plain white background with wide gaps, no shadow, no ground, seen from high above at an angle. No writing, no numbers, no frame. (See Pack 2.)
-```
-
-### `ui:icon`
-
-```text
-Twelve small square paintings in three rows of four on a plain white background with white gaps, each a single object on a dark warm background inside a bevelled grey stone border, easy to recognise when very small, light from the upper left, warm medieval colors. No writing, no letters, no numbers. (See Pack 9.)
 ```
 
 ### `ui:panel`

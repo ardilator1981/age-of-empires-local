@@ -1,0 +1,20 @@
+{
+  "image": "deco-pebbles.png",
+  "cell": {
+    "w": 36,
+    "h": 27
+  },
+  "anchor": {
+    "x": 18,
+    "y": 21
+  },
+  "scale": 2,
+  "shadow": false,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 4,
+      "pick": "variant"
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "image": "projectile-axe.png",
+  "cell": {
+    "w": 20,
+    "h": 36
+  },
+  "anchor": {
+    "x": 10,
+    "y": 30
+  },
+  "scale": 2,
+  "shadow": false,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 1
+    }
+  }
+}

@@ -1,0 +1,137 @@
+{
+  "kind": "resource",
+  "out": "effects",
+  "groups": {
+    "projectile-arrow": {
+      "shadow": false
+    },
+    "projectile-bolt": {
+      "shadow": false
+    },
+    "projectile-javelin": {
+      "shadow": false
+    },
+    "projectile-axe": {
+      "shadow": false
+    },
+    "projectile-stone": {
+      "shadow": false
+    },
+    "rubble": {
+      "shadow": false
+    },
+    "fire": {
+      "shadow": false
+    },
+    "dust": {
+      "shadow": false
+    },
+    "smoke": {
+      "shadow": false
+    }
+  },
+  "sources": [
+    {
+      "source": "pack7-efectos/proyectiles.jpg",
+      "grid": [
+        5,
+        1
+      ],
+      "items": [
+        {
+          "id": "projectile-arrow",
+          "height": 22
+        },
+        {
+          "id": "projectile-bolt",
+          "height": 18
+        },
+        {
+          "id": "projectile-javelin",
+          "height": 30
+        },
+        {
+          "id": "projectile-axe",
+          "height": 14
+        },
+        {
+          "id": "projectile-stone",
+          "height": 9
+        }
+      ]
+    },
+    {
+      "source": "pack7-efectos/escombros.jpg",
+      "grid": [
+        2,
+        2
+      ],
+      "items": [
+        {
+          "id": "rubble",
+          "width": 52
+        },
+        {
+          "id": "rubble",
+          "width": 104
+        },
+        {
+          "id": "rubble",
+          "width": 156
+        },
+        {
+          "id": "rubble",
+          "width": 208
+        }
+      ]
+    },
+    {
+      "source": "pack7-efectos/fuego-humo.jpg",
+      "grid": [
+        4,
+        3
+      ],
+      "items": [
+        {
+          "id": "fire",
+          "height": 22
+        },
+        {
+          "id": "fire"
+        },
+        {
+          "id": "fire"
+        },
+        {
+          "id": "fire"
+        },
+        {
+          "id": "dust",
+          "height": 18
+        },
+        {
+          "id": "dust"
+        },
+        {
+          "id": "dust"
+        },
+        {
+          "id": "dust"
+        },
+        {
+          "id": "smoke",
+          "height": 34
+        },
+        {
+          "id": "smoke"
+        },
+        {
+          "id": "smoke"
+        },
+        {
+          "id": "smoke"
+        }
+      ]
+    }
+  ]
+}

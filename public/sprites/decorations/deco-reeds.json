@@ -1,0 +1,20 @@
+{
+  "image": "deco-reeds.png",
+  "cell": {
+    "w": 54,
+    "h": 56
+  },
+  "anchor": {
+    "x": 27,
+    "y": 50
+  },
+  "scale": 2,
+  "shadow": false,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 3,
+      "pick": "variant"
+    }
+  }
+}

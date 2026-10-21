@@ -1,0 +1,19 @@
+{
+  "image": "icon-build.png",
+  "cell": {
+    "w": 104,
+    "h": 104
+  },
+  "anchor": {
+    "x": 52,
+    "y": 98
+  },
+  "scale": 2,
+  "shadow": false,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 1
+    }
+  }
+}

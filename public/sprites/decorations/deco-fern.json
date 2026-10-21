@@ -1,0 +1,20 @@
+{
+  "image": "deco-fern.png",
+  "cell": {
+    "w": 36,
+    "h": 36
+  },
+  "anchor": {
+    "x": 18,
+    "y": 30
+  },
+  "scale": 2,
+  "shadow": false,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 2,
+      "pick": "variant"
+    }
+  }
+}

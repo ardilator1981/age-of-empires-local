@@ -1,6 +1,6 @@
 import type { GameMod } from '../../core/types';
 import { type ArtEntry, bindArt, buildingArt, resourceArt, unitArt } from '../../render/art/artRegistry';
-import { artMode } from '../../render/art/assets';
+import { artMode, assetUrl, hasDom, loadImage } from '../../render/art/assets';
 import { preloadTerrainTextures } from '../../render/art/terrainTextures';
 
 /**
@@ -68,6 +68,15 @@ export const artMod: GameMod = {
   core: true,
   register(reg) {
     preloadTerrainTextures(reg.terrains);
+    // Iconos de recursos con imagen (public/sprites/ui/icon-<recurso>.png); mientras no carguen, quedan los SVG
+    if (hasDom && artMode() !== 'no') {
+      for (const r of reg.resources.values()) {
+        const orig = r.icon;
+        void loadImage(`sprites/ui/icon-${r.id}.png`).then(img => {
+          if (img && r.icon === orig) r.icon = `<img class="ri" src="${assetUrl(`sprites/ui/icon-${r.id}.png`)}" alt="" width="22" height="22" style="vertical-align:-5px">`;
+        });
+      }
+    }
     // Las hojas de ejemplo van primero: si una definición tiene arte de verdad, gana el de verdad
     bindArt(reg, artMode() === 'ejemplo' ? [...EXAMPLE, ...ART] : ART);
   },

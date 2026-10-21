@@ -1,0 +1,20 @@
+{
+  "image": "rubble.png",
+  "cell": {
+    "w": 424,
+    "h": 275
+  },
+  "anchor": {
+    "x": 212,
+    "y": 269
+  },
+  "scale": 2,
+  "shadow": false,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 4,
+      "pick": "variant"
+    }
+  }
+}

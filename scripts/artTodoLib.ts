@@ -128,11 +128,14 @@ export function buildCatalog(reg: Registry, art: ArtEntry[], disk: Disk, root = 
   // ------------------------------------------------------------ decoración, efectos e interfaz
   // Aún sin soporte en el motor: se dibujan por código aunque exista la imagen.
   const engine = 'el motor todavía no usa estas imágenes (se dibuja por código)';
-  const fixed = (kind: Kind, folder: string, id: string, name: string, prompt: string): Item => {
-    const done = disk.exists(`sprites/${folder}/${id}.png`);
-    return { kind, id, name, status: done ? 'hecho' : 'pendiente', missing: done ? [] : ['imagen'], priority: 5, files: done ? [] : [`${folder}/${id}.png`], prompt, note: engine };
+  /** Qué imágenes de efectos y de interfaz ya usa el motor (el resto aún no). */
+  const wired = (folder: string, id: string) => folder === 'decorations' || (folder === 'effects' && (id.startsWith('projectile-') || id === 'rubble'))
+    || (folder === 'ui' && reg.resources.has(id.replace(/^icon-/, '')));
+  const fixed = (kind: Kind, folder: string, id: string, name: string, prompt: string, file = id): Item => {
+    const done = disk.exists(`sprites/${folder}/${file}.png`);
+    return { kind, id, name, status: done ? 'hecho' : 'pendiente', missing: done ? [] : ['imagen'], priority: 5, files: done ? [] : [`${folder}/${file}.png`], prompt, note: wired(folder, id) ? undefined : engine };
   };
-  for (const k of DECORATION_KINDS) items.push(fixed('decoración', 'decorations', k, k, 'decoration'));
+  for (const k of DECORATION_KINDS) items.push(fixed('decoración', 'decorations', k, k, 'decoration', `deco-${k}`));
   const styles = new Set<string>(['arrow']);
   for (const d of [...reg.units.values(), ...reg.buildings.values()]) if (d.projectile) styles.add(d.projectile);
   for (const s of styles) items.push(fixed('efecto', 'effects', `projectile-${s}`, `Proyectil: ${s}`, 'effect'));

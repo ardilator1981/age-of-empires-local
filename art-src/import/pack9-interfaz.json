@@ -1,0 +1,95 @@
+{
+  "kind": "resource",
+  "out": "ui",
+  "groups": {
+    "icon-food": {
+      "shadow": false
+    },
+    "icon-wood": {
+      "shadow": false
+    },
+    "icon-gold": {
+      "shadow": false
+    },
+    "icon-stone": {
+      "shadow": false
+    },
+    "icon-population": {
+      "shadow": false
+    },
+    "icon-idle-villager": {
+      "shadow": false
+    },
+    "icon-attack": {
+      "shadow": false
+    },
+    "icon-stop": {
+      "shadow": false
+    },
+    "icon-delete": {
+      "shadow": false
+    },
+    "icon-build": {
+      "shadow": false
+    },
+    "icon-rally": {
+      "shadow": false
+    }
+  },
+  "sources": [
+    {
+      "source": "pack9-interfaz/iconos.jpg",
+      "grid": [
+        4,
+        3
+      ],
+      "items": [
+        {
+          "id": "icon-food",
+          "height": 48
+        },
+        {
+          "id": "icon-wood",
+          "height": 48
+        },
+        {
+          "id": "icon-gold",
+          "height": 48
+        },
+        {
+          "id": "icon-stone",
+          "height": 48
+        },
+        {
+          "id": "icon-population",
+          "height": 48
+        },
+        {
+          "id": "icon-idle-villager",
+          "height": 48
+        },
+        null,
+        {
+          "id": "icon-attack",
+          "height": 48
+        },
+        {
+          "id": "icon-stop",
+          "height": 48
+        },
+        {
+          "id": "icon-delete",
+          "height": 48
+        },
+        {
+          "id": "icon-build",
+          "height": 48
+        },
+        {
+          "id": "icon-rally",
+          "height": 48
+        }
+      ]
+    }
+  ]
+}

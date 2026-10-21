@@ -1,0 +1,20 @@
+{
+  "image": "deco-shrub.png",
+  "cell": {
+    "w": 53,
+    "h": 36
+  },
+  "anchor": {
+    "x": 27,
+    "y": 30
+  },
+  "scale": 2,
+  "shadow": false,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 2,
+      "pick": "variant"
+    }
+  }
+}

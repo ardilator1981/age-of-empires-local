@@ -1,0 +1,19 @@
+{
+  "image": "deco-dryTuft.png",
+  "cell": {
+    "w": 42,
+    "h": 36
+  },
+  "anchor": {
+    "x": 21,
+    "y": 30
+  },
+  "scale": 2,
+  "shadow": false,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 1
+    }
+  }
+}

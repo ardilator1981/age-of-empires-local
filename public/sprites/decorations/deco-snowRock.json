@@ -1,0 +1,20 @@
+{
+  "image": "deco-snowRock.png",
+  "cell": {
+    "w": 36,
+    "h": 33
+  },
+  "anchor": {
+    "x": 18,
+    "y": 27
+  },
+  "scale": 2,
+  "shadow": false,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 2,
+      "pick": "variant"
+    }
+  }
+}

@@ -1,3 +1,4 @@
+import { prop } from './art/props';
 import type { Game } from '../game/Game';
 import { SpriteCache, ellipse, seeded } from './draw';
 
@@ -156,6 +157,9 @@ const PAINTERS: Record<string, [number, number, number, number, (c: CanvasRender
 };
 
 export function drawDecoration(ctx: CanvasRenderingContext2D, d: Deco, sx: number, sy: number, z: number) {
+  // Con imagen (public/sprites/decorations/deco-<tipo>.json) se dibuja ella; si no, el dibujo por código
+  const art = prop('decorations', `deco-${d.kind}`);
+  if (art && art.drawFrame(ctx, d.v, sx, sy, z)) return;
   const p = PAINTERS[d.kind];
   if (!p) return;
   const [w, h, ax, ay, paint] = p;

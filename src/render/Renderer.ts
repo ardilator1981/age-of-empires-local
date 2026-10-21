@@ -7,6 +7,7 @@ import { Camera } from './Camera';
 import { ellipse, poly, up } from './draw';
 import { TerrainGL } from './TerrainGL';
 import { artFor } from './art/artRegistry';
+import { prop } from './art/props';
 import { type Deco, drawDecoration, generateDecorations } from './decorations';
 import { QUALITY, type QualityProfile } from './quality';
 
@@ -300,6 +301,8 @@ export class Renderer {
       } else if (d.kind === 'corpse') {
         ctx.fillStyle = 'rgba(70,20,15,0.55)'; ellipse(ctx, p.x, p.y, 10 * z, 4 * z); ctx.fill();
         ctx.fillStyle = d.color; ellipse(ctx, p.x + 2 * z, p.y - 1 * z, 6 * z, 2.4 * z); ctx.fill();
+      } else if (prop('effects', 'rubble')?.drawFrame(ctx, Math.min(3, Math.max(0, Math.round(d.size) - 1)), p.x, p.y, z)) {
+        // escombros con imagen
       } else {
         for (let k = 0; k < d.size * 5; k++) {
           const rx = Math.sin(k * 12.9898 + d.x) * d.size * 0.42, ry = Math.cos(k * 78.233 + d.y) * d.size * 0.42;
@@ -391,6 +394,8 @@ export class Renderer {
       const h2 = pr.sh * (1 - t2) + 10 * t2 + Math.sin(Math.PI * t2) * 26;
       const dx = p2.x - p.x, dy = (p2.y - h2 * z) - (p.y - hgt * z);
       const len = Math.hypot(dx, dy) || 1;
+      const img = prop('effects', `projectile-${pr.style}`);
+      if (img && img.drawFrame(ctx, 0, p.x, p.y - hgt * z, z, { rot: Math.atan2(dy, dx) + Math.PI / 2, center: true })) continue;
       const L = (pr.style === 'arrow' ? 9 : 5) * z;
       ctx.strokeStyle = pr.style === 'arrow' ? '#2e2214' : '#8a8f94';
       ctx.lineWidth = Math.max(1, (pr.style === 'arrow' ? 1.3 : 2.8) * z);
