@@ -10,7 +10,8 @@
         "work-gold": 8,
         "work-stone": 8,
         "work-food": 7,
-        "carry-wood": 9
+        "carry-wood": 9,
+        "death": 6
       }
     },
     "militia": {
@@ -551,6 +552,44 @@
           "id": "villager",
           "state": "work-stone"
         },
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source": "pack6-unidades/aldeano-morir.jpg",
+      "grid": [
+        6,
+        2
+      ],
+      "sharedScale": true,
+      "items": [
+        {
+          "id": "villager",
+          "state": "death",
+          "height": 46
+        },
+        {
+          "id": "villager",
+          "state": "death"
+        },
+        {
+          "id": "villager",
+          "state": "death"
+        },
+        {
+          "id": "villager",
+          "state": "death"
+        },
+        {
+          "id": "villager",
+          "state": "death"
+        },
+        null,
         null,
         null,
         null,

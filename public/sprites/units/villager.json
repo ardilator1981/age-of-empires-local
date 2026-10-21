@@ -119,6 +119,21 @@
         "x": 34,
         "y": 99
       }
+    },
+    "death": {
+      "image": "villager-death.png",
+      "mask": "villager-death-mask.png",
+      "row": 0,
+      "frames": 4,
+      "fps": 6,
+      "cell": {
+        "w": 81,
+        "h": 100
+      },
+      "anchor": {
+        "x": 41,
+        "y": 94
+      }
     }
   }
 }

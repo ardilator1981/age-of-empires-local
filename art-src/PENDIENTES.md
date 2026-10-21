@@ -20,7 +20,7 @@
 
 1. Aldeano: recoger, llevar carga y construir · 2. Unidades de combate: andar y atacar · 3. Muerte y edificios por edad · 4. Variantes por edad restantes · 5. Decoración, efectos e interfaz (necesitan además soporte en el motor).
 
-- P1 · **unidad villager**: attack, carry-food, carry-gold, carry-stone, death
+- P1 · **unidad villager**: attack, carry-food, carry-gold, carry-stone
 - P2 · **unidad manAtArms**: walk, attack, death
 - P2 · **unidad longSwordsman**: walk, attack, death
 - P2 · **unidad spearman**: walk, attack, death
@@ -40,7 +40,7 @@
 
 | id | nombre | estado | falta | archivos esperados (en public/sprites/) | prio | prompt |
 | --- | --- | --- | --- | --- | ---: | --- |
-| villager | Aldeano | 🟡 sin animar | attack, carry-food, carry-gold, carry-stone, death | units/villager-attack.png (+ -mask.png)<br>units/villager-carry-food.png (+ -mask.png)<br>units/villager-carry-gold.png (+ -mask.png)<br>units/villager-carry-stone.png (+ -mask.png)<br>units/villager-death.png (+ -mask.png) | 1 | `anim:attack-melee` `anim:carry-food` `anim:carry-gold` `anim:carry-stone` `anim:death` |
+| villager | Aldeano | 🟡 sin animar | attack, carry-food, carry-gold, carry-stone | units/villager-attack.png (+ -mask.png)<br>units/villager-carry-food.png (+ -mask.png)<br>units/villager-carry-gold.png (+ -mask.png)<br>units/villager-carry-stone.png (+ -mask.png) | 1 | `anim:attack-melee` `anim:carry-food` `anim:carry-gold` `anim:carry-stone` |
 | militia | Milicia | 🟡 sin animar | death | units/militia-death.png (+ -mask.png) | 3 | `anim:death` |
 | manAtArms | Hombre de armas | 🟡 sin animar | walk, attack, death | units/manAtArms-walk.png (+ -mask.png)<br>units/manAtArms-attack.png (+ -mask.png)<br>units/manAtArms-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack-melee` `anim:death` |
 | longSwordsman | Espadachín de mandoble | 🟡 sin animar | walk, attack, death | units/longSwordsman-walk.png (+ -mask.png)<br>units/longSwordsman-attack.png (+ -mask.png)<br>units/longSwordsman-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack-melee` `anim:death` |
