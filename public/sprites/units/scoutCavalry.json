@@ -29,6 +29,21 @@
         "x": 55,
         "y": 128
       }
+    },
+    "attack": {
+      "image": "scoutCavalry-attack.png",
+      "mask": "scoutCavalry-attack-mask.png",
+      "row": 0,
+      "frames": 6,
+      "fps": 8,
+      "cell": {
+        "w": 126,
+        "h": 134
+      },
+      "anchor": {
+        "x": 63,
+        "y": 128
+      }
     }
   }
 }

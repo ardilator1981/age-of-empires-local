@@ -23,8 +23,6 @@
 - P2 · **unidad villager**: attack
 - P2 · **unidad longSwordsman**: walk, attack, death
 - P2 · **unidad pikeman**: walk, attack, death
-- P2 · **unidad scoutCavalry**: attack, death
-- P2 · **unidad lightCavalry**: attack, death
 - P2 · **unidad knight**: walk, attack, death
 - P2 · **unidad cavalier**: walk, attack, death
 - P2 · **unidad batteringRam**: walk, attack, death
@@ -35,6 +33,8 @@
 - P2 · **unidad deer**: idle, walk, death
 - P2 · **unidad boar**: idle, walk, attack, death
 - P2 · **unidad sheep**: idle, walk, death
+- P2 · **unidad warElephant**: idle, walk, attack, death
+- P2 · **unidad general**: idle, walk, attack, death
 
 ## Unidades
 
@@ -49,8 +49,8 @@
 | archer | Arquero | ✅ hecho | — | — | — | — |
 | crossbowman | Ballestero | 🟡 sin animar | death | units/crossbowman-death.png (+ -mask.png) | 3 | `anim:death` |
 | skirmisher | Hostigador | 🟡 sin animar | death | units/skirmisher-death.png (+ -mask.png) | 3 | `anim:death` |
-| scoutCavalry | Caballería de exploración | 🟡 sin animar | attack, death | units/scoutCavalry-attack.png (+ -mask.png)<br>units/scoutCavalry-death.png (+ -mask.png) | 2 | `anim:attack-melee:mounted` `anim:death:mounted` |
-| lightCavalry | Caballería ligera | 🟡 sin animar | attack, death | units/lightCavalry-attack.png (+ -mask.png)<br>units/lightCavalry-death.png (+ -mask.png) | 2 | `anim:attack-melee:mounted` `anim:death:mounted` |
+| scoutCavalry | Caballería de exploración | 🟡 sin animar | death | units/scoutCavalry-death.png (+ -mask.png) | 3 | `anim:death:mounted` |
+| lightCavalry | Caballería ligera | 🟡 sin animar | death | units/lightCavalry-death.png (+ -mask.png) | 3 | `anim:death:mounted` |
 | knight | Caballero | 🟡 sin animar | walk, attack, death | units/knight-walk.png (+ -mask.png)<br>units/knight-attack.png (+ -mask.png)<br>units/knight-death.png (+ -mask.png) | 2 | `anim:walk:mounted` `anim:attack-melee:mounted` `anim:death:mounted` |
 | cavalier | Paladín | 🟡 sin animar | walk, attack, death | units/cavalier-walk.png (+ -mask.png)<br>units/cavalier-attack.png (+ -mask.png)<br>units/cavalier-death.png (+ -mask.png) | 2 | `anim:walk:mounted` `anim:attack-melee:mounted` `anim:death:mounted` |
 | batteringRam | Ariete | 🟡 sin animar | walk, attack, death | units/batteringRam-walk.png (+ -mask.png)<br>units/batteringRam-attack.png (+ -mask.png)<br>units/batteringRam-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack-melee` `anim:death` |

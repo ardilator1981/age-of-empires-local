@@ -67,7 +67,8 @@
     },
     "scoutCavalry": {
       "fps": {
-        "walk": 8
+        "walk": 8,
+        "attack": 8
       }
     }
   },
@@ -1328,6 +1329,38 @@
         {
           "id": "scoutCavalry",
           "state": "walk"
+        }
+      ]
+    },
+    {
+      "source": "pack6-unidades/explorador-atacar.jpg",
+      "grid": "auto",
+      "sharedScale": true,
+      "items": [
+        {
+          "id": "scoutCavalry",
+          "state": "attack",
+          "height": 62
+        },
+        {
+          "id": "scoutCavalry",
+          "state": "attack"
+        },
+        {
+          "id": "scoutCavalry",
+          "state": "attack"
+        },
+        {
+          "id": "scoutCavalry",
+          "state": "attack"
+        },
+        {
+          "id": "scoutCavalry",
+          "state": "attack"
+        },
+        {
+          "id": "scoutCavalry",
+          "state": "attack"
         }
       ]
     }
