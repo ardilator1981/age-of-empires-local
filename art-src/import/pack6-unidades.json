@@ -70,6 +70,12 @@
         "walk": 8,
         "attack": 8
       }
+    },
+    "knight": {
+      "fps": {
+        "walk": 8,
+        "attack": 8
+      }
     }
   },
   "sources": [
@@ -1360,6 +1366,70 @@
         },
         {
           "id": "scoutCavalry",
+          "state": "attack"
+        }
+      ]
+    },
+    {
+      "source": "pack6-unidades/caballero-andar.jpg",
+      "grid": "auto",
+      "sharedScale": true,
+      "items": [
+        {
+          "id": "knight",
+          "state": "walk",
+          "height": 84
+        },
+        {
+          "id": "knight",
+          "state": "walk"
+        },
+        {
+          "id": "knight",
+          "state": "walk"
+        },
+        {
+          "id": "knight",
+          "state": "walk"
+        },
+        {
+          "id": "knight",
+          "state": "walk"
+        },
+        {
+          "id": "knight",
+          "state": "walk"
+        }
+      ]
+    },
+    {
+      "source": "pack6-unidades/caballero-atacar.jpg",
+      "grid": "auto",
+      "sharedScale": true,
+      "items": [
+        {
+          "id": "knight",
+          "state": "attack",
+          "height": 84
+        },
+        {
+          "id": "knight",
+          "state": "attack"
+        },
+        {
+          "id": "knight",
+          "state": "attack"
+        },
+        {
+          "id": "knight",
+          "state": "attack"
+        },
+        {
+          "id": "knight",
+          "state": "attack"
+        },
+        {
+          "id": "knight",
           "state": "attack"
         }
       ]
