@@ -1,6 +1,7 @@
 import { BALANCE } from '../config/balance';
 import { isTouchDevice, PLAYER_COLORS, PLAYER_COLOR_NAMES } from '../core/constants';
 import { buildRegistry, type Registry } from '../core/Registry';
+import type { CivDef } from '../core/types';
 import type { GameOptions } from '../game/Game';
 import { ALL_MODS } from '../mods';
 import type { App } from '../app/App';
@@ -36,7 +37,7 @@ interface MenuState {
 const STORAGE_KEY = 'aoe-local-menu-v1';
 
 const DEFAULTS: MenuState = {
-  name: 'Jugador', civ: 'franks', color: 0,
+  name: 'Jugador', civ: 'france', color: 0,
   rivals: [{ civ: 'random', difficulty: 'normal', color: 1 }],
   // En móviles, mapa pequeño por defecto (menos trabajo para la CPU y la GPU)
   mapType: 'arabia', mapSize: isTouchDevice() ? 80 : 96, startingResources: 'standard', startAge: 0, victory: 'conquest',
@@ -72,6 +73,13 @@ const HELP_TOUCH = `
 const help = () => (isTouchDevice() || document.documentElement.classList.contains('touch') ? HELP_TOUCH : HELP_MOUSE);
 
 export class Menu {
+  /** Línea de identidades de la civilización: una por era, con sus bonos propios. */
+  private civEras(reg: Registry, civ: CivDef): string {
+    const eras = Object.entries(civ.eras ?? {}).sort((a, b) => Number(a[0]) - Number(b[0]));
+    if (!eras.length) return '';
+    return `<ol class="civeras">${eras.map(([i, e]) => `<li><b>${esc(reg.ageName(Number(i)))}: ${esc(e.name)}</b>${e.bonusText.length ? ' — ' + e.bonusText.map(esc).join('; ') : ''}</li>`).join('')}</ol>`;
+  }
+
   private state: MenuState;
   private overlay = document.getElementById('overlay')!;
   private regCache: { key: string; reg: Registry } | null = null;
@@ -152,7 +160,7 @@ export class Menu {
               <select data-k="civ">${civOpts(st.civ, false)}</select>
               <select data-k="color">${colorOpts(st.color)}</select>
             </div>
-            ${civ ? `<div class="civinfo"><b>${esc(civ.name)}</b> — ${esc(civ.description)}<ul>${civ.bonusText.map(t => `<li>${esc(t)}</li>`).join('')}</ul></div>` : ''}
+            ${civ ? `<div class="civinfo"><b>${esc(civ.name)}</b> — ${esc(civ.description)}<ul>${civ.bonusText.map(t => `<li>${esc(t)}</li>`).join('')}</ul>${this.civEras(reg, civ)}</div>` : ''}
             <h3>Rivales</h3>
             ${rivals}
             ${st.rivals.length < 5 ? '<button class="small" data-add>+ Añadir rival</button>' : ''}
@@ -455,7 +463,7 @@ export class Menu {
     if (!s) return;
     const g = s.game;
     const rows = g.players.slice(1).map(p => `
-      <tr style="color:${p.color}"><td>${esc(p.name)}</td><td>${esc(p.civ.name)}</td><td>${esc(g.reg.ageName(p.age))}</td>
+      <tr style="color:${p.color}"><td>${esc(p.name)}</td><td>${esc(p.identity)}</td><td>${esc(g.reg.ageName(p.age))}</td>
       <td>${p.stats.kills}</td><td>${p.stats.losses}</td><td>${p.stats.razed}</td><td>${Math.floor(p.stats.gathered)}</td><td>${p.defeated ? 'Derrotado' : 'En pie'}</td></tr>`).join('');
     const t = Math.floor(g.time);
     this.app.menuOpen = true;

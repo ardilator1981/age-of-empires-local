@@ -8,8 +8,8 @@
 
 | Tipo | Hecho | Sin animar | Pendiente |
 | --- | ---: | ---: | ---: |
-| unidad | 0 | 17 | 7 |
-| edificio | 7 | 5 | 2 |
+| unidad | 0 | 16 | 10 |
+| edificio | 7 | 5 | 6 |
 | recurso | 6 | 0 | 4 |
 | terreno | 9 | 0 | 0 |
 | decoración | 0 | 0 | 9 |
@@ -34,7 +34,7 @@
 - P2 · **unidad batteringRam**: walk, attack, death
 - P2 · **unidad longbowman**: walk, attack, death
 - P2 · **unidad throwingAxeman**: walk, attack, death
-- P2 · **unidad huskarl**: idle, walk, attack, death
+- P2 · **unidad druzhinnik**: idle, walk, attack, death
 
 ## Unidades
 
@@ -56,8 +56,10 @@
 | batteringRam | Ariete | 🟡 sin animar | walk, attack, death | units/batteringRam-walk.png (+ -mask.png)<br>units/batteringRam-attack.png (+ -mask.png)<br>units/batteringRam-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack-melee` `anim:death` |
 | longbowman | Arquero de tiro largo | 🟡 sin animar | walk, attack, death | units/longbowman-walk.png (+ -mask.png)<br>units/longbowman-attack.png (+ -mask.png)<br>units/longbowman-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack` `anim:death` |
 | throwingAxeman | Lanzador de hachas | 🟡 sin animar | walk, attack, death | units/throwingAxeman-walk.png (+ -mask.png)<br>units/throwingAxeman-attack.png (+ -mask.png)<br>units/throwingAxeman-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack` `anim:death` |
-| huskarl | Huscarle | 🔴 pendiente | idle, walk, attack, death | units/huskarl.png (+ -mask.png)<br>units/huskarl-walk.png (+ -mask.png)<br>units/huskarl-attack.png (+ -mask.png)<br>units/huskarl-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack-melee` `anim:death` |
-| mangudai | Mangudai | 🟡 sin animar | walk, attack, death | units/mangudai-walk.png (+ -mask.png)<br>units/mangudai-attack.png (+ -mask.png)<br>units/mangudai-death.png (+ -mask.png) | 2 | `anim:walk:mounted` `anim:attack:mounted` `anim:death:mounted` |
+| druzhinnik | Druzhinnik | 🔴 pendiente | idle, walk, attack, death | units/druzhinnik.png (+ -mask.png)<br>units/druzhinnik-walk.png (+ -mask.png)<br>units/druzhinnik-attack.png (+ -mask.png)<br>units/druzhinnik-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack-melee` `anim:death` |
+| boyarSon | Hijo de boyardo | 🔴 pendiente | idle, walk, attack, death | units/boyarSon.png (+ -mask.png)<br>units/boyarSon-walk.png (+ -mask.png)<br>units/boyarSon-attack.png (+ -mask.png)<br>units/boyarSon-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk:mounted` `anim:attack-melee:mounted` `anim:death:mounted` |
+| strelets | Strelets | 🔴 pendiente | idle, walk, attack, death | units/strelets.png (+ -mask.png)<br>units/strelets-walk.png (+ -mask.png)<br>units/strelets-attack.png (+ -mask.png)<br>units/strelets-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack` `anim:death` |
+| cossack | Cosaco | 🔴 pendiente | idle, walk, attack, death | units/cossack.png (+ -mask.png)<br>units/cossack-walk.png (+ -mask.png)<br>units/cossack-attack.png (+ -mask.png)<br>units/cossack-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk:mounted` `anim:attack-melee:mounted` `anim:death:mounted` |
 | deer | Ciervo | 🔴 pendiente | idle, walk, death | units/deer.png (+ -mask.png)<br>units/deer-walk.png (+ -mask.png)<br>units/deer-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:death` |
 | boar | Jabalí | 🔴 pendiente | idle, walk, attack, death | units/boar.png (+ -mask.png)<br>units/boar-walk.png (+ -mask.png)<br>units/boar-attack.png (+ -mask.png)<br>units/boar-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack-melee` `anim:death` |
 | sheep | Oveja | 🔴 pendiente | idle, walk, death | units/sheep.png (+ -mask.png)<br>units/sheep-walk.png (+ -mask.png)<br>units/sheep-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:death` |
@@ -84,11 +86,16 @@
 | watchTower | Torre de vigilancia | ✅ hecho | — | — | — | — |
 | siegeWorkshop | Taller de asedio | 🟡 sin animar | Edad Imperial | buildings/siegeWorkshop-3.png (+ -mask.png) | 4 | `building:age` |
 | castle | Castillo | 🟡 sin animar | Edad Imperial | buildings/castle-3.png (+ -mask.png) | 4 | `building:age` |
+| gorodishche | Gorodishche | 🔴 pendiente | imagen base (Edad Oscura), Edad Feudal, Edad de los Castillos, Edad Imperial | buildings/gorodishche.png (+ -mask.png)<br>buildings/gorodishche-1.png (+ -mask.png)<br>buildings/gorodishche-2.png (+ -mask.png)<br>buildings/gorodishche-3.png (+ -mask.png) | 3 | `building:base` |
+| monasteryFortress | Monasterio-fortaleza | 🔴 pendiente | imagen base (Edad Feudal), Edad de los Castillos, Edad Imperial | buildings/monasteryFortress.png (+ -mask.png)<br>buildings/monasteryFortress-2.png (+ -mask.png)<br>buildings/monasteryFortress-3.png (+ -mask.png) | 3 | `building:base` |
+| kremlin | Kremlin de piedra | 🔴 pendiente | imagen base (Edad de los Castillos), Edad Imperial | buildings/kremlin.png (+ -mask.png)<br>buildings/kremlin-3.png (+ -mask.png) | 3 | `building:base` |
+| ostrog | Ostrog | 🔴 pendiente | imagen base (Edad Imperial) | buildings/ostrog.png (+ -mask.png) | 3 | `building:base` |
 | corral | Corral | 🔴 pendiente | imagen base (Edad Feudal), Edad de los Castillos, Edad Imperial | buildings/corral.png (+ -mask.png)<br>buildings/corral-2.png (+ -mask.png)<br>buildings/corral-3.png (+ -mask.png) | 3 | `building:base` |
 
 *huella 2x2*
 *huella 3x3*
 *huella 4x4*
+*huella 1x1*
 
 ## Recursos
 
@@ -197,8 +204,8 @@
 | up_cavalier | Tecnología: Paladín | 🔴 pendiente | imagen | ui/tech/up_cavalier.png | 5 | `ui:tech` |
 | yeomen | Tecnología: Arqueros ingleses | 🔴 pendiente | imagen | ui/tech/yeomen.png | 5 | `ui:tech` |
 | beardedAxe | Tecnología: Hacha barbada | 🔴 pendiente | imagen | ui/tech/beardedAxe.png | 5 | `ui:tech` |
-| perfusion | Tecnología: Perfusión | 🔴 pendiente | imagen | ui/tech/perfusion.png | 5 | `ui:tech` |
-| drill | Tecnología: Instrucción | 🔴 pendiente | imagen | ui/tech/drill.png | 5 | `ui:tech` |
+| russkayaPravda | Tecnología: Russkaya Pravda | 🔴 pendiente | imagen | ui/tech/russkayaPravda.png | 5 | `ui:tech` |
+| siberianMarch | Tecnología: Marcha a Siberia | 🔴 pendiente | imagen | ui/tech/siberianMarch.png | 5 | `ui:tech` |
 | selectiveBreeding | Tecnología: Cría selectiva | 🔴 pendiente | imagen | ui/tech/selectiveBreeding.png | 5 | `ui:tech` |
 | ironTusks | Tecnología: Colmillos de hierro | 🔴 pendiente | imagen | ui/tech/ironTusks.png | 5 | `ui:tech` |
 
@@ -224,12 +231,6 @@ Draw a new picture: using the attached character as the exact model (same face, 
 
 ```text
 Draw a new picture: using the attached character as the exact model (same face, body, clothes, colors, weapon and magenta cloth), draw 6 poses of one sword blow from horseback toward the lower right: standing ready, raising the weapon, weapon high, swinging down, follow-through, and recovering (the horse moves, the rider stays in the saddle). The 6 poses are side by side in a single horizontal row on a plain white background, evenly spaced and not touching. Same viewing angle from slightly above, turned toward the lower right, the same size in every pose, the feet on the same level. Sunlight from the upper left; no shadow, no ground, no motion blur. No writing, no numbers, no frame.
-```
-
-### `anim:attack:mounted`
-
-```text
-Draw a new picture: using the attached character as the exact model (same face, body, clothes, colors, weapon and magenta cloth), draw 6 poses of shooting toward the lower right: standing ready, drawing, aiming, releasing, and lowering the weapon (the horse moves, the rider stays in the saddle). The 6 poses are side by side in a single horizontal row on a plain white background, evenly spaced and not touching. Same viewing angle from slightly above, turned toward the lower right, the same size in every pose, the feet on the same level. Sunlight from the upper left; no shadow, no ground, no motion blur. No writing, no numbers, no frame.
 ```
 
 ### `anim:carry-food`

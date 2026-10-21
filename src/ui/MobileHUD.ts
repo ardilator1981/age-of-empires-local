@@ -601,7 +601,7 @@ export class MobileHUD {
     if (k[0] === 's') return this.sheetBtns[Number(k.slice(1))]?.tip ?? '';
     if (k[0] === 'q') return '<b>Cancelar</b><br>Toca dos veces para quitarlo de la cola.';
     const fixed: Record<string, string> = {
-      res: `<b>Recursos</b> · ${esc(g.reg.ageName(g.human.age))} · ${esc(g.human.civ.name)}`,
+      res: `<b>Recursos</b> · ${esc(g.reg.ageName(g.human.age))} · ${esc(g.human.identity)}`,
       alerts: '<b>Alertas</b><br>Lleva la cámara al último ataque o aviso.',
       army: '<b>Ejército</b><br>Selecciona todas tus unidades militares (dos veces: centrar).',
       idle: '<b>Aldeano inactivo</b><br>Selecciona el siguiente aldeano sin tarea.',
@@ -664,7 +664,7 @@ export class MobileHUD {
     } else if (sc === 'game') {
       const t = Math.floor(g.time);
       body = `<div class="m-col">
-        <p class="m-sub">${esc(g.reg.ageName(p.age))} · ${esc(p.civ.name)} · ${Math.floor(t / 60)} min</p>
+        <p class="m-sub">${esc(g.reg.ageName(p.age))} · ${esc(p.identity)} · ${Math.floor(t / 60)} min</p>
         <button class="m-wide" data-a="resume">▶ Continuar</button>
         <button class="m-wide${armed('restart') ? ' armed' : ''}" data-a="restart">${armed('restart') ? '¿Seguro? Toca otra vez' : '↻ Reiniciar partida'}</button>
         <button class="m-wide${armed('to-menu') ? ' armed' : ''}" data-a="to-menu">${armed('to-menu') ? '¿Seguro? Toca otra vez' : '☰ Menú principal'}</button>
@@ -684,7 +684,7 @@ export class MobileHUD {
         <h3>Investigadas</h3>${done.length ? `<ul class="m-list">${done.map(d => `<li>${d.icon} <b>${esc(d.name)}</b> <small>${esc(d.description)}</small></li>`).join('')}</ul>` : '<p class="m-sub">Todavía ninguna.</p>'}</div>`;
     } else if (sc === 'diplomacy') {
       body = `<div class="m-scroll"><ul class="m-list">${g.players.slice(1).map(q => `<li><span class="swatch" style="background:${q.color}"></span>
-        <b>${esc(q.name)}</b> <small>${esc(q.civ.name)}</small> — ${q.id === p.id ? 'Tú' : q.defeated ? 'Derrotado' : g.isEnemy(p.id, q.id) ? '⚔ Enemigo' : '🤝 Aliado'}</li>`).join('')}</ul>
+        <b>${esc(q.name)}</b> <small>${esc(q.identity)}</small> — ${q.id === p.id ? 'Tú' : q.defeated ? 'Derrotado' : g.isEnemy(p.id, q.id) ? '⚔ Enemigo' : '🤝 Aliado'}</li>`).join('')}</ul>
         <p class="m-sub">Las alianzas se eligen al crear la partida.</p></div>`;
     } else {
       body = `<div class="m-scroll">${settingsHtml(app)}</div>`;

@@ -153,7 +153,7 @@ export class HUD {
     const pop = document.getElementById('res-pop')!;
     pop.textContent = `${p.popUsed}/${p.popCap}`;
     pop.classList.toggle('bad', p.popUsed >= p.popCap);
-    this.el.age.textContent = `${g.reg.ageName(p.age)} · ${p.civ.name}`;
+    this.el.age.textContent = `${g.reg.ageName(p.age)} · ${p.identity}`;
     const t = Math.floor(g.time);
     this.el.clock.textContent = `${Math.floor(t / 3600) ? Math.floor(t / 3600) + ':' : ''}${String(Math.floor(t / 60) % 60).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}`;
   }
@@ -277,7 +277,7 @@ export class HUD {
     }
     this.setSelectionHtml(`<div class="sel-single">
       <div class="portrait" style="border-color:${owner.color}">${icon}</div>
-      <div class="info"><div class="name">${esc(name)}</div><div class="owner" style="color:${owner.color}">${esc(owner.name)}${e.owner ? ' · ' + esc(owner.civ.name) : ''}</div>${body}</div>
+      <div class="info"><div class="name">${esc(name)}</div><div class="owner" style="color:${owner.color}">${esc(owner.name)}${e.owner ? ' · ' + esc(owner.identity) : ''}</div>${body}</div>
     </div>`);
   }
 

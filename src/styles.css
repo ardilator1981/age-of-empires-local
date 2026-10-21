@@ -234,6 +234,7 @@ button { font-family: var(--font); cursor: pointer; }
   background: var(--grain), linear-gradient(#efe0bc, #d9c494); box-shadow: 0 0 0 1px #6e5420, inset 0 0 12px rgba(120, 80, 30, 0.35);
 }
 .civinfo b { color: #5a1e0e; }
+.civinfo .civeras { margin: 6px 0 0; padding-left: 18px; font-size: 0.9em; }
 .civinfo ul { margin: 4px 0 0; padding-left: 18px; }
 .grid { display: grid; grid-template-columns: auto 1fr; gap: 6px 10px; align-items: center; }
 .grid label { color: var(--parchment); text-shadow: 1px 1px 0 #000; }
