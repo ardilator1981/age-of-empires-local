@@ -11,7 +11,7 @@ export type SfxId =
   | 'buildingDone' | 'unitTrained' | 'techDone' | 'ageUp'
   | 'depleted' | 'alertUnits' | 'alertBuildings' | 'villagerIdle'
   | 'errResources' | 'errPlacement' | 'errPopulation' | 'errGeneric'
-  | 'hitMelee' | 'hitArrow' | 'hitBuilding' | 'bird';
+  | 'hitMelee' | 'hitArrow' | 'hitBuilding' | 'animalDeath' | 'bird';
 
 export type SfxBus = 'effects' | 'alerts';
 
@@ -284,6 +284,15 @@ export const SFX: Record<SfxId, SfxDef> = {
       burst(c, o, { type: 'lowpass', freq: 450, t: 0, dur: 0.18, gain: 0.5 });
     },
   },
+  animalDeath: {
+    dur: 0.45, bus: 'effects', prio: 1, cooldown: 0.15, gain: 0.3,
+    make: (c, o) => {
+      // Un balido corto: tono con vibrato rápido que cae, más un soplo de ruido
+      tone(c, o, { type: 'sawtooth', freq: 360, to: 210, t: 0, dur: 0.32, gain: 0.35, attack: 0.01, lp: 1400 });
+      tone(c, o, { type: 'sawtooth', freq: 372, to: 220, t: 0.012, dur: 0.3, gain: 0.25, attack: 0.01, lp: 1400 });
+      burst(c, o, { type: 'bandpass', freq: 900, q: 1.5, t: 0, dur: 0.12, gain: 0.2 });
+    },
+  },
   bird: {
     dur: 0.6, bus: 'effects', prio: 0, cooldown: 2, gain: 0.1,
     make: (c, o) => {
@@ -297,5 +306,5 @@ export const SFX: Record<SfxId, SfxDef> = {
 export const PRELOAD_ORDER: SfxId[] = [
   'confirmMove', 'confirmGather', 'confirmBuild', 'confirmAttack', 'errPlacement', 'errResources', 'errGeneric',
   'unitTrained', 'buildingDone', 'alertUnits', 'alertBuildings', 'errPopulation', 'depleted', 'techDone', 'ageUp',
-  'villagerIdle', 'hitMelee', 'hitArrow', 'hitBuilding', 'bird',
+  'villagerIdle', 'hitMelee', 'hitArrow', 'hitBuilding', 'animalDeath', 'bird',
 ];

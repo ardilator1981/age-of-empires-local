@@ -42,6 +42,8 @@ export interface ResourceNodeDef {
   groundTerrain?: string;
   /** Color en el minimapa. */
   minimapColor: string;
+  /** Multiplica lo que se carga de golpe de este recurso (la carne se carga a hombros). */
+  carryMul?: number;
 }
 
 export interface TerrainDef {
@@ -126,6 +128,25 @@ export interface UnitDef extends BaseDef {
   aura?: UnitAura;
   /** No se puede eliminar con la orden «Eliminar» (p. ej. el rey: borrarlo sería rendirse). */
   undeletable?: boolean;
+  /** Es un animal (salvaje, de la Naturaleza, o ganado de un jugador). Ver `WildlifeDef`. */
+  wildlife?: WildlifeDef;
+  /** Aunque no sea `gatherer`, puede cazar y llevar la carne (p. ej. la caballería de exploración). */
+  hunting?: boolean;
+}
+
+/** Comportamiento de un animal. Al morir deja un cadáver (nodo de recurso) recolectable. */
+export interface WildlifeDef {
+  /** Id del nodo de recurso que deja al morir (su cantidad de comida es la del nodo). */
+  carcass: string;
+  /**
+   * 'flee': huye al ser herido; 'fight': contraataca a quien lo hiere (peligroso); 'passive': no
+   * reacciona. La IA no caza los que luchan.
+   */
+  behavior: 'flee' | 'fight' | 'passive';
+  /** Radio (casillas) del paseo alrededor de su sitio. */
+  roam: number;
+  /** Ganado de un jugador: un aldeano lo sacrifica al instante, sin atacarlo. */
+  livestock?: boolean;
 }
 
 export interface UnitAura {
@@ -256,6 +277,20 @@ export interface SetupConfig {
   townCenter: string;
   startingUnits: { unit: string; count: number }[];
   baseResources: BaseResourceSpec[];
+  /** Animales salvajes que el generador reparte por el mapa (ver `MapGenerator.wildlife`). */
+  wildlife?: WildlifeSpec[];
+}
+
+/** Manadas de animales salvajes. `base`: por cada jugador, a esa distancia; `map`: repartidas, lejos de las bases. */
+export interface WildlifeSpec {
+  unit: string;
+  where: 'base' | 'map';
+  /** Manadas por jugador (`base`) o en todo el mapa (`map`, por cada 48×48 casillas). */
+  groups: number;
+  /** Animales por manada, mínimo y máximo. */
+  perGroup: [number, number];
+  minDist: number;
+  maxDist: number;
 }
 
 // ---------------------------------------------------------------- extensiones del motor

@@ -90,6 +90,7 @@ export class AudioManager {
       ev.on('underAttack', ({ playerId, kind }) => { if (playerId === h) this.play(kind === 'building' ? 'alertBuildings' : 'alertUnits'); }),
       ev.on('villagerIdle', ({ entity }) => { if (entity.owner === h) this.play('villagerIdle'); }),
       ev.on('damaged', ({ target, attacker }) => this.combatSound(target, attacker)),
+      ev.on('entityDied', ({ entity }) => this.animalSound(entity)),
     ];
     this.startAmbient();
   }
@@ -307,21 +308,36 @@ export class AudioManager {
     this.voices.push({ src, gain, prio: def.prio, end: now + buf.duration / rate, group: def.group });
   }
 
-  /** Golpes del combate: solo si se ve (niebla), más bajos cuanto más lejos de la vista y con panorama. */
-  private combatSound(target: Entity, attacker?: Entity) {
+  /** Volumen y panorama de un sonido en el mapa: solo si se ve (niebla), más bajo cuanto más lejos de la vista. */
+  private spatial(target: Entity): { gain: number; pan: number } | null {
     const g = this.game, view = this.view?.();
-    if (!g || !view || this.paused) return;
+    if (!g || !view || this.paused) return null;
     const human = g.players[g.humanId];
     const tx = Math.floor(target.x), ty = Math.floor(target.y);
-    if (!g.map.inBounds(tx, ty) || !human.visible[ty * g.map.w + tx]) return;
+    if (!g.map.inBounds(tx, ty) || !human.visible[ty * g.map.w + tx]) return null;
     const d = Math.hypot(target.x - view.x, target.y - view.y);
     const gain = clamp01(1 - d / (view.r * 1.5));
-    if (gain < 0.08) return;
+    if (gain < 0.08) return null;
     // En la vista isométrica, la x de pantalla crece con (x - y)
     const pan = ((target.x - target.y) - (view.x - view.y)) / (view.r * 1.4);
+    return { gain, pan };
+  }
+
+  /** Golpes del combate. */
+  private combatSound(target: Entity, attacker?: Entity) {
+    const sp = this.spatial(target);
+    if (!sp) return;
+    const g = this.game!;
     const ranged = !!attacker && attacker.kind === 'unit' && (g.unitDef(attacker).range ?? 0) > 1.5;
     const id: SfxId = target.kind === 'building' ? 'hitBuilding' : ranged ? 'hitArrow' : 'hitMelee';
-    this.play(id, { gain, pan, rate: 0.9 + Math.random() * 0.2 });
+    this.play(id, { gain: sp.gain, pan: sp.pan, rate: 0.9 + Math.random() * 0.2 });
+  }
+
+  /** Un animal cae (caza o sacrificio de ganado). */
+  private animalSound(e: Entity) {
+    if (e.kind !== 'unit' || !this.game?.unitDef(e).wildlife) return;
+    const sp = this.spatial(e);
+    if (sp) this.play('animalDeath', { gain: sp.gain, pan: sp.pan, rate: 0.85 + Math.random() * 0.4 });
   }
 
   // ------------------------------------------------------------ ambiente

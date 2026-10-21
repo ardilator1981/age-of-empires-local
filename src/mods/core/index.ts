@@ -13,12 +13,14 @@ import { maps } from './maps';
 import { techs } from './techs';
 import { units } from './units';
 import { ages, resourceNodes, resources, setup, terrains } from './world';
+import { wildlifeBuildings, wildlifeNodes, wildlifeSpawns, wildlifeTechs, wildlifeUnits } from './wildlife';
+import { WildlifeSystem, retaliateOrder } from '../../game/wildlife';
 
 const victories: VictoryDef[] = [
   {
     id: 'conquest', name: 'Conquista', description: 'Destruye todas las unidades y edificios enemigos.',
     isDefeated(game, p) {
-      return !game.list.some(e => e.owner === p.id && !e.dead && (e.kind === 'unit' || (e.kind === 'building' && !game.reg.building(e.defId).walkable)));
+      return !game.list.some(e => e.owner === p.id && !e.dead && ((e.kind === 'unit' && !game.reg.unit(e.defId).classes.includes('livestock')) || (e.kind === 'building' && !game.reg.building(e.defId).walkable)));
     },
   },
   {
@@ -40,13 +42,17 @@ export const coreMod: GameMod = {
     terrains.forEach(t => reg.addTerrain(t));
     resourceNodes.forEach(n => reg.addResourceNode(n));
     ages.forEach(a => reg.addAge(a));
+    wildlifeNodes.forEach(n => reg.addResourceNode(n));
     units.forEach(u => reg.addUnit(u));
+    wildlifeUnits.forEach(u => reg.addUnit(u));
     buildings.forEach(b => reg.addBuilding(b));
+    wildlifeBuildings.forEach(b => reg.addBuilding(b));
     techs.forEach(t => reg.addTech(t));
+    wildlifeTechs.forEach(t => reg.addTech(t));
     civs.forEach(c => reg.addCiv(c));
     maps.forEach(m => reg.addMapType(m));
     victories.forEach(v => reg.addVictory(v));
-    reg.setup = setup;
+    reg.setup = { ...setup, wildlife: wildlifeSpawns };
 
     registerCoreSprites(reg);
 
@@ -58,10 +64,12 @@ export const coreMod: GameMod = {
     reg.addOrder('gather', gatherOrder);
     reg.addOrder('build', buildOrder);
     reg.addOrder('garrison', garrisonOrder);
+    reg.addOrder('retaliate', retaliateOrder);
 
     reg.addSystem('playerStats', g => new PlayerStatsSystem(g), 0);
     reg.addSystem('ai', g => new AISystem(g), 5);
     reg.addSystem('formations', g => new FormationSystem(g), 9);
+    reg.addSystem('wildlife', g => new WildlifeSystem(g), 8);
     reg.addSystem('orders', g => new OrderSystem(g), 10);
     reg.addSystem('movement', g => new MovementSystem(g), 20);
     reg.addSystem('production', g => new ProductionSystem(g), 30);

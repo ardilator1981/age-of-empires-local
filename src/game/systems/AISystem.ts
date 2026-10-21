@@ -8,6 +8,7 @@ import type { Game } from '../Game';
 import type { Player } from '../Player';
 import { buildingAvail, researchablesAt, techAvail, trainablesAt, unitAvail } from '../rules';
 import { cos, hypot, sin } from '../fmath';
+import { wildlifeOf } from '../wildlife';
 
 interface Difficulty {
   gather: number;
@@ -107,6 +108,7 @@ export class AIController {
     // 3. Edificios de depósito y militares
     this.ensureDropSites(vills);
     this.ensureFoodBuilding(vills);
+    this.tendLivestock(blds, vills);
     this.resumeFoundations(blds, vills);
     if (vills.length >= 10) this.buildOne(['barracks'], vills);
     if (p.age >= 1 && vills.length >= 16) this.buildOne(['blacksmith', 'archeryRange', 'stable'], vills, canSpend);
@@ -314,6 +316,25 @@ export class AIController {
     }
   }
 
+  /** Ganadería: un corral cuando hay aldeanos de sobra, y unas pocas ovejas que sacrificar. */
+  private tendLivestock(blds: Entity[], vills: Entity[]) {
+    const g = this.game, p = this.p;
+    const pen = [...g.reg.buildings.values()].find(b => [...g.reg.units.values()].some(u => u.wildlife?.livestock && u.trainedAt.includes(b.id)));
+    if (!pen || p.age < pen.age || vills.length < 14) return;
+    if (p.countAll(pen.id) === 0) {
+      if ((p.res.wood ?? 0) >= 200) this.buildOne([pen.id], vills);
+      return;
+    }
+    const sheep = [...g.reg.units.values()].find(u => u.wildlife?.livestock && u.trainedAt.includes(pen.id));
+    if (!sheep) return;
+    const have = g.units.filter(u => !u.dead && u.owner === p.id && u.defId === sheep.id).length;
+    for (const b of blds) {
+      if (b.defId !== pen.id || !b.complete || b.queue.length) continue;
+      if (have >= BALANCE.wildlife.aiSheepPerCorral * p.countAll(pen.id)) break;
+      if (Object.entries(p.getCost(sheep)).every(([r, v]) => (p.res[r] ?? 0) >= (v ?? 0) + 100)) Commands.train(g, b, sheep.id);
+    }
+  }
+
   /** Cimientos sin nadie construyéndolos: envía al aldeano libre más cercano. */
   private resumeFoundations(blds: Entity[], vills: Entity[]) {
     const g = this.game;
@@ -385,6 +406,18 @@ export class AIController {
       if (dh > bestD + 10) continue;
       const d = dh * 0.6 + hypot(n.x - v.x, n.y - v.y) * 0.4;
       if (d < bestD && isAccessible(g, n, v)) { bestD = d; best = n; }
+    }
+    if (res === 'food') {
+      // Caza (los animales que no se defienden) y ganado propio, igual que los arbustos
+      for (const a of g.units) {
+        if (a.dead) continue;
+        const w = wildlifeOf(g, a);
+        if (!w || w.behavior === 'fight' || (a.owner !== 0 && a.owner !== p.id)) continue;
+        const dh = hypot(a.x - h.x, a.y - h.y);
+        if (dh > BALANCE.wildlife.aiHuntRange) continue;
+        const d = dh * 0.6 + hypot(a.x - v.x, a.y - v.y) * 0.4;
+        if (d < bestD && isAccessible(g, a, v)) { bestD = d; best = a; }
+      }
     }
     if (!best && res !== 'food') {
       // Se agotó lo cercano (mapas de montaña o desierto): lo más cercano alcanzable, esté donde esté.

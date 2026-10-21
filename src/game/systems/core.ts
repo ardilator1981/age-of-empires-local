@@ -9,6 +9,7 @@ import type { Entity } from '../Entity';
 import type { Game } from '../Game';
 import { hypot } from '../fmath';
 import { leaveShelter } from '../garrison';
+import { isHuntable } from '../wildlife';
 
 /**
  * Sistemas básicos de la simulación. Se registran en el Registry desde el mod
@@ -214,7 +215,7 @@ export class ProductionSystem implements System {
     if (rally) {
       const t = g.get(rally.targetId);
       const def = g.unitDef(u);
-      if (t && def.gatherer && t.resType && (t.kind === 'resource' || t.owner === u.owner)) setOrder(u, { type: 'gather', targetId: t.id, phase: 'gather' });
+      if (t && def.gatherer && (t.kind === 'unit' ? isHuntable(g, u.owner, t) : t.resType && (t.kind === 'resource' || t.owner === u.owner))) setOrder(u, { type: 'gather', targetId: t.id, phase: 'gather' });
       else if (t && def.builder && t.kind === 'building' && t.owner === u.owner && !t.complete) setOrder(u, { type: 'build', targetId: t.id });
       else setOrder(u, { type: 'move', x: rally.x, y: rally.y });
     }

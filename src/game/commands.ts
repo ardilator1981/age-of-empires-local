@@ -9,6 +9,7 @@ import type { Entity } from './Entity';
 import type { Game } from './Game';
 import { buildingAvail, exploreAvail, techAvail, unitAvail } from './rules';
 import { canShelter, garrisonOf, leaveShelter } from './garrison';
+import { canGatherFrom, isHuntable } from './wildlife';
 
 /**
  * Todas las acciones de los jugadores (humano o IA) pasan por aquí.
@@ -140,7 +141,7 @@ export const Commands = {
 
   gather(game: Game, units: Entity[], target: Entity) {
     for (const u of units) {
-      if (!game.unitDef(u).gatherer) continue;
+      if (!canGatherFrom(game, u, target)) continue;
       setOrder(u, { type: 'gather', targetId: target.id, phase: 'gather' });
     }
   },
@@ -244,7 +245,7 @@ export function smartKind(game: Game, pid: number, units: Entity[], target: Enti
   if (!mine.length) return null;
   if (target && !target.dead) {
     if (game.isEnemy(pid, target.owner) && target.kind !== 'resource' && mine.some(u => game.canAttack(u, target, false))) return 'attack';
-    if (target.kind === 'resource' || (target.kind === 'building' && !!target.resType && target.owner === pid && target.complete)) return 'gather';
+    if (target.kind === 'resource' || isHuntable(game, pid, target) || (target.kind === 'building' && !!target.resType && target.owner === pid && target.complete)) return 'gather';
     if (target.kind === 'building' && target.owner === pid) return mine.some(u => canShelter(game, u, target)) ? 'move' : 'build';
   }
   return 'move';
@@ -262,9 +263,9 @@ function smartOrder(game: Game, pid: number, units: Entity[], x: number, y: numb
       if (rest.length) Commands.move(game, rest, x, y);
       return 'attack';
     }
-    const gatherable = target.kind === 'resource' || (target.kind === 'building' && !!target.resType && target.owner === pid && target.complete);
+    const gatherable = target.kind === 'resource' || isHuntable(game, pid, target) || (target.kind === 'building' && !!target.resType && target.owner === pid && target.complete);
     if (gatherable) {
-      const g = mine.filter(u => game.unitDef(u).gatherer);
+      const g = mine.filter(u => canGatherFrom(game, u, target));
       Commands.gather(game, g, target);
       const rest = mine.filter(u => !g.includes(u));
       if (rest.length) Commands.move(game, rest, target.x, target.y);
