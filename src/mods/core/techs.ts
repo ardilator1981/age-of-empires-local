@@ -158,7 +158,7 @@ export const techs: TechDef[] = [
     effects: [statAll(['archer'], 'range', 1), statAll(['tower'], 'attack', 2)],
   },
   {
-    id: 'beardedAxe', name: 'Hacha barbada', icon: '🪓', civs: ['france'], description: 'Lanzadores de hachas +1 alcance.',
+    id: 'beardedAxe', name: 'Hacha barbada', icon: '🪓', civs: ['france'], description: 'Guerreros francos +1 de alcance.',
     cost: { food: 400, gold: 400 }, researchTime: 60, age: 2, researchedAt: 'castle',
     effects: [{ type: 'stat', target: { ids: ['throwingAxeman'] }, stat: 'range', op: 'add', value: 1 }],
   },
