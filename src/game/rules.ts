@@ -13,6 +13,17 @@ export function civAllowed(def: { civs?: string[] }, p: Player): boolean {
   return !def.civs || def.civs.includes(p.civ.id);
 }
 
+/**
+ * ¿Le faltan eras a la civilización? Las civilizaciones se incorporan con las eras que ya existen
+ * y completan las siguientes a medida que se hacen: si la última capa que tiene es anterior a la
+ * última edad del juego, está «incompleta» (docs/civilizaciones.md §10).
+ */
+export function civIncomplete(reg: { ages: { index: number }[] }, civ: { eras?: Record<number, unknown> }): boolean {
+  const last = Math.max(...reg.ages.map(a => a.index));
+  const mine = Object.keys(civ.eras ?? {}).map(Number);
+  return mine.length > 0 && Math.max(...mine) < last;
+}
+
 export function costText(game: Game, cost: Cost): string {
   return Object.entries(cost)
     .filter(([, v]) => (v ?? 0) > 0)
@@ -80,6 +91,9 @@ export function buildingAvail(game: Game, p: Player, id: string): Avail {
   if (a) return a;
   for (const b of def.requiresBuildings ?? []) {
     if (p.count(b) === 0) return { visible: true, ok: false, reason: `Requiere ${game.reg.buildings.get(b)?.name ?? b}`, code: 'requirement' };
+  }
+  if (def.maxAlive !== undefined && p.countAll(def.id) >= def.maxAlive) {
+    return { visible: true, ok: false, reason: def.maxAlive === 1 ? `Solo puedes tener un ${def.name}` : `Máximo ${def.maxAlive}`, code: 'requirement' };
   }
   return affordCheck(game, p, p.getCost(def)) ?? OK;
 }

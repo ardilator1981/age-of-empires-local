@@ -5,7 +5,7 @@ export const units: UnitDef[] = [
   {
     id: 'villager', name: 'Aldeano', icon: '🧑‍🌾',
     description: 'Recolecta recursos y construye edificios.',
-    classes: ['villager'], cost: { food: 50 }, trainTime: 25, trainedAt: ['townCenter', 'kremlin'],
+    classes: ['villager'], cost: { food: 50 }, trainTime: 25, trainedAt: ['townCenter', 'kremlin', 'bastide', 'forbiddenCity'],
     hp: 25, attack: 3, attackType: 'melee', reloadTime: 2, armor: { melee: 0, pierce: 0 },
     speed: 0.8, los: 4, pop: 1, age: 0, gatherer: true, builder: true, carryCapacity: 10,
     sprite: 'humanoid', spriteParams: { weapon: 'axe', villager: true },
@@ -104,7 +104,7 @@ export const units: UnitDef[] = [
     bonus: [{ vs: 'building', amount: 125 }], speed: 0.5, los: 3, pop: 1, age: 2, radius: 0.4,
     sprite: 'ram',
   },
-  // ---- Unidades únicas (castillo)
+  // ---- Unidades únicas (castillo; las de cada era de cada civilización, en civ-*.ts y gunpowder.ts)
   {
     id: 'longbowman', name: 'Arquero de tiro largo', icon: '🏹', description: 'Unidad única británica: enorme alcance.',
     classes: ['archer'], civs: ['britain'], cost: { wood: 35, gold: 40 }, trainTime: 18, trainedAt: ['castle'],
@@ -113,10 +113,10 @@ export const units: UnitDef[] = [
     sprite: 'humanoid', spriteParams: { weapon: 'bow', hood: '#2e5a2e', cape: true },
   },
   {
-    id: 'throwingAxeman', name: 'Lanzador de hachas', icon: '🪓', description: 'Unidad única franca: hachas a distancia.',
-    classes: ['infantry'], civs: ['france'], cost: { food: 55, gold: 25 }, trainTime: 17, trainedAt: ['castle'],
-    hp: 60, attack: 7, attackType: 'melee', range: 3, reloadTime: 2, armor: { melee: 0, pierce: 0 },
-    speed: 1.0, los: 5, pop: 1, age: 2, projectile: 'axe',
+    id: 'throwingAxeman', name: 'Guerrero franco', icon: '🪓', description: 'Unidad única francesa (Edad Oscura): hachas arrojadizas (francisca) a distancia.',
+    classes: ['infantry'], civs: ['france'], cost: { food: 55, gold: 25 }, trainTime: 19, trainedAt: ['barracks'],
+    hp: 50, attack: 6, attackType: 'melee', range: 3, reloadTime: 2, armor: { melee: 0, pierce: 0 },
+    speed: 1.0, los: 5, pop: 1, age: 0, projectile: 'axe',
     sprite: 'humanoid', spriteParams: { weapon: 'throwingAxe', helmet: true, shield: true },
   },
   // ---- Rusia (rus): una unidad única por era

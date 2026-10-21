@@ -221,5 +221,9 @@ export class Player {
     this.cache.clear();
     this.yieldCache.clear();
     game.refreshHp(this.id);
+    // Los modificadores siempre en el mismo orden (extra, civilización, eras, tecnologías): los
+    // productos de decimales cambian en el último bit según el orden, y una partida cargada
+    // (que los reconstruye así) tiene que seguir exactamente igual que la original.
+    if (extra) this.rebuildModifiers(game);
   }
 }

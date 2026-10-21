@@ -11,7 +11,7 @@ export type SfxId =
   | 'buildingDone' | 'unitTrained' | 'techDone' | 'ageUp'
   | 'depleted' | 'alertUnits' | 'alertBuildings' | 'villagerIdle'
   | 'errResources' | 'errPlacement' | 'errPopulation' | 'errGeneric'
-  | 'hitMelee' | 'hitArrow' | 'hitBuilding' | 'animalDeath' | 'bird';
+  | 'hitMelee' | 'hitArrow' | 'hitMusket' | 'hitCannon' | 'hitBuilding' | 'animalDeath' | 'bird';
 
 export type SfxBus = 'effects' | 'alerts';
 
@@ -277,6 +277,24 @@ export const SFX: Record<SfxId, SfxDef> = {
       burst(c, o, { type: 'lowpass', freq: 1100, t: 0, dur: 0.05, gain: 0.4 });
     },
   },
+  hitMusket: {
+    dur: 0.3, bus: 'effects', prio: 1, cooldown: 0.07, gain: 0.24, group: 'combat',
+    make: (c, o) => {
+      // Estampido seco: ruido ancho que se apaga rápido y un golpe grave corto
+      burst(c, o, { type: 'bandpass', freq: 1600, q: 0.6, t: 0, dur: 0.12, gain: 0.8 });
+      burst(c, o, { type: 'lowpass', freq: 500, t: 0.01, dur: 0.22, gain: 0.45 });
+      tone(c, o, { freq: 140, to: 60, t: 0, dur: 0.12, gain: 0.5 });
+    },
+  },
+  hitCannon: {
+    dur: 0.7, bus: 'effects', prio: 2, cooldown: 0.2, gain: 0.3, group: 'combat',
+    make: (c, o) => {
+      // Cañonazo: golpe muy grave con caída y una cola de ruido
+      tone(c, o, { freq: 95, to: 38, t: 0, dur: 0.5, gain: 0.9 });
+      burst(c, o, { type: 'lowpass', freq: 700, t: 0, dur: 0.45, gain: 0.7 });
+      burst(c, o, { type: 'bandpass', freq: 1400, q: 0.5, t: 0, dur: 0.08, gain: 0.6 });
+    },
+  },
   hitBuilding: {
     dur: 0.35, bus: 'effects', prio: 1, cooldown: 0.12, gain: 0.22, group: 'combat',
     make: (c, o) => {
@@ -306,5 +324,5 @@ export const SFX: Record<SfxId, SfxDef> = {
 export const PRELOAD_ORDER: SfxId[] = [
   'confirmMove', 'confirmGather', 'confirmBuild', 'confirmAttack', 'errPlacement', 'errResources', 'errGeneric',
   'unitTrained', 'buildingDone', 'alertUnits', 'alertBuildings', 'errPopulation', 'depleted', 'techDone', 'ageUp',
-  'villagerIdle', 'hitMelee', 'hitArrow', 'hitBuilding', 'animalDeath', 'bird',
+  'villagerIdle', 'hitMelee', 'hitArrow', 'hitMusket', 'hitCannon', 'hitBuilding', 'animalDeath', 'bird',
 ];

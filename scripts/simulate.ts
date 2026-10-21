@@ -51,3 +51,12 @@ for (let i = 0; i < ticks && !game.over; i++) {
   }
 }
 console.log(`\nFin: ${fmt(game.time)} simulados en ${((Date.now() - t0) / 1000).toFixed(1)} s. Entidades: ${game.list.length}. Terminada: ${game.over}`);
+// Resumen por jugador: identidad, edad y qué hay (edificios y unidades por tipo), para ver si la IA usa el contenido de cada era
+for (const p of game.players.slice(1)) {
+  const tally = (kind: 'unit' | 'building') => {
+    const n = new Map<string, number>();
+    for (const e of game.list) if (e.owner === p.id && !e.dead && e.kind === kind && (kind === 'building' ? e.complete : true)) n.set(e.defId, (n.get(e.defId) ?? 0) + 1);
+    return [...n].sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k}×${v}`).join(' ');
+  };
+  console.log(`\n${p.name} (${p.identity}, ${reg.ageName(p.age)})${p.defeated ? ' [derrotada]' : ''}\n  edificios: ${tally('building')}\n  unidades: ${tally('unit')}\n  tecnologías: ${[...p.researched].join(' ')}`);
+}

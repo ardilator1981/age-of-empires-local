@@ -3,6 +3,7 @@ import { isTouchDevice, PLAYER_COLORS, PLAYER_COLOR_NAMES } from '../core/consta
 import { buildRegistry, type Registry } from '../core/Registry';
 import type { CivDef } from '../core/types';
 import type { GameOptions } from '../game/Game';
+import { civIncomplete } from '../game/rules';
 import { ALL_MODS } from '../mods';
 import type { App } from '../app/App';
 import { setUIPrefs, uiPrefs, type LayoutPref } from './layout';
@@ -126,7 +127,7 @@ export class Menu {
     if (!reg.mapTypes.has(st.mapType)) st.mapType = [...reg.mapTypes.keys()][0];
     if (!reg.victories.has(st.victory)) st.victory = [...reg.victories.keys()][0];
     const civOpts = (cur: string, random: boolean) =>
-      (random ? opt('random', '🎲 Aleatoria', cur) : '') + civs.map(c => opt(c.id, c.name, cur)).join('');
+      (random ? opt('random', '🎲 Aleatoria', cur) : '') + civs.map(c => opt(c.id, civIncomplete(reg, c) ? `${c.name} (incompleta)` : c.name, cur)).join('');
     const colorOpts = (cur: number) => PLAYER_COLORS.map((_, i) => opt(i, PLAYER_COLOR_NAMES[i], cur)).join('');
     const civ = reg.civs.get(st.civ);
     const map = reg.mapTypes.get(st.mapType);
@@ -160,7 +161,7 @@ export class Menu {
               <select data-k="civ">${civOpts(st.civ, false)}</select>
               <select data-k="color">${colorOpts(st.color)}</select>
             </div>
-            ${civ ? `<div class="civinfo"><b>${esc(civ.name)}</b> — ${esc(civ.description)}<ul>${civ.bonusText.map(t => `<li>${esc(t)}</li>`).join('')}</ul>${this.civEras(reg, civ)}</div>` : ''}
+            ${civ ? `<div class="civinfo"><b>${esc(civ.name)}</b> — ${esc(civ.description)}${civIncomplete(reg, civ) ? ' <i>(Incompleta: aún no tiene las últimas eras.)</i>' : ''}<ul>${civ.bonusText.map(t => `<li>${esc(t)}</li>`).join('')}</ul>${this.civEras(reg, civ)}</div>` : ''}
             <h3>Rivales</h3>
             ${rivals}
             ${st.rivals.length < 5 ? '<button class="small" data-add>+ Añadir rival</button>' : ''}

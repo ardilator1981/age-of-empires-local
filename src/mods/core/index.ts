@@ -14,6 +14,10 @@ import { techs } from './techs';
 import { units } from './units';
 import { ages, resourceNodes, resources, setup, terrains } from './world';
 import { wildlifeBuildings, wildlifeNodes, wildlifeSpawns, wildlifeTechs, wildlifeUnits } from './wildlife';
+import { britainBuildings, britainTechs, britainUnits } from './civ-britain';
+import { chinaBuildings, chinaTechs, chinaUnits } from './civ-china';
+import { franceBuildings, franceTechs, franceUnits } from './civ-france';
+import { gunpowderAI, gunpowderBuildings, gunpowderTechs, gunpowderUnits } from './gunpowder';
 import { WildlifeSystem, retaliateOrder } from '../../game/wildlife';
 
 const victories: VictoryDef[] = [
@@ -49,6 +53,11 @@ export const coreMod: GameMod = {
     wildlifeBuildings.forEach(b => reg.addBuilding(b));
     techs.forEach(t => reg.addTech(t));
     wildlifeTechs.forEach(t => reg.addTech(t));
+    // Era 4 (Pólvora) y lo único de cada civilización por era
+    [...gunpowderUnits, ...chinaUnits, ...franceUnits, ...britainUnits].forEach(u => reg.addUnit(u));
+    [...gunpowderBuildings, ...chinaBuildings, ...franceBuildings, ...britainBuildings].forEach(b => reg.addBuilding(b));
+    [...gunpowderTechs, ...chinaTechs, ...franceTechs, ...britainTechs].forEach(t => reg.addTech(t));
+    reg.addAIPlugin(gunpowderAI);
     civs.forEach(c => reg.addCiv(c));
     maps.forEach(m => reg.addMapType(m));
     victories.forEach(v => reg.addVictory(v));

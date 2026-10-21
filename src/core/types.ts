@@ -171,6 +171,8 @@ export interface BuildingDef extends BaseDef {
   gatherable?: { resource: ResourceId; amount: number; gatherRate: number };
   /** Hace falta tener construido al menos uno de cada uno de estos edificios. */
   requiresBuildings?: string[];
+  /** Máximo de edificios de este tipo (terminados o en obras) por jugador. */
+  maxAlive?: number;
   /**
    * Refugio: las unidades propias con alguna de estas clases pueden entrar (órdenes `garrison` y
    * `ungarrison`), hasta `capacity` a la vez. Dentro no se las puede atacar ni se ven; si el
@@ -388,6 +390,8 @@ export interface AIContext {
   train(unitId: string): boolean;
   /** ¿Se puede gastar esto sin tocar la reserva para la siguiente edad? */
   canSpend(cost: Cost): boolean;
+  /** Investiga una tecnología en un edificio terminado y libre que pueda; false si no se puede. */
+  research(techId: string): boolean;
 }
 
 /** Extensión de la IA (la registra un mod). */

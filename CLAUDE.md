@@ -42,7 +42,7 @@ docs/          flujo-de-trabajo.md (áreas, modelos y esfuerzo), decisiones.md (
 
 ## Qué hay en `main`
 
-Juego base con IA, civilizaciones que cambian de identidad con la era (Rusia como piloto, eras 0–3), terreno orgánico con relieve en WebGL2, música y sonido sintéticos, interfaz de escritorio y móvil (PWA, Pages y APK), relieve con roca y pasos, 12 regiones reales sin conexión, arte con imágenes (`src/mods/art/`, flujo en el README), modo Guerra declarada (mod `declared-war`), modo Matar al rey (mod `regicide`, con refugio de unidades en el motor), formaciones, posturas, órdenes tácticas y pantalla de estrategia, guardado y Continuar, calidad gráfica automática y ajustes, y multijugador en red (`docs/multijugador.md`; falta probar WebRTC en dispositivos reales).
+Juego base con IA, civilizaciones que cambian de identidad con la era (Rusia, China, Francia y Gran Bretaña, eras 0–4 con la era Pólvora), terreno orgánico con relieve en WebGL2, música y sonido sintéticos, interfaz de escritorio y móvil (PWA, Pages y APK), relieve con roca y pasos, 12 regiones reales sin conexión, arte con imágenes (`src/mods/art/`, flujo en el README), modo Guerra declarada (mod `declared-war`), modo Matar al rey (mod `regicide`, con refugio de unidades en el motor), formaciones, posturas, órdenes tácticas y pantalla de estrategia, guardado y Continuar, calidad gráfica automática y ajustes, y multijugador en red (`docs/multijugador.md`; falta probar WebRTC en dispositivos reales).
 
 Reglas que vienen de esas mejoras:
 - **Determinismo (multijugador):** en el código que corre cada tick, `hypot`, `sin` y `cos` de `game/fmath.ts`; nunca `Math.random` ni el reloj.

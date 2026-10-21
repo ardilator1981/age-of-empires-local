@@ -228,6 +228,7 @@ export class ProductionSystem implements System {
     const t = g.reg.tech(techId);
     p.researched.add(techId);
     p.addEffects(t.effects, g);
+    p.rebuildModifiers(g); // mismo orden de modificadores que tras cargar la partida
     if (t.setsAge !== undefined) {
       const before = p.identity;
       p.age = t.setsAge;

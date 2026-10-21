@@ -53,14 +53,14 @@ describe('civilizaciones por era', () => {
     expect(huntGold(p)).toBeCloseTo(0.3);
   });
 
-  it('las civilizaciones sin bonos por era no cambian, pero sí de nombre', () => {
+  it('Francia cambia de nombre y de bonos al subir de edad', () => {
     const g = rusGame();
     const f = g.players[2];
     expect(f.identity).toBe('Francos');
     const hp = f.getStat(g.reg.unit('knight'), 'hp');
     finishAge(g, f, 'feudalAge');
     expect(f.identity).toBe('Francia capeta');
-    expect(f.getStat(g.reg.unit('knight'), 'hp')).toBe(hp);
+    expect(f.getStat(g.reg.unit('knight'), 'hp')).toBeCloseTo(hp * 1.1);
     expect(g.players[0].identity).toBe('Naturaleza');
   });
 

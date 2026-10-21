@@ -34,6 +34,7 @@ export const ages: AgeDef[] = [
   { index: 1, id: 'feudal', name: 'Edad Feudal' },
   { index: 2, id: 'castle', name: 'Edad de los Castillos' },
   { index: 3, id: 'imperial', name: 'Edad Imperial' },
+  { index: 4, id: 'gunpowder', name: 'Edad de la Pólvora' },
 ];
 
 export const setup: SetupConfig = {

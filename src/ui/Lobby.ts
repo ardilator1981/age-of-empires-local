@@ -4,6 +4,7 @@ import { BALANCE } from '../config/balance';
 import { PLAYER_COLORS, PLAYER_COLOR_NAMES } from '../core/constants';
 import type { Registry } from '../core/Registry';
 import { buildRegistry } from '../core/Registry';
+import { civIncomplete } from '../game/rules';
 import { SAVE_VERSION } from '../game/save';
 import { ALL_MODS } from '../mods';
 import { NetGame } from '../net/NetGame';
@@ -261,7 +262,7 @@ export class Lobby {
     const host = this.role === 'host';
     const reg = this.d.registry();
     const civs = [...reg.civs.values()];
-    const civOpts = (cur: string) => opt('random', '🎲 Aleatoria', cur) + civs.map(c => opt(c.id, c.name, cur)).join('');
+    const civOpts = (cur: string) => opt('random', '🎲 Aleatoria', cur) + civs.map(c => opt(c.id, civIncomplete(reg, c) ? `${c.name} (incompleta)` : c.name, cur)).join('');
     const colorOpts = (cur: number) => PLAYER_COLORS.map((_, i) => opt(i, PLAYER_COLOR_NAMES[i], cur)).join('');
     const me = clientId();
     const slots = (l?.slots ?? []).map((s, i) => {
