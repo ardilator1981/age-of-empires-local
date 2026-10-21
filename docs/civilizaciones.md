@@ -242,6 +242,17 @@ Todo esto es la parte más cara del motor; se deja diseñado como hueco para no 
 | **Armas nucleares** | Proyecto de varias etapas (investigación + edificio + coste enorme). Efecto: arma de área con enfriamiento largo. Variantes de diseño 🔶: *disuasión* (tenerla impide al rival atacar el centro urbano), *poder activo* limitado, o *amenaza de victoria* | Poder activo vía `addNetCommand`; daño en área; la guerra declarada ya tiene reglas para la paz que se pueden extender; añadir alerta y fin de partida distinto si se usa |
 | **Espionaje** | Espías que se infiltran (ven recursos y edificios enemigos, sabotean, roban tecnología, envenenan el suministro, convierten unidades). Contraespionaje. Desde la era 1 en versión simple (mensajeros, informantes) hasta la Moderna (agencia) | Unidad `spy` invisible salvo contra contraespionaje (necesita una capa de visión nueva en `vision`); órdenes `infiltrate` y `sabotage`; la niebla de guerra ya existe, lo cual ayuda |
 
+**Decidido: el espionaje existe desde las primeras eras.** Dos vías, escalando con la era:
+
+1. **Agentes convertidos (eras 0–3):** un aldeano o soldado enemigo puede ser *sobornado o convertido* (cuesta oro, tiene probabilidad, y exige un edificio como la taberna/posada o el monasterio) y pasa a ser un **agente doble**: sigue pareciendo del enemigo, pero comparte con su dueño real la visión de lo que ve (su campo de visión se suma al mapa del espía). Puede ser descubierto: al ser inspeccionado o por un contraespionaje (patrulla, torre), vuelve a su dueño o muere. Encaja con la niebla de guerra y la visión actual (`vision`); lo nuevo es un *«propietario de visión»* distinto del propietario de la unidad.
+2. **Espías propios (eras 1+):** unidad invisible salvo contra contraespionaje, con órdenes de infiltrar y sabotear. Entre sus acciones:
+   - **Robar tecnología:** copiar una tecnología que el enemigo ya tenga y tú no (a coste de un porcentaje y un tiempo; con cooldown), sujeto a edad igual o menor para evitar saltos de era. Efecto: fomenta una carrera tecnológica menos lineal.
+   - **Ver recursos y edificios:** información del enemigo.
+   - **Sabotear:** retrasar producción, incendiar almacenes (más tarde).
+3. **Escalado por era (🔶):** mensajeros e informantes (0–1), espías de corte y agentes de compañía (2–3), servicios de inteligencia y cifrado (4–5), agencias y satélites (6).
+
+**Contrapesos para que no rompa la partida:** probabilidad de fallo, enfriamiento largo, coste en oro, que los conversos puedan ser descubiertos, y contraespionaje barato (el mismo edificio o tecnología que los detecta). Un jugador con espías fuertes debería notarse más lento en la economía.
+
 Cada civilización podría tener su **versión histórica** del espionaje (🔶 y con cuidado): informantes y espías bizantinos del mundo mediterráneo, el sistema postal y de información del Estado chino (*yizhan*), servicios de seguridad de las cortes persas, el *Cabinet Noir* francés del s. XVIII, el Servicio Secreto británico (Walsingham en los Tudor), la Cheka/KGB, la CIA/OSS. Solo hace falta una mecánica común más un par de variantes por civilización.
 
 ## 9. Traducción al código actual
@@ -289,7 +300,7 @@ Determinismo: los poderes y el comercio deben usar `fmath`, `game.rng()` y datos
 | **4** | **China, Francia y Británicos → EE. UU.** (solo datos más lo de fases 2–3; el crédito y la ayuda a aliados quedan para la fase 5) | Bajo | Simulaciones IA contra IA equilibradas |
 | **5** | **Comercio y diplomacia** (mercado, caravana, relaciones, crédito, ayuda a aliados). **Persia** y **Etiopía** (que lo aprovechan) y la rama EE. UU. completa | Alto | Rutas funcionan en red y guardado |
 | **6** | **Recursos modernos y mantenimiento**; era Moderna completa | Alto (balance) | Partida completa a la era 6 sin bloqueos |
-| **7** | **Aviación, armas nucleares y espionaje** (§8b) | Alto (render, visión, balance) | Aviones, un arma de área y espías funcionan en red y guardado |
+| **7** | **Aviación y armas nucleares** (§8b); el **espionaje** puede adelantarse a la fase 5 junto al comercio y la diplomacia (comparte la visión y las órdenes) | Alto (render, visión, balance) | Aviones, un arma de área y espías funcionan en red y guardado |
 | **8** | **IA por civilización/era**, victorias alternativas, pulido de interfaz y arte | Medio | Todas las civilizaciones juegan con la IA |
 
 Cada fase se hace en su propia rama (`feat/...`) y pasa `npm run build`, `npm run simulate -- 20 arabia 1` y `npm test`.
