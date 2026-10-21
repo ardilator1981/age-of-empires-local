@@ -207,13 +207,14 @@ export class Sheet {
     return { sx: (i % cols) * r.cell.w, sy: (r.row + dir * rowsPerDir + Math.floor(i / cols)) * r.cell.h };
   }
 
-  private blit(ctx: CanvasRenderingContext2D, r: Resolved, frame: number, dir: number, flip: boolean, x: number, y: number, z: number, color: string) {
+  private blit(ctx: CanvasRenderingContext2D, r: Resolved, frame: number, dir: number, flip: boolean, x: number, y: number, z: number, color: string, fx?: Motion) {
     const c = this.cellAt(r, frame, dir);
     const src = tinted(r.img, r.mask, color);
     if (!c || !src) return;
     const k = z / this.scale;
     ctx.save();
-    ctx.translate(x, y);
+    ctx.translate(x + (fx?.dx ?? 0), y + (fx?.dy ?? 0));
+    if (fx?.rot) ctx.rotate(fx.rot);
     ctx.scale(flip ? -k : k, k);
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
@@ -248,20 +249,32 @@ export class Sheet {
   draw(s: SpriteContext) {
     const e = s.entity;
     if (this.kind === 'building') { this.drawBuilding(s); return; }
-    const r = this.resolve(this.kind === 'unit' ? this.unitStates(e) : ['idle'], s.age, 1);
+    const names = this.kind === 'unit' ? this.unitStates(e) : ['idle'];
+    const r = this.resolve(names, s.age, 1);
     if (!r) return;
     const t = r.duration && e && e.attackAnim > 0 ? ATTACK_TIME - e.attackAnim : s.time + (e?.id ?? 0) * 0.37;
     const { dir, flip } = this.direction(e, e?.facing ?? 1);
     this.shadow(s);
-    this.blit(s.ctx, r, this.frameAt(r, t, e), dir, flip, s.x, s.y, s.z, s.color);
+    // Sin imagen para este estado: la imagen quieta se mueve por código (paso, estocada, golpe)
+    const own = names.some(n => this.variant(s.age).states[n]);
+    const fx = this.kind === 'unit' && e && !own ? motion(names[0], e, s.time, s.z) : undefined;
+    this.blit(s.ctx, r, this.frameAt(r, t, e), dir, flip, s.x, s.y, s.z, s.color, fx);
   }
 
-  /** Animación de muerte: false si la hoja no tiene estado death. */
+  /** Animación de muerte: con imagen si la hoja tiene estado death; si no, la imagen quieta cae por código. */
   death(s: SpriteContext, t: number, facing: number): boolean {
-    if (!this.variant(s.age).states.death) return false;
+    const { dir, flip } = this.direction(null, facing);
+    if (!this.variant(s.age).states.death) {
+      if (this.kind !== 'unit') return false;
+      const r = this.resolve(['idle'], s.age, 1);
+      if (!r) return false;
+      const p = Math.min(1, t / 0.6);
+      const side = facing < 0 ? -1 : 1;
+      this.blit(s.ctx, r, 0, dir, flip, s.x, s.y, s.z, s.color, { dx: side * p * 6 * s.z, dy: 0, rot: side * p * Math.PI / 2 });
+      return true;
+    }
     const r = this.resolve(['death'], s.age, 1);
     if (!r) return false;
-    const { dir, flip } = this.direction(null, facing);
     this.blit(s.ctx, r, this.frameAt(r, t, null), dir, flip, s.x, s.y, s.z, s.color);
     return true;
   }
@@ -334,6 +347,21 @@ export class Sheet {
     ctx.drawImage(src, c.sx + b.x, c.sy + b.y, b.w, b.h, -w / 2, S * 0.95 - h, w, h);
     ctx.restore();
   }
+}
+
+interface Motion { dx: number; dy: number; rot: number }
+
+/** Movimiento por código de una imagen quieta (px de pantalla, giro en radianes alrededor de los pies). */
+function motion(state: StateName, e: Entity, time: number, z: number): Motion {
+  const side = e.facing < 0 ? -1 : 1;
+  if (state === 'attack') {
+    const lunge = Math.sin(Math.PI * Math.min(1, Math.max(0, 1 - e.attackAnim / ATTACK_TIME)));
+    return { dx: side * lunge * 5 * z, dy: 0, rot: side * lunge * 0.12 };
+  }
+  if (state === 'idle') return { dx: 0, dy: 0, rot: 0 };
+  const ph = time * (state.startsWith('work') ? 7 : 10) + e.id;
+  const bob = Math.abs(Math.sin(ph));
+  return { dx: 0, dy: -bob * (state.startsWith('work') ? 1.5 : 2.5) * z, rot: Math.sin(ph) * (state.startsWith('work') ? 0.04 : 0.06) };
 }
 
 function validate(m: SheetManifest): string | null {
