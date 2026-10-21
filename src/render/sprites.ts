@@ -78,6 +78,21 @@ function drawWeapon(ctx: CanvasRenderingContext2D, weapon: string | undefined, s
       poly(ctx, [{ x: 0, y: -9.5 }, { x: 4, y: -11 }, { x: 4, y: -6 }, { x: 0, y: -7.3 }]); ctx.fill(); outline(ctx, 0.6);
       break;
     }
+    case 'musket': {
+      // Mosquete con bayoneta: el culatazo al disparar echa el arma atrás
+      ctx.translate(4 - swing * 1.5, -13);
+      ctx.rotate(-0.2 - swing * 0.15);
+      ctx.strokeStyle = OUTLINE; ctx.lineWidth = 2.6;
+      line(ctx, { x: -3, y: 2 }, { x: 15, y: -1 });
+      ctx.strokeStyle = '#6a4a28'; ctx.lineWidth = 1.5;
+      line(ctx, { x: -3, y: 2 }, { x: 6, y: 0.4 });
+      ctx.strokeStyle = '#4b5057'; ctx.lineWidth = 1.2;
+      line(ctx, { x: 6, y: 0.4 }, { x: 15, y: -1 });
+      ctx.strokeStyle = '#dfe3e7'; ctx.lineWidth = 0.9;
+      line(ctx, { x: 15, y: -1 }, { x: 19, y: -1.7 });
+      if (swing > 0.5) { ctx.fillStyle = 'rgba(255,220,120,0.9)'; ellipse(ctx, 20, -1.8, 2.4, 1.8); ctx.fill(); }
+      break;
+    }
     case 'hammer': {
       ctx.translate(4.5, -12.5);
       ctx.rotate(-0.3 + swing * 1.9);
@@ -170,7 +185,17 @@ export const humanoid: SpriteFn = s => {
   ellipse(ctx, 0, -22.6, 3.7, 3.8); ctx.fill(); outline(ctx, 0.8);
   ctx.fillStyle = 'rgba(30,20,10,0.8)';
   ellipse(ctx, 1.7, -22.9, 0.5, 0.6); ctx.fill();
-  if (P.helmet) {
+  if (P.hat === 'tricorn') {
+    // Tricornio de la era de la pólvora
+    ctx.fillStyle = '#26282e';
+    poly(ctx, [{ x: -6, y: -23.4 }, { x: 0, y: -28.6 }, { x: 6, y: -23.4 }, { x: 3, y: -22.4 }, { x: -3, y: -22.4 }]); ctx.fill(); outline(ctx, 0.7);
+    ctx.fillStyle = '#d9d2bc'; ctx.fillRect(-6, -23.6, 12, 0.9);
+  } else if (P.hat === 'mitre') {
+    // Gorro alto de granadero
+    ctx.fillStyle = P.hatColor ?? '#2f5a3f';
+    poly(ctx, [{ x: -3.6, y: -24 }, { x: -2.6, y: -30 }, { x: 2.6, y: -30 }, { x: 3.6, y: -24 }]); ctx.fill(); outline(ctx, 0.7);
+    ctx.fillStyle = '#e2cf8e'; ctx.fillRect(-1.2, -28.6, 2.4, 2);
+  } else if (P.helmet) {
     ctx.fillStyle = '#8f99a2';
     ctx.beginPath(); ctx.arc(0, -23.2, 4.1, Math.PI, 0); ctx.closePath(); ctx.fill(); outline(ctx, 0.7);
     ctx.fillStyle = 'rgba(255,255,255,0.35)'; ctx.fillRect(-3, -26.2, 1.4, 2.5);
@@ -305,6 +330,44 @@ export const ram: SpriteFn = s => {
     ctx.strokeStyle = '#a07a4a'; ctx.lineWidth = 0.9;
     line(ctx, { x: wx + Math.cos(roll) * 3, y: -3.5 + Math.sin(roll) * 3 }, { x: wx - Math.cos(roll) * 3, y: -3.5 - Math.sin(roll) * 3 });
   }
+  ctx.restore();
+};
+
+/** Cañón o obús sobre ruedas (artillería de la era de la pólvora); `size` da el calibre. */
+export const cannon: SpriteFn = s => {
+  const { ctx, x, y, z, color, entity: e, time } = s;
+  const facing = e?.facing ?? 1;
+  const recoil = e && e.attackAnim > 0 ? Math.sin(((0.35 - e.attackAnim) / 0.35) * Math.PI) * 3 : 0;
+  const roll = e?.moving ? time * 5 : 0;
+  const big = s.params.big ? 1.15 : 1;
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(z * facing * UNIT_SCALE * big, z * UNIT_SCALE * big);
+  ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+  ctx.fillStyle = 'rgba(0,0,0,0.3)';
+  ellipse(ctx, 0, 0, 15, 4.5); ctx.fill();
+  // afuste y cola
+  ctx.strokeStyle = OUTLINE; ctx.lineWidth = 4;
+  line(ctx, { x: -14, y: -2 }, { x: -2, y: -8 });
+  ctx.strokeStyle = '#6a4a2a'; ctx.lineWidth = 2.4;
+  line(ctx, { x: -14, y: -2 }, { x: -2, y: -8 });
+  // ruedas
+  for (const wx of [-2, 5]) {
+    ctx.fillStyle = '#4a3320'; ellipse(ctx, wx, -5, 4.6, 4.6); ctx.fill(); outline(ctx, 0.9);
+    ctx.strokeStyle = '#a07a4a'; ctx.lineWidth = 0.8;
+    line(ctx, { x: wx + Math.cos(roll) * 4, y: -5 + Math.sin(roll) * 4 }, { x: wx - Math.cos(roll) * 4, y: -5 - Math.sin(roll) * 4 });
+    line(ctx, { x: wx + Math.sin(roll) * 4, y: -5 - Math.cos(roll) * 4 }, { x: wx - Math.sin(roll) * 4, y: -5 + Math.cos(roll) * 4 });
+  }
+  // tubo
+  const len = s.params.howitzer ? 15 : 20;
+  ctx.strokeStyle = OUTLINE; ctx.lineWidth = s.params.howitzer ? 6.6 : 5.4;
+  line(ctx, { x: -4 - recoil, y: -9.5 }, { x: -4 + len - recoil, y: -12.5 });
+  ctx.strokeStyle = s.params.barrel ?? '#4b4f55'; ctx.lineWidth = s.params.howitzer ? 5 : 3.8;
+  line(ctx, { x: -4 - recoil, y: -9.5 }, { x: -4 + len - recoil, y: -12.5 });
+  ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 0.9;
+  line(ctx, { x: -3 - recoil, y: -11 }, { x: len - 5 - recoil, y: -13.6 });
+  ctx.fillStyle = color; ctx.fillRect(-6 - recoil, -12, 3, 3.4);
+  if (recoil > 1.6) { ctx.fillStyle = 'rgba(255,230,150,0.9)'; ellipse(ctx, len - 1, -12.8, 3.4, 2.6); ctx.fill(); }
   ctx.restore();
 };
 
@@ -954,6 +1017,7 @@ export function registerCoreSprites(reg: Registry) {
   reg.addSprite('humanoid', humanoid);
   reg.addSprite('cavalry', cavalry);
   reg.addSprite('ram', ram);
+  reg.addSprite('cannon', cannon);
   reg.addSprite('building', building);
   reg.addSprite('farm', farm);
   reg.addSprite('tree', tree);

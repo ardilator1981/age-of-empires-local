@@ -391,7 +391,12 @@ export class Renderer {
       const h2 = pr.sh * (1 - t2) + 10 * t2 + Math.sin(Math.PI * t2) * 26;
       const dx = p2.x - p.x, dy = (p2.y - h2 * z) - (p.y - hgt * z);
       const len = Math.hypot(dx, dy) || 1;
-      const L = (pr.style === 'arrow' ? 9 : 5) * z;
+      if (pr.style === 'cannonball') {
+        ctx.fillStyle = '#2a2d31';
+        ellipse(ctx, p.x, p.y - hgt * z, 2.6 * z, 2.6 * z); ctx.fill();
+        continue;
+      }
+      const L = (pr.style === 'arrow' ? 9 : pr.style === 'bullet' ? 3 : 5) * z;
       ctx.strokeStyle = pr.style === 'arrow' ? '#2e2214' : '#8a8f94';
       ctx.lineWidth = Math.max(1, (pr.style === 'arrow' ? 1.3 : 2.8) * z);
       ctx.beginPath();
