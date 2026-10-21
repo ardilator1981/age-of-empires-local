@@ -29,6 +29,44 @@ Hoy: Oscura, Feudal, Castillos, Imperial (índices 0–3, `src/mods/core/world.t
 
 Alternativas: (a) 6 eras, fundiendo Pólvora en Imperial; (b) 8 eras, partiendo Moderna en «Guerras mundiales» (1914–1945) y «Contemporánea» (1945–hoy). **Decidido: 7 eras, llegando a la Moderna.** Se reservaría la Moderna para 2–3 unidades muy potentes en vez de cubrir toda la tecnología del siglo XX. Aviación, armas nucleares y espionaje **se incluirán más adelante** (decisión del usuario, §8b); la ciberguerra queda fuera.
 
+## 2b. Árbol de edificios y tecnologías propuesto por el usuario (8 eras)
+
+El usuario aportó su propio esquema de **8 eras** con edificios y tecnologías por era (Prehistoria, Antigüedad, Clásica, Medieval, Moderna, Industrial, Contemporánea, Futuro próximo). Se integra aquí como **el esqueleto de contenido común** sobre el que se colocan las civilizaciones: lo de cada era lo tienen todas, y la identidad de cada civilización (§5) se suma encima con sus únicos.
+
+### Cómo casa con el juego actual y con las 7 eras de §2
+
+El juego ya tiene Oscura, Feudal, Castillos e Imperial (equivalentes a la Edad Media y el inicio de la Moderna del esquema). Hay dos formas de encajarlo (🔶 decisión del usuario, §11):
+
+| Opción | Eras del juego | Comentario |
+| --- | --- | --- |
+| **A (recomendada)** | 0 Oscura · 1 Feudal · 2 Castillos · 3 Imperial · 4 Pólvora · 5 Industrial · 6 Moderna (=«Contemporánea» del esquema) · **7 Futuro próximo** | Sin tocar lo existente. Prehistoria, Antigüedad y Clásica no son eras: sus edificios y tecnologías (granja, cantera, molino, mina, mercado, muralla, biblioteca, banco, puerto, astillero…) se reparten entre Oscura–Imperial, como en AoE2 |
+| **B** | 0 Prehistoria · 1 Antigüedad · 2 Clásica · 3 Medieval(Oscura→Feudal→Castillos como subetapas) · 4 Moderna(Imperial+Pólvora) · 5 Industrial · 6 Contemporánea · 7 Futuro | Fiel al esquema, pero obliga a rehacer la base actual y a inventar tres eras anteriores a todos los linajes de §5 (las civilizaciones tendrían una identidad genérica «tribal» en las primeras) |
+
+Opción A: añade solo una era nueva sobre §2 (Futuro). Las civilizaciones **dejan de cambiar de identidad en el Futuro próximo** (se fija la última identidad; en esa era mandan la tecnología y los edificios comunes). 🔶
+
+### Reparto del esquema del usuario (opción A)
+
+| Era del juego | Del esquema del usuario | Notas |
+| --- | --- | --- |
+| 0 Oscura | Granja, vivienda, molino, cantera; tecnologías de fuego (comida) y herramientas de piedra (recolección) → renombradas «Dominio del fuego» y «Herramientas» | Base del juego ya hecha |
+| 1 Feudal | Mina (oro y cobre), granja ganadera, **mercado**, muralla, templo; Agricultura, Metalurgia del bronce, Escritura | El **mercado** es la puerta del comercio (§8) |
+| 2 Castillos | Carretera, **biblioteca**, **banco**, **puerto comercial**, astillero, taller de asedio; Ingeniería, Arquitectura, Moneda, Matemáticas, Feudalismo | Donde el esquema coloca la base económica «clásica» |
+| 3 Imperial | Castillo, torre, muralla fortificada, gremio, **universidad**, taller de pólvora, taller de asedio avanzado; Armadura, Pólvora, Arquitectura gótica | Ya parcialmente existe (castillo, asedio) |
+| 4 Pólvora | «Moderna» del esquema: astillero oceánico, fortaleza, fábrica de pólvora, **imprenta**, observatorio, mina profunda (hierro), **compañía comercial**; Imprenta, Navegación oceánica, Cartografía, Metalurgia avanzada | «Moderna» en la historiografía hispana = 1492–1789, coincide con Pólvora |
+| 5 Industrial | Fábrica, estación de ferrocarril, **refinería**, laboratorio, fábrica de armas, búnker, **aeródromo**; Máquina de vapor, Electricidad, Motor de combustión, Producción en cadena, Aviación | Aquí aparece la primera aviación (coincide con §8b) |
+| 6 Moderna (=Contemporánea) | Refinería petrolífera, **central nuclear**, fábrica de automóviles, laboratorio avanzado, centro de comunicaciones, base aérea, puerto militar; Electrónica, Radar, Cohetería, **Energía nuclear**, Computación | Radar = «detecta unidades ocultas» (contraespionaje y aviones, §8b); Energía nuclear abre las armas nucleares |
+| 7 Futuro próximo | Centro de IA, fábrica de robots, centro de drones, laboratorio de nanotecnología, reactor de fusión, mina de tierras raras, centro espacial, centro de mando cuántico; IA, Robótica, Drones, Fusión, Nanotecnología, Computación cuántica | Especulativo; ver advertencia abajo |
+
+### Observaciones y conflictos a resolver
+
+1. **Nombre «Moderna»:** en el esquema significa la Edad Moderna historiográfica (1492–1789), mientras que en §2 «Moderna» es el siglo XX. En el juego, para evitar confusión: *Pólvora* (o «Moderna temprana») y *Contemporánea*. Se propone renombrar la era 6 como **Contemporánea** y retirar el nombre «Moderna». Los textos de este documento que digan «Moderna» se leerán como «Contemporánea» si se acepta.
+2. **Aviones aparecen en tres eras** del esquema (placeholders): se propone Aeródromo y primeras aeronaves en Industrial, y base aérea y reactores en Contemporánea. Con ello se alinea con §8b.
+3. **Recursos nuevos** que el esquema implica: cobre, hierro, **petróleo**, **energía** y **tierras raras**. Petróleo, hierro y cobre son nodos de recurso como el oro (datos). La **energía** (central nuclear, reactor de fusión) es distinta: no se recolecta, la *producen edificios* y se consume. Requiere un sistema de producción/consumo de recurso por edificio (🔶 verificar si el motor actual lo admite; si no, un sistema nuevo con `save()`/`load()`).
+4. **Edificios que dan información** (observatorio, centro de comunicaciones, radar, satélites, centro de IA): se apoyan en visión compartida/ampliada y ya anticipan el espionaje de §8b.
+5. **Edificios que automatizan** (centro de IA, fábrica de robots, drones): afectan a la producción automática y a la IA; ojo con la determinismo en red y con el coste en tick. Riesgo alto; dejar para el final.
+6. **Volumen:** el esquema son ~60 edificios y ~55 tecnologías además de las unidades de las civilizaciones. Es contenido de muchas semanas; conviene hacerlo **por eras, en orden**, probando cada era con `npm run simulate`.
+7. **Dos ejes que no hay que mezclar:** (a) el *árbol común* de edificios y tecnologías (este §2b) y (b) la *identidad de civilización* por era (§5). Cada civilización añade a (a) sus unidades únicas, un edificio único y tecnologías únicas por era; y modifica costes y bonos de (a).
+
 ## 3. Elección de las civilizaciones
 
 Criterios: (1) *continuidad de linaje* documentable durante 1.500 años o más (aunque cambie de dinastía/régimen); (2) variedad geográfica; (3) variedad de estilo de juego; (4) que cada era tenga una identidad reconocible y diferenciada; (5) que cubran los puntos de extensión que queremos probar (comercio, diplomacia, terreno).
@@ -294,6 +332,7 @@ Determinismo: los poderes y el comercio deben usar `fmath`, `game.rng()` y datos
 | Fase | Contenido | Riesgo | Hecho cuando |
 | --- | --- | --- | --- |
 | **0** | Decisiones del §11 y revisión de este documento | — | Usuario aprueba eras y civilizaciones |
+| **1b** | **Árbol común de edificios y tecnologías** (§2b) por eras, en orden: primero Feudal–Imperial (mercado, biblioteca, banco, puerto, universidad…), después Pólvora, Industrial, Contemporánea y, al final, Futuro | Alto (volumen) | Cada era se simula sin bloqueos antes de pasar a la siguiente |
 | **1** | **Eras nuevas (4–6)** como datos vacíos pero con tecnologías de era; sin civilizaciones nuevas aún. Revisar IA y UI para 7 eras | Medio (la IA y el balance asumen 4) | `npm run simulate` llega a la era 6 |
 | **2** | **Bonos por era** (`CivDef.eras`, `rebuildModifiers`, guardado) con una sola civilización: **Rus → Rusia**, solo con datos (unidades únicas, edificios y bonos) | Bajo-medio | Rusia cambia de identidad al subir de era, guardar/cargar sin diferencias |
 | **3** | **Poderes activos** (Tierra quemada, Nagarit…) y `excludes` para doctrinas | Medio | Un poder activo y una doctrina funcionan en red |
@@ -306,6 +345,8 @@ Determinismo: los poderes y el comercio deben usar `fmath`, `game.rng()` y datos
 Cada fase se hace en su propia rama (`feat/...`) y pasa `npm run build`, `npm run simulate -- 20 arabia 1` y `npm test`.
 
 ## 11. Decisiones que debe tomar el usuario
+
+0. **Esquema de 8 eras del usuario (§2b):** ¿opción A (sobre las eras del juego, con Futuro próximo como era 7) o B (rehacer desde Prehistoria)? ¿Se renombra «Moderna» a «Contemporánea»? ¿Las civilizaciones congelan su identidad en el Futuro próximo?
 
 1. ~~Cuántas eras~~ **Decidido: llegar a la Moderna (7 eras).** Queda por ver si la Moderna se parte en dos (guerras mundiales / contemporánea) y los nombres.
 2. **Lista de civilizaciones:** Rus, China, Francia, Persia, Etiopía y Británicos → EE. UU. (decidido). ¿Se añade Japón o Turcos como séptima?
