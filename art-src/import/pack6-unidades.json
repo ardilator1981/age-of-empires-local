@@ -28,6 +28,24 @@
         "walk": 9,
         "death": 6
       }
+    },
+    "crossbowman": {
+      "fps": {
+        "walk": 9,
+        "attack": 8
+      }
+    },
+    "spearman": {
+      "fps": {
+        "walk": 9,
+        "attack": 8
+      }
+    },
+    "manAtArms": {
+      "fps": {
+        "walk": 9,
+        "attack": 8
+      }
     }
   },
   "sources": [
@@ -794,6 +812,211 @@
           "state": "death"
         },
         null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source": "pack6-unidades/ballestero-andar.jpg",
+      "grid": [
+        6,
+        2
+      ],
+      "sharedScale": true,
+      "items": [
+        {
+          "id": "crossbowman",
+          "state": "walk",
+          "height": 46
+        },
+        {
+          "id": "crossbowman",
+          "state": "walk"
+        },
+        {
+          "id": "crossbowman",
+          "state": "walk"
+        },
+        {
+          "id": "crossbowman",
+          "state": "walk"
+        },
+        {
+          "id": "crossbowman",
+          "state": "walk"
+        },
+        {
+          "id": "crossbowman",
+          "state": "walk"
+        },
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source": "pack6-unidades/ballestero-atacar.jpg",
+      "grid": [
+        6,
+        2
+      ],
+      "sharedScale": true,
+      "items": [
+        {
+          "id": "crossbowman",
+          "state": "attack",
+          "height": 46
+        },
+        {
+          "id": "crossbowman",
+          "state": "attack"
+        },
+        {
+          "id": "crossbowman",
+          "state": "attack"
+        },
+        {
+          "id": "crossbowman",
+          "state": "attack"
+        },
+        {
+          "id": "crossbowman",
+          "state": "attack"
+        },
+        {
+          "id": "crossbowman",
+          "state": "attack"
+        },
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source": "pack6-unidades/lancero-andar.jpg",
+      "grid": [
+        6,
+        2
+      ],
+      "sharedScale": true,
+      "items": [
+        {
+          "id": "spearman",
+          "state": "walk",
+          "height": 46
+        },
+        {
+          "id": "spearman",
+          "state": "walk"
+        },
+        {
+          "id": "spearman",
+          "state": "walk"
+        },
+        {
+          "id": "spearman",
+          "state": "walk"
+        },
+        {
+          "id": "spearman",
+          "state": "walk"
+        },
+        {
+          "id": "spearman",
+          "state": "walk"
+        },
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source": "pack6-unidades/lancero-atacar.jpg",
+      "grid": [
+        6,
+        2
+      ],
+      "sharedScale": true,
+      "items": [
+        {
+          "id": "spearman",
+          "state": "attack",
+          "height": 46
+        },
+        {
+          "id": "spearman",
+          "state": "attack"
+        },
+        {
+          "id": "spearman",
+          "state": "attack"
+        },
+        {
+          "id": "spearman",
+          "state": "attack"
+        },
+        {
+          "id": "spearman",
+          "state": "attack"
+        },
+        {
+          "id": "spearman",
+          "state": "attack"
+        },
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source": "pack6-unidades/hombrearmas-andar.jpg",
+      "grid": [
+        6,
+        2
+      ],
+      "sharedScale": true,
+      "items": [
+        {
+          "id": "manAtArms",
+          "state": "walk",
+          "height": 46
+        },
+        {
+          "id": "manAtArms",
+          "state": "walk"
+        },
+        {
+          "id": "manAtArms",
+          "state": "walk"
+        },
+        {
+          "id": "manAtArms",
+          "state": "walk"
+        },
+        {
+          "id": "manAtArms",
+          "state": "walk"
+        },
+        {
+          "id": "manAtArms",
+          "state": "walk"
+        },
         null,
         null,
         null,

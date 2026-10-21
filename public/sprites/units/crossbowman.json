@@ -14,6 +14,36 @@
     "idle": {
       "row": 0,
       "frames": 1
+    },
+    "walk": {
+      "image": "crossbowman-walk.png",
+      "mask": "crossbowman-walk-mask.png",
+      "row": 0,
+      "frames": 6,
+      "fps": 9,
+      "cell": {
+        "w": 67,
+        "h": 102
+      },
+      "anchor": {
+        "x": 34,
+        "y": 96
+      }
+    },
+    "attack": {
+      "image": "crossbowman-attack.png",
+      "mask": "crossbowman-attack-mask.png",
+      "row": 0,
+      "frames": 6,
+      "fps": 8,
+      "cell": {
+        "w": 77,
+        "h": 100
+      },
+      "anchor": {
+        "x": 39,
+        "y": 94
+      }
     }
   }
 }

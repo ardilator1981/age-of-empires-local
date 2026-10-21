@@ -14,6 +14,36 @@
     "idle": {
       "row": 0,
       "frames": 1
+    },
+    "walk": {
+      "image": "spearman-walk.png",
+      "mask": "spearman-walk-mask.png",
+      "row": 0,
+      "frames": 6,
+      "fps": 9,
+      "cell": {
+        "w": 86,
+        "h": 102
+      },
+      "anchor": {
+        "x": 43,
+        "y": 96
+      }
+    },
+    "attack": {
+      "image": "spearman-attack.png",
+      "mask": "spearman-attack-mask.png",
+      "row": 0,
+      "frames": 5,
+      "fps": 8,
+      "cell": {
+        "w": 131,
+        "h": 100
+      },
+      "anchor": {
+        "x": 66,
+        "y": 94
+      }
     }
   }
 }

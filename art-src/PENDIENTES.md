@@ -21,11 +21,9 @@
 1. Aldeano: recoger, llevar carga y construir · 2. Unidades de combate: andar y atacar · 3. Muerte y edificios por edad · 4. Variantes por edad restantes · 5. Decoración, efectos e interfaz (necesitan además soporte en el motor).
 
 - P2 · **unidad villager**: attack
-- P2 · **unidad manAtArms**: walk, attack, death
+- P2 · **unidad manAtArms**: attack, death
 - P2 · **unidad longSwordsman**: walk, attack, death
-- P2 · **unidad spearman**: walk, attack, death
 - P2 · **unidad pikeman**: walk, attack, death
-- P2 · **unidad crossbowman**: walk, attack, death
 - P2 · **unidad skirmisher**: walk, attack, death
 - P2 · **unidad scoutCavalry**: walk, attack, death
 - P2 · **unidad lightCavalry**: walk, attack, death
@@ -35,6 +33,8 @@
 - P2 · **unidad longbowman**: walk, attack, death
 - P2 · **unidad throwingAxeman**: walk, attack, death
 - P2 · **unidad druzhinnik**: idle, walk, attack, death
+- P2 · **unidad boyarSon**: idle, walk, attack, death
+- P2 · **unidad strelets**: idle, walk, attack, death
 
 ## Unidades
 
@@ -42,12 +42,12 @@
 | --- | --- | --- | --- | --- | ---: | --- |
 | villager | Aldeano | 🟡 sin animar | attack | units/villager-attack.png (+ -mask.png) | 2 | `anim:attack-melee` |
 | militia | Milicia | ✅ hecho | — | — | — | — |
-| manAtArms | Hombre de armas | 🟡 sin animar | walk, attack, death | units/manAtArms-walk.png (+ -mask.png)<br>units/manAtArms-attack.png (+ -mask.png)<br>units/manAtArms-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack-melee` `anim:death` |
+| manAtArms | Hombre de armas | 🟡 sin animar | attack, death | units/manAtArms-attack.png (+ -mask.png)<br>units/manAtArms-death.png (+ -mask.png) | 2 | `anim:attack-melee` `anim:death` |
 | longSwordsman | Espadachín de mandoble | 🟡 sin animar | walk, attack, death | units/longSwordsman-walk.png (+ -mask.png)<br>units/longSwordsman-attack.png (+ -mask.png)<br>units/longSwordsman-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack-melee` `anim:death` |
-| spearman | Lancero | 🟡 sin animar | walk, attack, death | units/spearman-walk.png (+ -mask.png)<br>units/spearman-attack.png (+ -mask.png)<br>units/spearman-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack-melee` `anim:death` |
+| spearman | Lancero | 🟡 sin animar | death | units/spearman-death.png (+ -mask.png) | 3 | `anim:death` |
 | pikeman | Piquero | 🟡 sin animar | walk, attack, death | units/pikeman-walk.png (+ -mask.png)<br>units/pikeman-attack.png (+ -mask.png)<br>units/pikeman-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack-melee` `anim:death` |
 | archer | Arquero | ✅ hecho | — | — | — | — |
-| crossbowman | Ballestero | 🟡 sin animar | walk, attack, death | units/crossbowman-walk.png (+ -mask.png)<br>units/crossbowman-attack.png (+ -mask.png)<br>units/crossbowman-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack` `anim:death` |
+| crossbowman | Ballestero | 🟡 sin animar | death | units/crossbowman-death.png (+ -mask.png) | 3 | `anim:death` |
 | skirmisher | Hostigador | 🟡 sin animar | walk, attack, death | units/skirmisher-walk.png (+ -mask.png)<br>units/skirmisher-attack.png (+ -mask.png)<br>units/skirmisher-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack` `anim:death` |
 | scoutCavalry | Caballería de exploración | 🟡 sin animar | walk, attack, death | units/scoutCavalry-walk.png (+ -mask.png)<br>units/scoutCavalry-attack.png (+ -mask.png)<br>units/scoutCavalry-death.png (+ -mask.png) | 2 | `anim:walk:mounted` `anim:attack-melee:mounted` `anim:death:mounted` |
 | lightCavalry | Caballería ligera | 🟡 sin animar | walk, attack, death | units/lightCavalry-walk.png (+ -mask.png)<br>units/lightCavalry-attack.png (+ -mask.png)<br>units/lightCavalry-death.png (+ -mask.png) | 2 | `anim:walk:mounted` `anim:attack-melee:mounted` `anim:death:mounted` |

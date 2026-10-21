@@ -14,6 +14,21 @@
     "idle": {
       "row": 0,
       "frames": 1
+    },
+    "walk": {
+      "image": "manAtArms-walk.png",
+      "mask": "manAtArms-walk-mask.png",
+      "row": 0,
+      "frames": 6,
+      "fps": 9,
+      "cell": {
+        "w": 65,
+        "h": 100
+      },
+      "anchor": {
+        "x": 33,
+        "y": 94
+      }
     }
   }
 }
