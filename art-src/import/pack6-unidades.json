@@ -55,7 +55,8 @@
     },
     "throwingAxeman": {
       "fps": {
-        "walk": 8
+        "walk": 8,
+        "attack": 8
       }
     }
   },
@@ -1177,6 +1178,41 @@
         {
           "id": "throwingAxeman",
           "state": "walk"
+        }
+      ]
+    },
+    {
+      "source": "pack6-unidades/lanzahachas-atacar.jpg",
+      "grid": [
+        3,
+        2
+      ],
+      "sharedScale": true,
+      "items": [
+        {
+          "id": "throwingAxeman",
+          "state": "attack",
+          "height": 48
+        },
+        {
+          "id": "throwingAxeman",
+          "state": "attack"
+        },
+        {
+          "id": "throwingAxeman",
+          "state": "attack"
+        },
+        {
+          "id": "throwingAxeman",
+          "state": "attack"
+        },
+        {
+          "id": "throwingAxeman",
+          "state": "attack"
+        },
+        {
+          "id": "throwingAxeman",
+          "state": "attack"
         }
       ]
     }

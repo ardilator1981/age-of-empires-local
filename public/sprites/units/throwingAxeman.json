@@ -29,6 +29,21 @@
         "x": 31,
         "y": 100
       }
+    },
+    "attack": {
+      "image": "throwingAxeman-attack.png",
+      "mask": "throwingAxeman-attack-mask.png",
+      "row": 0,
+      "frames": 6,
+      "fps": 8,
+      "cell": {
+        "w": 67,
+        "h": 112
+      },
+      "anchor": {
+        "x": 34,
+        "y": 106
+      }
     }
   }
 }
