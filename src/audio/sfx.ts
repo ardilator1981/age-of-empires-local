@@ -8,7 +8,7 @@
 
 export type SfxId =
   | 'confirmMove' | 'confirmGather' | 'confirmBuild' | 'confirmAttack'
-  | 'buildingDone' | 'unitTrained' | 'techDone' | 'ageUp'
+  | 'buildingDone' | 'unitTrained' | 'techDone' | 'ageUp' | 'powerUsed'
   | 'depleted' | 'alertUnits' | 'alertBuildings' | 'villagerIdle'
   | 'errResources' | 'errPlacement' | 'errPopulation' | 'errGeneric'
   | 'hitMelee' | 'hitArrow' | 'hitMusket' | 'hitCannon' | 'hitBuilding' | 'animalDeath' | 'bird';
@@ -195,6 +195,15 @@ export const SFX: Record<SfxId, SfxDef> = {
     dur: 1.6, bus: 'effects', prio: 3, cooldown: 0.4, gain: 0.35,
     make: (c, o) => { [79, 83, 86, 91].forEach((m, i) => bell(c, o, mtof(m), i * 0.07, 0.3, 0.9)); },
   },
+  powerUsed: {
+    dur: 1.2, bus: 'effects', prio: 3, cooldown: 0.5, gain: 0.5,
+    make: (c, o) => {
+      // Toque corto de trompa con un golpe de timbal
+      held(c, o, { freq: mtof(62), t: 0, dur: 0.22, gain: 0.3, lp: 2200, attack: 0.02 });
+      held(c, o, { freq: mtof(69), t: 0.2, dur: 0.7, gain: 0.3, lp: 2200, attack: 0.02, vibrato: 0.004 });
+      tone(c, o, { freq: 110, to: 50, t: 0, dur: 0.5, gain: 0.7 });
+    },
+  },
   ageUp: {
     dur: 3.2, bus: 'effects', prio: 4, cooldown: 2, gain: 0.5,
     make: (c, o) => {
@@ -323,6 +332,6 @@ export const SFX: Record<SfxId, SfxDef> = {
 /** Orden de precarga: primero lo que se oye nada más empezar. */
 export const PRELOAD_ORDER: SfxId[] = [
   'confirmMove', 'confirmGather', 'confirmBuild', 'confirmAttack', 'errPlacement', 'errResources', 'errGeneric',
-  'unitTrained', 'buildingDone', 'alertUnits', 'alertBuildings', 'errPopulation', 'depleted', 'techDone', 'ageUp',
+  'unitTrained', 'buildingDone', 'alertUnits', 'alertBuildings', 'errPopulation', 'depleted', 'techDone', 'ageUp', 'powerUsed',
   'villagerIdle', 'hitMelee', 'hitArrow', 'hitMusket', 'hitCannon', 'hitBuilding', 'animalDeath', 'bird',
 ];

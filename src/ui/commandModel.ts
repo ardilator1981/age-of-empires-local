@@ -8,6 +8,7 @@ import {
 } from '../game/rules';
 import type { Session } from '../app/Session';
 import { portrait } from '../render/icons';
+import { playerPowers, powerAvail, powerWait } from '../game/powers';
 import { canShelterSomewhere, garrisonOf, nearestShelter } from '../game/garrison';
 
 /**
@@ -48,6 +49,8 @@ export interface CommandSet {
   research: Cmd[];
   /** Eliminar la selección (o cancelar la construcción de unos cimientos). */
   del: Cmd | null;
+  /** Poderes activos de la civilización (no dependen de la selección). */
+  powers: Cmd[];
 }
 
 export const OK: Avail = { visible: true, ok: true };
@@ -107,13 +110,33 @@ export function taskText(g: Game, e: Entity): string {
   }
 }
 
+/** Poderes activos de la civilización del jugador humano, con su enfriamiento. */
+export function powerCommands(s: Session): Cmd[] {
+  const g = s.game, p = g.human, ui = s.ui;
+  return playerPowers(g, p).map(d => {
+    const a = powerAvail(g, p, d.id), wait = powerWait(g, p, d.id);
+    const cost = d.cost ? costText(g, d.cost) : '';
+    return {
+      icon: d.icon, label: d.name, avail: a, cost, badge: wait > 0 ? String(wait) : undefined,
+      tip: tipHtml(d.name, cost, d.description, a, `⏳ Enfriamiento ${Math.round(d.cooldown / 60 * 10) / 10} min`),
+      action: () => {
+        const av = powerAvail(g, p, d.id);
+        if (!av.ok) { g.rejectAvail(p.id, av); return; }
+        if (d.target !== 'point') { s.orders.send({ t: 'mod', id: 'power', args: { id: d.id } }); return; }
+        g.notify(`${d.icon} ${d.name}: toca el mapa donde quieres usarlo`, p.id, 'info');
+        ui.pickPoint = { owner: 'power', onPick: pt => { ui.pickPoint = null; s.orders.send({ t: 'mod', id: 'power', args: { id: d.id, x: pt.x, y: pt.y } }); } };
+      },
+    } as Cmd;
+  });
+}
+
 /** Calcula los comandos disponibles para la selección actual del jugador humano. */
 export function selectionCommands(s: Session): CommandSet {
   const g = s.game, p = g.human, ui = s.ui;
   const sel = ui.selected(g).filter(e => e.owner === p.id);
   const units = sel.filter(e => e.kind === 'unit');
   const blds = sel.filter(e => e.kind === 'building');
-  const set: CommandSet = { units, blds, build: null, attackMove: null, explore: null, stop: null, shelter: null, evacuate: null, strategy: null, train: [], research: [], del: null };
+  const set: CommandSet = { units, blds, build: null, attackMove: null, explore: null, stop: null, shelter: null, evacuate: null, strategy: null, train: [], research: [], del: null, powers: powerCommands(s) };
   if (!sel.length) return set;
   const del: Cmd = {
     icon: '❌', label: 'Eliminar', avail: OK, tip: '<b>Eliminar</b> (Supr)<br>Destruye la selección.',

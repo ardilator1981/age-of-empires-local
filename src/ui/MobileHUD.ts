@@ -1,5 +1,6 @@
 import type { Session } from '../app/Session';
 import type { Entity } from '../game/Entity';
+import { playerPowers } from '../game/powers';
 import { costText } from '../game/rules';
 import { esc, pic, selectionCommands, taskText, type Cmd, type CommandSet } from './commandModel';
 import { haptic, isMobileLayout, longPressMs, setUIPrefs, uiPrefs } from './layout';
@@ -21,8 +22,8 @@ interface Btn {
   run: () => void;
 }
 
-type Tab = 'economy' | 'military' | 'units' | 'techs' | 'actions';
-const TAB_NAMES: Record<Tab, string> = { economy: 'Economía', military: 'Militar', units: 'Unidades', techs: 'Tecnologías', actions: 'Acciones' };
+type Tab = 'economy' | 'military' | 'units' | 'techs' | 'actions' | 'powers';
+const TAB_NAMES: Record<Tab, string> = { economy: 'Economía', military: 'Militar', units: 'Unidades', techs: 'Tecnologías', actions: 'Acciones', powers: 'Poderes' };
 type Screen = 'game' | 'stats' | 'techs' | 'diplomacy' | 'settings';
 const SCREENS: [Screen, string][] = [['game', 'Partida'], ['stats', 'Estadísticas'], ['techs', 'Tecnologías'], ['diplomacy', 'Diplomacia'], ['settings', 'Ajustes']];
 const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI'];
@@ -75,6 +76,7 @@ export class MobileHUD {
         <button class="mbtn" data-a="army" data-mt="army">⚔️</button>
         <button class="mbtn" data-a="idle" data-mt="idle">💤<i class="mb-badge"></i></button>
         <button class="mbtn" data-a="strategy" data-mt="strategy">📜</button>
+        <button class="mbtn" data-a="powers" data-mt="powers" style="display:none">⚡</button>
         <button class="mbtn" data-a="menu" data-mt="menu">☰</button>
       </div>
       <button id="m-mode" class="mbtn" data-a="mode" data-mt="mode"></button>
@@ -249,6 +251,8 @@ export class MobileHUD {
       i.textContent = n ? String(n) : '';
     };
     badge('alerts', this.alerts.length);
+    const hasPowers = playerPowers(g, g.human).length > 0;
+    (this.el['m-btns'].querySelector('[data-a="powers"]') as HTMLElement).style.display = hasPowers ? '' : 'none';
     badge('idle', this.idleVillagers());
     const mode = this.s.input.cameraMode;
     this.setHtml('mode', this.el['m-mode'], mode ? '✥<span>Cámara</span>' : '⬚<span>Selección</span>');
@@ -288,6 +292,7 @@ export class MobileHUD {
     if (set.train.length) tabs.push('units');
     if (set.research.length) tabs.push('techs');
     if (set.del || set.stop || set.evacuate) tabs.push('actions');
+    if (set.powers.length) tabs.push('powers');
     return tabs;
   }
 
@@ -430,6 +435,7 @@ export class MobileHUD {
     if ((tab === 'economy' || tab === 'military') && set.build) btns = set.build[tab].items.map(c => this.btnFromCmd(c));
     else if (tab === 'units') btns = set.train.map(c => this.btnFromCmd(c));
     else if (tab === 'techs') btns = set.research.map(c => this.btnFromCmd(c));
+    else if (tab === 'powers') btns = set.powers.map(c => this.btnFromCmd(c));
     else if (tab === 'actions') {
       if (set.attackMove) btns.push(this.btnFromCmd(set.attackMove));
       if (set.explore) btns.push(this.btnFromCmd(set.explore));
@@ -534,6 +540,7 @@ export class MobileHUD {
         break;
       }
       case 'strategy': this.s.strategy.toggle(); break;
+      case 'powers': this.openSheet('powers'); break;
       case 'mode': input.cameraMode = !input.cameraMode; haptic(8); this.acc = 1; break;
       case 'mini-toggle': this.setMini(this.mini === 'small' ? 'normal' : 'small'); break;
       case 'mini-full': this.setMini(this.mini === 'full' ? 'normal' : 'full'); break;

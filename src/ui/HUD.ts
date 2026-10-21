@@ -177,11 +177,13 @@ export class HUD {
       out[8] = set.shelter;
       out[10] = set.stop;
       out[14] = set.del;
+      set.powers.slice(0, 3).forEach((c, i) => { out[11 + i] = c; });
       return out;
     }
-    [...set.train, ...set.research].slice(0, 13).forEach((c, i) => { out[i] = c; });
+    [...set.train, ...set.research].slice(0, 13 - set.powers.length).forEach((c, i) => { out[i] = c; });
     out[13] = set.evacuate;
     out[14] = set.del;
+    set.powers.forEach((c, i) => { out[13 - set.powers.length + i] = c; });
     return out;
   }
 
