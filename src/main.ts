@@ -1,5 +1,6 @@
 import './styles.css';
 import { App } from './app/App';
+import { watchForUpdates } from './app/updates';
 import { isTouchDevice } from './core/constants';
 import { initLayout } from './ui/layout';
 
@@ -9,4 +10,7 @@ if (isTouchDevice()) document.documentElement.classList.add('touch');
 // Interfaz de escritorio o móvil (según la entrada y la pantalla, o lo elegido en ajustes)
 initLayout();
 
-new App();
+const app = new App();
+
+// Versión nueva publicada: se aplica sola al abrir o se avisa (ver app/updates.ts)
+watchForUpdates(app);
