@@ -1,6 +1,7 @@
-import type { Room, TurnServerConfig } from '@trystero-p2p/core';
+import type { Room } from '@trystero-p2p/core';
 import { selfId } from '@trystero-p2p/core';
 import { Deframer, Framer, isFrame, type Frame } from '../framing';
+import { connectionKind } from '../ice';
 import type { NetMessage, Transport } from '../protocol';
 
 /**
@@ -29,10 +30,12 @@ export interface TrysteroOptions {
   host: boolean;
   /** Orden en que se prueban (el anfitrión usa todas). */
   strategies: Strategy[];
-  /** TURN opcional (para redes que no dejan conectar directamente). */
-  turn?: TurnServerConfig[];
+  /** Servidores ICE: los STUN públicos y el TURN del usuario, si lo hay (ver net/ice.ts). */
+  ice?: RTCIceServer[];
   /** Mensajes de estado para la interfaz ("Buscando por Nostr..."). */
   onState?: (text: string) => void;
+  /** Fallo de conexión con un par, con el texto original (en inglés) para explicarlo. */
+  onError?: (raw: string) => void;
 }
 
 interface Joined { strategy: Strategy; room: Room; send: (f: Frame, target?: string[] | string) => Promise<void> }
@@ -70,8 +73,8 @@ export class TrysteroTransport implements Transport {
     try {
       const { joinRoom } = await loaders[strategy]();
       if (this.closed) return;
-      const room = joinRoom({ appId: APP_ID, password: this.code, turnConfig: this.o.turn?.length ? this.o.turn : undefined }, this.code, {
-        onJoinError: (e: { error: string }) => this.o.onState?.(`No se pudo conectar (${e.error})`),
+      const room = joinRoom({ appId: APP_ID, password: this.code, rtcConfig: this.o.ice?.length ? { iceServers: this.o.ice } : undefined }, this.code, {
+        onJoinError: (e: { error: string }) => this.o.onError?.(e.error),
       });
       const action = room.makeAction<any>('m');
       const joined: Joined = { strategy, room, send: (f, target) => action.send(f as any, { target: target ?? null }) };
@@ -113,6 +116,12 @@ export class TrysteroTransport implements Transport {
   }
 
   peers() { return [...this.route.keys()]; }
+
+  /** Cómo va la conexión con un par: directa o por el TURN. */
+  connectionKind(id: string) {
+    const pc = this.route.get(id)?.room.getPeers()[id];
+    return pc ? connectionKind(pc) : Promise.resolve(null);
+  }
 
   /** Ida y vuelta medida por Trystero con un par (ms). */
   ping(id: string): Promise<number> | null { return this.route.get(id)?.room.ping(id) ?? null; }

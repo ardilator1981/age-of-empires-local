@@ -108,5 +108,7 @@ export interface Transport {
   onPeerLeave: (peerId: string) => void;
   /** Pares conectados ahora. */
   peers(): string[];
+  /** Cómo va la conexión con un par (WebRTC): directa o por el TURN. */
+  connectionKind?(peerId: string): Promise<'directa' | 'turn' | null>;
   close(): void;
 }

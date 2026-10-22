@@ -162,6 +162,15 @@ export class NetGame implements OrderSink {
 
   get isHost() { return this.role === 'host'; }
 
+  /** Transporte de la partida (para preguntarle cómo va cada conexión). */
+  get transport(): Transport { return this.t; }
+
+  /** Par del transporte de un cliente (anfitrión) o del anfitrión (invitado), para la interfaz. */
+  peerOf(clientId: string): string | null {
+    if (this.isHost) return this.clients.get(clientId)?.peerId ?? null;
+    return clientId === this.lobby?.hostId ? this.hostPeer : null;
+  }
+
   on<K extends keyof NetEvents>(evt: K, fn: (v: NetEvents[K]) => void): () => void {
     const l = (this.listeners[evt] ??= []) as ((v: NetEvents[K]) => void)[];
     l.push(fn);

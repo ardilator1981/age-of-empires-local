@@ -1,4 +1,5 @@
 import { fromB64, toB64 } from '../codec';
+import { connectionKind } from '../ice';
 import { Deframer, Framer, isFrame } from '../framing';
 import type { NetMessage, Transport } from '../protocol';
 
@@ -12,11 +13,8 @@ import type { NetMessage, Transport } from '../protocol';
  * invitado responde con su código (`joinManual`).
  */
 
-export const STUN: RTCIceServer[] = [
-  { urls: 'stun:stun.l.google.com:19302' },
-  { urls: 'stun:stun1.l.google.com:19302' },
-  { urls: 'stun:stun.cloudflare.com:3478' },
-];
+/** STUN públicos (están en net/ice.ts). */
+export { STUN } from '../ice';
 
 /** Espera a tener todas las direcciones posibles (sin señalización no se pueden mandar después). */
 function gathered(pc: RTCPeerConnection, ms = 3000): Promise<void> {
@@ -62,6 +60,8 @@ abstract class ManualBase implements Transport {
   onMessage: (msg: NetMessage, from: string) => void = () => {};
   onPeerJoin: (peerId: string) => void = () => {};
   onPeerLeave: (peerId: string) => void = () => {};
+  /** La conexión con un par ha fallado (texto original, para explicarlo). */
+  onError: (raw: string) => void = () => {};
   protected links = new Map<string, Link>();
 
   protected wire(link: Link, ch: RTCDataChannel) {
@@ -77,6 +77,7 @@ abstract class ManualBase implements Transport {
       for (const m of link.deframer.push(f)) this.onMessage(m, link.id);
     };
     link.pc.onconnectionstatechange = () => {
+      if (link.pc.connectionState === 'failed') this.onError('connection failed');
       if (link.pc.connectionState === 'failed' || link.pc.connectionState === 'closed') ch.close();
     };
   }
@@ -91,6 +92,9 @@ abstract class ManualBase implements Transport {
   }
 
   peers() { return [...this.links.values()].filter(l => l.channel?.readyState === 'open').map(l => l.id); }
+
+  /** Cómo va la conexión con un par: directa o por el TURN. */
+  connectionKind(id: string) { const l = this.links.get(id); return l ? connectionKind(l.pc) : Promise.resolve(null); }
 
   close() {
     for (const l of this.links.values()) { l.channel?.close(); l.pc.close(); }
@@ -126,7 +130,7 @@ export class ManualHost extends ManualBase {
 }
 
 /** Invitado: con el código del anfitrión crea la respuesta, que hay que devolverle. */
-export async function joinManual(offer: string, ice: RTCIceServer[]): Promise<{ transport: Transport; answer: string }> {
+export async function joinManual(offer: string, ice: RTCIceServer[]): Promise<{ transport: ManualGuest; answer: string }> {
   const o = await decodeSignal(offer);
   if (o.k !== 'o') throw new Error('Ese código es una respuesta: pide al anfitrión su invitación');
   const t = new ManualGuest();
@@ -140,7 +144,7 @@ export async function joinManual(offer: string, ice: RTCIceServer[]): Promise<{ 
   return { transport: t, answer: await encodeSignal('a', pc.localDescription!.sdp) };
 }
 
-class ManualGuest extends ManualBase {
+export class ManualGuest extends ManualBase {
   readonly selfId = Math.random().toString(36).slice(2, 10);
   add(link: Link) { this.links.set(link.id, link); }
   attach(link: Link, ch: RTCDataChannel) { this.wire(link, ch); }

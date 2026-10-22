@@ -10,7 +10,8 @@ import { ALL_MODS } from '../mods';
 import { NetGame } from '../net/NetGame';
 import { NET_PROTOCOL, type LobbySettings, type LobbyState, type Transport } from '../net/protocol';
 import { TabTransport } from '../net/transports/broadcast';
-import { joinManual, ManualHost, STUN } from '../net/transports/manual';
+import { joinManual, ManualHost } from '../net/transports/manual';
+import { explainConnectError, iceServers, parseTurn, testTurn } from '../net/ice';
 import { STRATEGIES, TrysteroTransport, type Strategy } from '../net/transports/trystero';
 import { DIFFS, esc, opt, POP_LIMITS, RESOURCES, SIZES, SPEEDS, VISIBILITY } from './menuOptions';
 
@@ -95,6 +96,11 @@ export class Lobby {
   private offs: (() => void)[] = [];
   private answerCh: BroadcastChannel | null = null;
   private armed = '';
+  /** Último fallo de conexión, explicado (con botón de reintentar). */
+  private error = '';
+  private keepAdvOpen = false;
+  /** Cómo va la conexión con cada jugador (clientId → directa o por TURN). */
+  private kinds: Record<string, 'directa' | 'turn'> = {};
 
   constructor(private app: App, private overlay: HTMLElement, private d: LobbyDefaults, private back: () => void) {}
 
@@ -103,15 +109,23 @@ export class Lobby {
     this.overlay.style.display = 'flex';
   }
 
-  private ice(): RTCIceServer[] {
-    const p = this.prefs;
-    return p.turnUrl ? [...STUN, { urls: p.turnUrl, username: p.turnUser || undefined, credential: p.turnPass || undefined }] : STUN;
+  private ice(): RTCIceServer[] { return iceServers(this.prefs); }
+
+  /** ¿Hay un TURN configurado y bien escrito? */
+  private hasTurn() { return parseTurn(this.prefs).servers.length > 0; }
+
+  /** Fallo de conexión: se explica en español, con qué probar, y se ofrece reintentar. */
+  private connectError(raw: string) {
+    this.error = explainConnectError(raw, this.hasTurn());
+    this.status = '';
+    if (!this.app.session) this.room();
   }
 
   // ------------------------------------------------------------ entrada
 
   show() {
     const p = this.prefs;
+    const turnErr = parseTurn(p).error;
     const modes = MODES.map(([m, label, desc]) => `<button class="nl-mode${p.mode === m ? ' on' : ''}" data-mode="${m}"><b>${label}</b><small>${desc}</small></button>`).join('');
     this.render(`
       <div class="menu small net-lobby">
@@ -128,11 +142,13 @@ export class Lobby {
         <details class="nl-adv"><summary>Opciones de conexión</summary>
           <div class="grid">
             <label>Señalización</label><select data-strategy>${opt('auto', 'Automática (Nostr, luego BitTorrent y MQTT)', p.strategy)}${STRATEGIES.map(([v, l]) => opt(v, l, p.strategy)).join('')}</select>
-            <label>TURN (opcional)</label><input data-turn="turnUrl" value="${esc(p.turnUrl)}" placeholder="turn:servidor:3478">
-            <label>Usuario</label><input data-turn="turnUser" value="${esc(p.turnUser)}">
-            <label>Contraseña</label><input data-turn="turnPass" type="password" value="${esc(p.turnPass)}">
+            <label>TURN (opcional)</label><textarea data-turn="turnUrl" rows="2" placeholder="turn:mi-servidor.com:3478 (o la lista JSON de Cloudflare o Metered)">${esc(p.turnUrl)}</textarea>
+            <label>Usuario</label><input data-turn="turnUser" value="${esc(p.turnUser)}" autocomplete="off">
+            <label>Contraseña</label><input data-turn="turnPass" type="password" value="${esc(p.turnPass)}" autocomplete="off">
+            <span></span><div class="nl-copyrow"><button class="small" data-turn-test>🔎 Probar TURN</button>${p.turnUrl ? '<button class="small" data-turn-clear>Quitar</button>' : ''}</div>
           </div>
-          <p class="note">Casi siempre basta con los STUN públicos (Google y Cloudflare). Un TURN solo hace falta si alguna red (algunas de datos móviles o de empresa) no deja conectar directamente; los hay con capa gratuita (ver docs/multijugador.md).</p>
+          ${turnErr ? `<p class="nl-error">${esc(turnErr)}</p>` : ''}
+          <p class="note">Casi siempre basta con los STUN públicos (Google y Cloudflare). Un TURN solo hace falta si vuestras redes no dejan conectar directamente (algunos datos móviles y redes de empresa u hotel): sale el aviso «vuestras redes no dejan conectar». No hay ninguno público y fiable sin cuenta; se guarda solo en este navegador. Cómo conseguir uno: docs/multijugador.md.</p>
         </details>
         <p class="nl-status">${esc(this.status)}</p>
         <div class="buttons"><button data-back>↩ Volver</button></div>
@@ -142,7 +158,23 @@ export class Lobby {
     nameEl.addEventListener('change', () => { this.d.name = nameEl.value.trim() || 'Jugador'; this.d.rememberName(this.d.name); });
     root.querySelectorAll<HTMLElement>('[data-mode]').forEach(b => b.addEventListener('click', () => { this.prefs.mode = b.dataset.mode as Mode; savePrefs(this.prefs); this.show(); }));
     root.querySelector<HTMLSelectElement>('[data-strategy]')!.addEventListener('change', e => { this.prefs.strategy = (e.target as HTMLSelectElement).value as ConnPrefs['strategy']; savePrefs(this.prefs); });
-    root.querySelectorAll<HTMLInputElement>('[data-turn]').forEach(el => el.addEventListener('change', () => { (this.prefs as any)[el.dataset.turn!] = el.value.trim(); savePrefs(this.prefs); }));
+    root.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('[data-turn]').forEach(el => el.addEventListener('change', () => {
+      (this.prefs as any)[el.dataset.turn!] = el.value.trim();
+      savePrefs(this.prefs);
+      if (el.dataset.turn === 'turnUrl') { this.keepAdvOpen = true; this.show(); }
+    }));
+    root.querySelector('[data-turn-clear]')?.addEventListener('click', () => {
+      this.prefs.turnUrl = ''; this.prefs.turnUser = ''; this.prefs.turnPass = '';
+      savePrefs(this.prefs); this.keepAdvOpen = true; this.status = ''; this.show();
+    });
+    root.querySelector('[data-turn-test]')?.addEventListener('click', async () => {
+      const t = parseTurn(this.prefs);
+      if (t.error || !t.servers.length) { this.status = t.error ?? 'Escribe primero la dirección del TURN'; this.updateStatus(); return; }
+      this.status = '🔎 Probando el TURN…'; this.updateStatus();
+      const r = await testTurn(t.servers);
+      this.status = `${r.ok ? '✅' : '❌'} ${r.detail}`; this.updateStatus();
+    });
+    if (this.keepAdvOpen) { root.querySelector<HTMLDetailsElement>('.nl-adv')!.open = true; this.keepAdvOpen = false; }
     root.querySelector('[data-create]')!.addEventListener('click', () => { this.d.name = nameEl.value.trim() || 'Jugador'; this.create(); });
     root.querySelector('[data-join]')!.addEventListener('click', () => {
       this.d.name = nameEl.value.trim() || 'Jugador';
@@ -163,10 +195,10 @@ export class Lobby {
 
   private transport(code: string, host: boolean): Transport {
     if (this.prefs.mode === 'tabs') return new TabTransport(code);
-    const turn = this.prefs.turnUrl ? [{ urls: this.prefs.turnUrl, username: this.prefs.turnUser || undefined, credential: this.prefs.turnPass || undefined }] : undefined;
     return new TrysteroTransport(code, {
-      host, strategies: this.strategies(), turn,
+      host, strategies: this.strategies(), ice: this.ice(),
       onState: text => { this.status = text; this.updateStatus(); },
+      onError: raw => this.connectError(raw),
     });
   }
 
@@ -184,8 +216,12 @@ export class Lobby {
     this.app.playNet(net);
     this.offs.push(
       net.on('lobby', () => {
-        if (role === 'guest' && /Buscando|Conectando|respuesta/.test(this.status)) this.status = 'Estás en la sala';
+        if (role === 'guest' && /Buscando|Conectando|respuesta|Probando/.test(this.status)) this.status = 'Estás en la sala';
+        this.error = '';
         if (!this.app.session) this.room();
+        // Las estadísticas de la conexión tardan un poco en estar
+        void this.checkKinds();
+        setTimeout(() => void this.checkKinds(), 2500);
       }),
       net.on('refused', reason => { this.status = reason; this.close(); this.show(); }),
       net.on('game', () => this.stopListening()),
@@ -199,6 +235,7 @@ export class Lobby {
     this.code = this.prefs.mode === 'manual' ? '' : newCode();
     if (this.prefs.mode === 'manual') {
       this.manualHost = new ManualHost(this.ice());
+      this.manualHost.onError = raw => this.connectError(raw);
       this.netGame(this.manualHost, 'host');
       this.listenAnswers();
     } else this.netGame(this.transport(this.code, true), 'host');
@@ -209,7 +246,8 @@ export class Lobby {
   join(code: string) {
     if (code.length < 4) { this.status = 'El código de la sala tiene 6 letras o números'; this.show(); return; }
     this.code = code;
-    try { sessionStorage.setItem(ROOM_KEY, JSON.stringify({ mode: this.prefs.mode, code })); } catch { /* sin almacenamiento */ }
+    // (no si va incrustado en otra página: compartiría el sessionStorage con ella)
+    if (window.top === window) try { sessionStorage.setItem(ROOM_KEY, JSON.stringify({ mode: this.prefs.mode, code })); } catch { /* sin almacenamiento */ }
     this.status = this.prefs.mode === 'tabs' ? 'Buscando la sala en las otras pestañas…' : 'Buscando la sala…';
     this.netGame(this.transport(code, false), 'guest');
     this.room();
@@ -227,6 +265,7 @@ export class Lobby {
     this.room();
     try {
       const { transport, answer } = await joinManual(invite, this.ice());
+      transport.onError = raw => this.connectError(raw);
       this.answer = answer;
       this.status = 'Devuelve tu respuesta al anfitrión';
       this.netGame(transport, 'guest');
@@ -267,7 +306,9 @@ export class Lobby {
     const me = clientId();
     const slots = (l?.slots ?? []).map((s, i) => {
       const mine = s.clientId === me, ai = s.kind === 'ai', edit = mine || (host && ai);
-      const label = ai ? 'IA' : `${esc(s.name)}${s.clientId === l!.hostId ? ' 👑' : ''}${mine ? ' (tú)' : ''}`;
+      const kind = s.clientId ? this.kinds[s.clientId] : undefined;
+      const conn = kind === 'turn' ? ' <small title="Conexión a través de tu servidor TURN">🔁 TURN</small>' : kind ? ' <small title="Conexión directa entre los dos dispositivos">📶 directa</small>' : '';
+      const label = ai ? 'IA' : `${esc(s.name)}${s.clientId === l!.hostId ? ' 👑' : ''}${mine ? ' (tú)' : ''}${conn}`;
       return `<div class="prow nl-slot"><span class="swatch" style="background:${PLAYER_COLORS[s.color]}"></span>
         ${mine ? `<input data-pick="name" value="${esc(s.name)}" maxlength="18">` : `<span class="nl-pname">${label}</span>`}
         ${edit ? `<select data-slot="${i}" data-pick="civ">${civOpts(s.civ)}</select>` : `<span class="nl-civ">${esc(s.civ === 'random' ? '🎲 Aleatoria' : reg.civs.get(s.civ)?.name ?? s.civ)}</span>`}
@@ -290,6 +331,7 @@ export class Lobby {
           ${host && l && l.slots.length < BALANCE.net.maxPlayers ? '<button class="small" data-ai>+ Añadir IA</button>' : ''}
         </section>
         ${l ? this.settingsHtml(l, host, reg) : ''}
+        ${this.error ? `<div class="nl-error"><p>⚠️ ${esc(this.error)}</p>${host ? '' : '<button class="small" data-retry>🔄 Reintentar</button>'}</div>` : ''}
         <p class="nl-status">${esc(this.status)}</p>
         ${host ? `<button class="start" data-start${humans < 2 ? ' disabled' : ''}>⚔️ Empezar partida</button>${humans < 2 ? '<p class="note">Hace falta al menos otro jugador.</p>' : ''}` : (l ? '<p class="note">El anfitrión empezará la partida.</p>' : '')}
         <div class="buttons"><button data-leave>🚪 Salir de la sala</button></div>
@@ -364,6 +406,7 @@ export class Lobby {
     }));
     root.querySelectorAll<HTMLElement>('[data-del]').forEach(b => b.addEventListener('click', () => net?.editSlot(Number(b.dataset.del), null)));
     root.querySelector('[data-ai]')?.addEventListener('click', () => net?.addAI());
+    root.querySelector('[data-retry]')?.addEventListener('click', () => this.retry());
     root.querySelector('[data-start]')?.addEventListener('click', () => {
       this.status = 'Creando la partida…';
       this.updateStatus();
@@ -387,6 +430,29 @@ export class Lobby {
       this.status = '';
       this.show();
     });
+  }
+
+  /** Pregunta al transporte cómo va cada conexión (directa o por TURN) y lo enseña en la sala. */
+  private async checkKinds() {
+    const net = this.net, l = net?.lobby, t = net?.transport;
+    if (!net || !l || !t?.connectionKind) return;
+    let changed = false;
+    for (const s of l.slots) {
+      if (!s.clientId || s.clientId === clientId()) continue;
+      const peer = net.peerOf(s.clientId);
+      const k = peer ? await t.connectionKind(peer) : null;
+      if (k && this.kinds[s.clientId] !== k) { this.kinds[s.clientId] = k; changed = true; }
+    }
+    if (changed && !this.app.session && this.net === net) this.room();
+  }
+
+  /** Invitado: vuelve a intentarlo con el mismo código (nueva conexión). */
+  private retry() {
+    const code = this.code, mode = this.prefs.mode;
+    this.close();
+    this.error = '';
+    if (mode !== 'manual' && code) this.join(code);
+    else { this.status = 'Pide al anfitrión una invitación nueva'; this.show(); }
   }
 
   private updateStatus() {
