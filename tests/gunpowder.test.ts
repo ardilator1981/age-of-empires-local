@@ -52,6 +52,8 @@ function place(g: Game, pid: number, defId: string) {
 }
 
 const run = (g: Game, seconds: number) => { for (let i = 0; i < seconds / TICK_DT && !g.over; i++) g.update(TICK_DT); };
+/** Sigue jugando aunque la partida haya terminado (el rival quieto cae y el juego marca la victoria). */
+const runOn = (g: Game, seconds: number) => { for (let i = 0; i < seconds / TICK_DT; i++) g.update(TICK_DT); };
 
 function roundTrip(g: Game): Game {
   const save: SaveData = JSON.parse(JSON.stringify(snapshot(g)));
@@ -194,7 +196,7 @@ describe('era 4 · Pólvora', () => {
   it('la IA de cada civilización sube sola a Pólvora y construye lo de la era', () => {
     for (const civ of CIVS) {
       const g = peaceful(civ, 3, 6);
-      run(g, 50 * 60);
+      runOn(g, 50 * 60);
       const p = g.players[1];
       expect(p.age, `${civ}: edad`).toBeGreaterThanOrEqual(4);
       expect(p.count('gunpowderWorks'), `${civ}: fábrica de pólvora`).toBeGreaterThan(0);
@@ -205,7 +207,7 @@ describe('era 4 · Pólvora', () => {
   it('la IA investiga las tecnologías de la era y las únicas, y entrena sus unidades', () => {
     // Francia (semilla 6) llega pronto a Pólvora: comprueba tecnologías propias y unidades de la era
     const g = peaceful('france', 3, 6);
-    run(g, 50 * 60);
+    runOn(g, 50 * 60);
     const p = g.players[1];
     expect(p.age).toBeGreaterThanOrEqual(4);
     const unique = [...p.researched].filter(t => reg.techs.get(t)!.civs?.includes('france'));
