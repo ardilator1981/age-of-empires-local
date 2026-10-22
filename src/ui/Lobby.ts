@@ -340,7 +340,7 @@ export class Lobby {
     const root = this.overlay, net = this.net;
     root.querySelectorAll<HTMLElement>('[data-copy]').forEach(b => b.addEventListener('click', () => void this.copy(b.dataset.copy!)));
     root.querySelectorAll<HTMLElement>('[data-share]').forEach(b => b.addEventListener('click', () => {
-      void navigator.share?.({ title: 'Age of Empires II · partida en red', text: 'Únete a mi partida', url: b.dataset.share }).catch(() => {});
+      void navigator.share?.({ title: 'Liada de Imperios · partida en red', text: 'Únete a mi partida', url: b.dataset.share }).catch(() => {});
     }));
     root.querySelectorAll<HTMLElement>('[data-share-text]').forEach(b => b.addEventListener('click', () => {
       void navigator.share?.({ title: 'Respuesta para la partida', text: b.dataset.shareText }).catch(() => {});

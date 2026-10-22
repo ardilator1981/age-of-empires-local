@@ -1,6 +1,6 @@
-# Age of Empires II · Edición local
+# Liada de Imperios
 
-Un juego de estrategia en tiempo real inspirado en **Age of Empires II**, que se juega en el navegador y corre
+Un juego de estrategia en tiempo real de imperios que cambian con las eras, inspirado en los clásicos del género, que se juega en el navegador y corre
 entero en tu ordenador. Está pensado para **crecer**: todo el contenido (unidades, edificios, tecnologías,
 civilizaciones, mapas, reglas) son datos registrados por *mods*, así que añadir cosas nuevas no exige tocar el motor.
 

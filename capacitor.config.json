@@ -1,6 +1,6 @@
 {
   "appId": "io.github.aoelocal.game",
-  "appName": "AoE II Local",
+  "appName": "Liada de Imperios",
   "webDir": "dist",
   "android": {
     "backgroundColor": "#1a140e"

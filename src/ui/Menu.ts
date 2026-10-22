@@ -149,7 +149,7 @@ export class Menu {
 
     this.show(`
       <div class="menu">
-        <h1>Age of Empires II</h1>
+        <h1>Liada de Imperios</h1>
         <div class="sub">Edición local · motor modular</div>
         <div class="continue-box"></div>
         <div class="cols">
@@ -506,7 +506,7 @@ export class Menu {
     this.show(`
       <div class="menu small credits">
         <h1>Créditos</h1>
-        <div class="sub">Age of Empires II · Edición local — proyecto personal sin ánimo de lucro inspirado en <i>Age of Empires II</i> (marca de Microsoft). No usa ningún recurso gráfico ni sonoro del juego original: los gráficos, la música y los efectos de sonido se generan por código (detalle en <code>CREDITS.md</code>).</div>
+        <div class="sub">Liada de Imperios — proyecto personal sin ánimo de lucro inspirado en <i>Age of Empires II</i> (marca de Microsoft). No usa ningún recurso gráfico ni sonoro del juego original: los gráficos, la música y los efectos de sonido se generan por código (detalle en <code>CREDITS.md</code>).</div>
         <h2>Relieve y datos de las regiones reales</h2>
         <ul>
           <li><b>Copernicus DEM GLO-30</b>: © DLR e.V. 2010-2014 y © Airbus Defence and Space GmbH 2014-2018, proporcionado bajo el programa COPERNICUS de la Unión Europea y la ESA.</li>
