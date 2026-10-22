@@ -30,9 +30,12 @@ En partida:
 - Arriba a la derecha: **📶 latencia · ⏱ retardo** de las órdenes (verde si va bien).
 - **Pausa para todos** desde el menú (escritorio) o ☰ → Partida (móvil); cualquiera la quita con
   **▶ Reanudar**. Abrir un menú no para el juego. La velocidad, en Ajustes, cambia para todos.
-- **"Esperando a…"** si faltan las órdenes de alguien. Si no vuelve (4 s si se ha desconectado o
-  ha salido de la app, 12 s si sigue conectado pero no avanza), **la IA juega por él**. Al volver,
-  recibe la partida de ese momento y retoma el mando él solo.
+- **Nadie para a los demás.** El anfitrión cierra cada turno a su hora: si las órdenes de alguien
+  llegan tarde (mala red), salen en el turno siguiente y la partida sigue para todos. Un invitado
+  solo ve **"Esperando a…"** si lleva más de 1 s sin noticias del anfitrión. Si alguien deja de
+  mandar órdenes (4 s si se ha desconectado o ha salido de la app, 12 s si sigue conectado pero no
+  avanza), **la IA juega por él**. Al volver, recibe la partida de ese momento y retoma el mando él
+  solo.
 - Si un invitado **recarga la página** (o el móvil le cierra la pestaña), vuelve solo a la partida.
 - Si **te derrotan**, puedes seguir mirando mientras los demás juegan.
 - Si se **pierde al anfitrión**: esperar a que vuelva, **seguir solo contra la IA** (la IA juega
@@ -61,8 +64,16 @@ En partida:
 - **Todos empiezan con la partida guardada del anfitrión** (comprimida, 30 a 95 KB), no con la
   semilla. Además se compara una huella del contenido del juego: con versiones o mods distintos, no
   se empieza.
-- **Retardo adaptable:** el anfitrión mide la latencia de cada invitado y fija el retardo para todos
-  (empieza en 200 ms; entre 100 y 700). Sube enseguida y baja despacio.
+- **El anfitrión cierra cada tick a su hora.** Manda su turno de un tick al ejecutarlo, y esa es
+  la señal de que el tick está cerrado: los invitados no lo ejecutan hasta recibirla. Si el turno
+  de un invitado no ha llegado tras un margen de 120 ms, ese tick se cierra con su turno vacío (va
+  en la lista `forced`) y sus órdenes salen en el siguiente; si sigue sin llegar, ya no se le espera
+  en los siguientes ticks. Mientras dura el margen, el reloj del anfitrión sigue contando y luego
+  recupera el tiempo, así que la mala red de uno no hace más lenta la partida de los demás.
+- **Retardo por jugador, en tiempo real:** el anfitrión, el mínimo (2 ticks: él cierra los ticks);
+  cada invitado, su ida y vuelta más su variación y dos fotogramas, en milisegundos reales (un tick
+  dura 50 ms entre la velocidad: 33 ms a ×1,5, 17 ms a ×3). Sube al momento si más del 10 % de sus
+  turnos llegan tarde y baja despacio. Tope: 1 s.
 - **Respuesta inmediata:** la marca y el sonido de una orden salen al darla, aunque se ejecute
   unos ticks después.
 - **Comprobación de sincronía:** la huella del anfitrión viaja cada segundo con sus turnos.
@@ -76,15 +87,12 @@ En partida:
   el anfitrión espera en los tres. En el modo sin intermediarios no hay señalización: la hacen las
   personas, copiando o escaneando.
 - **STUN:** públicos y gratuitos (Google y Cloudflare). Con ellos conecta la gran mayoría de redes.
-- **TURN (opcional):** solo hace falta si alguna red no deja conectar directamente (algunas de datos
-  móviles con CGNAT estricto, o de empresa). Se configura en **Opciones de conexión** (URL, usuario
-  y contraseña) y se guarda en el navegador. Opciones con capa gratuita: el TURN de
-  [Cloudflare Realtime](https://developers.cloudflare.com/realtime/pricing/) (1.000 GB al mes
-  gratis; pide credenciales temporales con una clave, así que hay que generarlas aparte),
-  [Open Relay de Metered](https://www.metered.ca/tools/openrelay/) (20 GB al mes gratis según su
-  página, en los puertos 80 y 443, que pasan casi cualquier cortafuegos; comprobad la cifra antes
-  de depender de ella) o un `coturn` propio en cualquier máquina. Una partida gasta
-  unos 0,7 KB/s por jugador: cualquier capa gratuita sobra.
+- **TURN (opcional, propio):** solo hace falta si las dos redes no dejan conectar directamente
+  (ver «Cuándo hace falta un TURN» más abajo). Se configura en **Opciones de conexión**, se prueba
+  con **🔎 Probar TURN** y se guarda solo en ese navegador (nunca en el repositorio). Por defecto no
+  hay ninguno: no existe un TURN público fiable sin cuenta (las credenciales públicas del Open Relay
+  de Metered ya no funcionan: su servidor ni siquiera resuelve, comprobado en octubre de 2026), y un
+  relé ajeno ve las direcciones IP de los jugadores.
 - **Tamaño:** Trystero añade unos 330 KB a la descarga (MQTT, el más grande, se carga solo si hace
   falta). Todo queda en la caché sin conexión de la PWA.
 
@@ -121,14 +129,121 @@ adaptable, pausa y velocidad, corte y vuelta, segundo plano del invitado y del a
 desincronización, versiones distintas y anfitrión perdido, todo con un transporte en memoria con
 latencia.
 
+### Cuándo hace falta un TURN y cómo tener uno
+
+**Cuándo:** el aviso de la sala dice «Os habéis encontrado, pero vuestras redes no dejan conectar
+directamente». Los dos navegadores se han encontrado por la señalización pública, pero WebRTC no ha
+podido abrir un camino directo: pasa con algunos datos móviles (CGNAT simétrico), redes de empresa,
+de hotel o universidad, y algunos routers. Antes de montar nada, probad: los dos en la misma wifi, o
+el del móvil con wifi en vez de datos, o cambiar quién crea la sala. Si con alguna combinación
+conecta, no hace falta TURN.
+
+**Qué poner en Opciones de conexión:** una o varias direcciones (`turn:servidor:3478`,
+`turns:servidor:5349`, separadas por comas) con usuario y contraseña, o la lista JSON de
+`iceServers` que dan algunos servicios (se pega tal cual; usuario y contraseña van dentro). Los dos
+jugadores deben ponerlo (o al menos el que está en la red difícil). **🔎 Probar TURN** dice si
+responde, si rechaza las credenciales o si no llega desde esa red.
+
+**Opciones, de menos a más trabajo:**
+- **[Cloudflare Realtime TURN](https://developers.cloudflare.com/realtime/pricing/):** 1.000 GB al
+  mes gratis (una partida gasta unos 0,7 KB/s por jugador: sobra). Hace falta una cuenta de
+  Cloudflare y crear una clave TURN en el panel. La clave no se pone en el juego: con ella se piden
+  credenciales temporales ([guía](https://developers.cloudflare.com/calls/turn/generate-credentials)):
+  ```bash
+  curl -X POST "https://rtc.live.cloudflare.com/v1/turn/keys/ID_DE_LA_CLAVE/credentials/generate-ice-servers" -H "Authorization: Bearer TOKEN_DE_LA_CLAVE" -H "Content-Type: application/json" -d '{"ttl": 86400}'
+  ```
+  La respuesta (`{"iceServers": [...]}`) se pega tal cual en el campo TURN y vale 24 horas. Fiable
+  y rápido, pero hay que renovarla para cada día de partidas.
+- **Metered:** tiene un plan gratuito pequeño con panel que da el JSON de `iceServers` (comprobad
+  la cuota actual en su web).
+- **Un `coturn` propio** (lo más controlado): en cualquier servidor con IP pública. Sirve un VPS de
+  los más pequeños (unos 4–5 €/mes, o la capa gratuita de algún proveedor de nube) o un ordenador de
+  casa con puertos abiertos en el router.
+  ```bash
+  sudo apt install coturn
+  ```
+  En `/etc/turnserver.conf`:
+  ```
+  listening-port=3478
+  fingerprint
+  lt-cred-mech
+  user=jugador:una-contraseña-larga
+  realm=aoe.local
+  external-ip=IP.PUBLICA.DEL.SERVIDOR
+  min-port=49160
+  max-port=49200
+  no-cli
+  ```
+  Abrid en el cortafuegos el 3478 (UDP y TCP) y el rango 49160–49200 (UDP). Activad el servicio
+  (`TURNSERVER_ENABLED=1` en `/etc/default/coturn`) y arrancadlo con
+  `sudo systemctl restart coturn`. En el juego: `turn:IP.PUBLICA.DEL.SERVIDOR:3478`, usuario
+  `jugador` y la contraseña. Con un dominio y certificado se puede añadir TLS (`turns:` en el puerto
+  5349 o 443), que pasa casi cualquier cortafuegos.
+
+El TURN solo reenvía los paquetes, que van cifrados de punta a punta (DTLS): no puede leer la
+partida, pero sí ve las direcciones IP de los dos.
+
+### Pruebas con dos ordenadores y con móvil y ordenador (octubre de 2026)
+
+Primeras pruebas reales con la web publicada (rama `fix/multijugador-pruebas`):
+
+**1. Dos ordenadores por internet: iba muy lento y salía «Esperando al otro jugador» todo el
+rato.** Simulado con `npm run lockstep` (red con latencia, variación y paquetes tardíos), las
+causas eran tres:
+- **El retardo de las órdenes no contaba la velocidad de juego.** Se calculaba en ticks de 50 ms,
+  pero a la velocidad Normal (×1,5) un tick dura 33 ms y a ×3, 17 ms: salía entre un 33 y un 67 %
+  más corto de lo necesario, y los turnos llegaban tarde una y otra vez.
+- **Un turno tardío paraba a todos.** En los pasos sincronizados puros nadie avanza sin el turno
+  de todos; cada pico de la red de uno congelaba a los demás, y ese tiempo no se recuperaba.
+- **El aviso «Esperando a…» mentía:** un cliente que iba justo a tiempo (un tick por fotograma, y
+  al acabar el fotograma ya esperando el siguiente) acumulaba «espera» sin parar, y el aviso salía
+  aunque la partida avanzara bien.
+
+No eran la simulación, ni el render, ni la huella: dos copias del juego completo (con render) en
+el navegador, conectadas por Trystero y WebRTC, van al 100 % del tiempo real con menos de 1 ms de
+CPU por fotograma.
+
+Arreglos: retardo en milisegundos reales y por jugador, cierre de cada tick por el anfitrión a su
+hora (los turnos tardíos salen en el siguiente, sin parar a nadie) y aviso solo tras 1 s sin poder
+avanzar (ver «Cómo funciona»). Velocidad real del juego, partida completa (NetGame) con dos
+jugadores durante 40–60 s:
+
+| Red simulada | `main` antes, ×1,5 / ×3 | Ahora, ×1,5 / ×3 | Retardo ahora (anfitrión / invitado), ×1,5 |
+| --- | --- | --- | --- |
+| Misma wifi (3 ms) | 100 / 100 %, pero aviso de espera el 50 % del tiempo a ×3 | 100 / 100 %, sin aviso | 67 / 100 ms |
+| Fibra, misma ciudad (15 ms) | 99,5 / 97,4 % | 99,9 / 100 % | 67 / 133 ms |
+| Otro país (45 ms, 1 % de picos de 200 ms) | 95 / **74 %** | 99,9 / 100 % | 67 / 265 ms |
+| Lejos: 100–300 ms y 2 % de tardíos de 300 ms | 87 / **54 %** | 100 / 99,9 % | 67 / 699 ms |
+| 4G (60 ms + 0–60, 2 % de picos de 400 ms) | 82 / **69 %** | 100 / 100 % | 67 / 541 ms |
+| 2 invitados, uno con muy mala red | 75 / **42 %** | 99,7 / 100 % | 67 / 1.000 ms (el de la mala red) |
+
+En ningún caso sale ya el aviso «Esperando…», ni hay desincronizaciones. El precio: el retardo de
+un invitado es ahora su ida y vuelta con el anfitrión (antes, solo la ida, pero con parones). En
+internet normal, unos 250–300 ms; en redes muy lejanas o malas, más. El anfitrión responde casi al
+momento.
+
+**2. Móvil + ordenador: «No se pudo conectar (could not connect to peer … configure TURN
+servers)».** Se encontraban por la señalización, pero sus redes no dejaban abrir una conexión
+directa (NAT). Hace falta un TURN (ver arriba). Ahora el aviso lo explica en español, con qué
+probar y un botón **🔄 Reintentar**, y la sala enseña si cada conexión es directa o por TURN.
+
+**Cómo probar con móvil y ordenador** (con la web publicada en https, o el APK):
+1. En el ordenador: **🌐 Jugar en red** → **🌍 Por internet** → **Crear sala** → **▦ QR**.
+2. En el móvil: escanea el QR con la cámara (se abre el juego y entra en la sala). En la sala,
+   junto a cada jugador, sale **📶 directa** o **🔁 TURN**.
+3. Si sale «vuestras redes no dejan conectar directamente»: prueba primero con el móvil en la
+   misma wifi que el ordenador (debería conectar, directa). Si con datos móviles no conecta, hace
+   falta un TURN: ponlo en **Opciones de conexión** en los dos, pulsa **🔎 Probar TURN** y
+   **🔄 Reintentar**.
+4. Ya en partida: el indicador **📶 · ⏱** dice la latencia y el retardo de tus órdenes. Si el del
+   móvil va con mala red, sus órdenes tardan algo más, pero la partida no se para para nadie.
+
 ### Qué queda por comprobar en dispositivos reales
 
-- **WebRTC de verdad.** En el navegador de pruebas de esta sesión la señalización por Nostr
-  funcionó (anfitrión e invitado se encontraron e intercambiaron la descripción de la conexión),
-  pero no la conexión directa: ese navegador integrado no puede conectar WebRTC ni dentro de la
-  misma página (no resuelve las direcciones `.local`). Hay que probar en Chrome, Safari y Firefox
-  reales, y entre un móvil en wifi y otro con datos. Lo probado de punta a punta en el navegador
-  real es el modo de pestañas, con la misma `NetGame`.
+- **WebRTC entre dispositivos distintos.** Probado de punta a punta en el navegador, por Trystero
+  (Nostr) y WebRTC, entre dos copias del juego en el mismo ordenador (conexión directa). Falta
+  repetirlo entre dos ordenadores por internet y entre un móvil con datos y un ordenador, ya con
+  los arreglos de esta rama, y probar un TURN real (Cloudflare o un `coturn`).
 - **Safari en iOS:** que las conexiones WebRTC sobreviven a salir un momento de la app (si se
   cortan, el invitado vuelve solo cuando Trystero reconecta; en el modo sin intermediarios hay que
   crear otra invitación). También que con la app instalada en la pantalla de inicio el QR de
@@ -142,8 +257,9 @@ latencia.
 
 - No hay cambio de anfitrión: si el anfitrión cierra el juego, la partida en red termina (cada
   uno puede seguir contra la IA).
-- Con 3 o más jugadores, los turnos entre invitados pasan por el anfitrión (más retardo si el
-  anfitrión tiene mala red).
+- Todo pasa por el anfitrión: el retardo de cada invitado es su ida y vuelta con el anfitrión. Si
+  el anfitrión tiene mala red, la notan todos los invitados (mejor que sea el que tenga mejor
+  conexión, por ejemplo el ordenador con cable o wifi y no el móvil con datos).
 - Quien quiera hacer trampas puede ver todo el mapa (cada uno tiene la partida entera). Para jugar
   entre amigos es aceptable.
 - Las partidas en red no se guardan solas ni se pueden continuar después.
