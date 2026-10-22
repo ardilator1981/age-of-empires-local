@@ -14,6 +14,8 @@ export class MemoryHub {
   /** Picos (wifi, internet): con esta probabilidad un mensaje tarda `spikeMs` más (y los de detrás esperan). */
   spikeChance = 0;
   spikeMs = 0;
+  /** Picos solo en los mensajes de o hacia un nodo (un jugador con mala red). */
+  nodeSpikes: Record<string, { chance: number; ms: number }> = {};
   private rnd = 1;
   bytes = 0;
   private nodes = new Map<string, MemoryTransport>();
@@ -47,6 +49,8 @@ export class MemoryHub {
     let at = this.now + this.latency + (this.rnd / 2147483647) * this.jitter;
     this.rnd = (this.rnd * 16807) % 2147483647;
     if (this.rnd / 2147483647 < this.spikeChance) at += this.spikeMs;
+    const bad = this.nodeSpikes[from] ?? this.nodeSpikes[to];
+    if (bad) { this.rnd = (this.rnd * 16807) % 2147483647; if (this.rnd / 2147483647 < bad.chance) at += bad.ms; }
     at = Math.max(this.linkLast.get(key) ?? 0, at);
     this.linkLast.set(key, at);
     this.queue.push({ at, from, to, json });

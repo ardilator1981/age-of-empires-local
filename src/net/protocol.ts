@@ -72,8 +72,11 @@ export type NetMessage =
   | { k: 'pick'; name?: string; civ?: string; color?: number }
   /** Anfitrión → todos: empieza la partida, con su partida guardada y qué jugador es cada uno. */
   | { k: 'start'; save: Packed; assign: Record<string, number>; delay: number; content: number }
-  /** Un turno: del invitado al anfitrión, y del anfitrión a todos (los suyos y los retransmitidos). */
-  | { k: 'turn'; t: Turn }
+  /**
+   * Un turno: del invitado al anfitrión, y del anfitrión a todos (los retransmitidos, y el suyo, que
+   * cierra el tick: con `forced`, los jugadores cuyo turno no llegó a tiempo y queda vacío).
+   */
+  | { k: 'turn'; t: Turn; forced?: number[] }
   /** Anfitrión → todos: el jugador deja de jugar después del tick `last` (la IA juega por él). */
   | { k: 'drop'; pid: number; last: number }
   /** Anfitrión → todos: el jugador vuelve a jugar desde el tick `from`. */

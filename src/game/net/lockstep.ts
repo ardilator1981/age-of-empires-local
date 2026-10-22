@@ -162,6 +162,8 @@ export class LockstepPeer {
     const target = this.game.tick + this.delay;
     const out: Turn[] = [];
     if (!this.members.some(m => m.pid === this.me && m.until > this.lastSent)) { this.local = []; return out; }
+    // Los ticks ya ejecutados (o cerrados sin este jugador, ver `force`) no llevan turno
+    this.lastSent = Math.max(this.lastSent, this.game.tick);
     while (this.lastSent < target) {
       const tick = ++this.lastSent;
       if (!this.plays(this.me, tick)) continue;
@@ -216,6 +218,26 @@ export class LockstepPeer {
     if (this.openSpan(pid)) return;
     this.members.push({ pid, from, until: Infinity });
     if (pid === this.me) this.lastSent = Math.max(this.lastSent, from - 1);
+  }
+
+  /**
+   * El anfitrión ha cerrado el tick `tick` sin el turno de estos jugadores (no llegó a tiempo): su
+   * turno de ese tick queda vacío para todos. Si era el propio, sus órdenes no se pierden: vuelven
+   * a salir en el próximo turno. Devuelve si había órdenes propias que repetir.
+   */
+  force(tick: number, pids: number[]): boolean {
+    let again = false;
+    for (const pid of pids) {
+      if (!this.plays(pid, tick)) continue;
+      const slot = this.slot(tick);
+      if (pid === this.me) {
+        const mine = slot.get(pid);
+        if (mine?.length) { this.local = [...mine, ...this.local]; again = true; }
+        this.lastSent = Math.max(this.lastSent, tick);
+      }
+      slot.set(pid, []);
+    }
+    return again;
   }
 
   /** Olvida una desincronización ya atendida. */
