@@ -96,6 +96,8 @@ export const extraContentMod: GameMod = {
           gen.cluster('goldMine', cx + Math.cos(a) * (r + 7), cy + Math.sin(a) * (r + 7), 6);
         }
         gen.scatter('stoneMine', 2 * starts.length, 4, 18, starts);
+        gen.scatter('ironMine', starts.length, 4, 18, starts);
+        gen.scatter('coalMine', starts.length, 4, 18, starts);
         gen.forests(4, 2, 3.5, starts, 16);
       },
     });

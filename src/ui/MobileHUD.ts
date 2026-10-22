@@ -226,7 +226,9 @@ export class MobileHUD {
     const g = this.s.game, p = g.human;
     for (const r of g.reg.resources.values()) {
       const b = document.getElementById(`mres-${r.id}`);
-      if (b) b.textContent = String(Math.floor(p.res[r.id] ?? 0));
+      if (!b) continue;
+      b.textContent = String(Math.floor(p.res[r.id] ?? 0));
+      b.parentElement!.style.display = p.age >= (r.minAge ?? 0) ? '' : 'none';
     }
     const pop = document.getElementById('mres-pop')!;
     pop.textContent = `${p.popUsed}/${p.popCap}`;

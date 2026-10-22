@@ -4,7 +4,7 @@ import type { BuildingDef, TechDef, UnitDef } from '../../core/types';
  * China (id `china`), eras 0–4: Sui-Tang, Song del Norte, Song del Sur y Yuan, Ming y Qing.
  * Valores indicativos (docs/civilizaciones.md §5.2). Un único por era: unidad, edificio y tecnología.
  */
-const ALL = ['food', 'wood', 'gold', 'stone'];
+const ALL = ['food', 'wood', 'gold', 'stone', 'iron', 'coal'];
 const CHINA = ['china'];
 
 export const chinaUnits: UnitDef[] = [

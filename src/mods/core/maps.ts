@@ -16,6 +16,8 @@ function placeBases(gen: MapGenerator, starts: Pt[]) {
 function extraResources(gen: MapGenerator, starts: Pt[], scale: number) {
   gen.scatter('goldMine', Math.round(3 * scale), 5, 20, starts);
   gen.scatter('stoneMine', Math.round(2 * scale), 4, 20, starts);
+  gen.scatter('ironMine', Math.round(2 * scale), 6, 22, starts);
+  gen.scatter('coalMine', Math.round(2 * scale), 6, 22, starts);
   gen.scatter('berries', Math.round(1 * scale), 5, 18, starts);
 }
 
@@ -130,6 +132,8 @@ function pyrenees(gen: MapGenerator) {
     }
   }
   gen.scatter('berries', Math.round(2 * scale), 5, 18, starts);
+  gen.scatter('ironMine', Math.round(2 * scale), 5, 20, starts);
+  gen.scatter('coalMine', Math.round(2 * scale), 5, 20, starts);
 }
 
 export const maps: MapTypeDef[] = [

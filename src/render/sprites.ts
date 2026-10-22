@@ -78,8 +78,9 @@ function drawWeapon(ctx: CanvasRenderingContext2D, weapon: string | undefined, s
       poly(ctx, [{ x: 0, y: -9.5 }, { x: 4, y: -11 }, { x: 4, y: -6 }, { x: 0, y: -7.3 }]); ctx.fill(); outline(ctx, 0.6);
       break;
     }
-    case 'musket': {
-      // Mosquete con bayoneta: el culatazo al disparar echa el arma atrás
+    case 'musket':
+    case 'rifle': {
+      // Mosquete con bayoneta (o fusil estriado, más largo): el culatazo al disparar echa el arma atrás
       ctx.translate(4 - swing * 1.5, -13);
       ctx.rotate(-0.2 - swing * 0.15);
       ctx.strokeStyle = OUTLINE; ctx.lineWidth = 2.6;
@@ -119,7 +120,8 @@ function animState(s: SpriteContext) {
 function villagerTool(s: SpriteContext): string {
   const o = s.entity?.order;
   if (o?.type === 'build') return 'hammer';
-  if (s.entity?.carry?.type === 'gold' || s.entity?.carry?.type === 'stone') return 'axe';
+  const c = s.entity?.carry?.type;
+  if (c === 'gold' || c === 'stone' || c === 'iron' || c === 'coal') return 'axe';
   return s.params.weapon ?? 'axe';
 }
 
@@ -154,7 +156,7 @@ export const humanoid: SpriteFn = s => {
   }
   // carga a la espalda
   if (e?.carry && e.carry.amount > 0.5) {
-    const cc: Record<string, string> = { wood: '#8b5a2b', food: '#c0392b', gold: '#f1c40f', stone: '#9e9e9e' };
+    const cc: Record<string, string> = { wood: '#8b5a2b', food: '#c0392b', gold: '#f1c40f', stone: '#9e9e9e', iron: '#a96f56', coal: '#34363e' };
     ctx.fillStyle = cc[e.carry.type] ?? '#a0522d';
     ctx.beginPath(); ctx.roundRect(-9, -17.5, 5, 7.5, 1.5); ctx.fill(); outline(ctx, 0.7);
   }
@@ -190,6 +192,12 @@ export const humanoid: SpriteFn = s => {
     ctx.fillStyle = '#26282e';
     poly(ctx, [{ x: -6, y: -23.4 }, { x: 0, y: -28.6 }, { x: 6, y: -23.4 }, { x: 3, y: -22.4 }, { x: -3, y: -22.4 }]); ctx.fill(); outline(ctx, 0.7);
     ctx.fillStyle = '#d9d2bc'; ctx.fillRect(-6, -23.6, 12, 0.9);
+  } else if (P.hat === 'shako') {
+    // Chacó de la era industrial
+    ctx.fillStyle = P.hatColor ?? '#2b3a55';
+    poly(ctx, [{ x: -3.6, y: -24 }, { x: -3.2, y: -29.4 }, { x: 3.2, y: -29.4 }, { x: 3.6, y: -24 }]); ctx.fill(); outline(ctx, 0.7);
+    ctx.fillStyle = '#d9d2bc'; ctx.fillRect(-3.4, -25.2, 6.8, 0.9);
+    ctx.fillStyle = '#c24a3a'; ellipse(ctx, 0, -29.8, 1.1, 1.1); ctx.fill();
   } else if (P.hat === 'mitre') {
     // Gorro alto de granadero
     ctx.fillStyle = P.hatColor ?? '#2f5a3f';
@@ -1013,11 +1021,82 @@ export const bush: SpriteFn = s => {
   });
 };
 
+/** Ametralladora Gatling: cañón de varios tubos giratorios sobre un afuste con ruedas. */
+export const gatling: SpriteFn = s => {
+  const { ctx, x, y, z, color, entity: e, time } = s;
+  const facing = e?.facing ?? 1;
+  const firing = e && e.attackAnim > 0;
+  const roll = e?.moving ? time * 5 : 0;
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(z * facing * UNIT_SCALE, z * UNIT_SCALE);
+  ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+  ctx.fillStyle = 'rgba(0,0,0,0.3)';
+  ellipse(ctx, 0, 0, 13, 4); ctx.fill();
+  ctx.strokeStyle = OUTLINE; ctx.lineWidth = 3.6;
+  line(ctx, { x: -12, y: -1.5 }, { x: -1, y: -7 });
+  ctx.strokeStyle = '#4a4f58'; ctx.lineWidth = 2;
+  line(ctx, { x: -12, y: -1.5 }, { x: -1, y: -7 });
+  for (const wx of [-1, 5]) {
+    ctx.fillStyle = '#3d3a36'; ellipse(ctx, wx, -4.6, 4.2, 4.2); ctx.fill(); outline(ctx, 0.9);
+    ctx.strokeStyle = '#9a9488'; ctx.lineWidth = 0.8;
+    line(ctx, { x: wx + Math.cos(roll) * 3.6, y: -4.6 + Math.sin(roll) * 3.6 }, { x: wx - Math.cos(roll) * 3.6, y: -4.6 - Math.sin(roll) * 3.6 });
+  }
+  // haz de tubos
+  const spin = firing ? time * 40 : 0;
+  ctx.strokeStyle = OUTLINE; ctx.lineWidth = 6;
+  line(ctx, { x: -3, y: -9.5 }, { x: 12, y: -11.5 });
+  for (let i = 0; i < 3; i++) {
+    const off = Math.sin(spin + i * 2.1) * 1.4;
+    ctx.strokeStyle = i === 1 ? '#8d939c' : '#5b616a'; ctx.lineWidth = 1.5;
+    line(ctx, { x: -3, y: -9.5 + off }, { x: 12, y: -11.5 + off });
+  }
+  ctx.fillStyle = color; ctx.fillRect(-6, -13.5, 3, 3.2);
+  ctx.fillStyle = '#7a5a2a'; ctx.fillRect(-5, -13, 2, 1);
+  if (firing) { ctx.fillStyle = 'rgba(255,230,150,0.9)'; ellipse(ctx, 13, -11.8, 2.6, 1.8); ctx.fill(); }
+  ctx.restore();
+};
+
+/** Biplano: vuela por encima del suelo (sombra en tierra). El hélice gira siempre. */
+export const biplane: SpriteFn = s => {
+  const { ctx, x, y, z, color, entity: e, time } = s;
+  const facing = e?.facing ?? 1;
+  const lift = 34, bob = Math.sin(time * 2.2 + (e?.id ?? 0)) * 1.4;
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(z * facing * UNIT_SCALE, z * UNIT_SCALE);
+  ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+  ctx.fillStyle = 'rgba(0,0,0,0.22)';
+  ellipse(ctx, 0, 0, 10, 3.2); ctx.fill();
+  ctx.translate(0, -lift + bob);
+  // alas inferior y superior
+  for (const wy of [3, -4]) {
+    ctx.fillStyle = shade(color, wy > 0 ? -0.1 : 0.1);
+    ctx.beginPath(); ctx.roundRect(-9, wy - 1.6, 18, 3.2, 1.4); ctx.fill(); outline(ctx, 0.8);
+  }
+  ctx.strokeStyle = '#4a3a2a'; ctx.lineWidth = 0.9;
+  line(ctx, { x: -5, y: -2.6 }, { x: -5, y: 1.6 }); line(ctx, { x: 5, y: -2.6 }, { x: 5, y: 1.6 });
+  // fuselaje
+  ctx.fillStyle = '#d8d2c0';
+  ctx.beginPath(); ctx.moveTo(-12, -1); ctx.lineTo(10, -2.4); ctx.lineTo(13, 0); ctx.lineTo(10, 2.4); ctx.lineTo(-12, 1.4); ctx.closePath(); ctx.fill(); outline(ctx, 0.9);
+  ctx.fillStyle = shade(color, -0.2);
+  ctx.beginPath(); ctx.moveTo(-12, -1); ctx.lineTo(-15, -5); ctx.lineTo(-10, -1.2); ctx.closePath(); ctx.fill(); outline(ctx, 0.7);
+  // cabina y hélice
+  ctx.fillStyle = '#26282e'; ellipse(ctx, 1, -2.8, 2.2, 1.5); ctx.fill();
+  const blade = Math.sin(time * 38) * 4.2;
+  ctx.strokeStyle = 'rgba(30,30,30,0.7)'; ctx.lineWidth = 1.2;
+  line(ctx, { x: 13.5, y: -blade }, { x: 13.5, y: blade });
+  if (e && e.attackAnim > 0) { ctx.fillStyle = 'rgba(255,230,150,0.9)'; ellipse(ctx, 16, 0, 2.6, 1.7); ctx.fill(); }
+  ctx.restore();
+};
+
 export function registerCoreSprites(reg: Registry) {
   reg.addSprite('humanoid', humanoid);
   reg.addSprite('cavalry', cavalry);
   reg.addSprite('ram', ram);
   reg.addSprite('cannon', cannon);
+  reg.addSprite('gatling', gatling);
+  reg.addSprite('biplane', biplane);
   reg.addSprite('building', building);
   reg.addSprite('farm', farm);
   reg.addSprite('tree', tree);

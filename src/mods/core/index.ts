@@ -17,6 +17,10 @@ import { wildlifeBuildings, wildlifeNodes, wildlifeSpawns, wildlifeTechs, wildli
 import { britainBuildings, britainTechs, britainUnits } from './civ-britain';
 import { chinaBuildings, chinaTechs, chinaUnits } from './civ-china';
 import { franceBuildings, franceTechs, franceUnits } from './civ-france';
+import { industrialBuildings, industrialTechs, industrialUnits, airRule } from './industrial';
+import { industrialCivBuildings, industrialCivTechs, industrialCivUnits } from './civ-industrial';
+import { persiaBuildings, persiaTechs, persiaUnits } from './civ-persia';
+import { ethiopiaBuildings, ethiopiaTechs, ethiopiaUnits } from './civ-ethiopia';
 import { gunpowderAI, gunpowderBuildings, gunpowderTechs, gunpowderUnits } from './gunpowder';
 import { powers, powersAI } from './powers';
 import { PowerSystem, truceRule, usePower } from '../../game/powers';
@@ -60,6 +64,11 @@ export const coreMod: GameMod = {
     [...gunpowderBuildings, ...chinaBuildings, ...franceBuildings, ...britainBuildings].forEach(b => reg.addBuilding(b));
     [...gunpowderTechs, ...chinaTechs, ...franceTechs, ...britainTechs].forEach(t => reg.addTech(t));
     reg.addAIPlugin(gunpowderAI);
+    // Era 5 (Industrial): árbol común, lo único de cada civilización y Persia y Etiopía (eras 0–5)
+    [...industrialUnits, ...industrialCivUnits, ...persiaUnits, ...ethiopiaUnits].forEach(u => reg.addUnit(u));
+    [...industrialBuildings, ...industrialCivBuildings, ...persiaBuildings, ...ethiopiaBuildings].forEach(b => reg.addBuilding(b));
+    [...industrialTechs, ...industrialCivTechs, ...persiaTechs, ...ethiopiaTechs].forEach(t => reg.addTech(t));
+    reg.addCombatRule(airRule);
     powers.forEach(w => reg.addPower(w));
     reg.addAIPlugin(powersAI);
     reg.addNetCommand('power', usePower);

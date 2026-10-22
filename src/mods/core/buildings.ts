@@ -1,6 +1,6 @@
 import type { BuildingDef } from '../../core/types';
 
-const ALL = ['food', 'wood', 'gold', 'stone'];
+const ALL = ['food', 'wood', 'gold', 'stone', 'iron', 'coal'];
 
 export const buildings: BuildingDef[] = [
   // ------------------------------------------------ economía
@@ -31,9 +31,9 @@ export const buildings: BuildingDef[] = [
     sprite: 'building', spriteParams: { style: 'shed', pile: 'wood' },
   },
   {
-    id: 'miningCamp', name: 'Campamento minero', icon: '⛏️', category: 'economy', description: 'Depósito de oro y piedra.',
+    id: 'miningCamp', name: 'Campamento minero', icon: '⛏️', category: 'economy', description: 'Depósito de oro, piedra, hierro y carbón.',
     classes: ['building'], cost: { wood: 100 }, buildTime: 35, size: 2,
-    hp: 1000, armor: { melee: 0, pierce: 7 }, los: 4, age: 0, dropSite: ['gold', 'stone'],
+    hp: 1000, armor: { melee: 0, pierce: 7 }, los: 4, age: 0, dropSite: ['gold', 'stone', 'iron', 'coal'],
     sprite: 'building', spriteParams: { style: 'shed', pile: 'stone' },
   },
   {

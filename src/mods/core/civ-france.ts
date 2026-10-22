@@ -65,7 +65,7 @@ export const franceBuildings: BuildingDef[] = [
     id: 'bastide', name: 'Bastida', icon: '🏘️', category: 'economy', civs: FRANCE,
     description: 'Edificio único francés (Castillos): ciudad fortificada nueva. Centro urbano que entrena aldeanos y dispara.',
     classes: ['building', 'townCenter'], cost: { wood: 150, stone: 250 }, buildTime: 120, size: 4,
-    hp: 3000, armor: { melee: 4, pierce: 7 }, los: 8, age: 2, popProvided: 10, dropSite: ['food', 'wood', 'gold', 'stone'], requiresBuildings: ['townCenter'],
+    hp: 3000, armor: { melee: 4, pierce: 7 }, los: 8, age: 2, popProvided: 10, dropSite: ['food', 'wood', 'gold', 'stone', 'iron', 'coal'], requiresBuildings: ['townCenter'],
     attack: 6, attackType: 'pierce', range: 6, reloadTime: 2, projectile: 'arrow',
     sprite: 'building', spriteParams: { style: 'tc', wall: '#d8cba8', roof: '#8a4a2e' },
   },

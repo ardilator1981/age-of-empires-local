@@ -188,15 +188,25 @@ export const BALANCE = {
     scorchedEarth: { radius: 7, duration: 90, enemySpeed: 0.6, cooldown: 300 },
     /** Leva: infantería que aparece junto al centro urbano. */
     levy: { count: 6, unit: 'musketeer', cooldown: 300 },
+    /** Gran Saqueo (Persia): oro por cada baja causada, hasta un máximo, y las bajas mínimas para poder usarlo. */
+    greatPlunder: { perKill: 6, max: 800, minKills: 15, cooldown: 420 },
+    /** Bazar (Persia): comida que se cambia por oro, al momento. */
+    bazaar: { food: 300, gold: 450, cooldown: 240 },
+    /** Resistencia (Etiopía): las tropas junto al centro urbano recuperan esta parte de la vida que les falta. */
+    resistance: { radius: 14, heal: 0.6, cooldown: 360 },
+    /** Nagarit (Etiopía): milicia que aparece de golpe junto al centro urbano. */
+    nagarit: { count: 10, unit: 'pikeman', cooldown: 600 },
+    /** Legión Extranjera (Francia): fusileros contratados con oro. */
+    foreignLegion: { cost: 500, count: 5, unit: 'rifleman', cooldown: 420 },
     /** La IA: enemigos cerca de su base para recurrir al poder de defensa; oro de sobra para la Flota; oro bajo para pedir crédito. */
     ai: { threatRadius: 16, threatCount: 6, fleetSurplus: 1600, creditBelow: 120 },
   },
 
   ai: {
     difficulty: {
-      easy: { gather: 0.75, maxVillagers: 18, firstAttack: 900, wave: 5, waveGrow: 1, villagersForAge: [14, 20, 26, 99], think: 2 },
-      normal: { gather: 1.0, maxVillagers: 28, firstAttack: 600, wave: 8, waveGrow: 2, villagersForAge: [18, 24, 30, 28], think: 1 },
-      hard: { gather: 1.15, maxVillagers: 40, firstAttack: 420, wave: 10, waveGrow: 3, villagersForAge: [20, 26, 32, 36], think: 0.6 },
+      easy: { gather: 0.75, maxVillagers: 18, firstAttack: 900, wave: 5, waveGrow: 1, villagersForAge: [14, 20, 26, 99, 99], think: 2 },
+      normal: { gather: 1.0, maxVillagers: 28, firstAttack: 600, wave: 8, waveGrow: 2, villagersForAge: [18, 24, 30, 28, 28], think: 1 },
+      hard: { gather: 1.15, maxVillagers: 40, firstAttack: 420, wave: 10, waveGrow: 3, villagersForAge: [20, 26, 32, 36, 36], think: 0.6 },
     } as Record<string, { gather: number; maxVillagers: number; firstAttack: number; wave: number; waveGrow: number; villagersForAge: number[]; think: number }>,
     /** Reparto de aldeanos por recurso en cada edad. */
     ratios: [
@@ -204,7 +214,8 @@ export const BALANCE = {
       { food: 0.45, wood: 0.35, gold: 0.15, stone: 0.05 },
       { food: 0.4, wood: 0.3, gold: 0.25, stone: 0.05 },
       { food: 0.38, wood: 0.27, gold: 0.28, stone: 0.07 },
-      { food: 0.36, wood: 0.24, gold: 0.3, stone: 0.1 },
+      { food: 0.36, wood: 0.3, gold: 0.24, stone: 0.1 },
+      { food: 0.3, wood: 0.27, gold: 0.17, stone: 0.04, iron: 0.14, coal: 0.08 },
     ] as Record<string, number>[],
     /** Con más de esto en el almacén, la IA aparta aldeanos de ese recurso. */
     stockpileEnough: 1200,

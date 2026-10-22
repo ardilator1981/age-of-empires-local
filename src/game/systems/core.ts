@@ -70,6 +70,12 @@ export class MovementSystem implements System {
 
   private tryMove(u: Entity, nx: number, ny: number): boolean {
     const m = this.game.map;
+    // Los aviones vuelan sobre todo: solo los frena el borde del mapa
+    if (this.game.unitDef(u).flying) {
+      if (nx < 0.5 || ny < 0.5 || nx > m.w - 0.5 || ny > m.h - 0.5) return false;
+      u.x = nx; u.y = ny;
+      return true;
+    }
     const cur = m.walkable(Math.floor(u.x), Math.floor(u.y));
     if (m.walkable(Math.floor(nx), Math.floor(ny)) || !cur) { u.x = nx; u.y = ny; return true; }
     if (m.walkable(Math.floor(nx), Math.floor(u.y))) { u.x = nx; return true; }
@@ -82,7 +88,8 @@ export class MovementSystem implements System {
     const units: Entity[] = [];
     for (const u of g.units) {
       if (u.dead || u.inside) continue;
-      units.push(u);
+      const flying = g.unitDef(u).flying;
+      if (!flying) units.push(u); // los aviones no chocan con las unidades de tierra
       if (!u.path.length) { u.moving = false; continue; }
       let speed = g.players[u.owner].getStat(g.unitDef(u), 'speed');
       // En formación, las que ya están en su hueco van al paso de la más lenta
@@ -93,7 +100,7 @@ export class MovementSystem implements System {
       if (dd > 0.01) {
         const k = Math.min(0.5, dd) / dd;
         const grade = (m.heightAt(u.x + (t0.x - u.x) * k, u.y + (t0.y - u.y) * k) - m.heightAt(u.x, u.y)) / Math.min(0.5, dd);
-        if (grade > 0) speed *= Math.max(mv.minSpeedFactor, 1 - mv.uphillSlowPerGrade * grade);
+        if (grade > 0 && !flying) speed *= Math.max(mv.minSpeedFactor, 1 - mv.uphillSlowPerGrade * grade);
       }
       let step = speed * dt;
       u.moving = true;

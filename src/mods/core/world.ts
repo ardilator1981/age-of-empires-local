@@ -6,6 +6,9 @@ export const resources: ResourceDef[] = [
   { id: 'wood', name: 'Madera', icon: ICONS.wood, color: '#a8743d', start: { low: 100, standard: 200, high: 1000 } },
   { id: 'gold', name: 'Oro', icon: ICONS.gold, color: '#f1c40f', start: { low: 0, standard: 100, high: 1000 } },
   { id: 'stone', name: 'Piedra', icon: ICONS.stone, color: '#a0a0a0', start: { low: 0, standard: 200, high: 1000 } },
+  // Era 5 (Industrial): la interfaz los muestra desde esa edad
+  { id: 'iron', name: 'Hierro', icon: ICONS.iron, color: '#b0705a', start: { low: 0, standard: 0, high: 500 }, minAge: 5 },
+  { id: 'coal', name: 'Carbón', icon: ICONS.coal, color: '#4a4d57', start: { low: 0, standard: 0, high: 500 }, minAge: 5 },
 ];
 
 export const terrains: TerrainDef[] = [
@@ -26,6 +29,8 @@ export const resourceNodes: ResourceNodeDef[] = [
   { id: 'snowPine', name: 'Pino nevado', icon: '🌲', resource: 'wood', amount: 100, gatherRate: 0.39, sprite: 'tree', spriteParams: { species: 'pine', snow: true }, minimapColor: '#2c4a3c' },
   { id: 'goldMine', name: 'Mina de oro', icon: '🪙', resource: 'gold', amount: 800, gatherRate: 0.38, sprite: 'rocks', spriteParams: { color: '#e6c13a' }, minimapColor: '#f5d442' },
   { id: 'stoneMine', name: 'Cantera de piedra', icon: '🪨', resource: 'stone', amount: 350, gatherRate: 0.36, sprite: 'rocks', spriteParams: { color: '#a9a9a9' }, minimapColor: '#c8c8c8' },
+  { id: 'ironMine', name: 'Mina de hierro', icon: '⛓️', resource: 'iron', amount: 700, gatherRate: 0.36, sprite: 'rocks', spriteParams: { color: '#a96f56' }, minimapColor: '#b0705a' },
+  { id: 'coalMine', name: 'Mina de carbón', icon: '⚫', resource: 'coal', amount: 700, gatherRate: 0.38, sprite: 'rocks', spriteParams: { color: '#34363e' }, minimapColor: '#2a2b31' },
   { id: 'berries', name: 'Arbusto de bayas', icon: '🫐', resource: 'food', amount: 125, gatherRate: 0.31, sprite: 'bush', minimapColor: '#d24a6a' },
 ];
 
@@ -35,6 +40,7 @@ export const ages: AgeDef[] = [
   { index: 2, id: 'castle', name: 'Edad de los Castillos' },
   { index: 3, id: 'imperial', name: 'Edad Imperial' },
   { index: 4, id: 'gunpowder', name: 'Edad de la Pólvora' },
+  { index: 5, id: 'industrial', name: 'Edad Industrial' },
 ];
 
 export const setup: SetupConfig = {
@@ -48,6 +54,8 @@ export const setup: SetupConfig = {
     { node: 'goldMine', count: 7, minDist: 7, maxDist: 10 },
     { node: 'goldMine', count: 4, minDist: 12, maxDist: 16 },
     { node: 'stoneMine', count: 5, minDist: 8, maxDist: 12 },
+    { node: 'ironMine', count: 4, minDist: 13, maxDist: 18 },
+    { node: 'coalMine', count: 4, minDist: 13, maxDist: 18 },
     { node: 'tree', count: 30, minDist: 9, maxDist: 12 },
     { node: 'tree', count: 14, minDist: 13, maxDist: 17 },
   ],

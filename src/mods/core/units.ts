@@ -5,7 +5,7 @@ export const units: UnitDef[] = [
   {
     id: 'villager', name: 'Aldeano', icon: '🧑‍🌾',
     description: 'Recolecta recursos y construye edificios.',
-    classes: ['villager'], cost: { food: 50 }, trainTime: 25, trainedAt: ['townCenter', 'kremlin', 'bastide', 'forbiddenCity'],
+    classes: ['villager'], cost: { food: 50 }, trainTime: 25, trainedAt: ['townCenter', 'kremlin', 'bastide', 'forbiddenCity', 'katama'],
     hp: 25, attack: 3, attackType: 'melee', reloadTime: 2, armor: { melee: 0, pierce: 0 },
     speed: 0.8, los: 4, pop: 1, age: 0, gatherer: true, builder: true, carryCapacity: 10,
     sprite: 'humanoid', spriteParams: { weapon: 'axe', villager: true },

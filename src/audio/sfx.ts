@@ -11,7 +11,7 @@ export type SfxId =
   | 'buildingDone' | 'unitTrained' | 'techDone' | 'ageUp' | 'powerUsed'
   | 'depleted' | 'alertUnits' | 'alertBuildings' | 'villagerIdle'
   | 'errResources' | 'errPlacement' | 'errPopulation' | 'errGeneric'
-  | 'hitMelee' | 'hitArrow' | 'hitMusket' | 'hitCannon' | 'hitBuilding' | 'animalDeath' | 'bird';
+  | 'hitMelee' | 'hitArrow' | 'hitMusket' | 'hitCannon' | 'hitRifle' | 'hitGatling' | 'hitBuilding' | 'animalDeath' | 'bird';
 
 export type SfxBus = 'effects' | 'alerts';
 
@@ -304,6 +304,25 @@ export const SFX: Record<SfxId, SfxDef> = {
       burst(c, o, { type: 'bandpass', freq: 1400, q: 0.5, t: 0, dur: 0.08, gain: 0.6 });
     },
   },
+  hitRifle: {
+    dur: 0.28, bus: 'effects', prio: 1, cooldown: 0.07, gain: 0.22, group: 'combat',
+    make: (c, o) => {
+      // Fusil estriado: chasquido más agudo y seco que el mosquete, con menos cola grave
+      burst(c, o, { type: 'bandpass', freq: 2600, q: 0.7, t: 0, dur: 0.07, gain: 0.8 });
+      burst(c, o, { type: 'lowpass', freq: 700, t: 0.01, dur: 0.14, gain: 0.3 });
+      tone(c, o, { freq: 190, to: 80, t: 0, dur: 0.08, gain: 0.4 });
+    },
+  },
+  hitGatling: {
+    dur: 0.3, bus: 'effects', prio: 1, cooldown: 0.09, gain: 0.2, group: 'combat',
+    make: (c, o) => {
+      // Ráfaga: tres chasquidos muy seguidos (ametralladora y aviones)
+      for (const t of [0, 0.06, 0.12]) {
+        burst(c, o, { type: 'bandpass', freq: 2200, q: 0.8, t, dur: 0.045, gain: 0.7 });
+        tone(c, o, { freq: 170, to: 90, t, dur: 0.05, gain: 0.3 });
+      }
+    },
+  },
   hitBuilding: {
     dur: 0.35, bus: 'effects', prio: 1, cooldown: 0.12, gain: 0.22, group: 'combat',
     make: (c, o) => {
@@ -333,5 +352,5 @@ export const SFX: Record<SfxId, SfxDef> = {
 export const PRELOAD_ORDER: SfxId[] = [
   'confirmMove', 'confirmGather', 'confirmBuild', 'confirmAttack', 'errPlacement', 'errResources', 'errGeneric',
   'unitTrained', 'buildingDone', 'alertUnits', 'alertBuildings', 'errPopulation', 'depleted', 'techDone', 'ageUp', 'powerUsed',
-  'villagerIdle', 'hitMelee', 'hitArrow', 'hitMusket', 'hitCannon', 'hitBuilding', 'animalDeath', 'bird',
+  'villagerIdle', 'hitMelee', 'hitArrow', 'hitMusket', 'hitCannon', 'hitRifle', 'hitGatling', 'hitBuilding', 'animalDeath', 'bird',
 ];

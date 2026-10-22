@@ -25,6 +25,8 @@ export interface ResourceDef {
   color: string;
   /** Cantidad inicial según la opción de partida. */
   start: { low: number; standard: number; high: number };
+  /** La interfaz solo la muestra desde esta edad (hierro y carbón: era Industrial). */
+  minAge?: number;
 }
 
 /** Un nodo de recurso en el mapa: árbol, mina de oro, arbusto... */
@@ -132,6 +134,8 @@ export interface UnitDef extends BaseDef {
   wildlife?: WildlifeDef;
   /** Aunque no sea `gatherer`, puede cazar y llevar la carne (p. ej. la caballería de exploración). */
   hunting?: boolean;
+  /** Vuela: ignora el terreno y las unidades de tierra, y solo la golpean armas a distancia (aviación básica). */
+  flying?: boolean;
 }
 
 /** Comportamiento de un animal. Al morir deja un cadáver (nodo de recurso) recolectable. */
