@@ -214,15 +214,29 @@ export const BALANCE = {
   net: {
     /** Jugadores como mucho en una sala (humanos e IA). */
     maxPlayers: 8,
-    /** Retardo de entrada en ticks de 50 ms: al empezar, mínimo y máximo (se adapta a la latencia). */
-    delayStart: 4,
+    /**
+     * Retardo de entrada (lo que tarda una orden en ejecutarse): al empezar y como mucho, en ms
+     * reales; como poco, en ticks. Se adapta a la latencia medida y a las esperas de verdad. En ms
+     * porque un tick dura 50 ms entre la velocidad de juego (33 ms a ×1,5; 17 ms a ×3).
+     */
+    delayStartMs: 200,
     delayMin: 2,
-    delayMax: 14,
-    /** Margen sobre la latencia de ida medida al calcular el retardo. */
-    delayMargin: 40,
+    delayMaxMs: 1000,
+    /** Margen sobre la latencia de ida: unos dos fotogramas (los mensajes se atienden entre fotogramas). */
+    delayMargin: 50,
+    /** Cuántas veces la variación de la latencia se suma a la latencia media al calcular el retardo. */
+    jitterFactor: 1,
     /** Cada cuántos ms se recalcula el retardo; para bajarlo hace falta que sobre varias veces seguidas. */
     delayEvery: 2000,
     delayLowerAfter: 2,
+    /** Si alguien ha esperado turnos más de esta fracción del tiempo, el retardo sube al momento. */
+    waitRaise: 0.02,
+    /** Solo se baja el retardo si nadie ha esperado más de esta fracción. */
+    waitLowerOk: 0.005,
+    /** Una espera más larga que esto (ms) es un corte, no variación de la red: no sube el retardo. */
+    waitIsJitter: 1000,
+    /** Tras irse, volver o salir de la app alguien, durante esto (ms) las esperas no suben el retardo. */
+    delayCalm: 6000,
     /** Huella del estado cada tantos ticks (comprobación de sincronía). */
     hashEvery: 20,
     pingEvery: 1000,

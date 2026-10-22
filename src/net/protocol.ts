@@ -80,7 +80,8 @@ export type NetMessage =
   | { k: 'add'; pid: number; from: number }
   /** Anfitrión → todos: retardo de entrada (ticks) según la latencia medida. */
   | { k: 'delay'; d: number }
-  | { k: 'ping'; t: number }
+  /** `w`: ms que ha esperado turnos desde el último ping, y `wm` la espera más larga (para el retardo). */
+  | { k: 'ping'; t: number; w?: number; wm?: number }
   | { k: 'pong'; t: number }
   /** Invitado → anfitrión: ha pasado a segundo plano (o ha vuelto). */
   | { k: 'away'; on: boolean }

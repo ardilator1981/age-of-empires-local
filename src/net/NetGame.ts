@@ -27,6 +27,11 @@ import { NET_PROTOCOL, type LobbySettings, type LobbySlot, type LobbyState, type
 
 const NB = BALANCE.net;
 
+/** Ticks de retardo para tantos ms reales a esta velocidad de juego. */
+export function delayTicks(ms: number, speed: number): number {
+  return Math.max(NB.delayMin, Math.ceil(ms / (TICK_DT * 1000 / (speed || 1))));
+}
+
 export interface NetGameOptions {
   transport: Transport;
   role: 'host' | 'guest';
@@ -70,6 +75,9 @@ interface ClientInfo {
   name: string;
   rtt?: number;
   rttDev?: number;
+  /** Ms que ha esperado turnos (y la espera más larga) desde el último cálculo del retardo. */
+  waited?: number;
+  waitedMax?: number;
   away: boolean;
   connected: boolean;
   /** Ya no juega (la IA lleva sus tropas). */
@@ -113,6 +121,14 @@ export class NetGame implements OrderSink {
   private lowerVotes = 0;
   private lastStatus = 0;
   private waitStart = new Map<number, number>();
+  /** Ms esperando turnos (y la espera más larga) desde el último informe o cálculo del retardo. */
+  private waited = 0;
+  private waitedMax = 0;
+  private delaySpeed = 0;
+  /** Hasta cuándo no se sube el retardo por esperas (alguien acaba de irse, volver o salir de la app). */
+  private calmUntil = 0;
+  /** Fracción del tiempo que alguien ha esperado turnos en el último cálculo (para la interfaz). */
+  waitShare = 0;
   /** Anfitrión: mensajes guardados para quien está recibiendo la partida (se mandan después de ella). */
   private holding = new Map<string, NetMessage[]>();
   private waitSince = 0;
@@ -235,7 +251,7 @@ export class NetGame implements OrderSink {
     const assign: Record<string, number> = {};
     l.slots.forEach((s, i) => { if (s.kind === 'human' && s.clientId) assign[s.clientId] = i + 1; });
     for (const c of this.clients.values()) c.pid = assign[c.clientId];
-    const msg: NetMessage = { k: 'start', save: await pack(JSON.stringify(save)), assign, delay: NB.delayStart, content: contentHash(reg) };
+    const msg: NetMessage = { k: 'start', save: await pack(JSON.stringify(save)), assign, delay: delayTicks(NB.delayStartMs, opts.speed), content: contentHash(reg) };
     this.broadcastLobby();
     this.t.send(msg);
     await this.handleStart(msg);
@@ -285,7 +301,10 @@ export class NetGame implements OrderSink {
     const c = id ? this.clients.get(id) : undefined;
     switch (msg.k) {
       case 'hello': return this.hello(msg, from);
-      case 'ping': this.t.send({ k: 'pong', t: msg.t }, from); return;
+      case 'ping':
+        this.t.send({ k: 'pong', t: msg.t }, from);
+        if (c && msg.w !== undefined) { c.waited = (c.waited ?? 0) + msg.w; c.waitedMax = Math.max(c.waitedMax ?? 0, msg.wm ?? 0); }
+        return;
       case 'pong': if (c) this.measure(c, this.now() - msg.t); return;
       case 'pick': {
         const slot = this.lobby?.slots.find(s => s.clientId === id);
@@ -300,7 +319,7 @@ export class NetGame implements OrderSink {
         this.toGame({ k: 'turn', t: { from: msg.t.from, tick: msg.t.tick, cmds: msg.t.cmds } }, others);
         return;
       }
-      case 'away': if (c) { c.away = msg.on; this.emit('info', msg.on ? `${c.name} ha salido de la app` : `${c.name} ha vuelto`); } return;
+      case 'away': if (c) { c.away = msg.on; this.calmUntil = this.now() + NB.delayCalm; this.emit('info', msg.on ? `${c.name} ha salido de la app` : `${c.name} ha vuelto`); } return;
       case 'resync': if (c && c.pid !== undefined) void this.sendSnap(c); return;
       case 'bye': if (c) { c.connected = false; if (c.pid !== undefined && !c.dropped && this.peer) this.dropPlayer(c); } return;
     }
@@ -434,6 +453,7 @@ export class NetGame implements OrderSink {
     const until = Math.max(0, ...peer.membership().filter(m => m.pid === pid).map(m => m.until));
     const from = Math.max(game.tick + peer.delay, until) + 3;
     peer.add(pid, from);
+    this.calmUntil = this.now() + NB.delayCalm;
     this.toGame({ k: 'add', pid, from }, this.othersThan(c.peerId));
     c.dropped = false;
     if (game.players[pid].data.aiControl) peer.issue({ t: 'ai', pid, on: false });
@@ -491,6 +511,7 @@ export class NetGame implements OrderSink {
 
   /** Anfitrión: el jugador ya no juega después de su último turno; la IA toma el mando. */
   private dropPlayer(c: ClientInfo) {
+    this.calmUntil = this.now() + NB.delayCalm;
     const peer = this.peer!, pid = c.pid!;
     const last = peer.lastTurnOf(pid);
     peer.drop(pid, last);
@@ -533,10 +554,13 @@ export class NetGame implements OrderSink {
       if (this.now() - t0 > NB.catchUpBudget) break;
     }
     if (this.acc >= TICK_DT && !peer.ready()) {
-      // Faltan turnos: el reloj se para (no se acumula retraso que luego haya que recuperar)
+      // Faltan turnos: el reloj se para (no se acumula retraso que luego haya que recuperar).
+      // Se anota cuánto, para que el anfitrión suba el retardo si hace falta
       this.acc = TICK_DT;
       if (!this.waitSince) this.waitSince = now;
       this.waitingMs = now - this.waitSince;
+      this.waited += dt * 1000;
+      this.waitedMax = Math.max(this.waitedMax, this.waitingMs + dt * 1000);
     } else { this.waitSince = 0; this.waitingMs = 0; }
   }
 
@@ -598,7 +622,10 @@ export class NetGame implements OrderSink {
       if (this.isHost) {
         const to = this.t.peers().filter(p => this.byPeer.has(p));
         if (to.length) this.t.send({ k: 'ping', t: now }, to);
-      } else if (this.hostPeer) this.t.send({ k: 'ping', t: now }, this.hostPeer);
+      } else if (this.hostPeer) {
+        this.t.send({ k: 'ping', t: now, w: Math.round(this.waited), wm: Math.round(this.waitedMax) }, this.hostPeer);
+        this.waited = 0; this.waitedMax = 0;
+      }
     }
     if (this.isHost) this.hostHousekeeping(now);
     else if (!this.hostLostSent && !this.away && (this.lobby || this.game) && now - this.lastHostMsg > (this.hostAway ? NB.hostAwayLost : NB.hostLost)) {
@@ -621,17 +648,34 @@ export class NetGame implements OrderSink {
       const limit = !c || !c.connected || c.away ? NB.dropAway : NB.dropSilent;
       if (c && now - since > limit) this.dropPlayer(c);
     }
-    // Retardo de entrada según la latencia: sube enseguida y baja despacio
-    if (now - this.lastDelay >= NB.delayEvery) {
+    // Retardo de entrada: sube enseguida (por latencia o porque alguien ha esperado) y baja despacio.
+    // Se recalcula también al cambiar la velocidad (un tick dura menos)
+    const speed = game.opts.speed || 1;
+    if (now - this.lastDelay >= NB.delayEvery || speed !== this.delaySpeed) {
+      const span = Math.max(1, now - this.lastDelay);
       this.lastDelay = now;
+      this.delaySpeed = speed;
+      const tickMs = TICK_DT * 1000 / speed;
       const guests = [...this.clients.values()].filter(c => c.pid !== undefined && c.clientId !== this.o.clientId && c.connected && !c.dropped && c.rtt !== undefined);
-      const worst = guests.reduce((m, c) => Math.max(m, c.rtt! / 2 + 2 * (c.rttDev ?? 0)), 0);
+      const worst = guests.reduce((m, c) => Math.max(m, c.rtt! / 2 + NB.jitterFactor * (c.rttDev ?? 0)), 0);
       this.rtt = guests.length ? Math.max(...guests.map(c => c.rtt!)) : null;
       // Con 3 o más humanos, el turno de un invitado pasa por el anfitrión hasta otro invitado
       const hops = guests.length >= 2 ? 2 : 1;
-      const want = Math.min(NB.delayMax, Math.max(NB.delayMin, Math.ceil((worst * hops + NB.delayMargin) / (TICK_DT * 1000))));
+      // Esperas de verdad (picos que el ping medio no ve): las propias y las que cuentan los invitados
+      const waited = Math.max(this.waited, ...guests.map(c => c.waited ?? 0)) / span;
+      const waitedMax = Math.max(this.waitedMax, ...guests.map(c => c.waitedMax ?? 0));
+      this.waited = 0; this.waitedMax = 0;
+      for (const c of guests) { c.waited = 0; c.waitedMax = 0; }
+      this.waitShare = waited;
+      const max = Math.max(NB.delayMin, Math.ceil(NB.delayMaxMs / tickMs));
+      let want = Math.ceil((worst * hops + NB.delayMargin) / tickMs);
+      // Solo cuentan las esperas cortas (variación de la red): las largas son cortes o alguien que
+      // se ha ido, y no se arreglan con más retardo
+      const jitterWait = waitedMax <= NB.waitIsJitter && now >= this.calmUntil;
+      if (jitterWait && waited > NB.waitRaise) want = Math.max(want, peer.delay + Math.max(1, Math.ceil(waitedMax / tickMs)));
+      want = Math.min(max, Math.max(NB.delayMin, want));
       let d = peer.delay;
-      if (want > d) { d = want; this.lowerVotes = 0; } else if (want < d) {
+      if (want > d) { d = want; this.lowerVotes = 0; } else if (want < d && waited <= NB.waitLowerOk) {
         // Si sobra mucho, baja de dos en dos
         if (++this.lowerVotes >= NB.delayLowerAfter) { d = Math.max(want, d - (d - want >= 3 ? 2 : 1)); this.lowerVotes = 0; }
       } else this.lowerVotes = 0;
