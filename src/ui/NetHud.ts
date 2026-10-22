@@ -30,7 +30,8 @@ export class NetHud {
     if (this.s.orders !== net || net.game !== g) { this.el.style.display = 'none'; return; }
     this.el.style.display = '';
     const ms = (t: number) => `${Math.round(t)} ms`;
-    const delay = net.peer ? net.peer.delay * TICK_DT * 1000 : 0;
+    // Un tick dura 50 ms entre la velocidad de juego
+    const delay = net.peer ? net.peer.delay * TICK_DT * 1000 / (g.opts.speed || 1) : 0;
     const rtt = net.rtt;
     const quality = rtt === null ? '' : rtt < 120 ? 'good' : rtt < 250 ? 'ok' : 'bad';
     const chip = `<span class="nh-chip ${quality}" title="Ida y vuelta con ${net.isHost ? 'el invitado más lento' : 'el anfitrión'} · retardo de las órdenes">📶 ${rtt === null ? '—' : ms(rtt)} · ⏱ ${ms(delay)}</span>`;

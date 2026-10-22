@@ -27,6 +27,11 @@ import { NET_PROTOCOL, type LobbySettings, type LobbySlot, type LobbyState, type
 
 const NB = BALANCE.net;
 
+/** Ticks de retardo para tantos ms reales a esta velocidad de juego. */
+export function delayTicks(ms: number, speed: number): number {
+  return Math.max(NB.delayMin, Math.ceil(ms / (TICK_DT * 1000 / (speed || 1))));
+}
+
 export interface NetGameOptions {
   transport: Transport;
   role: 'host' | 'guest';
@@ -70,6 +75,15 @@ interface ClientInfo {
   name: string;
   rtt?: number;
   rttDev?: number;
+  /** Cuándo llegó su último turno (si deja de mandarlos, se ha ido). */
+  lastTurnAt?: number;
+  /** Su retardo de entrada (ticks), los ticks cerrados sin su turno en la ventana y votos para bajarlo. */
+  delay?: number;
+  forced?: number;
+  lowerVotes?: number;
+  /** Ms que ha esperado turnos (y la espera más larga) desde el último cálculo del retardo. */
+  waited?: number;
+  waitedMax?: number;
   away: boolean;
   connected: boolean;
   /** Ya no juega (la IA lleva sus tropas). */
@@ -110,9 +124,24 @@ export class NetGame implements OrderSink {
   private acc = 0;
   private lastPing = 0;
   private lastDelay = 0;
-  private lowerVotes = 0;
   private lastStatus = 0;
   private waitStart = new Map<number, number>();
+  /** Anfitrión: sus turnos, hasta cerrar cada tick. */
+  private closeQueue = new Map<number, Turn>();
+  private lastForced = new Set<number>();
+  /** Anfitrión: ticks cerrados sin el turno de alguien, y ticks ejecutados, en la ventana del retardo. */
+  private forcedTicks = 0;
+  private ticksInWindow = 0;
+  /** Invitado: veces que sus órdenes llegaron tarde y salieron en otro turno. */
+  bounced = 0;
+  /** Ms esperando turnos (y la espera más larga) desde el último informe o cálculo del retardo. */
+  private waited = 0;
+  private waitedMax = 0;
+  private delaySpeed = 0;
+  /** Hasta cuándo no se sube el retardo por esperas (alguien acaba de irse, volver o salir de la app). */
+  private calmUntil = 0;
+  /** Fracción del tiempo que alguien ha esperado turnos en el último cálculo (para la interfaz). */
+  waitShare = 0;
   /** Anfitrión: mensajes guardados para quien está recibiendo la partida (se mandan después de ella). */
   private holding = new Map<string, NetMessage[]>();
   private waitSince = 0;
@@ -145,6 +174,15 @@ export class NetGame implements OrderSink {
   }
 
   get isHost() { return this.role === 'host'; }
+
+  /** Transporte de la partida (para preguntarle cómo va cada conexión). */
+  get transport(): Transport { return this.t; }
+
+  /** Par del transporte de un cliente (anfitrión) o del anfitrión (invitado), para la interfaz. */
+  peerOf(clientId: string): string | null {
+    if (this.isHost) return this.clients.get(clientId)?.peerId ?? null;
+    return clientId === this.lobby?.hostId ? this.hostPeer : null;
+  }
 
   on<K extends keyof NetEvents>(evt: K, fn: (v: NetEvents[K]) => void): () => void {
     const l = (this.listeners[evt] ??= []) as ((v: NetEvents[K]) => void)[];
@@ -235,7 +273,7 @@ export class NetGame implements OrderSink {
     const assign: Record<string, number> = {};
     l.slots.forEach((s, i) => { if (s.kind === 'human' && s.clientId) assign[s.clientId] = i + 1; });
     for (const c of this.clients.values()) c.pid = assign[c.clientId];
-    const msg: NetMessage = { k: 'start', save: await pack(JSON.stringify(save)), assign, delay: NB.delayStart, content: contentHash(reg) };
+    const msg: NetMessage = { k: 'start', save: await pack(JSON.stringify(save)), assign, delay: delayTicks(NB.delayStartMs, opts.speed), content: contentHash(reg) };
     this.broadcastLobby();
     this.t.send(msg);
     await this.handleStart(msg);
@@ -285,7 +323,10 @@ export class NetGame implements OrderSink {
     const c = id ? this.clients.get(id) : undefined;
     switch (msg.k) {
       case 'hello': return this.hello(msg, from);
-      case 'ping': this.t.send({ k: 'pong', t: msg.t }, from); return;
+      case 'ping':
+        this.t.send({ k: 'pong', t: msg.t }, from);
+        if (c && msg.w !== undefined) { c.waited = (c.waited ?? 0) + msg.w; c.waitedMax = Math.max(c.waitedMax ?? 0, msg.wm ?? 0); }
+        return;
       case 'pong': if (c) this.measure(c, this.now() - msg.t); return;
       case 'pick': {
         const slot = this.lobby?.slots.find(s => s.clientId === id);
@@ -294,13 +335,16 @@ export class NetGame implements OrderSink {
       }
       case 'turn': {
         if (!c || c.pid === undefined || msg.t.from !== c.pid || !this.peer || c.dropped) return;
+        c.lastTurnAt = this.now();
+        // Ese tick ya está cerrado (llegó tarde): no cuenta, y sus órdenes salen en otro turno
+        if (msg.t.tick <= this.peer.game.tick) return;
         this.peer.receive(msg.t);
         // Se retransmite a los demás, sin su huella: la de referencia es la del anfitrión
         const others = this.othersThan(from);
         this.toGame({ k: 'turn', t: { from: msg.t.from, tick: msg.t.tick, cmds: msg.t.cmds } }, others);
         return;
       }
-      case 'away': if (c) { c.away = msg.on; this.emit('info', msg.on ? `${c.name} ha salido de la app` : `${c.name} ha vuelto`); } return;
+      case 'away': if (c) { c.away = msg.on; this.calmUntil = this.now() + NB.delayCalm; this.emit('info', msg.on ? `${c.name} ha salido de la app` : `${c.name} ha vuelto`); } return;
       case 'resync': if (c && c.pid !== undefined) void this.sendSnap(c); return;
       case 'bye': if (c) { c.connected = false; if (c.pid !== undefined && !c.dropped && this.peer) this.dropPlayer(c); } return;
     }
@@ -349,7 +393,11 @@ export class NetGame implements OrderSink {
       case 'start': this.hostPeer ??= from; void this.handleStart(msg); return;
       case 'ping': this.t.send({ k: 'pong', t: msg.t }, from); return;
       case 'pong': this.rtt = this.ewma(this.rtt, this.now() - msg.t); return;
-      case 'turn': this.peer?.receive(msg.t); return;
+      case 'turn':
+        // El anfitrión cierra cada tick con su turno; los que no llegaron a tiempo quedan vacíos
+        if (msg.forced?.length && this.peer && this.peer.force(msg.t.tick, msg.forced)) this.bounced++;
+        this.peer?.receive(msg.t);
+        return;
       case 'drop':
         this.peer?.drop(msg.pid, msg.last);
         if (msg.pid === this.pid) {
@@ -434,12 +482,14 @@ export class NetGame implements OrderSink {
     const until = Math.max(0, ...peer.membership().filter(m => m.pid === pid).map(m => m.until));
     const from = Math.max(game.tick + peer.delay, until) + 3;
     peer.add(pid, from);
+    this.calmUntil = this.now() + NB.delayCalm;
     this.toGame({ k: 'add', pid, from }, this.othersThan(c.peerId));
     c.dropped = false;
     if (game.players[pid].data.aiControl) peer.issue({ t: 'ai', pid, on: false });
     // La partida y los turnos ya conocidos, del mismo instante; se comprime después
-    const save = JSON.stringify(snapshot(game)), pending = peer.pendingTurns(), membership = peer.membership();
-    const delay = peer.delay, to = c.peerId;
+    // (sin los turnos propios aún sin cerrar: le llegarán al cerrarse, como a todos)
+    const save = JSON.stringify(snapshot(game)), pending = peer.pendingTurns().filter(t => t.from !== this.pid), membership = peer.membership();
+    const delay = c.delay ?? delayTicks(NB.delayStartMs, game.opts.speed), to = c.peerId;
     // Lo que se le mande mientras se comprime espera y va justo detrás de la partida
     this.holding.set(to, this.holding.get(to) ?? []);
     const packed = await pack(save);
@@ -448,6 +498,8 @@ export class NetGame implements OrderSink {
     this.holding.delete(to);
     for (const m of held) this.t.send(m, to);
   }
+
+  private clientOf(pid: number): ClientInfo | undefined { return [...this.clients.values()].find(c => c.pid === pid); }
 
   private othersThan(peerId: string): string[] { return this.t.peers().filter(p => p !== peerId && this.byPeer.has(p)); }
 
@@ -491,6 +543,7 @@ export class NetGame implements OrderSink {
 
   /** Anfitrión: el jugador ya no juega después de su último turno; la IA toma el mando. */
   private dropPlayer(c: ClientInfo) {
+    this.calmUntil = this.now() + NB.delayCalm;
     const peer = this.peer!, pid = c.pid!;
     const last = peer.lastTurnOf(pid);
     peer.drop(pid, last);
@@ -524,19 +577,38 @@ export class NetGame implements OrderSink {
     const t0 = now;
     let steps = 0;
     while (this.acc >= TICK_DT || (steps < 2000 && this.behind())) {
-      if (!peer.ready()) break;
+      let forced: number[] = [];
+      if (!peer.ready() && (!this.isHost || !(forced = this.forceLate(now)).length)) break;
+      const tick = g.tick + 1;
       peer.step();
+      if (this.isHost) {
+        this.closeTick(tick, forced);
+        this.waitSince = 0;
+        if (!forced.length) this.lastForced.clear();
+      }
+      this.ticksInWindow++;
       this.acc = Math.max(0, this.acc - TICK_DT);
       steps++;
       this.flushTurns();
       if (peer.desync) this.onDesync(peer.desync.from, peer.desync.tick);
       if (this.now() - t0 > NB.catchUpBudget) break;
     }
+    // Si se ha avanzado, la espera (si la hay) empieza ahora: un cliente que va justo a tiempo
+    // (ejecuta su tick en cada fotograma y al acabar ya espera el siguiente) no está esperando
+    if (steps > 0) this.waitSince = 0;
     if (this.acc >= TICK_DT && !peer.ready()) {
-      // Faltan turnos: el reloj se para (no se acumula retraso que luego haya que recuperar)
-      this.acc = TICK_DT;
+      // Faltan turnos: el reloj se para (no se acumula retraso que luego haya que recuperar). El
+      // anfitrión, mientras dura el margen para un turno que llega tarde, sigue contando: al
+      // cerrar el tick recupera ese tiempo y la partida no va más lenta por la mala red de otro.
+      // Se anota cuánto, para que el anfitrión suba el retardo si hace falta
+      const grace = this.isHost ? (Math.max(NB.closeGrace, TICK_DT * 1000) / 1000 + TICK_DT) * (g.opts.speed || 1) : TICK_DT;
+      this.acc = Math.min(this.acc, Math.max(TICK_DT, grace));
       if (!this.waitSince) this.waitSince = now;
       this.waitingMs = now - this.waitSince;
+      if (!steps) {
+        this.waited += dt * 1000;
+        this.waitedMax = Math.max(this.waitedMax, this.waitingMs + dt * 1000);
+      }
     } else { this.waitSince = 0; this.waitingMs = 0; }
   }
 
@@ -546,6 +618,9 @@ export class NetGame implements OrderSink {
   /** ¿Hay turnos de sobra (los demás van por delante)? Entonces se ejecutan sin esperar al reloj. */
   private behind(): boolean {
     const p = this.peer!;
+    // El invitado sigue al anfitrión, que es quien cierra los ticks: si tiene más de uno cerrado
+    // esperando, va por detrás y los ejecuta ya (si se quedara atrás, sus turnos llegarían tarde)
+    if (!this.isHost) return p.readyAhead(3) >= 2;
     return p.readyAhead(p.delay + 4) > p.delay + 2;
   }
 
@@ -570,10 +645,42 @@ export class NetGame implements OrderSink {
   private flushTurns() {
     const peer = this.peer!;
     for (const t of peer.endTurn()) {
-      if (this.isHost) {
-        this.toGame({ k: 'turn', t }, this.gamePeers());
-      } else if (this.hostPeer) this.t.send({ k: 'turn', t }, this.hostPeer);
+      // El anfitrión no manda su turno hasta cerrar ese tick (ver `closeTick`)
+      if (this.isHost) this.closeQueue.set(t.tick, t);
+      else if (this.hostPeer) this.t.send({ k: 'turn', t }, this.hostPeer);
     }
+  }
+
+  /**
+   * Anfitrión: el tick `tick` se acaba de ejecutar. Se manda su turno a todos, que es la señal de
+   * que el tick está cerrado (los invitados no lo ejecutan hasta recibirlo), con la lista de
+   * jugadores cuyo turno no llegó a tiempo y quedó vacío.
+   */
+  private closeTick(tick: number, forced: number[]) {
+    const t = this.closeQueue.get(tick) ?? { from: this.pid, tick, cmds: [] };
+    this.closeQueue.delete(tick);
+    const msg: NetMessage = forced.length ? { k: 'turn', t, forced } : { k: 'turn', t };
+    this.toGame(msg, this.gamePeers());
+  }
+
+  /**
+   * Anfitrión: falta el turno de alguien para el siguiente tick. Pasado un margen corto no se le
+   * espera más: su turno queda vacío (sus órdenes saldrán en otro) y la partida sigue para todos.
+   * Devuelve los jugadores que se quedan fuera (vacío si aún se le espera).
+   */
+  private forceLate(now: number): number[] {
+    const peer = this.peer!, missing = peer.waitingFor();
+    if (!missing.length || missing.includes(this.pid)) return [];
+    const tickMs = TICK_DT * 1000 / (this.game!.opts.speed || 1);
+    // Al que ya se le cerró vacío el tick anterior no se le vuelve a esperar (si se ha ido, la
+    // partida sigue a su ritmo hasta que la IA toma el mando)
+    const again = missing.every(p => this.lastForced.has(p));
+    if (!again && (!this.waitSince || now - this.waitSince < Math.max(NB.closeGrace, tickMs))) return [];
+    peer.force(this.game!.tick + 1, missing);
+    this.forcedTicks++;
+    for (const pid of missing) { const c = this.clientOf(pid); if (c) c.forced = (c.forced ?? 0) + 1; }
+    this.lastForced = new Set(missing);
+    return missing;
   }
 
   /** Para la interfaz: nombres de los jugadores a los que se espera. */
@@ -598,7 +705,10 @@ export class NetGame implements OrderSink {
       if (this.isHost) {
         const to = this.t.peers().filter(p => this.byPeer.has(p));
         if (to.length) this.t.send({ k: 'ping', t: now }, to);
-      } else if (this.hostPeer) this.t.send({ k: 'ping', t: now }, this.hostPeer);
+      } else if (this.hostPeer) {
+        this.t.send({ k: 'ping', t: now, w: Math.round(this.waited), wm: Math.round(this.waitedMax) }, this.hostPeer);
+        this.waited = 0; this.waitedMax = 0;
+      }
     }
     if (this.isHost) this.hostHousekeeping(now);
     else if (!this.hostLostSent && !this.away && (this.lobby || this.game) && now - this.lastHostMsg > (this.hostAway ? NB.hostAwayLost : NB.hostLost)) {
@@ -610,34 +720,53 @@ export class NetGame implements OrderSink {
   private hostHousekeeping(now: number) {
     const peer = this.peer, game = this.game;
     if (!peer || !game) return;
-    // ¿A quién se espera, y desde cuándo? Pasado el plazo, la IA juega por él
-    const waiting = new Set(this.waitingMs > 0 ? peer.waitingFor() : []);
-    for (const pid of [...this.waitStart.keys()]) if (!waiting.has(pid)) this.waitStart.delete(pid);
-    for (const pid of waiting) {
+    // ¿Quién ha dejado de mandar turnos? Pasado el plazo, la IA juega por él (la partida no le
+    // espera: sus ticks se cierran vacíos mientras tanto)
+    for (const pid of peer.playersAt(game.tick + 1)) {
       if (pid === this.pid) continue;
-      const since = this.waitStart.get(pid) ?? now;
-      this.waitStart.set(pid, since);
       const c = [...this.clients.values()].find(x => x.pid === pid);
-      const limit = !c || !c.connected || c.away ? NB.dropAway : NB.dropSilent;
-      if (c && now - since > limit) this.dropPlayer(c);
+      if (!c) continue;
+      const since = this.waitStart.get(pid) ?? now;
+      if (!this.waitStart.has(pid)) this.waitStart.set(pid, since);
+      const last = Math.max(c.lastTurnAt ?? 0, since);
+      const limit = !c.connected || c.away ? NB.dropAway : NB.dropSilent;
+      if (now - last > limit) this.dropPlayer(c);
     }
-    // Retardo de entrada según la latencia: sube enseguida y baja despacio
-    if (now - this.lastDelay >= NB.delayEvery) {
+    // Retardo de entrada: sube enseguida (por latencia o porque alguien ha esperado) y baja despacio.
+    // Se recalcula también al cambiar la velocidad (un tick dura menos)
+    const speed = game.opts.speed || 1;
+    if (now - this.lastDelay >= NB.delayEvery || speed !== this.delaySpeed) {
+      const span = Math.max(1, now - this.lastDelay);
       this.lastDelay = now;
+      this.delaySpeed = speed;
+      const tickMs = TICK_DT * 1000 / speed;
       const guests = [...this.clients.values()].filter(c => c.pid !== undefined && c.clientId !== this.o.clientId && c.connected && !c.dropped && c.rtt !== undefined);
-      const worst = guests.reduce((m, c) => Math.max(m, c.rtt! / 2 + 2 * (c.rttDev ?? 0)), 0);
       this.rtt = guests.length ? Math.max(...guests.map(c => c.rtt!)) : null;
-      // Con 3 o más humanos, el turno de un invitado pasa por el anfitrión hasta otro invitado
-      const hops = guests.length >= 2 ? 2 : 1;
-      const want = Math.min(NB.delayMax, Math.max(NB.delayMin, Math.ceil((worst * hops + NB.delayMargin) / (TICK_DT * 1000))));
-      let d = peer.delay;
-      if (want > d) { d = want; this.lowerVotes = 0; } else if (want < d) {
-        // Si sobra mucho, baja de dos en dos
-        if (++this.lowerVotes >= NB.delayLowerAfter) { d = Math.max(want, d - (d - want >= 3 ? 2 : 1)); this.lowerVotes = 0; }
-      } else this.lowerVotes = 0;
-      if (d !== peer.delay) {
-        peer.setDelay(d);
-        this.toGame({ k: 'delay', d }, this.gamePeers());
+      const ticks = Math.max(1, this.ticksInWindow);
+      const waited = Math.max(this.waited, ...guests.map(c => c.waited ?? 0)) / span;
+      this.waitShare = Math.max(waited, this.forcedTicks / ticks);
+      this.waited = 0; this.waitedMax = 0; this.forcedTicks = 0; this.ticksInWindow = 0;
+      const max = Math.max(NB.delayMin, Math.ceil(NB.delayMaxMs / tickMs));
+      // Retardo por jugador. El del anfitrión, el mínimo: él cierra cada tick, así que su turno
+      // nunca llega tarde. El de cada invitado, el que pida su conexión: ejecuta cada tick al
+      // recibir el cierre del anfitrión, así que su turno tiene que ir y volver a tiempo (ida y
+      // vuelta más su variación). Así la mala red de uno no retrasa las órdenes de los demás
+      if (peer.delay !== NB.delayMin) peer.setDelay(NB.delayMin);
+      for (const c of guests) {
+        // Turnos suyos que no llegaron a tiempo (el anfitrión cerró el tick sin ellos). Tras irse,
+        // volver o salir de la app alguien, los turnos perdidos no son de la red
+        const late = (c.forced ?? 0) / ticks;
+        c.forced = 0; c.waited = 0; c.waitedMax = 0;
+        let want = Math.ceil((c.rtt! + 2 * NB.jitterFactor * (c.rttDev ?? 0) + NB.delayMargin) / tickMs);
+        const cur = c.delay ?? NB.delayMin;
+        if (late > NB.waitRaise && now >= this.calmUntil) want = Math.max(want, cur + (late > 0.2 ? 2 : 1));
+        want = Math.min(max, Math.max(NB.delayMin, want));
+        let d = cur;
+        if (want > d) { d = want; c.lowerVotes = 0; } else if (want < d && late <= NB.waitLowerOk) {
+          // Si sobra mucho, baja de dos en dos
+          if ((c.lowerVotes = (c.lowerVotes ?? 0) + 1) >= NB.delayLowerAfter) { d = Math.max(want, d - (d - want >= 3 ? 2 : 1)); c.lowerVotes = 0; }
+        } else c.lowerVotes = 0;
+        if (d !== c.delay && c.peerId) { c.delay = d; this.toGame({ k: 'delay', d }, [c.peerId]); }
       }
     }
     if (now - this.lastStatus >= 1000) {

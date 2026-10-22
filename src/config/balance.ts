@@ -214,15 +214,33 @@ export const BALANCE = {
   net: {
     /** Jugadores como mucho en una sala (humanos e IA). */
     maxPlayers: 8,
-    /** Retardo de entrada en ticks de 50 ms: al empezar, mínimo y máximo (se adapta a la latencia). */
-    delayStart: 4,
+    /**
+     * Retardo de entrada (lo que tarda una orden en ejecutarse): al empezar y como mucho, en ms
+     * reales; como poco, en ticks. Se adapta a la latencia medida y a las esperas de verdad. En ms
+     * porque un tick dura 50 ms entre la velocidad de juego (33 ms a ×1,5; 17 ms a ×3).
+     */
+    delayStartMs: 200,
     delayMin: 2,
-    delayMax: 14,
-    /** Margen sobre la latencia de ida medida al calcular el retardo. */
-    delayMargin: 40,
+    delayMaxMs: 1000,
+    /** Margen sobre la latencia de ida: unos dos fotogramas (los mensajes se atienden entre fotogramas). */
+    delayMargin: 50,
+    /** Cuántas veces la variación de la latencia se suma a la latencia media al calcular el retardo. */
+    jitterFactor: 0.5,
     /** Cada cuántos ms se recalcula el retardo; para bajarlo hace falta que sobre varias veces seguidas. */
     delayEvery: 2000,
     delayLowerAfter: 2,
+    /** Si el anfitrión cierra sin el turno de alguien más de esta fracción de los ticks, el retardo sube al momento. */
+    waitRaise: 0.1,
+    /** Solo se baja el retardo si los turnos tardíos no pasan de esta fracción. */
+    waitLowerOk: 0.03,
+    /**
+     * El anfitrión cierra cada tick a su hora: si el turno de alguien no ha llegado tras este margen
+     * (ms; como poco un tick), queda vacío y sus órdenes salen en el siguiente. Así un jugador con
+     * mala red no para a los demás.
+     */
+    closeGrace: 120,
+    /** Tras irse, volver o salir de la app alguien, durante esto (ms) las esperas no suben el retardo. */
+    delayCalm: 6000,
     /** Huella del estado cada tantos ticks (comprobación de sincronía). */
     hashEvery: 20,
     pingEvery: 1000,
@@ -234,8 +252,8 @@ export const BALANCE = {
     hostLost: 10000,
     /** Si el anfitrión ha avisado de que sale de la app, se le espera más. */
     hostAwayLost: 120000,
-    /** "Esperando a..." aparece tras esta espera. */
-    waitNotice: 400,
+    /** "Esperando a..." aparece tras esta espera (las cortas solo se notan como un tirón). */
+    waitNotice: 1000,
     /** Al ir por detrás, como mucho tantos ms de CPU por fotograma para ponerse al día. */
     catchUpBudget: 14,
   },

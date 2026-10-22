@@ -837,6 +837,12 @@ table.stats td { padding: 4px; text-shadow: 1px 1px 0 #000; }
 .nl-adv summary { cursor: pointer; color: var(--gold); }
 .nl-adv .grid { margin-top: 8px; }
 .nl-adv input { width: 100%; }
+.nl-error {
+  text-align: left; margin: 8px 0; padding: 8px 12px; color: var(--text); font-size: 14px;
+  background: rgba(120, 30, 20, 0.45); border: 1px solid #a2462e; text-shadow: 1px 1px 0 #000;
+}
+.nl-error p { margin: 0 0 6px; }
+.nl-adv textarea { width: 100%; font-family: monospace; font-size: 12px; background: #1a130c; color: var(--text); border: 1px solid var(--gold-dark); }
 .nl-status { min-height: 1.2em; color: var(--gold); text-shadow: 1px 1px 0 #000; margin: 8px 0; }
 .nl-code { display: flex; gap: 8px; justify-content: center; align-items: center; flex-wrap: wrap; margin-bottom: 8px; color: var(--parchment); }
 .nl-code b { font-size: 30px; letter-spacing: 6px; color: var(--gold); font-family: monospace; text-shadow: 1px 1px 0 #000; }

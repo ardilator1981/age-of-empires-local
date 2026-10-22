@@ -8,8 +8,15 @@ interface Packet { at: number; from: string; to: string; json: string }
 
 export class MemoryHub {
   now = 0;
-  /** Latencia de ida en ms. */
+  /** Latencia de ida en ms, y variación máxima añadida a cada mensaje. */
   latency = 20;
+  jitter = 0;
+  /** Picos (wifi, internet): con esta probabilidad un mensaje tarda `spikeMs` más (y los de detrás esperan). */
+  spikeChance = 0;
+  spikeMs = 0;
+  /** Picos solo en los mensajes de o hacia un nodo (un jugador con mala red). */
+  nodeSpikes: Record<string, { chance: number; ms: number }> = {};
+  private rnd = 1;
   bytes = 0;
   private nodes = new Map<string, MemoryTransport>();
   private queue: Packet[] = [];
@@ -37,7 +44,14 @@ export class MemoryHub {
     const json = JSON.stringify(msg);
     this.bytes += json.length;
     const key = `${from}>${to}`;
-    const at = Math.max(this.linkLast.get(key) ?? 0, this.now + this.latency);
+    // Variación determinista (para que las mediciones se puedan repetir)
+    this.rnd = (this.rnd * 16807) % 2147483647;
+    let at = this.now + this.latency + (this.rnd / 2147483647) * this.jitter;
+    this.rnd = (this.rnd * 16807) % 2147483647;
+    if (this.rnd / 2147483647 < this.spikeChance) at += this.spikeMs;
+    const bad = this.nodeSpikes[from] ?? this.nodeSpikes[to];
+    if (bad) { this.rnd = (this.rnd * 16807) % 2147483647; if (this.rnd / 2147483647 < bad.chance) at += bad.ms; }
+    at = Math.max(this.linkLast.get(key) ?? 0, at);
     this.linkLast.set(key, at);
     this.queue.push({ at, from, to, json });
   }

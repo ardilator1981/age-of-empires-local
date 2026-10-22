@@ -4,11 +4,14 @@
  * Uso: npm run lockstep -- [minutos] [semilla] [edad inicial]  (con la edad 4 los humanos con guion y las IA usan los poderes activos)
  *
  * Cada partida: 2 humanos "con guion" que dan órdenes por la red + 2 IA hard, en arabia.
+ * Al final, la partida en red completa (NetGame: retardo adaptable y cierre de turnos por el
+ * anfitrión) con redes de la misma wifi a lejos con paquetes tardíos, a velocidad ×1,5 y ×3.
  */
 import { buildRegistry } from '../src/core/Registry';
 import type { GameOptions } from '../src/game/Game';
 import { ALL_MODS } from '../src/mods';
 import { runMatch, type NetProfile } from '../tests/net/simnet';
+import { NET_CASES, runNetGame } from '../tests/net/netbench';
 
 const minutes = Number(process.argv[2] ?? 10);
 const seed = Number(process.argv[3] ?? 3);
@@ -55,3 +58,15 @@ for (const net of PROFILES) {
 }
 const bw = runMatch({ reg, opts: opts(2, 2), humans: 2, minutes: Math.min(minutes, 5), delay: 4, net: PROFILES[0], hashEvery: 20, seed });
 console.log(`\nTráfico: ${bw.bytesPerSec} B/s por cliente y destinatario (un turno JSON por tick, casi todos vacíos; ${bw.commands} órdenes).`);
+
+const netSecs = Math.min(60, Math.max(20, minutes * 6));
+console.log(`\n## Partida en red completa (NetGame, ${netSecs} s por fila, retardo adaptable)\n`);
+console.log('| Red | Latencia de ida (+ variación), picos | Velocidad | Anfitrión | Invitados | Tirones de más de 100 ms | Aviso «Esperando…» | Retardo de las órdenes (anfitrión / invitado) | Órdenes que salieron un turno después | Desincronizaciones |');
+console.log('| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |');
+for (const net of NET_CASES) {
+  for (const speed of [1.5, 3]) {
+    const r = await runNetGame(net, { speed, seconds: netSecs, guests: net.badGuest ? 2 : 1 });
+    const spikes = net.badGuest ? `un invitado: ${net.badGuest.chance * 100} % de mensajes +${net.badGuest.ms} ms` : net.spikeChance ? `${net.spikeChance * 100} % +${net.spikeMs} ms` : 'sin picos';
+    console.log(`| ${net.name} | ${net.latency} ms (+0 a ${net.jitter}), ${spikes} | ×${speed} | ${r.hostPct} % | ${r.guestPct} % | ${r.stallPct} % | ${r.noticePct} % | ${r.hostDelayMs} / ${r.guestDelayMs} ms | ${r.bounced} | ${r.desyncs} |`);
+  }
+}

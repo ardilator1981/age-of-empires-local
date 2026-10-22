@@ -64,7 +64,7 @@ Ver **`docs/flujo-de-trabajo.md`**: qué área es cada tipo de tarea, con qué m
 | Prueba de humo | `npm run simulate -- <minutos> <mapa> <semilla> [dificultad]`: partida IA contra IA sin gráficos; debe terminar sin errores, y las IAs deben avanzar de edad y combatir |
 | Tests | `npm test` (Vitest, carpeta `tests/`): conectividad de todos los mapas, reglas de altura, visión, caminos, órdenes y Guerra declarada. Los modos de juego (`declared-war`, `regicide`) solo se activan en las pruebas que los piden (`newGame(map, { war: true })`, `newGame(map, { regicide: true })`) |
 | Determinismo entre navegadores | `npm run engines -- [minutos]`: la misma partida en Node (V8) y en el `jsc` de macOS (JavaScriptCore, el de Safari); compara la huella del estado cada segundo |
-| Multijugador (prototipo) | `npm run lockstep -- [minutos]`: dos clientes por red simulada; determinismo, retardo de las órdenes y paradas |
+| Multijugador | `npm run lockstep -- [minutos]`: dos clientes por red simulada; determinismo, retardo de las órdenes y paradas, y al final la partida en red completa (NetGame) de la misma wifi a lejos con paquetes tardíos: debe ir al ~100 % del tiempo real |
 | Rendimiento | `npm run bench`: A*, partida con 4 IA, estrés de 300 unidades y visión. Resultados en `docs/rendimiento.md` |
 | Regiones reales | `npm run regions` (todas las de `src/mods/real-maps/regions.json`, con `--all` u `--only <id>`); `npm run world-map` regenera el mapamundi del selector |
 | Mapa real | `npm run real-map -- ...` (ver README): descarga relieve del ICGC o de Copernicus y datos de OpenStreetMap, y genera `src/mods/real-maps/data/<id>.json` |

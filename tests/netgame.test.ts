@@ -104,14 +104,50 @@ describe('partida en red (NetGame, transporte en memoria)', () => {
     const { hub, host, guests, all } = await started(2, 0);
     hub.latency = 300;
     await play(hub, all, 15);
-    expect(host.net.peer!.delay).toBeGreaterThan(5);
-    expect(guests[0].net.peer!.delay).toBe(host.net.peer!.delay);
-    const high = host.net.peer!.delay;
+    // Cada uno el suyo: el anfitrión cierra los ticks (el mínimo); el invitado, su ida y vuelta
+    expect(guests[0].net.peer!.delay).toBeGreaterThan(10);
+    expect(host.net.peer!.delay).toBe(2);
+    const high = guests[0].net.peer!.delay;
     hub.latency = 10;
     await play(hub, all, 30);
-    expect(host.net.peer!.delay).toBeLessThan(high - 4);
+    expect(guests[0].net.peer!.delay).toBeLessThan(high - 4);
     expect(compare(host, guests[0]).diff).toBeNull();
   }, 60_000);
+
+  it('a velocidad ×3, por internet con picos, el juego va a tiempo real (el retardo cuenta la velocidad y las esperas)', async () => {
+    const { hub, host, guests, all } = await started(2, 0);
+    host.net.send({ t: 'speed', v: 3 });
+    hub.latency = 60; hub.jitter = 40; hub.spikeChance = 0.05; hub.spikeMs = 250;
+    await play(hub, all, 12);
+    const t0 = host.net.game!.tick;
+    await play(hub, all, 30);
+    // 30 s reales a ×3 son 1.800 ticks; antes del arreglo salían unos 1.200 (68 %)
+    const pct = (host.net.game!.tick - t0) / (30 * 20 * 3);
+    expect(pct).toBeGreaterThan(0.95);
+    // El retardo se mide en tiempo real: a ×3 un tick son 17 ms
+    expect(guests[0].net.peer!.delay * 50 / 3).toBeGreaterThan(150);
+    expect(compare(host, guests[0]).diff).toBeNull();
+  }, 120_000);
+
+  it('un jugador con muy mala red no para a los demás: sus órdenes llegan más tarde', async () => {
+    const { hub, host, guests, all } = await started(3, 0);
+    const [g1, g2] = guests;
+    hub.latency = 30; hub.jitter = 20;
+    // g2: uno de cada diez mensajes tarda 600 ms más (y los de detrás esperan)
+    hub.nodeSpikes = { g2: { chance: 0.1, ms: 600 } };
+    await play(hub, all, 8);
+    const t0 = host.net.game!.tick, vills = () => host.net.game!.units.filter(u => u.owner === 3 && !u.dead).length;
+    const v0 = vills();
+    await play(hub, all, 40);
+    // El anfitrión y el otro invitado van a tiempo real (sin el arreglo, se paraban con cada pico)
+    expect((host.net.game!.tick - t0) / (40 * 20)).toBeGreaterThan(0.95);
+    expect(host.net.game!.tick - g1.net.game!.tick).toBeLessThan(10);
+    // Las órdenes de g2 se cumplen (entrena aldeanos), aunque a veces salgan en un turno posterior
+    expect(vills()).toBeGreaterThan(v0);
+    expect(compare(host, g1).diff).toBeNull();
+    expect(compare(host, g2).diff).toBeNull();
+    expect(compare(host, g2).same).toBeGreaterThan(10);
+  }, 120_000);
 
   it('pausa para todos y velocidad, como órdenes', async () => {
     const { hub, host, guests, all } = await started(2, 0);
@@ -151,7 +187,7 @@ describe('partida en red (NetGame, transporte en memoria)', () => {
     expect(compare(host, back, tickBack).same).toBeGreaterThan(5);
     expect(compare(host, back).diff).toBeNull();
     expect(compare(host, g1).diff).toBeNull();
-    expect(host.net.game!.tick - back.net.game!.tick).toBeLessThan(15);
+    expect(host.net.game!.tick - back.net.game!.tick, `retardo ${host.net.peer!.delay}`).toBeLessThan(15);
   }, 60_000);
 
   it('segundo plano: la IA juega por él y al volver se pone al día solo', async () => {
@@ -166,7 +202,7 @@ describe('partida en red (NetGame, transporte en memoria)', () => {
     g1.net.setAway(false);
     await play(hub, all, 10);
     expect(host.net.game!.players[2].data.aiControl).toBeUndefined();
-    expect(host.net.game!.tick - g1.net.game!.tick).toBeLessThan(15);
+    expect(host.net.game!.tick - g1.net.game!.tick, `retardo ${host.net.peer!.delay}`).toBeLessThan(15);
     const t = host.net.game!.tick;
     await play(hub, all, 5);
     expect(compare(host, g1, t).same).toBeGreaterThan(3);
