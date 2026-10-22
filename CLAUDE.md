@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Guía para trabajar en este proyecto: nuestra versión propia de Age of Empires II, un juego de estrategia en tiempo real que corre en el navegador.
+Guía para trabajar en este proyecto: nuestro juego propio, «Liada de Imperios» (inspirado en Age of Empires II), un juego de estrategia en tiempo real que corre en el navegador.
 
 ## Arquitectura
 

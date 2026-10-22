@@ -13,9 +13,9 @@ export default defineConfig({
       includeAssets: ['icons/icon.svg', 'icons/apple-touch-icon.png'],
       manifest: {
         id: './',
-        name: 'Age of Empires II · Edición local',
-        short_name: 'AoE II Local',
-        description: 'Estrategia en tiempo real inspirada en Age of Empires II. Funciona sin conexión.',
+        name: 'Liada de Imperios',
+        short_name: 'Liada de Imperios',
+        description: 'Estrategia en tiempo real de imperios que cambian con las eras. Funciona sin conexión.',
         lang: 'es',
         start_url: './',
         scope: './',
