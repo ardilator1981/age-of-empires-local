@@ -3,6 +3,9 @@ import type { Pt } from '../core/types';
 import type { Entity } from './Entity';
 import type { MapGenerator } from './MapGenerator';
 
+/** Recursos de mina: no se atraviesan al abrir pasos (se rodean). */
+const MINERALS = new Set(['gold', 'stone', 'iron', 'coal']);
+
 /**
  * Reglas de relieve comunes a todos los mapas (aleatorios y reales). Se aplican
  * automáticamente después de generar cada mapa (ver Game):
@@ -272,7 +275,7 @@ export function ensurePlayable(gen: MapGenerator, starts: Pt[]): PlayableReport 
     const e = g.entities.get(occ);
     if (!e || e.dead) return 1;
     if (e.kind === 'building') return Infinity;
-    if (e.kind === 'resource' && (e.resType === 'gold' || e.resType === 'stone') && e.resType !== keepRes) return Infinity;
+    if (e.kind === 'resource' && MINERALS.has(e.resType!) && e.resType !== keepRes) return Infinity;
     return 4;
   };
   const regionNear = (p: Pt) => {
@@ -286,11 +289,11 @@ export function ensurePlayable(gen: MapGenerator, starts: Pt[]): PlayableReport 
     const a = regs[0], b = regs[other];
     const path = cheapestPath(W, H, i => m.region(i % W, (i / W) | 0) === a, i => m.region(i % W, (i / W) | 0) === b, i => blockCost(i), true);
     if (!path) break;
-    carve(gen, path, 0, e => e.resType === 'gold' || e.resType === 'stone');
+    carve(gen, path, 0, e => MINERALS.has(e.resType!));
     report.passesOpened++;
   }
 
-  const KEY = ['wood', 'food', 'gold', 'stone'];
+  const KEY = ['wood', 'food', 'gold', 'stone', 'iron', 'coal'];
   for (const s of starts) {
     for (const res of KEY) {
       const reg0 = regionNear(s);
@@ -304,7 +307,7 @@ export function ensurePlayable(gen: MapGenerator, starts: Pt[]): PlayableReport 
         i => Math.max(Math.abs((i % W) - target.tx), Math.abs(((i / W) | 0) - target.ty)) === 1,
         i => blockCost(i, res), true);
       if (!path) continue;
-      carve(gen, path, 0, e => e === target || ((e.resType === 'gold' || e.resType === 'stone') && e.resType === res));
+      carve(gen, path, 0, e => e === target || (MINERALS.has(e.resType!) && e.resType === res));
       report.resourceLinks++;
     }
   }

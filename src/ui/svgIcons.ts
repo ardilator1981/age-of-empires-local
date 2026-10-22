@@ -14,6 +14,10 @@ export const ICONS = {
     <path d="M9 8l2-1M14 13l2-1M5 16l1.5-1" stroke="#fff6c0" stroke-width="1.3" stroke-linecap="round"/>`),
   stone: svg(`<g stroke="#2e2e2e" stroke-width="1" stroke-linejoin="round"><path d="M2 19l3-7 6-1 3 8z" fill="#8a8a8a"/><path d="M10 19l3-8 7 0 2 8z" fill="#a4a4a4"/><path d="M6 11l3-6 6 0 2 6-6 1z" fill="#c2c2c2"/></g>
     <path d="M9 7h3M14 13h3" stroke="#f2f2f2" stroke-width="1.2" stroke-linecap="round"/>`),
+  iron: svg(`<g stroke="#2a1a14" stroke-width="1" stroke-linejoin="round"><path d="M2 19l3-6 6 1 2 5z" fill="#8a5a46"/><path d="M10 19l2-7 7-1 3 8z" fill="#a96f56"/><path d="M6 12l3-7 6 1 1 6-5 1z" fill="#c58a6c"/></g>
+    <path d="M9 8l2-1M14 13l2-1M5 16l1.5-1" stroke="#e7c7b4" stroke-width="1.2" stroke-linecap="round"/>`),
+  coal: svg(`<g stroke="#000" stroke-width="1" stroke-linejoin="round"><path d="M2 19l3-7 6-1 3 8z" fill="#2c2d33"/><path d="M10 19l3-8 7 0 2 8z" fill="#3a3c44"/><path d="M6 11l3-6 6 0 2 6-6 1z" fill="#4a4d57"/></g>
+    <path d="M9 7h3M14 13h3" stroke="#8d93a3" stroke-width="1.2" stroke-linecap="round"/>`),
   pop: svg(`<g stroke="#2a1a0a" stroke-width="1"><circle cx="9" cy="7" r="3.4" fill="#e6b98f"/><path d="M3 21c0-6 3-9 6-9s6 3 6 9z" fill="#4a7ac8"/>
     <circle cx="16" cy="8" r="3" fill="#d9a67a"/><path d="M12 21c0-5 2-8 4.5-8S21 16 21 21z" fill="#c84a3a"/></g>`),
 };

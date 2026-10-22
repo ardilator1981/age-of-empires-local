@@ -76,7 +76,65 @@ export const powers: PowerDef[] = [
       return null;
     },
   },
+  {
+    id: 'foreignLegion', name: 'Legión Extranjera', icon: '🎖️', civs: ['france'], minAge: 5,
+    description: `Contratas tropas de fuera (1831): ${B.foreignLegion.count} fusileros aparecen junto al centro urbano por ${B.foreignLegion.cost} de oro (si hay población libre).`,
+    cost: { gold: B.foreignLegion.cost }, cooldown: B.foreignLegion.cooldown,
+    apply(game, p) { return spawnNearTown(game, p, B.foreignLegion.unit, B.foreignLegion.count); },
+  },
+  {
+    id: 'greatPlunder', name: 'Gran Saqueo', icon: '💰', civs: ['persia'], minAge: 2, maxAge: 3,
+    description: `El botín de las campañas: recibes ${B.greatPlunder.perKill} de oro por cada baja que hayas causado (máximo ${B.greatPlunder.max}). Hacen falta al menos ${B.greatPlunder.minKills} bajas.`,
+    cooldown: B.greatPlunder.cooldown,
+    apply(game, p) {
+      if (p.stats.kills < B.greatPlunder.minKills) return `Aún no hay botín (hacen falta ${B.greatPlunder.minKills} bajas)`;
+      const gold = Math.min(B.greatPlunder.max, p.stats.kills * B.greatPlunder.perKill);
+      p.res.gold = (p.res.gold ?? 0) + gold;
+      game.notify(`💰 ${p.name} recibe ${gold} de oro del saqueo`, undefined, 'info');
+      return null;
+    },
+  },
+  {
+    id: 'bazaar', name: 'Bazar', icon: '🏺', civs: ['persia'], minAge: 3,
+    description: `El gran bazar: cambias ${B.bazaar.food} de comida por ${B.bazaar.gold} de oro al instante.`,
+    cost: { food: B.bazaar.food }, cooldown: B.bazaar.cooldown,
+    apply(game, p) { p.res.gold = (p.res.gold ?? 0) + B.bazaar.gold; return null; },
+  },
+  {
+    id: 'resistance', name: 'Resistencia', icon: '🛡️', civs: ['ethiopia'], minAge: 3,
+    description: `Las tropas a menos de ${B.resistance.radius} casillas del centro urbano recuperan el ${Math.round(B.resistance.heal * 100)}% de la vida que les falta.`,
+    cooldown: B.resistance.cooldown,
+    apply(game, p) {
+      const tc = townCenter(game, p.id);
+      if (!tc) return 'Necesitas un centro urbano';
+      for (const u of game.units) {
+        if (u.dead || u.owner !== p.id || u.inside || hypot(u.x - tc.x, u.y - tc.y) > B.resistance.radius) continue;
+        u.hp = Math.min(u.maxHp, u.hp + (u.maxHp - u.hp) * B.resistance.heal);
+      }
+      return null;
+    },
+  },
+  {
+    id: 'nagarit', name: 'Nagarit', icon: '🥁', civs: ['ethiopia'], minAge: 5,
+    description: `El tambor del emperador llama a las armas: ${B.nagarit.count} lanceros aparecen junto al centro urbano (si hay población libre).`,
+    cooldown: B.nagarit.cooldown,
+    apply(game, p) { return spawnNearTown(game, p, B.nagarit.unit, B.nagarit.count); },
+  },
 ];
+
+/** Hace aparecer `count` unidades junto al centro urbano (las que quepan en la población). */
+function spawnNearTown(game: any, p: any, unit: string, count: number): string | null {
+  const tc = townCenter(game, p.id);
+  if (!tc) return 'Necesitas un centro urbano';
+  const def = game.reg.unit(unit);
+  const free = Math.min(count, Math.floor((p.popCap - p.popUsed) / def.pop));
+  if (free <= 0) return 'Sin población libre';
+  for (let i = 0; i < free; i++) {
+    const spot = game.findFreeTile(tc.x, tc.y, 10);
+    if (spot) game.spawnUnit(unit, p.id, spot.x + 0.5, spot.y + 0.5);
+  }
+  return null;
+}
 
 /**
  * La IA usa sus poderes: los de defensa cuando hay enemigos junto a su base, y los de economía
@@ -106,6 +164,11 @@ export const powersAI: AIPlugin = {
           // Solo si no arrasa su propia base: el punto tiene que quedar fuera de la zona de sus granjas
           if (hypot(at.x - ctx.home.x, at.y - ctx.home.y) < B.scorchedEarth.radius + 3) continue;
           break;
+        case 'foreignLegion': if (gold < B.foreignLegion.cost + 300 || ctx.army.length >= 25) continue; break;
+        case 'greatPlunder': if (p.stats.kills * B.greatPlunder.perKill < 300) continue; break;
+        case 'bazaar': if ((p.res.food ?? 0) < B.bazaar.food + 500 || gold > 900) continue; break;
+        case 'resistance': if (!threatened) continue; break;
+        case 'nagarit': if (!(threatened || ctx.army.length < 10)) continue; break;
         default: continue;
       }
       usePower(game, p.id, { id: d.id, ...at });

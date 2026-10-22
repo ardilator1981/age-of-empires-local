@@ -164,17 +164,34 @@ export const gunpowderTechs: TechDef[] = [
  * IA: construye lo de la era de la pólvora (y lo único de cada civilización) cuando le sobran
  * recursos. Las unidades las entrena la IA general, que ya prefiere las de la edad más alta.
  */
-const WANTS: { id: string; minAge: number; spare: number }[] = [
+const WANTS: { id: string; minAge: number; spare: number; after?: string; tech?: string }[] = [
   { id: 'gunpowderWorks', minAge: 4, spare: 0 },
-  { id: 'printingHouse', minAge: 4, spare: 250 },
-  { id: 'tradingCompany', minAge: 4, spare: 250 },
-  { id: 'observatory', minAge: 4, spare: 300 },
+  { id: 'printingHouse', minAge: 4, spare: 60 },
+  { id: 'tradingCompany', minAge: 4, spare: 60 },
+  { id: 'observatory', minAge: 4, spare: 60 },
   { id: 'engineerAcademy', minAge: 4, spare: 200 },
   { id: 'royalManufacture', minAge: 4, spare: 250 },
   { id: 'bank', minAge: 4, spare: 250 },
   { id: 'cantonHong', minAge: 4, spare: 250 },
   { id: 'vaubanFortress', minAge: 4, spare: 500 },
-  { id: 'fortress', minAge: 4, spare: 600 },
+  { id: 'fortress', minAge: 4, spare: 100 },
+  // Era 5 (Industrial): la fábrica abre la era; el resto llega con ella
+  { id: 'factory', minAge: 5, spare: 0 },
+  { id: 'railwayStation', minAge: 5, spare: 40, after: 'factory' },
+  { id: 'laboratory', minAge: 5, spare: 40, after: 'factory' },
+  { id: 'airfield', minAge: 5, spare: 250, after: 'laboratory', tech: 'aviation' },
+  { id: 'jiangnanArsenal', minAge: 5, spare: 200, after: 'factory' },
+  { id: 'polytechnique', minAge: 5, spare: 250, after: 'factory' },
+  { id: 'darulFunun', minAge: 5, spare: 250, after: 'factory' },
+  { id: 'djiboutiRailway', minAge: 5, spare: 200, after: 'factory' },
+  { id: 'transSiberian', minAge: 5, spare: 400, after: 'railwayStation' },
+  { id: 'transcontinental', minAge: 5, spare: 400, after: 'railwayStation' },
+  // Únicos de las eras anteriores de Persia y Etiopía: los construye al llegar a la Pólvora
+  { id: 'maraghaObservatory', minAge: 2, spare: 250 },
+  { id: 'maidan', minAge: 3, spare: 250 },
+  { id: 'ordu', minAge: 4, spare: 250 },
+  { id: 'gondarCastle', minAge: 3, spare: 300 },
+  { id: 'rasPalace', minAge: 4, spare: 250 },
 ];
 
 export const gunpowderAI: AIPlugin = {
@@ -192,6 +209,8 @@ export const gunpowderAI: AIPlugin = {
       const def = game.reg.buildings.get(w.id);
       if (!def || p.age < w.minAge || p.countAll(w.id) > 0 || (p.pending.get(w.id) ?? 0) > 0) continue;
       if (w.id !== 'gunpowderWorks' && (!works || ctx.villagers.length < 24)) continue;
+      if (w.after && p.count(w.after) === 0) continue;
+      if (w.tech && !p.researched.has(w.tech)) continue;
       const av = buildingAvail(game, p, w.id);
       if (!av.visible) continue;
       const cost = p.getCost(def);

@@ -162,12 +162,16 @@ const STATES: Record<string, [string, number]> = {
   'work-wood': ['chopping a tree trunk with an axe (the tree itself is not drawn)', 6],
   'work-gold': ['swinging a pickaxe down at rocks (the rocks are not drawn)', 6],
   'work-stone': ['swinging a pickaxe down at rocks (the rocks are not drawn)', 6],
+  'work-iron': ['swinging a pickaxe down at rocks (the rocks are not drawn)', 6],
+  'work-coal': ['swinging a pickaxe down at rocks (the rocks are not drawn)', 6],
   'work-food': ['picking berries from a bush and putting them in a basket (the bush is not drawn)', 6],
   'work-build': ['hammering with a mallet, crouching', 6],
   'carry-wood': ['walking while carrying logs on the shoulder', 8],
   'carry-food': ['walking while carrying a full basket of food', 8],
   'carry-gold': ['walking with a heavy sack of ore over the shoulder', 8],
   'carry-stone': ['walking with a heavy sack of ore over the shoulder', 8],
+  'carry-iron': ['walking with a heavy sack of ore over the shoulder', 8],
+  'carry-coal': ['walking with a heavy sack of coal over the shoulder', 8],
 };
 const TERRAIN: Record<string, string> = {
   grass: 'a lush green meadow with small tufts of grass and a few tiny yellow and white wildflowers',

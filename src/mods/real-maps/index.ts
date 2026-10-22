@@ -345,6 +345,8 @@ function generateReal(gen: MapGenerator, d: RealMapData) {
     }
   }
   gen.scatter('berries', Math.round(2 * scale), 5, 18, starts);
+  gen.scatter('ironMine', Math.round(2 * scale), 5, 20, starts);
+  gen.scatter('coalMine', Math.round(2 * scale), 5, 20, starts);
   // La conexión entre bases (pasos de ancho mínimo) la garantiza el motor después (relief.ensurePlayable)
 }
 

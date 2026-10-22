@@ -147,7 +147,9 @@ export class HUD {
       if (r) workers[r] = (workers[r] ?? 0) + 1;
     }
     for (const r of g.reg.resources.values()) {
-      document.getElementById(`res-${r.id}`)!.textContent = String(Math.floor(p.res[r.id] ?? 0));
+      const cell = document.getElementById(`res-${r.id}`)!;
+      cell.textContent = String(Math.floor(p.res[r.id] ?? 0));
+      cell.parentElement!.style.display = p.age >= (r.minAge ?? 0) ? '' : 'none';
       document.getElementById(`resv-${r.id}`)!.textContent = workers[r.id] ? `(${workers[r.id]})` : '';
     }
     const pop = document.getElementById('res-pop')!;

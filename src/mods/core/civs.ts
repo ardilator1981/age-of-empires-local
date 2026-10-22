@@ -1,6 +1,9 @@
 import type { CivDef } from '../../core/types';
+import { industrialLayers } from './civ-industrial';
+import { persiaCiv } from './civ-persia';
+import { ethiopiaCiv } from './civ-ethiopia';
 
-export const civs: CivDef[] = [
+const baseCivs: CivDef[] = [
   {
     id: 'britain', name: 'Británicos', description: 'Civilización de arqueros. Línea británica: de los anglosajones a la Inglaterra Tudor (después, hacia Estados Unidos).',
     bonusText: ['Arqueros +1 de alcance', 'Centros urbanos cuestan -50% de madera', 'Unidad única: Arquero de tiro largo'],
@@ -182,4 +185,10 @@ export const civs: CivDef[] = [
       },
     },
   },
+];
+
+/** Todas las civilizaciones, con la capa de la era 5 de las que venían de antes y Persia y Etiopía (eras 0–5). */
+export const civs: CivDef[] = [
+  ...baseCivs.map(c => industrialLayers[c.id] ? { ...c, eras: { ...c.eras, 5: industrialLayers[c.id] } } : c),
+  persiaCiv, ethiopiaCiv,
 ];

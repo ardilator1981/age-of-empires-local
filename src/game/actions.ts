@@ -47,9 +47,19 @@ export function setOrder(u: Entity, order: Order | null) {
   u.working = false;
 }
 
+/** ¿Vuela? (aviación: ignora el terreno y no necesita camino.) */
+export function flies(game: Game, u: Entity): boolean {
+  return u.kind === 'unit' && !!game.unitDef(u).flying;
+}
+
 /** Calcula un camino hasta un punto. */
 export function moveTo(game: Game, u: Entity, x: number, y: number) {
   const m = game.map;
+  if (flies(game, u)) {
+    u.path = [{ x: Math.max(0.5, Math.min(m.w - 0.5, x)), y: Math.max(0.5, Math.min(m.h - 0.5, y)) }];
+    u.pathFor = -1;
+    return;
+  }
   const gx = Math.floor(x), gy = Math.floor(y);
   const walk = m.walkable(gx, gy);
   const r = findPath(m, u.x, u.y, { x0: gx, y0: gy, x1: gx, y1: gy }, walk ? 0 : 1);
@@ -77,6 +87,7 @@ export function approach(game: Game, u: Entity, t: Entity, range: number): numbe
 
 /** ¿Puede la unidad llegar hasta el objetivo? (comprobación instantánea por regiones) */
 export function canReach(game: Game, u: { x: number; y: number }, t: Entity): boolean {
+  if ((u as Entity).kind === 'unit' && flies(game, u as Entity)) return true;
   const m = game.map;
   const r = m.regionAt(u.x, u.y);
   if (r < 0) return true;
@@ -87,6 +98,14 @@ export function canReach(game: Game, u: { x: number; y: number }, t: Entity): bo
 
 function approachStep(game: Game, u: Entity, t: Entity, d: number): number {
   const m = game.map;
+  if (flies(game, u)) {
+    if (!u.path.length || u.pathFor !== t.id || game.time >= u.nextRepath) {
+      u.path = [{ x: t.x, y: t.y }];
+      u.pathFor = t.id;
+      u.nextRepath = game.time + 0.4;
+    }
+    return MOVING;
+  }
   if (!canReach(game, u, t)) { u.path.length = 0; return UNREACHABLE; }
   if (t.kind === 'unit') {
     if (!u.path.length || u.pathFor !== t.id || game.time >= u.nextRepath) {

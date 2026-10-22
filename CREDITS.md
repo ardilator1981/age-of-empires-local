@@ -27,6 +27,7 @@ ningún sonido de *Age of Empires* ni de otros juegos comerciales, ni muestras d
 | Animal abatido (caza y sacrificio de ganado) | `sfx.ts` (`animalDeath`) | Dos dientes de sierra con glissando descendente y un soplo de ruido: un balido corto | Original del proyecto |
 | Combate: espada, flecha y golpe a edificio | `sfx.ts` (`hitMelee`, `hitArrow`, `hitBuilding`) | Parciales metálicos inarmónicos; golpe seco; golpe sordo de madera | Original del proyecto |
 | Combate: mosquete y cañón (era de la Pólvora) | `sfx.ts` (`hitMusket`, `hitCannon`) | Estampido: ruido filtrado que se apaga rápido más un golpe grave; el cañón, un tono muy grave con caída y cola de ruido | Original del proyecto |
+| Combate: fusil estriado, ametralladora y aviones (era Industrial) | `sfx.ts` (`hitRifle`, `hitGatling`) | Fusil: chasquido agudo de ruido filtrado más un golpe corto; ráfaga: tres chasquidos seguidos | Original del proyecto |
 | Ambiente: pájaros | `sfx.ts` (`bird`) | Glissandos agudos cortos | Original del proyecto |
 | Ambiente: viento | `src/audio/AudioManager.ts` | Ruido filtrado con ráfagas lentas | Original del proyecto |
 
