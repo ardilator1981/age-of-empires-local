@@ -12,7 +12,7 @@ import { esc } from './menuOptions';
  * que `npm run catalog`, ver src/catalog/audit.ts). Pestañas por tipo, filtros y búsqueda; sirve
  * en escritorio y en móvil (la rejilla se adapta y los controles miden 44 px).
  */
-type Tab = CatType | 'compare';
+type Tab = CatType;
 type StateFilter = CatState | 'all' | 'issues';
 
 const COLOR = '#c0392b';
@@ -64,13 +64,12 @@ export class CatalogScreen {
     const issues = (t: CatType) => this.res.items.filter(i => i.type === t && i.state !== 'ok').length;
     o.querySelector('[data-tabs]')!.innerHTML = [
       ...CAT_TYPES.map(t => `<button class="${this.tab === t.type ? 'sel' : ''}" data-tab="${t.type}">${t.icon} ${t.label} <small>${count(t.type)}${issues(t.type) ? ` · ⚠${issues(t.type)}` : ''}</small></button>`),
-      `<button class="${this.tab === 'compare' ? 'sel' : ''}" data-tab="compare">⚖️ Comparar civilizaciones</button>`,
     ].join('');
     o.querySelectorAll<HTMLElement>('[data-tab]').forEach(b => b.addEventListener('click', () => {
       this.tab = b.dataset.tab as Tab; this.renderChrome(); this.renderBody();
     }));
     const ages = this.reg.ages;
-    const filters = this.tab === 'compare' ? '' : `
+    const filters = `
       <input type="search" data-q placeholder="Buscar por nombre, id o descripción…" value="${esc(this.q)}">
       <select data-age><option value="all">Todas las edades</option>${ages.map(a => `<option value="${a.index}"${this.age === String(a.index) ? ' selected' : ''}>${esc(a.name)}</option>`).join('')}</select>
       <select data-civ><option value="all">Todas las civilizaciones</option>${[...this.reg.civs.values()].map(c => `<option value="${c.id}"${this.civ === c.id ? ' selected' : ''}>${esc(c.name)}</option>`).join('')}</select>
@@ -125,30 +124,10 @@ export class CatalogScreen {
     const body = this.overlay.querySelector('[data-body]') as HTMLElement | null;
     const sum = this.overlay.querySelector('[data-summary]') as HTMLElement | null;
     if (!body || !sum) return;
-    if (this.tab === 'compare') { sum.textContent = ''; body.innerHTML = this.compare(); return; }
     const all = this.res.items.filter(i => i.type === this.tab);
     const shown = all.filter(i => this.matches(i));
     const n = (s: CatState) => all.filter(i => i.state === s).length;
     sum.innerHTML = `${shown.length} de ${all.length} · ✔ ${n('ok')} · ⚠ ${n('unused')} · 🛠 ${n('dev')} · 🎨 ${n('deco')}`;
     body.innerHTML = shown.length ? `<div class="cat-grid">${shown.map(i => this.card(i)).join('')}</div>` : '<p class="note">Nada coincide con los filtros.</p>';
-  }
-
-  /** Comparativa de civilizaciones: contenido acumulado por edad y contenido único. */
-  private compare(): string {
-    const reps = this.res.civReports;
-    const ages = reps[0]?.ages ?? [];
-    const table = (title: string, pick: (a: (typeof ages)[number]) => string) => `<h3>${title}</h3>
-      <div class="cat-scroll"><table class="cat-table"><thead><tr><th>Civilización</th>${ages.map(a => `<th>${esc(a.ageName)}</th>`).join('')}</tr></thead>
-      <tbody>${reps.map(c => `<tr><th>${esc(c.name)}</th>${c.ages.map(a => `<td>${esc(pick(a))}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
-    return `<p class="note">Recuentos acumulados hasta cada edad (contenido común más propio). «Mejor unidad» = vida × daño por segundo, un índice grueso para detectar desequilibrios.</p>
-      ${table('Unidades entrenables', a => String(a.units))}
-      ${table('Edificios', a => String(a.buildings))}
-      ${table('Tecnologías', a => String(a.techs))}
-      ${table('Mejor unidad militar (índice)', a => a.best ? `${a.best.name} (${a.best.score})` : '—')}
-      <h3>Identidad y contenido único</h3>
-      <div class="cat-scroll"><table class="cat-table"><thead><tr><th>Civilización</th><th>Bonos</th><th>Únicos</th><th>Poderes</th></tr></thead><tbody>
-      ${reps.map(c => `<tr><th>${esc(c.name)}</th><td>${esc(c.bonusText.join(' · ') || '—')}</td>
-        <td>${esc([...c.unique.units, ...c.unique.buildings, ...c.unique.techs].join(', ') || '—')}</td><td>${esc(c.powers.join(', ') || '—')}</td></tr>`).join('')}
-      </tbody></table></div>`;
   }
 }
