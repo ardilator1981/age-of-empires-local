@@ -80,7 +80,7 @@ export class Input {
     const btn = (id: string) => document.getElementById(id);
     const order = btn('btn-order'), idle = btn('btn-idle'), panel = btn('btn-panel');
     if (order) this.listen(order, 'click', () => this.toggleOrderMode());
-    if (idle) this.listen(idle, 'click', () => { if (this.active) this.nextIdleVillager(); });
+    if (idle) this.listen(idle, 'click', () => { if (this.active) this.idleVillagerPress(); });
     if (panel) this.listen(panel, 'click', () => document.getElementById('hud')!.classList.toggle('collapsed'));
   }
 
@@ -571,6 +571,21 @@ export class Input {
     const same = army.length === ui.selection.length && army.every(u => ui.selection.includes(u.id));
     ui.setSelection(army.map(u => u.id));
     if (same) this.centerOnSelection();
+  }
+
+  /** Un toque al botón de aldeano desocupado va de uno en uno; un doble toque los selecciona a todos. */
+  idleVillagerPress() {
+    const now = performance.now();
+    const double = now - this.lastIdlePress < 400;
+    this.lastIdlePress = now;
+    if (double) this.selectAllIdleVillagers(); else this.nextIdleVillager();
+  }
+
+  selectAllIdleVillagers() {
+    const { ui, game } = this;
+    const idle = game.units.filter(x => !x.dead && x.owner === game.humanId && !x.inside && !x.order && game.unitDef(x).gatherer);
+    if (!idle.length) { game.notify('No hay aldeanos inactivos', game.humanId); return; }
+    ui.setSelection(idle.map(x => x.id));
   }
 
   nextIdleVillager() {

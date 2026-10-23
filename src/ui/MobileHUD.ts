@@ -532,7 +532,7 @@ export class MobileHUD {
     if (!a) return;
     switch (a) {
       case 'menu': this.openScreen('game'); break;
-      case 'idle': input.nextIdleVillager(); break;
+      case 'idle': input.idleVillagerPress(); break;
       case 'army': input.selectArmy(); break;
       case 'alerts': {
         const last = this.alerts.pop();
