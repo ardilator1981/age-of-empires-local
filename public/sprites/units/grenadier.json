@@ -14,6 +14,21 @@
     "idle": {
       "row": 0,
       "frames": 1
+    },
+    "attack": {
+      "image": "grenadier-attack.png",
+      "mask": "grenadier-attack-mask.png",
+      "row": 0,
+      "frames": 5,
+      "fps": 8,
+      "cell": {
+        "w": 58,
+        "h": 100
+      },
+      "anchor": {
+        "x": 29,
+        "y": 94
+      }
     }
   }
 }
