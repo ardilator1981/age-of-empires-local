@@ -8,6 +8,8 @@ import {
 } from '../../game/systems/core';
 import { registerCoreSprites } from '../../render/sprites';
 import { buildings } from './buildings';
+import { defenseAI, defenseBuildings, defenseTechs } from './defenses';
+import { registerDefenseSprites } from '../../render/defenseSprites';
 import { civs } from './civs';
 import { maps } from './maps';
 import { techs } from './techs';
@@ -24,6 +26,7 @@ import { ethiopiaBuildings, ethiopiaTechs, ethiopiaUnits } from './civ-ethiopia'
 import { gunpowderAI, gunpowderBuildings, gunpowderTechs, gunpowderUnits } from './gunpowder';
 import { fieldArtilleryTechs, siegeAI, siegeTechs, siegeUnits } from './siege';
 import { powers, powersAI } from './powers';
+import { DefenseSystem } from '../../game/defense';
 import { PowerSystem, truceRule, usePower } from '../../game/powers';
 import { diploCommand, DiplomacySystem, initDiplomacy } from '../../game/diplomacy';
 import { EspionageSystem, spyCommand, spyOrder, stealthRule } from '../../game/espionage';
@@ -36,7 +39,7 @@ const victories: VictoryDef[] = [
   {
     id: 'conquest', name: 'Conquista', description: 'Destruye todas las unidades y edificios enemigos.',
     isDefeated(game, p) {
-      return !game.list.some(e => e.owner === p.id && !e.dead && ((e.kind === 'unit' && !game.reg.unit(e.defId).classes.includes('livestock')) || (e.kind === 'building' && !game.reg.building(e.defId).walkable)));
+      return !game.list.some(e => e.owner === p.id && !e.dead && ((e.kind === 'unit' && !game.reg.unit(e.defId).classes.includes('livestock')) || (e.kind === 'building' && !game.reg.building(e.defId).walkable && !game.reg.building(e.defId).classes.includes('barrier'))));
     },
   },
   {
@@ -63,8 +66,10 @@ export const coreMod: GameMod = {
     wildlifeUnits.forEach(u => reg.addUnit(u));
     buildings.forEach(b => reg.addBuilding(b));
     wildlifeBuildings.forEach(b => reg.addBuilding(b));
+    defenseBuildings.forEach(b => reg.addBuilding(b));
     techs.forEach(t => reg.addTech(t));
     wildlifeTechs.forEach(t => reg.addTech(t));
+    defenseTechs.forEach(t => reg.addTech(t));
     // Era 4 (Pólvora) y lo único de cada civilización por era
     [...gunpowderUnits, ...chinaUnits, ...franceUnits, ...britainUnits].forEach(u => reg.addUnit(u));
     [...gunpowderBuildings, ...chinaBuildings, ...franceBuildings, ...britainBuildings].forEach(b => reg.addBuilding(b));
@@ -78,6 +83,7 @@ export const coreMod: GameMod = {
     siegeUnits.forEach(u => reg.addUnit(u));
     [...siegeTechs, ...fieldArtilleryTechs].forEach(t => reg.addTech(t));
     reg.addAIPlugin(siegeAI);
+    reg.addAIPlugin(defenseAI);
     reg.addCombatRule(airRule);
     powers.forEach(w => reg.addPower(w));
     reg.addAIPlugin(powersAI);
@@ -101,6 +107,7 @@ export const coreMod: GameMod = {
     reg.setup = { ...setup, wildlife: wildlifeSpawns };
 
     registerCoreSprites(reg);
+    registerDefenseSprites(reg);
 
     reg.addOrder('move', moveOrder);
     reg.addOrder('attack', attackOrder);
@@ -126,6 +133,7 @@ export const coreMod: GameMod = {
     reg.addSystem('aura', g => new AuraSystem(g), 35);
     reg.addSystem('espionage', g => new EspionageSystem(g), 36);
     reg.addSystem('combat', g => new CombatSystem(g), 40);
+    reg.addSystem('defense', g => new DefenseSystem(g), 41);
     reg.addSystem('vision', g => new VisionSystem(g), 50);
     reg.addSystem('victory', g => new VictorySystem(g), 60);
   },
