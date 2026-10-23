@@ -1,0 +1,19 @@
+{
+  "image": "divineArquebusier.png",
+  "mask": "divineArquebusier-mask.png",
+  "cell": {
+    "w": 66,
+    "h": 121
+  },
+  "anchor": {
+    "x": 33,
+    "y": 115
+  },
+  "scale": 2,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 1
+    }
+  }
+}

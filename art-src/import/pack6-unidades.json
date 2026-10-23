@@ -1603,6 +1603,16 @@
         { "id": "rifleman" },
         { "id": "crusaderKnight", "height": 62 }
       ]
+    },
+    {
+      "source": "pack6-unidades/china2.jpg",
+      "grid": "auto",
+      "sharedScale": true,
+      "items": [
+        { "id": "unicorn", "height": 62 },
+        { "id": "counterweightTrebuchet", "width": 90 },
+        { "id": "divineArquebusier" }
+      ]
     }
   ]
 }

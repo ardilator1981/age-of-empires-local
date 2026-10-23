@@ -73,6 +73,9 @@ export const ART: ArtEntry[] = [
   unitArt('redcoat', 'units/redcoat'),
   unitArt('rifleman', 'units/rifleman'),
   unitArt('crusaderKnight', 'units/crusaderKnight'),
+  unitArt('unicorn', 'units/unicorn'),
+  unitArt('counterweightTrebuchet', 'units/counterweightTrebuchet'),
+  unitArt('divineArquebusier', 'units/divineArquebusier'),
   // Pack 2g · Animales (art-src/import/pack2-animales.json)
   unitArt('deer', 'units/deer'),
   unitArt('boar', 'units/boar'),

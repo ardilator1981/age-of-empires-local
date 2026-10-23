@@ -1,0 +1,19 @@
+{
+  "image": "unicorn.png",
+  "mask": "unicorn-mask.png",
+  "cell": {
+    "w": 94,
+    "h": 132
+  },
+  "anchor": {
+    "x": 47,
+    "y": 126
+  },
+  "scale": 2,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 1
+    }
+  }
+}
