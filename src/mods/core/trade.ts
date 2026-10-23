@@ -1,7 +1,7 @@
 import { BALANCE } from '../../config/balance';
 import type { AIPlugin, BuildingDef, OverlayFn, TechDef, UnitDef } from '../../core/types';
 import type { Registry } from '../../core/Registry';
-import { PEACE, ALLIANCE, accept, breakTreaty, decline, diploState, goodwill, propose, proposalsFor, relation, withRelation, WAR } from '../../game/diplomacy';
+import { PEACE, ALLIANCE, diplomacyOff, accept, breakTreaty, decline, diploState, goodwill, propose, proposalsFor, relation, withRelation, WAR } from '../../game/diplomacy';
 import { spyCommand, spyProblem, spyWait, stealWait, stealableTech } from '../../game/espionage';
 import { hypot } from '../../game/fmath';
 import type { Entity } from '../../game/Entity';
@@ -67,8 +67,15 @@ export function registerTrade(reg: Registry) {
   tradeBuildings.forEach(b => reg.addBuilding(b));
   tradeUnits.forEach(u => reg.addUnit(u));
   tradeTechs.forEach(t => reg.addTech(t));
-  for (const id of ['tradingCompany', 'bank']) reg.patchBuilding(id, b => { if (!b.classes.includes('tradePost')) b.classes.push('tradePost'); });
-  const bonus = (civ: string, mul: number, text: string) => reg.patchCiv(civ, c => { c.bonuses.push({ type: 'tradeYield', mul }); c.bonusText.push(text); });
+  // Se sustituyen por copias: las definiciones son compartidas entre partidas y no deben acumular cambios
+  for (const id of ['tradingCompany', 'bank']) {
+    const b = reg.building(id);
+    if (!b.classes.includes('tradePost')) reg.addBuilding({ ...b, classes: [...b.classes, 'tradePost'] });
+  }
+  const bonus = (civ: string, mul: number, text: string) => {
+    const c = reg.civs.get(civ);
+    if (c) reg.addCiv({ ...c, bonuses: [...c.bonuses, { type: 'tradeYield', mul }], bonusText: [...c.bonusText, text] });
+  };
   bonus('persia', 1.25, 'Rutas de la Seda: caravanas +25% de ganancia');
   bonus('china', 1.15, 'Gran Canal: caravanas +15% de ganancia');
   bonus('ethiopia', 1.1, 'Ruta del incienso y el oro: caravanas +10% de ganancia');
@@ -103,36 +110,43 @@ function armyOf(game: Game, pid: number): number {
   return n;
 }
 
-/** Mercado y caravanas de la IA: construye el mercado, mantiene unas caravanas y las manda a la mejor ruta. */
+/** Mejor puesto al que mandar una caravana desde `home` (null si no hay ruta posible): cuanto más lejos y mejor la relación, mejor. */
+function bestRoute(g: Game, pid: number, home: Entity): Entity | null {
+  let best: Entity | null = null, bs = -1;
+  for (const b of g.buildings) {
+    if (!isPost(g, b) || b.owner === 0 || tradeProblem(g, pid, home, b)) continue;
+    const mul = b.owner === pid ? T.domesticMul : relation(g, pid, b.owner) === ALLIANCE ? T.allyMul : T.foreignMul;
+    const score = Math.min(T.maxDist, hypot(home.x - b.x, home.y - b.y)) * mul;
+    if (score > bs) { bs = score; best = b; }
+  }
+  return best;
+}
+
+/**
+ * Mercado y caravanas de la IA: levanta el mercado (también sirve para espías y tecnologías) y
+ * solo entrena caravanas si hay una ruta posible (un puesto de alguien en paz con ella o uno propio lejano).
+ */
 export const tradeAI: AIPlugin = {
   id: 'trade',
   think(ctx) {
     const { game: g, player: p } = ctx;
-    if (p.age < 1 || ctx.villagers.length < 14) return;
-    const markets = ctx.buildings.filter(b => b.defId === 'market' && b.complete);
+    if (p.age < 2 || ctx.villagers.length < 20) return;
     if (!p.countAll('market')) {
       if (ctx.canSpend({ wood: 150, stone: 50 })) ctx.build('market');
       return;
     }
-    if (!markets.length && !ctx.buildings.some(b => isPost(g, b))) return;
+    const posts = ctx.buildings.filter(b => isPost(g, b));
+    if (!posts.length) return;
     const caravans = g.units.filter(u => !u.dead && u.owner === p.id && u.defId === 'caravan');
-    const want = T.aiCaravans[Math.min(p.age, T.aiCaravans.length - 1)];
-    if (caravans.length + ctx.buildings.reduce((n, b) => n + b.queue.filter(q => q.id === 'caravan').length, 0) < want && ctx.army.length >= 4) {
-      if (ctx.canSpend({ wood: 100, gold: 50 })) ctx.train('caravan');
-    }
-    // Rutas: a los puestos de quien no está en guerra con ella (cuanto más lejos, mejor), o a uno propio lejano
+    const route = bestRoute(g, p.id, posts[0]);
+    const want = route ? T.aiCaravans[Math.min(p.age, T.aiCaravans.length - 1)] : 0;
+    const queued = ctx.buildings.reduce((n, b) => n + b.queue.filter(q => q.id === 'caravan').length, 0);
+    if (caravans.length + queued < want && ctx.army.length >= 6 && ctx.canSpend({ wood: 100, gold: 50 })) ctx.train('caravan');
     for (const u of caravans) {
       if (u.order) continue;
       const home = nearestPost(g, p.id, u.x, u.y);
-      if (!home) continue;
-      let best: Entity | null = null, bs = -1;
-      for (const b of g.buildings) {
-        if (!isPost(g, b) || b.owner === 0 || tradeProblem(g, p.id, home, b)) continue;
-        const rel = b.owner === p.id ? 0 : relation(g, p.id, b.owner) === ALLIANCE ? T.allyMul : T.foreignMul;
-        const score = Math.min(T.maxDist, hypot(home.x - b.x, home.y - b.y)) * (b.owner === p.id ? T.domesticMul : rel);
-        if (score > bs) { bs = score; best = b; }
-      }
-      if (best) tradeCommand(g, p.id, { units: [u.id], dest: best.id });
+      const dest = home && bestRoute(g, p.id, home);
+      if (dest) tradeCommand(g, p.id, { units: [u.id], dest: dest.id });
     }
   },
 };
@@ -143,7 +157,7 @@ export const diplomacyAI: AIPlugin = {
   think(ctx) {
     const { game: g, player: p } = ctx;
     const d = diploState(g);
-    if (!d || g.data.war) return;
+    if (!d || diplomacyOff(g)) return;
     const diff = p.difficulty;
     const mine = ctx.army.length;
     // 1. Responde a lo que le proponen

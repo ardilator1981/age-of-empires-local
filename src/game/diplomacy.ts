@@ -35,6 +35,9 @@ export interface DiploState {
 
 const D = BALANCE.diplomacy;
 
+/** Modos de juego que no admiten paz ni alianzas (Guerra declarada, Matar al rey). */
+export const diplomacyOff = (game: Game) => !!game.data.war || !!game.data.noDiplomacy;
+
 export function diploState(game: Game): DiploState | undefined { return game.data.diplo; }
 
 export function initDiplomacy(game: Game) {
@@ -109,7 +112,7 @@ function reject(game: Game, pid: number, text: string): false {
 }
 
 function usable(game: Game, pid: number, other: number): string | null {
-  if (game.data.war) return 'En el modo Guerra declarada no hay diplomacia';
+  if (diplomacyOff(game)) return 'En este modo de juego no hay diplomacia';
   const p = game.players[pid], q = game.players[other];
   if (!p || !q || pid === other || pid === 0 || other === 0) return 'Jugador no válido';
   if (p.defeated || q.defeated) return 'Ese jugador ya ha caído';
