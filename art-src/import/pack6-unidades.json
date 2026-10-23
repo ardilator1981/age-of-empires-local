@@ -1540,6 +1540,27 @@
           "width": 70
         }
       ]
+    },
+    {
+      "source": "pack6-unidades/rusia.jpg",
+      "grid": "auto",
+      "sharedScale": true,
+      "items": [
+        {
+          "id": "druzhinnik",
+          "height": 48
+        },
+        {
+          "id": "boyarSon",
+          "height": 62
+        },
+        {
+          "id": "strelets"
+        },
+        {
+          "id": "cossack"
+        }
+      ]
     }
   ]
 }

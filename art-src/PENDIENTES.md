@@ -8,7 +8,7 @@
 
 | Tipo | Hecho | Sin animar | Pendiente |
 | --- | ---: | ---: | ---: |
-| unidad | 2 | 21 | 59 |
+| unidad | 2 | 25 | 55 |
 | edificio | 0 | 12 | 48 |
 | recurso | 6 | 0 | 6 |
 | terreno | 9 | 0 | 0 |
@@ -24,10 +24,10 @@
 - P2 · **unidad longSwordsman**: walk, attack, death
 - P2 · **unidad pikeman**: walk, attack, death
 - P2 · **unidad batteringRam**: walk, attack, death
-- P2 · **unidad druzhinnik**: idle, walk, attack, death
-- P2 · **unidad boyarSon**: idle, walk, attack, death
-- P2 · **unidad strelets**: idle, walk, attack, death
-- P2 · **unidad cossack**: idle, walk, attack, death
+- P2 · **unidad druzhinnik**: walk, attack, death
+- P2 · **unidad boyarSon**: walk, attack, death
+- P2 · **unidad strelets**: walk, attack, death
+- P2 · **unidad cossack**: walk, attack, death
 - P2 · **unidad deer**: walk, death
 - P2 · **unidad boar**: walk, attack, death
 - P2 · **unidad sheep**: walk, death
@@ -56,10 +56,10 @@
 | batteringRam | Ariete | 🟡 sin animar | walk, attack, death | units/batteringRam-walk.png (+ -mask.png)<br>units/batteringRam-attack.png (+ -mask.png)<br>units/batteringRam-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack-melee` `anim:death` |
 | longbowman | Arquero de tiro largo | 🟡 sin animar | death | units/longbowman-death.png (+ -mask.png) | 3 | `anim:death` |
 | throwingAxeman | Guerrero franco | 🟡 sin animar | death | units/throwingAxeman-death.png (+ -mask.png) | 3 | `anim:death` |
-| druzhinnik | Druzhinnik | 🔴 pendiente | idle, walk, attack, death | units/druzhinnik.png (+ -mask.png)<br>units/druzhinnik-walk.png (+ -mask.png)<br>units/druzhinnik-attack.png (+ -mask.png)<br>units/druzhinnik-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack-melee` `anim:death` |
-| boyarSon | Hijo de boyardo | 🔴 pendiente | idle, walk, attack, death | units/boyarSon.png (+ -mask.png)<br>units/boyarSon-walk.png (+ -mask.png)<br>units/boyarSon-attack.png (+ -mask.png)<br>units/boyarSon-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk:mounted` `anim:attack-melee:mounted` `anim:death:mounted` |
-| strelets | Strelets | 🔴 pendiente | idle, walk, attack, death | units/strelets.png (+ -mask.png)<br>units/strelets-walk.png (+ -mask.png)<br>units/strelets-attack.png (+ -mask.png)<br>units/strelets-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack` `anim:death` |
-| cossack | Cosaco | 🔴 pendiente | idle, walk, attack, death | units/cossack.png (+ -mask.png)<br>units/cossack-walk.png (+ -mask.png)<br>units/cossack-attack.png (+ -mask.png)<br>units/cossack-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk:mounted` `anim:attack-melee:mounted` `anim:death:mounted` |
+| druzhinnik | Druzhinnik | 🟡 sin animar | walk, attack, death | units/druzhinnik-walk.png (+ -mask.png)<br>units/druzhinnik-attack.png (+ -mask.png)<br>units/druzhinnik-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack-melee` `anim:death` |
+| boyarSon | Hijo de boyardo | 🟡 sin animar | walk, attack, death | units/boyarSon-walk.png (+ -mask.png)<br>units/boyarSon-attack.png (+ -mask.png)<br>units/boyarSon-death.png (+ -mask.png) | 2 | `anim:walk:mounted` `anim:attack-melee:mounted` `anim:death:mounted` |
+| strelets | Strelets | 🟡 sin animar | walk, attack, death | units/strelets-walk.png (+ -mask.png)<br>units/strelets-attack.png (+ -mask.png)<br>units/strelets-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack` `anim:death` |
+| cossack | Cosaco | 🟡 sin animar | walk, attack, death | units/cossack-walk.png (+ -mask.png)<br>units/cossack-attack.png (+ -mask.png)<br>units/cossack-death.png (+ -mask.png) | 2 | `anim:walk:mounted` `anim:attack-melee:mounted` `anim:death:mounted` |
 | deer | Ciervo | 🟡 sin animar | walk, death | units/deer-walk.png (+ -mask.png)<br>units/deer-death.png (+ -mask.png) | 2 | `anim:walk` `anim:death` |
 | boar | Jabalí | 🟡 sin animar | walk, attack, death | units/boar-walk.png (+ -mask.png)<br>units/boar-attack.png (+ -mask.png)<br>units/boar-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack-melee` `anim:death` |
 | sheep | Oveja | 🟡 sin animar | walk, death | units/sheep-walk.png (+ -mask.png)<br>units/sheep-death.png (+ -mask.png) | 2 | `anim:walk` `anim:death` |

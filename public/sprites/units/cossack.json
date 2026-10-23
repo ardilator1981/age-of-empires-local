@@ -1,0 +1,19 @@
+{
+  "image": "cossack.png",
+  "mask": "cossack-mask.png",
+  "cell": {
+    "w": 57,
+    "h": 116
+  },
+  "anchor": {
+    "x": 29,
+    "y": 110
+  },
+  "scale": 2,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 1
+    }
+  }
+}

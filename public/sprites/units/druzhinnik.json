@@ -1,0 +1,19 @@
+{
+  "image": "druzhinnik.png",
+  "mask": "druzhinnik-mask.png",
+  "cell": {
+    "w": 49,
+    "h": 104
+  },
+  "anchor": {
+    "x": 25,
+    "y": 98
+  },
+  "scale": 2,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 1
+    }
+  }
+}
