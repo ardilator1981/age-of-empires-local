@@ -1,4 +1,5 @@
 import { smartKind } from '../game/commands';
+import { lineTiles } from '../game/defense';
 import { ids } from '../game/net/netCommands';
 import type { Entity } from '../game/Entity';
 import { buildingAvail } from '../game/rules';
@@ -116,6 +117,31 @@ export class Input {
     ui.placing.tx = Math.round(w.x - def.size / 2);
     ui.placing.ty = Math.round(w.y - def.size / 2);
     ui.placing.valid = game.canPlace(def.id, ui.placing.tx, ui.placing.ty, game.humanId);
+    this.updateLine();
+  }
+
+  /** Recalcula el trazo de un edificio de línea (de `start` al fantasma). */
+  private updateLine() {
+    const { ui, game } = this;
+    const pl = ui.placing;
+    if (!pl) return;
+    if (!pl.start || !game.reg.building(pl.defId).line) { pl.line = undefined; return; }
+    pl.line = lineTiles(pl.start.tx, pl.start.ty, pl.tx, pl.ty).map(t => ({ x: t.x, y: t.y, ok: game.canPlace(pl.defId, t.x, t.y, game.humanId) }));
+    pl.valid = pl.line.some(t => t.ok);
+  }
+
+  /** ¿El edificio que se coloca se traza en línea? */
+  private placingLine(): boolean {
+    const pl = this.ui.placing;
+    return !!pl && !!this.game.reg.building(pl.defId).line;
+  }
+
+  /** Fija el comienzo del trazo en la casilla del fantasma. */
+  private startLine() {
+    const pl = this.ui.placing;
+    if (!pl) return;
+    pl.start = { tx: pl.tx, ty: pl.ty };
+    this.updateLine();
   }
 
   /** Centro en pantalla del fantasma del edificio que se está colocando. */
@@ -148,6 +174,8 @@ export class Input {
   /** Interfaz móvil: botón «Confirmar» al colocar un edificio. */
   confirmPlacement() {
     if (!this.active || !this.ui.placing) return;
+    // Edificios de línea: el primer «Confirmar» fija el inicio y el segundo coloca la línea hasta el fantasma
+    if (this.placingLine() && !this.ui.placing.start) { this.startLine(); return; }
     this.placeBuilding(false);
   }
 
@@ -166,6 +194,17 @@ export class Input {
     // Se comprueba aquí para responder al momento (en red, la orden se ejecuta unos ticks después)
     const a = buildingAvail(game, game.human, defId);
     if (!a.ok) { game.rejectAvail(game.humanId, a); return; }
+    if (game.reg.building(defId).line) {
+      // Línea: todos los segmentos del trazo que se puedan construir (si no se arrastró, solo uno)
+      const tiles = (ui.placing.line ?? [{ x: tx, y: ty, ok: game.canPlace(defId, tx, ty, game.humanId) }]).filter(t => t.ok);
+      if (!tiles.length) { game.reject(game.humanId, 'placement', 'No se puede construir ahí'); ui.placing.start = null; ui.placing.line = undefined; return; }
+      if (this.s.orders.send({ t: 'placeLine', building: defId, tiles: tiles.map(t => [t.x, t.y] as [number, number]), builders: ids(builders) }) === false) return;
+      for (const t of tiles) this.marker(t.x + 0.5, t.y + 0.5, '#7dff7d');
+      haptic(12);
+      ui.placing.start = null; ui.placing.line = undefined;
+      if (!keep || !buildingAvail(game, game.human, defId).ok) { ui.placing = null; ui.page = 'main'; }
+      return;
+    }
     if (!game.canPlace(defId, tx, ty, game.humanId)) { game.reject(game.humanId, 'placement', 'No se puede construir ahí'); return; }
     if (this.s.orders.send({ t: 'place', building: defId, tx, ty, builders: ids(builders) }) === false) return;
     const size = game.reg.building(defId).size;
@@ -247,7 +286,12 @@ export class Input {
     if (e.button !== 0) return;
 
     if (ui.pickPoint) { ui.pickPoint.onPick(this.s.renderer.cam.screenToWorld(e.clientX, e.clientY)); return; }
-    if (ui.placing) { this.placeBuilding(e.shiftKey); return; }
+    if (ui.placing) {
+      // De línea: se pulsa donde empieza, se arrastra y se suelta donde acaba
+      if (this.placingLine()) { this.setGhost(e.clientX, e.clientY); this.startLine(); return; }
+      this.placeBuilding(e.shiftKey);
+      return;
+    }
     if (ui.targeting === 'attackMove') { this.attackMoveAt(e.clientX, e.clientY, e.shiftKey, false); return; }
     this.drag = { x: e.clientX, y: e.clientY };
   }
@@ -289,6 +333,7 @@ export class Input {
 
   private onUp(e: MouseEvent) {
     if (e.button === 1) { this.pan = null; return; }
+    if (e.button === 0 && this.ui.placing?.start && this.placingLine()) { this.setGhost(e.clientX, e.clientY); this.placeBuilding(e.shiftKey); return; }
     if (e.button !== 0 || !this.drag) return;
     const { ui } = this;
     const box = ui.dragBox;
@@ -347,7 +392,7 @@ export class Input {
       this.gesture = 'place';
       // Interfaz móvil: el fantasma se arrastra desde donde está (el dedo no lo tapa) y se confirma con un botón
       if (isMobileLayout()) this.ghostDrag = this.ghostScreen();
-      else this.setGhost(p.x, p.y);
+      else { this.setGhost(p.x, p.y); if (this.placingLine()) this.startLine(); }
       return;
     }
     this.gesture = 'tap';

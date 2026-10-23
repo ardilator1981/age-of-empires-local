@@ -170,7 +170,7 @@ export interface UnitAura {
 }
 
 export interface BuildingDef extends BaseDef {
-  category: 'economy' | 'military';
+  category: 'economy' | 'military' | 'defense';
   buildTime: number;
   /** Lado del edificio en casillas. */
   size: number;

@@ -22,6 +22,24 @@ function slab(s: SpriteContext, x0: number, y0: number, x1: number, y1: number, 
   poly(ctx, [L(A, h1), L(B, h1), L(C, h1), L(D, h1)]); ctx.fillStyle = shade(col, 0.14); ctx.fill(); ctx.stroke();
 }
 
+/** Barra oblicua de A a B (en casillas) con medio ancho `th`: para los tramos que se unen en diagonal. */
+function bar(s: SpriteContext, ax: number, ay: number, bx: number, by: number, th: number, h: number, col: string) {
+  const { ctx, z, project: pr } = s;
+  const len = Math.hypot(bx - ax, by - ay) || 1, nx = -(by - ay) / len * th, ny = (bx - ax) / len * th;
+  const q = [[ax + nx, ay + ny], [bx + nx, by + ny], [bx - nx, by - ny], [ax - nx, ay - ny]];
+  const g = (i: number, hh: number) => lift(pr(q[i][0], q[i][1]), hh, z);
+  ctx.lineJoin = 'round';
+  ctx.strokeStyle = 'rgba(20,14,8,0.85)'; ctx.lineWidth = Math.max(0.5, 0.8 * z);
+  // Caras laterales que miran al observador (normal con x + y > 0), de la más lejana a la más cercana
+  for (const [i, j, ox, oy] of [[0, 1, nx, ny], [3, 2, -nx, -ny]] as [number, number, number, number][]) {
+    if (ox + oy <= 0) continue;
+    poly(ctx, [g(i, 0), g(j, 0), g(j, h), g(i, h)]);
+    ctx.fillStyle = shade(col, 0.02 - 0.24 * (ox / ((Math.abs(ox) + Math.abs(oy)) || 1)));
+    ctx.fill(); ctx.stroke();
+  }
+  poly(ctx, [g(0, h), g(1, h), g(2, h), g(3, h)]); ctx.fillStyle = shade(col, 0.14); ctx.fill(); ctx.stroke();
+}
+
 /** Muro, empalizada o puerta de una casilla: un pilar central con brazos hacia los tramos vecinos. */
 const wall: SpriteFn = s => {
   const { ctx, z, params: P, entity: e, foot, link, project: pr } = s;
@@ -44,8 +62,11 @@ const wall: SpriteFn = s => {
     slab(s, x0, y0, x1, y1, 0, ah, col);
     if (P.stakes) stakes(s, x0, y0, x1, y1, ah);
   };
+  const diag = (dx: number, dy: number) => {
+    if (link?.(dx, dy)) bar(s, cx, cy, cx + dx * 0.5, cy + dy * 0.5, Math.max(0.1, th * 0.8), P.gate ? Math.min(H, 8) : H * 0.82, col);
+  };
   // De atrás hacia delante: los brazos hacia -x y -y primero, los de +x y +y después del pilar
-  arm(0); arm(1);
+  diag(-1, -1); arm(0); arm(1);
   const pw = P.gate ? 0.3 : th + 0.07;
   if (P.gate) {
     // Puerta: dos pilares y un dintel; el hueco se ve oscuro
@@ -64,6 +85,8 @@ const wall: SpriteFn = s => {
     }
   }
   arm(2); arm(3);
+  // Uniones en diagonal (las líneas trazadas en oblicuo): una barra hasta la esquina compartida
+  for (const [dx, dy] of [[1, -1], [-1, 1], [1, 1]]) diag(dx, dy);
   if (!complete) {
     ctx.strokeStyle = '#7a5a32'; ctx.lineWidth = Math.max(0.6, 1.1 * z);
     const a = pr(tx + 0.15, ty + 0.85), b = pr(tx + 0.85, ty + 0.85);
