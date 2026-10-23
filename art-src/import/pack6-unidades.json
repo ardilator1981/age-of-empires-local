@@ -1572,6 +1572,17 @@
         { "id": "repeatingCrossbowman" },
         { "id": "eightBannersRider", "height": 62 }
       ]
+    },
+    {
+      "source": "pack6-unidades/francia.jpg",
+      "grid": "auto",
+      "sharedScale": true,
+      "items": [
+        { "id": "gendarme", "height": 62 },
+        { "id": "ordinanceArquebusier" },
+        { "id": "bayonetFusilier" },
+        { "id": "gribeauvalCannon", "width": 70 }
+      ]
     }
   ]
 }

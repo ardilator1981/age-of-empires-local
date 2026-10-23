@@ -8,7 +8,7 @@
 
 | Tipo | Hecho | Sin animar | Pendiente |
 | --- | ---: | ---: | ---: |
-| unidad | 2 | 29 | 51 |
+| unidad | 2 | 33 | 47 |
 | edificio | 0 | 12 | 48 |
 | recurso | 6 | 0 | 6 |
 | terreno | 9 | 0 | 0 |
@@ -75,10 +75,10 @@
 | divineArquebusier | Arcabucero de las divisiones divinas | 🔴 pendiente | idle, walk, attack, death | units/divineArquebusier.png (+ -mask.png)<br>units/divineArquebusier-walk.png (+ -mask.png)<br>units/divineArquebusier-attack.png (+ -mask.png)<br>units/divineArquebusier-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack` `anim:death` |
 | eightBannersRider | Jinete de las Ocho Banderas | 🟡 sin animar | walk, attack, death | units/eightBannersRider-walk.png (+ -mask.png)<br>units/eightBannersRider-attack.png (+ -mask.png)<br>units/eightBannersRider-death.png (+ -mask.png) | 2 | `anim:walk:mounted` `anim:attack-melee:mounted` `anim:death:mounted` |
 | crusaderKnight | Caballero cruzado | 🔴 pendiente | idle, walk, attack, death | units/crusaderKnight.png (+ -mask.png)<br>units/crusaderKnight-walk.png (+ -mask.png)<br>units/crusaderKnight-attack.png (+ -mask.png)<br>units/crusaderKnight-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk:mounted` `anim:attack-melee:mounted` `anim:death:mounted` |
-| gendarme | Gendarme | 🔴 pendiente | idle, walk, attack, death | units/gendarme.png (+ -mask.png)<br>units/gendarme-walk.png (+ -mask.png)<br>units/gendarme-attack.png (+ -mask.png)<br>units/gendarme-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk:mounted` `anim:attack-melee:mounted` `anim:death:mounted` |
-| ordinanceArquebusier | Arcabucero de la ordenanza | 🔴 pendiente | idle, walk, attack, death | units/ordinanceArquebusier.png (+ -mask.png)<br>units/ordinanceArquebusier-walk.png (+ -mask.png)<br>units/ordinanceArquebusier-attack.png (+ -mask.png)<br>units/ordinanceArquebusier-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack` `anim:death` |
-| bayonetFusilier | Fusilero con bayoneta | 🔴 pendiente | idle, walk, attack, death | units/bayonetFusilier.png (+ -mask.png)<br>units/bayonetFusilier-walk.png (+ -mask.png)<br>units/bayonetFusilier-attack.png (+ -mask.png)<br>units/bayonetFusilier-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack` `anim:death` |
-| gribeauvalCannon | Cañón Gribeauval | 🔴 pendiente | idle, walk, attack, death | units/gribeauvalCannon.png (+ -mask.png)<br>units/gribeauvalCannon-walk.png (+ -mask.png)<br>units/gribeauvalCannon-attack.png (+ -mask.png)<br>units/gribeauvalCannon-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack` `anim:death` |
+| gendarme | Gendarme | 🟡 sin animar | walk, attack, death | units/gendarme-walk.png (+ -mask.png)<br>units/gendarme-attack.png (+ -mask.png)<br>units/gendarme-death.png (+ -mask.png) | 2 | `anim:walk:mounted` `anim:attack-melee:mounted` `anim:death:mounted` |
+| ordinanceArquebusier | Arcabucero de la ordenanza | 🟡 sin animar | walk, attack, death | units/ordinanceArquebusier-walk.png (+ -mask.png)<br>units/ordinanceArquebusier-attack.png (+ -mask.png)<br>units/ordinanceArquebusier-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack` `anim:death` |
+| bayonetFusilier | Fusilero con bayoneta | 🟡 sin animar | walk, attack, death | units/bayonetFusilier-walk.png (+ -mask.png)<br>units/bayonetFusilier-attack.png (+ -mask.png)<br>units/bayonetFusilier-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack` `anim:death` |
+| gribeauvalCannon | Cañón Gribeauval | 🟡 sin animar | walk, attack, death | units/gribeauvalCannon-walk.png (+ -mask.png)<br>units/gribeauvalCannon-attack.png (+ -mask.png)<br>units/gribeauvalCannon-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack` `anim:death` |
 | fyrdman | Fyrdman | 🔴 pendiente | idle, walk, attack, death | units/fyrdman.png (+ -mask.png)<br>units/fyrdman-walk.png (+ -mask.png)<br>units/fyrdman-attack.png (+ -mask.png)<br>units/fyrdman-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack-melee` `anim:death` |
 | normanKnight | Caballero normando | 🔴 pendiente | idle, walk, attack, death | units/normanKnight.png (+ -mask.png)<br>units/normanKnight-walk.png (+ -mask.png)<br>units/normanKnight-attack.png (+ -mask.png)<br>units/normanKnight-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk:mounted` `anim:attack-melee:mounted` `anim:death:mounted` |
 | tudorArquebusier | Arcabucero Tudor | 🔴 pendiente | idle, walk, attack, death | units/tudorArquebusier.png (+ -mask.png)<br>units/tudorArquebusier-walk.png (+ -mask.png)<br>units/tudorArquebusier-attack.png (+ -mask.png)<br>units/tudorArquebusier-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack` `anim:death` |

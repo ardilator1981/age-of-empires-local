@@ -1,0 +1,19 @@
+{
+  "image": "bayonetFusilier.png",
+  "mask": "bayonetFusilier-mask.png",
+  "cell": {
+    "w": 79,
+    "h": 109
+  },
+  "anchor": {
+    "x": 40,
+    "y": 103
+  },
+  "scale": 2,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 1
+    }
+  }
+}

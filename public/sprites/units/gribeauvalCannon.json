@@ -1,0 +1,19 @@
+{
+  "image": "gribeauvalCannon.png",
+  "mask": "gribeauvalCannon-mask.png",
+  "cell": {
+    "w": 148,
+    "h": 129
+  },
+  "anchor": {
+    "x": 74,
+    "y": 123
+  },
+  "scale": 2,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 1
+    }
+  }
+}
