@@ -29,6 +29,21 @@
         "x": 34,
         "y": 103
       }
+    },
+    "attack": {
+      "image": "musketeer-attack.png",
+      "mask": "musketeer-attack-mask.png",
+      "row": 0,
+      "frames": 6,
+      "fps": 8,
+      "cell": {
+        "w": 68,
+        "h": 101
+      },
+      "anchor": {
+        "x": 34,
+        "y": 95
+      }
     }
   }
 }

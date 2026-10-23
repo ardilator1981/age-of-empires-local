@@ -1626,6 +1626,19 @@
         { "id": "musketeer", "state": "walk" },
         { "id": "musketeer", "state": "walk" }
       ]
+    },
+    {
+      "source": "pack6-unidades/mosquetero-atacar.jpg",
+      "grid": "auto",
+      "sharedScale": true,
+      "items": [
+        { "id": "musketeer", "state": "attack", "height": 46 },
+        { "id": "musketeer", "state": "attack" },
+        { "id": "musketeer", "state": "attack" },
+        { "id": "musketeer", "state": "attack" },
+        { "id": "musketeer", "state": "attack" },
+        { "id": "musketeer", "state": "attack" }
+      ]
     }
   ]
 }
