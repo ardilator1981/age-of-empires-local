@@ -33,7 +33,7 @@
 - P2 · **unidad sheep**: walk, death
 - P2 · **unidad cannon**: walk, attack, death
 - P2 · **unidad dragoon**: walk, attack, death
-- P2 · **unidad grenadier**: walk, attack, death
+- P2 · **unidad grenadier**: walk, death
 - P2 · **unidad unicorn**: walk, attack, death
 
 ## Unidades
@@ -66,7 +66,7 @@
 | musketeer | Mosquetero | 🟡 sin animar | death | units/musketeer-death.png (+ -mask.png) | 3 | `anim:death` |
 | cannon | Cañón | 🟡 sin animar | walk, attack, death | units/cannon-walk.png (+ -mask.png)<br>units/cannon-attack.png (+ -mask.png)<br>units/cannon-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack` `anim:death` |
 | dragoon | Dragón | 🟡 sin animar | walk, attack, death | units/dragoon-walk.png (+ -mask.png)<br>units/dragoon-attack.png (+ -mask.png)<br>units/dragoon-death.png (+ -mask.png) | 2 | `anim:walk:mounted` `anim:attack:mounted` `anim:death:mounted` |
-| grenadier | Granadero | 🟡 sin animar | walk, attack, death | units/grenadier-walk.png (+ -mask.png)<br>units/grenadier-attack.png (+ -mask.png)<br>units/grenadier-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack` `anim:death` |
+| grenadier | Granadero | 🟡 sin animar | walk, death | units/grenadier-walk.png (+ -mask.png)<br>units/grenadier-death.png (+ -mask.png) | 2 | `anim:walk` `anim:death` |
 | unicorn | Unicornio | 🟡 sin animar | walk, attack, death | units/unicorn-walk.png (+ -mask.png)<br>units/unicorn-attack.png (+ -mask.png)<br>units/unicorn-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack` `anim:death` |
 | fubing | Fubing | 🟡 sin animar | walk, attack, death | units/fubing-walk.png (+ -mask.png)<br>units/fubing-attack.png (+ -mask.png)<br>units/fubing-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack-melee` `anim:death` |
 | fireLance | Lancero de fuego | 🟡 sin animar | walk, attack, death | units/fireLance-walk.png (+ -mask.png)<br>units/fireLance-attack.png (+ -mask.png)<br>units/fireLance-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack` `anim:death` |

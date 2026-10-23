@@ -1639,6 +1639,22 @@
         { "id": "musketeer", "state": "attack" },
         { "id": "musketeer", "state": "attack" }
       ]
+    },
+    {
+      "source": "pack6-unidades/granadero-fila.jpg",
+      "grid": "auto",
+      "sharedScale": true,
+      "items": [
+        null,
+        null,
+        null,
+        null,
+        { "id": "grenadier", "state": "attack", "height": 46 },
+        { "id": "grenadier", "state": "attack" },
+        { "id": "grenadier", "state": "attack" },
+        { "id": "grenadier", "state": "attack" },
+        { "id": "grenadier", "state": "attack" }
+      ]
     }
   ]
 }
