@@ -6,6 +6,7 @@ import { esc, pic, selectionCommands, taskText, type Cmd, type CommandSet } from
 import { haptic, isMobileLayout, longPressMs, setUIPrefs, uiPrefs } from './layout';
 import { bindSettings, settingsHtml } from './SettingsPanel';
 import { ICONS } from './svgIcons';
+import { bindDiplomacy, diplomacyHtml } from './diplomacyView';
 
 /** Botón de la interfaz móvil (bandeja u hoja). */
 interface Btn {
@@ -105,6 +106,7 @@ export class MobileHUD {
     for (const id of ['m-top', 'm-btns', 'm-mode', 'm-groups', 'm-mini', 'm-mini-canvas', 'm-tray', 'm-target', 'm-place', 'm-sheet', 'm-screen', 'm-hint']) {
       this.el[id] = this.root.querySelector('#' + id)!;
     }
+    bindDiplomacy(this.el['m-screen'], this.s, () => this.renderScreen());
     this.el.info = this.root.querySelector('.m-info')!;
     this.el.acts = this.root.querySelector('.m-acts')!;
     this.el.tabs = this.root.querySelector('.m-tabs')!;
@@ -293,7 +295,7 @@ export class MobileHUD {
     if (set.build) tabs.push('economy', 'military');
     if (set.train.length) tabs.push('units');
     if (set.research.length) tabs.push('techs');
-    if (set.del || set.stop || set.evacuate) tabs.push('actions');
+    if (set.del || set.stop || set.evacuate || set.missions.length) tabs.push('actions');
     if (set.powers.length) tabs.push('powers');
     return tabs;
   }
@@ -320,6 +322,7 @@ export class MobileHUD {
           tip: '<b>Construir</b><br>Edificios económicos y militares.', run: () => this.openSheet(this.lastBuildTab),
         });
       }
+      for (const c of set.missions) out.push(this.btnFromCmd(c));
       if (set.attackMove) out.push(this.btnFromCmd(set.attackMove));
       if (set.strategy) out.push(this.btnFromCmd(set.strategy, { keepOpen: true }));
       if (set.explore) out.push(this.btnFromCmd(set.explore));
@@ -439,6 +442,7 @@ export class MobileHUD {
     else if (tab === 'techs') btns = set.research.map(c => this.btnFromCmd(c));
     else if (tab === 'powers') btns = set.powers.map(c => this.btnFromCmd(c));
     else if (tab === 'actions') {
+      for (const c of set.missions) btns.push(this.btnFromCmd(c));
       if (set.attackMove) btns.push(this.btnFromCmd(set.attackMove));
       if (set.explore) btns.push(this.btnFromCmd(set.explore));
       if (set.shelter) btns.push(this.btnFromCmd(set.shelter));
@@ -692,9 +696,7 @@ export class MobileHUD {
       body = `<div class="m-scroll">${doing.length ? `<h3>Investigando</h3><ul class="m-list">${doing.map(d => `<li>${d.def.icon} ${esc(d.def.name)} <small>${Math.floor(d.pr * 100)} %</small></li>`).join('')}</ul>` : ''}
         <h3>Investigadas</h3>${done.length ? `<ul class="m-list">${done.map(d => `<li>${d.icon} <b>${esc(d.name)}</b> <small>${esc(d.description)}</small></li>`).join('')}</ul>` : '<p class="m-sub">Todavía ninguna.</p>'}</div>`;
     } else if (sc === 'diplomacy') {
-      body = `<div class="m-scroll"><ul class="m-list">${g.players.slice(1).map(q => `<li><span class="swatch" style="background:${q.color}"></span>
-        <b>${esc(q.name)}</b> <small>${esc(q.identity)}</small> — ${q.id === p.id ? 'Tú' : q.defeated ? 'Derrotado' : g.isEnemy(p.id, q.id) ? '⚔ Enemigo' : '🤝 Aliado'}</li>`).join('')}</ul>
-        <p class="m-sub">Las alianzas se eligen al crear la partida.</p></div>`;
+      body = `<div class="m-scroll">${diplomacyHtml(this.s)}</div>`;
     } else {
       body = `<div class="m-scroll">${settingsHtml(app)}</div>`;
     }

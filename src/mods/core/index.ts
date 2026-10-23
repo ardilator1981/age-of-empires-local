@@ -27,6 +27,7 @@ import { PowerSystem, truceRule, usePower } from '../../game/powers';
 import { diploCommand, DiplomacySystem, initDiplomacy } from '../../game/diplomacy';
 import { EspionageSystem, spyCommand, spyOrder, stealthRule } from '../../game/espionage';
 import { tradeCommand, tradeOrder } from '../../game/trade';
+import { diplomacyPanel } from './diplomacyPanel';
 import { diplomacyAI, drawRoutes, registerTrade, spyAI, tradeAI } from './trade';
 import { WildlifeSystem, retaliateOrder } from '../../game/wildlife';
 
@@ -88,6 +89,7 @@ export const coreMod: GameMod = {
     reg.addNetCommand('diplo', diploCommand);
     reg.addCombatRule(stealthRule);
     reg.addWorldOverlay(drawRoutes);
+    reg.addHudPanel(diplomacyPanel);
     reg.onGameStart(initDiplomacy);
     maps.forEach(m => reg.addMapType(m));
     victories.forEach(v => reg.addVictory(v));

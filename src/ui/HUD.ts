@@ -173,6 +173,7 @@ export class HUD {
         return out;
       }
       if (set.build) { out[0] = set.build.economy.cmd; out[1] = set.build.military.cmd; }
+      [2, 3, 4, 9].forEach((slot, i) => { out[slot] = set.missions[i] ?? null; });
       out[5] = set.attackMove;
       out[6] = set.explore;
       out[7] = set.strategy;

@@ -10,6 +10,7 @@ import type { Game } from './Game';
 import { buildingAvail, exploreAvail, techAvail, unitAvail } from './rules';
 import { canShelter, garrisonOf, leaveShelter } from './garrison';
 import { canGatherFrom, isHuntable } from './wildlife';
+import { isPost, isTrader, tradeCommand } from './trade';
 
 /**
  * Todas las acciones de los jugadores (humano o IA) pasan por aquí.
@@ -262,6 +263,14 @@ function smartOrder(game: Game, pid: number, units: Entity[], x: number, y: numb
       const rest = mine.filter(u => !fighters.includes(u));
       if (rest.length) Commands.move(game, rest, x, y);
       return 'attack';
+    }
+    // Caravanas sobre un puesto comercial: ruta de comercio
+    if (target.kind === 'building' && isPost(game, target) && mine.some(u => isTrader(game, u))) {
+      const tr = mine.filter(u => isTrader(game, u));
+      tradeCommand(game, pid, { units: tr.map(u => u.id), dest: target.id });
+      const rest = mine.filter(u => !tr.includes(u));
+      if (rest.length) Commands.move(game, rest, x, y);
+      return 'move';
     }
     const gatherable = target.kind === 'resource' || isHuntable(game, pid, target) || (target.kind === 'building' && !!target.resType && target.owner === pid && target.complete);
     if (gatherable) {
