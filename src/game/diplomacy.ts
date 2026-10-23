@@ -42,7 +42,7 @@ export function diploState(game: Game): DiploState | undefined { return game.dat
 
 export function initDiplomacy(game: Game) {
   const n = game.players.length, z = () => new Array<number>(n * n).fill(0);
-  game.data.diplo = { n, rel: z(), since: z(), embargo: z(), goodwill: z(), proposals: [], nextId: 1 } as DiploState;
+  game.data.diplo = { n, rel: z(), since: new Array<number>(n * n).fill(-9999), embargo: z(), goodwill: z(), proposals: [], nextId: 1 } as DiploState;
 }
 
 function ensure(game: Game): DiploState {
@@ -126,7 +126,7 @@ export function propose(game: Game, pid: number, to: number, kind: ProposalKind)
   const d = ensure(game), cur = relation(game, pid, to);
   if (kind === 'peace' && cur !== WAR) return reject(game, pid, 'Ya no estáis en guerra');
   if (kind === 'alliance' && cur !== PEACE) return reject(game, pid, cur === ALLIANCE ? 'Ya sois aliados' : 'Primero hace falta la paz');
-  if (kind === 'alliance' && game.time - d.since[pid * d.n + to] < D.treatyLock && d.since[pid * d.n + to] > 0) {
+  if (kind === 'alliance' && game.time - d.since[pid * d.n + to] < D.treatyLock) {
     return reject(game, pid, `Tratado reciente: espera ${clock(D.treatyLock - (game.time - d.since[pid * d.n + to]))}`);
   }
   if (d.proposals.some(p => p.from === pid && p.to === to && p.kind === kind)) return reject(game, pid, 'Ya has hecho esa propuesta');
@@ -170,7 +170,7 @@ export function breakTreaty(game: Game, pid: number, other: number): boolean {
   const d = ensure(game), cur = relation(game, pid, other);
   if (cur === WAR) return reject(game, pid, 'Ya estáis en guerra');
   const left = D.treatyLock - (game.time - d.since[pid * d.n + other]);
-  if (d.since[pid * d.n + other] > 0 && left > 0) return reject(game, pid, `Tratado reciente: espera ${clock(left)}`);
+  if (left > 0) return reject(game, pid, `Tratado reciente: espera ${clock(left)}`);
   setRelation(game, pid, other, (cur - 1) as Rel);
   if (cur === PEACE) {
     game.notify(`⚔️ Has declarado la guerra a ${name(game, other)}`, pid, 'good');
