@@ -1613,6 +1613,19 @@
         { "id": "counterweightTrebuchet", "width": 90 },
         { "id": "divineArquebusier" }
       ]
+    },
+    {
+      "source": "pack6-unidades/mosquetero-andar.jpg",
+      "grid": "auto",
+      "sharedScale": true,
+      "items": [
+        { "id": "musketeer", "state": "walk", "height": 46 },
+        { "id": "musketeer", "state": "walk" },
+        { "id": "musketeer", "state": "walk" },
+        { "id": "musketeer", "state": "walk" },
+        { "id": "musketeer", "state": "walk" },
+        { "id": "musketeer", "state": "walk" }
+      ]
     }
   ]
 }

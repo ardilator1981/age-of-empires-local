@@ -31,7 +31,7 @@
 - P2 · **unidad deer**: walk, death
 - P2 · **unidad boar**: walk, attack, death
 - P2 · **unidad sheep**: walk, death
-- P2 · **unidad musketeer**: walk, attack, death
+- P2 · **unidad musketeer**: attack, death
 - P2 · **unidad cannon**: walk, attack, death
 - P2 · **unidad dragoon**: walk, attack, death
 - P2 · **unidad grenadier**: walk, attack, death
@@ -63,7 +63,7 @@
 | deer | Ciervo | 🟡 sin animar | walk, death | units/deer-walk.png (+ -mask.png)<br>units/deer-death.png (+ -mask.png) | 2 | `anim:walk` `anim:death` |
 | boar | Jabalí | 🟡 sin animar | walk, attack, death | units/boar-walk.png (+ -mask.png)<br>units/boar-attack.png (+ -mask.png)<br>units/boar-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack-melee` `anim:death` |
 | sheep | Oveja | 🟡 sin animar | walk, death | units/sheep-walk.png (+ -mask.png)<br>units/sheep-death.png (+ -mask.png) | 2 | `anim:walk` `anim:death` |
-| musketeer | Mosquetero | 🟡 sin animar | walk, attack, death | units/musketeer-walk.png (+ -mask.png)<br>units/musketeer-attack.png (+ -mask.png)<br>units/musketeer-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack` `anim:death` |
+| musketeer | Mosquetero | 🟡 sin animar | attack, death | units/musketeer-attack.png (+ -mask.png)<br>units/musketeer-death.png (+ -mask.png) | 2 | `anim:attack` `anim:death` |
 | cannon | Cañón | 🟡 sin animar | walk, attack, death | units/cannon-walk.png (+ -mask.png)<br>units/cannon-attack.png (+ -mask.png)<br>units/cannon-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack` `anim:death` |
 | dragoon | Dragón | 🟡 sin animar | walk, attack, death | units/dragoon-walk.png (+ -mask.png)<br>units/dragoon-attack.png (+ -mask.png)<br>units/dragoon-death.png (+ -mask.png) | 2 | `anim:walk:mounted` `anim:attack:mounted` `anim:death:mounted` |
 | grenadier | Granadero | 🟡 sin animar | walk, attack, death | units/grenadier-walk.png (+ -mask.png)<br>units/grenadier-attack.png (+ -mask.png)<br>units/grenadier-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack` `anim:death` |
