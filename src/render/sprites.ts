@@ -341,6 +341,43 @@ export const ram: SpriteFn = s => {
   ctx.restore();
 };
 
+/** Carro de mercancías tirado por una mula (caravana comercial). */
+export const cart: SpriteFn = s => {
+  const { ctx, x, y, z, color, entity: e, time } = s;
+  const facing = e?.facing ?? 1;
+  const roll = e?.moving ? time * 5 : 0;
+  const step = e?.moving ? Math.sin(time * 9 + (e?.id ?? 0)) : 0;
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(z * facing * UNIT_SCALE, z * UNIT_SCALE);
+  ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+  ctx.fillStyle = 'rgba(0,0,0,0.3)';
+  ellipse(ctx, 2, 0, 17, 4.6); ctx.fill();
+  // mula
+  ctx.strokeStyle = OUTLINE; ctx.lineWidth = 3.2;
+  for (const [lx, d] of [[13, 1], [17, -1]] as const) line(ctx, { x: lx, y: -6 }, { x: lx + step * d * 1.8, y: -0.8 });
+  ctx.strokeStyle = '#7a5a3a'; ctx.lineWidth = 2;
+  for (const [lx, d] of [[13, 1], [17, -1]] as const) line(ctx, { x: lx, y: -6 }, { x: lx + step * d * 1.8, y: -0.8 });
+  ctx.fillStyle = '#8a6a48';
+  ctx.beginPath(); ctx.roundRect(10, -11, 10, 6, 2.4); ctx.fill(); outline(ctx, 0.8);
+  poly(ctx, [{ x: 18, y: -10.5 }, { x: 23, y: -14 }, { x: 24.5, y: -11 }, { x: 20, y: -8.5 }]); ctx.fill(); outline(ctx, 0.8);
+  line(ctx, { x: 10, y: -8 }, { x: -2, y: -8 });
+  // carro
+  ctx.fillStyle = '#7a5530'; ctx.fillRect(-12, -11, 22, 5); ctx.strokeStyle = OUTLINE; ctx.lineWidth = 0.9; ctx.strokeRect(-12, -11, 22, 5);
+  // toldo y bultos
+  ctx.fillStyle = '#e9e0c8';
+  poly(ctx, [{ x: -11, y: -11 }, { x: -9, y: -18 }, { x: 7, y: -18 }, { x: 9, y: -11 }]); ctx.fill(); outline(ctx, 0.8);
+  ctx.fillStyle = color; ctx.fillRect(-9, -15, 16, 2);
+  ctx.fillStyle = '#c0922e'; ellipse(ctx, 3, -19, 3, 2); ctx.fill(); outline(ctx, 0.6);
+  // ruedas
+  for (const wx of [-7, 5]) {
+    ctx.fillStyle = '#3d2a17'; ellipse(ctx, wx, -4, 4, 4); ctx.fill(); outline(ctx, 0.8);
+    ctx.strokeStyle = '#a07a4a'; ctx.lineWidth = 0.8;
+    line(ctx, { x: wx + Math.cos(roll) * 3.2, y: -4 + Math.sin(roll) * 3.2 }, { x: wx - Math.cos(roll) * 3.2, y: -4 - Math.sin(roll) * 3.2 });
+  }
+  ctx.restore();
+};
+
 /** Cañón o obús sobre ruedas (artillería de la era de la pólvora); `size` da el calibre. */
 export const cannon: SpriteFn = s => {
   const { ctx, x, y, z, color, entity: e, time } = s;
@@ -1094,6 +1131,7 @@ export function registerCoreSprites(reg: Registry) {
   reg.addSprite('humanoid', humanoid);
   reg.addSprite('cavalry', cavalry);
   reg.addSprite('ram', ram);
+  reg.addSprite('cart', cart);
   reg.addSprite('cannon', cannon);
   reg.addSprite('gatling', gatling);
   reg.addSprite('biplane', biplane);

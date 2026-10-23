@@ -31,7 +31,7 @@ function baseStat(def: AnyDef, stat: StatKey): number {
 
 /** Los efectos que son modificadores (se recalculan); el resto (`grant`, `upgrade`, `custom`) se aplica una vez. */
 export function isModifier(e: Effect): boolean {
-  return e.type === 'stat' || e.type === 'gatherRate' || e.type === 'cost' || e.type === 'gatherYield';
+  return e.type === 'stat' || e.type === 'gatherRate' || e.type === 'cost' || e.type === 'gatherYield' || e.type === 'tradeYield';
 }
 
 function applyOp(v: number, op: 'add' | 'mul' | 'set', val: number): number {
@@ -142,6 +142,13 @@ export class Player {
         v = m.op === 'add' ? v + m.value : v * m.value;
       }
     }
+    return v;
+  }
+
+  /** Multiplicador de las ganancias del comercio (efecto `tradeYield`). */
+  tradeMult(): number {
+    let v = 1;
+    for (const m of this.modifiers) if (m.type === 'tradeYield') v *= m.mul;
     return v;
   }
 

@@ -221,6 +221,78 @@ export const BALANCE = {
     stockpileEnough: 1200,
   },
 
+  /** Diplomacia (docs/civilizaciones.md §8, `game/diplomacy.ts`). Tiempos en segundos de partida. */
+  diplomacy: {
+    /** Una propuesta sin respuesta caduca pasado esto. */
+    proposalTtl: 120,
+    /** Tras firmar o romper un tratado no se puede romper otra vez hasta pasado esto. */
+    treatyLock: 90,
+    /** Parte del tributo que se pierde por el camino. */
+    tributeFee: 0.25,
+    tributeMin: 50,
+    /** IA: la paz se acepta si el rival tiene al menos esta proporción de su ejército, o si ya hay buena voluntad. */
+    aiPeaceRatio: 1.2,
+    /** IA: oro (valor del tributo recibido) que equivale a una buena voluntad que inclina a aceptar la paz. */
+    aiGoodwill: 150,
+    /** IA: rompe la paz si su ejército supera al del otro por esta proporción y lleva este tiempo de tratado. */
+    aiBreakRatio: 2.2,
+    aiBreakAfter: 420,
+    /** IA: edad mínima a la que se plantea romper un tratado y mínimo de soldados. */
+    aiBreakAge: 3,
+    aiBreakArmy: 12,
+    /** IA: cada cuánto propone (s). */
+    aiProposeEvery: 90,
+  },
+
+  /** Comercio (`game/trade.ts`): caravanas entre puestos comerciales. Oro por casilla de distancia. */
+  trade: {
+    perTile: 0.8,
+    /** Multiplicadores según con quién se comercia. */
+    domesticMul: 0.5,
+    foreignMul: 1.5,
+    allyMul: 1.9,
+    /** Distancia mínima (casillas) de una ruta propia, y máxima que se paga. */
+    minDist: 15,
+    maxDist: 90,
+    /** Parte de la ganancia que cobra el puesto extranjero. */
+    partnerShare: 0.5,
+    /** Cada caravana extra en la misma ruta cobra esto menos, con un mínimo. */
+    saturation: 0.15,
+    saturationMin: 0.4,
+    /** Bono por edad del dueño (por edad). */
+    ageBonus: 0.08,
+    /** La IA: caravanas que mantiene según su edad. */
+    aiCaravans: [0, 2, 3, 4, 5, 6],
+  },
+
+  /** Espionaje (`game/espionage.ts`). */
+  espionage: {
+    /** Radio (casillas) en que un edificio de vigilancia o un espía enemigo descubre al espía. */
+    detectRadius: 4,
+    /** Informe: radio revelado en el mapa y segundos que dura. */
+    intelRadius: 9,
+    intelDuration: 45,
+    cooldown: 60,
+    /** Probabilidades de éxito (0–1). */
+    successIntel: 0.9,
+    successSteal: 0.55,
+    successSabotage: 0.65,
+    successBribe: 0.5,
+    /** Robar tecnología: parte del coste que se paga y enfriamiento del jugador (s). */
+    stealCostFrac: 0.4,
+    stealCooldown: 150,
+    /** Sabotaje: parte de la vida que se pierde y del avance de la cola. */
+    sabotageHp: 0.2,
+    sabotageQueue: 0.5,
+    /** Sobornar: oro por unidad y radio de búsqueda. */
+    bribeCost: 120,
+    /** Agente doble: cada cuánto se comprueba si lo descubren y probabilidad. */
+    agentCheckEvery: 2,
+    agentDiscoverChance: 0.25,
+    /** La IA: oro mínimo para ordenar un robo o un informe. */
+    aiMinGold: 350,
+  },
+
   /** Partidas en red (pasos sincronizados; ver docs/multijugador.md). Tiempos en ms salvo que se diga. */
   net: {
     /** Jugadores como mucho en una sala (humanos e IA). */

@@ -186,7 +186,12 @@ export class Game {
   nodeDef(e: Entity): ResourceNodeDef | undefined { return this.reg.resourceNodes.get(e.defId); }
   /** Definición de unidad o edificio (no nodos de recurso). */
   defOf(e: Entity): AnyDef { return e.kind === 'unit' ? this.reg.unit(e.defId) : this.reg.building(e.defId); }
-  isEnemy(a: number, b: number): boolean { return a !== b && a !== 0 && b !== 0; }
+  /** Enemigos: jugadores distintos en guerra (por defecto todos; ver `diplomacy.ts` para la paz y las alianzas). */
+  isEnemy(a: number, b: number): boolean {
+    if (a === b || a === 0 || b === 0) return false;
+    const d = this.data.diplo;
+    return !d || d.rel[a * d.n + b] === 0;
+  }
   /**
    * ¿Puede `a` atacar a `t`? Enemigos y todas las reglas de combate de los mods de acuerdo.
    * `hitting` = va a golpear ya; si es false, solo se pregunta si puede ir a por él.
