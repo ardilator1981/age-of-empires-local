@@ -399,3 +399,27 @@ Cada fase se hace en su propia rama (`feat/...`) y pasa `npm run build`, `npm ru
 - Los hechos citados se limitan a fechas y sucesos de amplio consenso; las unidades con 🔶 son extrapolaciones razonables, no unidades documentadas con ese nombre.
 - «Zemene Mesafint», «chewa», «Prestes Juan» y los detalles de ciertos reclutamientos (Zagüe, ras) se tratan con prudencia: antes de implementar, contrastar con bibliografía (p. ej. Henze, *Layers of Time*; Mote, *Imperial China*; Daryaee, *Sasanian Persia*; Hellie, *Enserfment and Military Change in Muscovy*; Kennedy, *The Prophet and the Age of the Caliphates*).
 - La representación de periodos de dominio extranjero (Yuan, Qing, Horda de Oro, ocupación italiana) no implica valoración: son parte del linaje del territorio.
+
+## 13. Asedio, artillería y blindados por era
+
+Implementado hasta la era 5 (`mods/core/siege.ts`, más `gunpowder.ts` e `industrial.ts`). Cada paso es una **mejora** (`upgrade`) de la unidad anterior: se entrena en el mismo edificio con el nombre y las estadísticas de la última, y las que ya existen se convierten. Valores indicativos.
+
+| Era | Asedio pesado (taller de asedio) | Artillería de campaña | Se enfrenta a |
+| --- | --- | --- | --- |
+| 2 Castillos | **Ariete** · **Catapulta** (área, imprecisa, hace de «mortero» de masas) · **Escorpión** (ballesta gigante: tiro tenso contra tropas y asedio) | — | Edificios (ariete, catapulta), tropas agrupadas y asedio (escorpión) |
+| 3 Imperial | **Ariete cubierto** · **Trabuquete** (de la catapulta; enorme alcance, solo edificios) · **Escorpión pesado** | — | Castillos y torres desde fuera de su alcance |
+| 4 Pólvora | **Bombarda** (del trabuquete: cañón de asedio de tubo corto) | **Cañón** (fábrica de pólvora; `gunpowder.ts`) | Fortalezas abaluartadas |
+| 5 Industrial | **Obús** (de la bombarda, en la fábrica: trayectoria alta, área grande) | **Cañón de campaña** (del cañón, en la fábrica) y **Ametralladora** (aparte: es arma de infantería) | Fortalezas y masas de fusileros |
+| 6 Contemporánea | *Pendiente (fase 6)* | *Pendiente (fase 6)* | |
+
+**Reglas del motor que lo hacen posible:** `CombatStats.splash` (daño de área: radio, pérdida en el borde, error de puntería; el proyectil cae donde estaba el blanco al disparar), clase `antiUnit` (el asedio dispara por su cuenta a las tropas; sin ella, solo a edificios, como el ariete, el trabuquete y la bombarda) y el proyectil `rock` (sonido `hitRock`). Toda la artillería (`artillery`) lleva daño de área pequeño y `antiUnit`.
+
+**Líneas que se quedan en su era:** el escorpión pesado no tiene sucesor (las armas de fuego lo sustituyen: ametralladora e infantería de fusil); el ariete cubierto tampoco (el blindado lo reemplazará en la fase 6). El **Trabuquete de contrapeso** chino (único, Castillos) coexiste con el trabuquete común de la Imperial.
+
+### Para la fase 6 (era Contemporánea)
+
+- **Blindados.** Línea de «carro»: *carro ligero* (mejora de la ametralladora o unidad nueva en la **fábrica de automóviles**) → *carro medio* → *carro pesado*. Clases `armored`, `siege`, `antiUnit` (puede disparar a tropas y edificios), blindaje alto contra `pierce` y bajo contra el nuevo tipo `antiTank`; necesitan **petróleo** (combustible, coste de entrenamiento y mantenimiento). Sustituyen al ariete cubierto como romperedes (`upgrade` desde `cappedRam` en la fábrica de automóviles, o línea propia si el motor lo prefiere).
+- **Artillería moderna.** Obús (era 5) → *obús autopropulsado* (sobre chasis) y *lanzacohetes múltiple*; *cañón antitanque* y *antiaéreo* como contraataque de unidades (usar `airRule` y un nuevo tipo de daño).
+- **Tipo de daño nuevo** (`explosive`/`antiTank`) o bonos por clase `armored` en `bonus`; hoy solo hay `melee` y `pierce`.
+- **Únicas por civilización de §5 que cuelgan de esto:** Rusia: **T-34** (carro medio) y **Katiusha** (lanzacohetes); Francia: **Renault FT** (carro ligero); China: **Carro ligero** e **Infantería mecanizada**; Persia: **Camión blindado**; Etiopía: **Carro ligero** (comprado: vía `armsImport`); Gran Bretaña/EE. UU.: **Sherman**. Cada una como `civs: [...]` y, si encaja en la línea, como `upgrade` propio de su civilización (la tabla de `Player.upgrades` es por jugador).
+- **Asedio sin fase 6:** si la era 6 se retrasa, bastaría con un *obús autopropulsado* en la era 5.

@@ -126,6 +126,8 @@ export const siegeAI: AIPlugin = {
   think(ctx) {
     const { game: g, player: p, army } = ctx;
     if (p.age < 2) return;
+    // Lo primero de cada era nueva es su edificio clave (fábrica de pólvora, fábrica): el asedio espera
+    if ((p.age === 4 && p.count('gunpowderWorks') === 0) || (p.age >= 5 && p.count('factory') === 0)) return;
     const isSiege = (id: string) => g.reg.unit(id).classes.includes('siege');
     const siege = army.filter(e => isSiege(e.defId));
     const troops = army.length - siege.length;
@@ -137,7 +139,7 @@ export const siegeAI: AIPlugin = {
       for (const t of [...siegeTechs, ...fieldArtilleryTechs]) {
         const up = t.effects.find(e => e.type === 'upgrade');
         if (up?.type !== 'upgrade' || !lines.has(up.from) || !techAvail(g, p, t.id).ok) continue;
-        if (ctx.canSpend(p.getCost(t)) && ctx.research(t.id)) return;
+        if (spare(ctx, p.getCost(t), 250) && ctx.research(t.id)) return;
       }
     }
 
@@ -152,12 +154,19 @@ export const siegeAI: AIPlugin = {
         if (isSiege(id) && (d.attack ?? 0) > 0 && !options.includes(id)) options.push(id);
       }
     }
-    // La que menos tiene en proporción a su peso (si empatan, la de más edad)
+    // La que menos tiene en proporción a su peso (si empatan, la de más edad); ninguna pasa de la mitad del asedio
     const have = (id: string) => siege.filter(e => e.defId === id).length + ctx.buildings.reduce((n, b) => n + b.queue.filter(q => q.kind === 'unit' && q.id === id).length, 0);
+    const cap = Math.max(2, Math.ceil(want / 2));
+    options.splice(0, options.length, ...options.filter(id => have(id) < cap));
     options.sort((a, b) => have(a) / (WEIGHT[a] ?? 1) - have(b) / (WEIGHT[b] ?? 1) || g.reg.unit(b).age - g.reg.unit(a).age);
-    for (const id of options) if (ctx.canSpend(p.getCost(g.reg.unit(id))) && ctx.train(id)) return;
+    for (const id of options) if (spare(ctx, p.getCost(g.reg.unit(id)), 100) && ctx.train(id)) return;
   },
 };
+
+/** ¿Se puede pagar y que sobre `margin` de cada recurso? El asedio no le quita a la economía ni a la edad lo que necesitan. */
+function spare(ctx: Parameters<AIPlugin['think']>[0], cost: Record<string, number | undefined>, margin: number): boolean {
+  return ctx.canSpend(cost) && Object.entries(cost).every(([r, v]) => (ctx.player.res[r] ?? 0) >= (v ?? 0) + margin);
+}
 
 function queuedSiege(ctx: Parameters<AIPlugin['think']>[0]): number {
   const { game: g } = ctx;

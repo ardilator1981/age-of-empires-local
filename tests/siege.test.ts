@@ -83,3 +83,26 @@ describe('evolución del asedio por era', () => {
     expect(trainablesAt(g, p, 'gunpowderWorks')).toContain('fieldGun');
   });
 });
+
+describe('la IA y el asedio', () => {
+  it('construye el taller y entrena asedio variado, y mejora sus líneas', async () => {
+    const o = options('arabia', { startAge: 3, seed: 3 });
+    o.players = [
+      { name: 'A', civ: 'france', color: '#3b6fe0', human: false, difficulty: 'normal' },
+      { name: 'B', civ: 'china', color: '#d63a3a', human: false, difficulty: 'normal' },
+    ] as any;
+    const g = new Game(reg, o);
+    const trained = new Set<string>();
+    g.events.on('unitTrained', ({ entity }: any) => { if (g.unitDef(entity).classes.includes('siege')) trained.add(entity.defId); });
+    for (let i = 0; i < 20 * 60 * 25; i++) {
+      // Recursos de sobra para ver las decisiones de la IA sin que la economía las tape
+      if (i % (20 * 20) === 0) for (const p of g.players.slice(1)) for (const r of ['food', 'wood', 'gold', 'stone']) p.res[r] = Math.max(p.res[r] ?? 0, 1500);
+      g.update(TICK_DT);
+    }
+    expect(g.players.slice(1).some(p => p.count('siegeWorkshop') > 0)).toBe(true);
+    // Más de un tipo de asedio (no solo arietes) y alguna mejora investigada
+    expect(trained.size).toBeGreaterThanOrEqual(2);
+    expect([...trained].some(id => id !== 'batteringRam' && id !== 'cappedRam')).toBe(true);
+    expect(g.players.slice(1).some(p => [...p.researched].some(t => t.startsWith('up_') && ['up_trebuchet', 'up_heavyScorpion', 'up_cappedRam'].includes(t)))).toBe(true);
+  }, 120_000);
+});

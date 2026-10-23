@@ -16,7 +16,7 @@ const FIREARM = ['firearm'];
 export const industrialBuildings: BuildingDef[] = [
   {
     id: 'factory', name: 'Fábrica', icon: '🏭', category: 'military',
-    description: 'Fabrica fusileros, cañones de campaña y ametralladoras, y mejora el armamento.',
+    description: 'Fabrica fusileros y ametralladoras, mejora el cañón a cañón de campaña y el asedio a obús, y mejora el armamento.',
     classes: ['building'], cost: { wood: 200, stone: 200 }, buildTime: 70, size: 3,
     hp: 2200, armor: { melee: 1, pierce: 9 }, los: 5, age: 5, requiresBuildings: ['gunpowderWorks'],
     sprite: 'building', spriteParams: { style: 'smithy', wall: '#8a5a48', roof: '#3a3f48' },
