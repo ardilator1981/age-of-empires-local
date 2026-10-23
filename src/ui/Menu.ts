@@ -12,6 +12,7 @@ import { bindSettings, settingsHtml } from './SettingsPanel';
 import { ago, AUTO_SLOT, deleteSlot, gameClock, listSlots, MANUAL_SLOTS } from '../app/saves';
 import { bindSoundControls, soundControlsHtml } from './soundSettings';
 import { Lobby } from './Lobby';
+import { CatalogScreen } from './CatalogScreen';
 import { DIFFS, esc, opt, SIZES, SPEEDS, type Diff } from './menuOptions';
 
 
@@ -192,7 +193,7 @@ export class Menu {
         </div>
         <button class="start" data-start>⚔️ ¡Comenzar partida!</button>
         <button class="start net" data-net>🌐 Jugar en red con amigos</button>
-        <div class="credits-link"><button class="small" data-settings>⚙️ Ajustes</button> <button class="small" data-credits>📜 Créditos y atribuciones</button></div>
+        <div class="credits-link"><button class="small" data-settings>⚙️ Ajustes</button> <button class="small" data-catalog>📚 Catálogo</button> <button class="small" data-credits>📜 Créditos y atribuciones</button></div>
         ${this.volumeHtml()}
         ${help()}
       </div>`);
@@ -239,6 +240,7 @@ export class Menu {
     void this.fillContinue(root);
     root.querySelector('[data-regions]')?.addEventListener('click', () => this.showRegions());
     root.querySelector('[data-credits]')?.addEventListener('click', () => this.showCredits());
+    root.querySelector('[data-catalog]')?.addEventListener('click', () => this.showCatalog());
     root.querySelector('[data-settings]')?.addEventListener('click', () => this.showSettings(() => this.showMain()));
     this.bindVolume();
   }
@@ -502,6 +504,9 @@ export class Menu {
   }
 
   /** Créditos y atribuciones de los datos geográficos. */
+  /** Catálogo de contenido y su estado de lógica (ver ui/CatalogScreen.ts). También con `?catalogo` en la URL. */
+  showCatalog() { new CatalogScreen(this.overlay, () => this.showMain()).show(); }
+
   showCredits() {
     this.show(`
       <div class="menu small credits">

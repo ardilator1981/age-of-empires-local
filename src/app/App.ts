@@ -58,6 +58,8 @@ export class App {
     this.menu.showMain();
     // Un enlace de invitación abre directamente la sala
     openFromUrl(this, () => this.menu.lobby());
+    // ?catalogo abre directamente el catálogo de contenido
+    if (new URLSearchParams(location.search).has('catalogo')) this.menu.showCatalog();
     requestAnimationFrame(this.loop);
     (window as any).app = this;
     // Guardado automático al pasar a segundo plano o cerrar (en el móvil, al cambiar de app).

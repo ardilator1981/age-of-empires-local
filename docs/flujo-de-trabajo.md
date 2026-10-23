@@ -55,3 +55,7 @@ Regla práctica:
 | --- | --- | --- |
 | Gráficos con sprites generados por IA | Gráficos y arte | Sonnet 5.5, medio |
 | Viabilidad del modo multijugador | Multijugador (para los fallos que salgan al probar en móviles) | Opus 5.5, alto |
+
+## Catálogo de contenido
+
+`docs/catalogo.md` lista todo el contenido (unidades, edificios, tecnologías, poderes, civilizaciones...) con su estado de lógica, el contenido que la IA nunca usa y la comparativa entre civilizaciones. Se genera con `npm run catalog` (`npm run catalog -- --check` solo comprueba) y un test falla si está desactualizado: **al añadir o cambiar contenido, ejecútalo y sube el resultado**. Las anotaciones manuales («en desarrollo», «pendiente de fase N», «solo decorativo») van en `docs/catalogo-notas.json` (con `until` caducan solas al existir lo que esperan) y la explicación de los desarrollos en `docs/catalogo-desarrollos.md`. En el juego: menú → 📚 Catálogo, o `?catalogo` en la URL.

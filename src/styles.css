@@ -901,3 +901,44 @@ ul.net-players small { color: var(--parchment); }
   background: var(--grain), linear-gradient(#80705c, #4c4136); border: 1px solid var(--gold-dark);
 }
 #update-banner button[data-u="ok"] { color: #fff3c8; border-color: var(--gold); }
+
+/* ================================================================ pantalla de Catálogo (ui/CatalogScreen.ts) */
+.menu.catalog { width: min(1280px, 100%); text-align: left; }
+.catalog .cat-tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px; -webkit-overflow-scrolling: touch; }
+.catalog .cat-tabs button, .catalog .cat-filters select, .catalog .cat-filters input { min-height: 44px; }
+.catalog .cat-tabs button { flex: none; background: var(--grain), linear-gradient(#80705c, #4c4136); color: var(--text); border: 1px solid #1a120a; box-shadow: var(--bevel-out); padding: 4px 10px; font-family: var(--font); }
+.catalog .cat-tabs button.sel { background: linear-gradient(#a8873a, #6e5420); color: #fff3c8; }
+.catalog .cat-tabs small { opacity: 0.8; }
+.catalog .cat-filters { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
+.catalog .cat-filters input { flex: 1 1 220px; width: auto; }
+.catalog .cat-filters select { flex: 1 1 160px; }
+.catalog .cat-summary { color: var(--parchment); font-size: 13px; margin-bottom: 8px; }
+.catalog .cat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; }
+.catalog .cat-card { background: var(--grain), rgba(14, 10, 6, 0.75); box-shadow: var(--bevel-in), 0 0 0 1px var(--gold-dark); padding: 10px; font-size: 13px; }
+.catalog .cat-card.unused { box-shadow: var(--bevel-in), 0 0 0 2px #c9852a; }
+.catalog .cat-card.dev { box-shadow: var(--bevel-in), 0 0 0 2px #5a8fd0; }
+.catalog .cat-card.deco { box-shadow: var(--bevel-in), 0 0 0 2px #8a6ab0; }
+.catalog .cat-head { display: flex; gap: 10px; align-items: center; }
+.catalog .cat-pic { width: 56px; height: 56px; flex: none; image-rendering: auto; }
+.catalog .cat-pic.ic { display: flex; align-items: center; justify-content: center; font-size: 34px; }
+.catalog .cat-pic.ic svg { width: 100%; height: 100%; }
+.catalog .cat-head b { color: var(--gold); font-size: 15px; display: block; }
+.catalog .cat-badge { font-size: 12px; border-radius: 2px; padding: 1px 6px; background: #2d4a2d; color: #cfe8c0; }
+.catalog .cat-badge.unused { background: #6b4210; color: #ffd9a0; }
+.catalog .cat-badge.dev { background: #1f3a63; color: #cfe0ff; }
+.catalog .cat-badge.deco { background: #4a2d63; color: #e6d0ff; }
+.catalog .cat-meta { color: var(--gold-dim); font-size: 12px; margin: 6px 0 2px; }
+.catalog .cat-cost { font-size: 12px; color: var(--parchment); }
+.catalog .cat-card p { margin: 6px 0; color: var(--text); }
+.catalog .cat-why { background: rgba(0, 0, 0, 0.35); padding: 5px 7px; margin: 6px 0; color: #ffe2b0; }
+.catalog details summary { cursor: pointer; color: var(--gold); min-height: 32px; display: flex; align-items: center; }
+.catalog details ul { margin: 4px 0; padding-left: 18px; }
+.catalog .cat-scroll { overflow-x: auto; }
+.catalog .cat-table { border-collapse: collapse; font-size: 12px; min-width: 520px; }
+.catalog .cat-table th, .catalog .cat-table td { border: 1px solid var(--gold-dark); padding: 4px 8px; text-align: left; vertical-align: top; }
+.catalog .cat-table thead th { color: var(--gold); background: rgba(0, 0, 0, 0.4); }
+@media (max-width: 700px) {
+  .menu.catalog { padding: 12px 10px; }
+  .menu.catalog h1 { font-size: 28px; }
+  .catalog .cat-grid { grid-template-columns: 1fr; }
+}
