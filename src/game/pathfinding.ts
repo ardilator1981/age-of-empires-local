@@ -61,7 +61,7 @@ const DY = [0, 0, 1, -1, 1, -1, 1, -1];
  * rectángulo objetivo ampliado `near` casillas. Si no hay camino, devuelve el
  * camino hasta la casilla alcanzable más cercana (reached = false).
  */
-export function findPath(map: GameMap, sx: number, sy: number, goal: GoalRect, near: number, maxNodes = 6000): { path: Pt[]; reached: boolean } {
+export function findPath(map: GameMap, sx: number, sy: number, goal: GoalRect, near: number, maxNodes = 6000, owner?: number): { path: Pt[]; reached: boolean } {
   const W = map.w, H = map.h, N = W * H;
   if (N > cap) {
     cap = N;
@@ -97,8 +97,8 @@ export function findPath(map: GameMap, sx: number, sy: number, goal: GoalRect, n
     for (let k = 0; k < 8; k++) {
       const nx = cx + DX[k], ny = cy + DY[k];
       if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue;
-      if (!map.walkable(nx, ny)) continue;
-      if (k >= 4 && (!map.walkable(cx + DX[k], cy) || !map.walkable(cx, cy + DY[k]))) continue;
+      if (!map.walkableFor(nx, ny, owner)) continue;
+      if (k >= 4 && (!map.walkableFor(cx + DX[k], cy, owner) || !map.walkableFor(cx, cy + DY[k], owner))) continue;
       const n = ny * W + nx;
       if (closed[n] === st) continue;
       const ng = gc + (k >= 4 ? 1.41421 : 1) + slopeCost * Math.abs(th[n] - th[cur]);
@@ -118,26 +118,26 @@ export function findPath(map: GameMap, sx: number, sy: number, goal: GoalRect, n
 }
 
 /** ¿Puede una unidad de radio r ir en línea recta de A a B? */
-export function lineClear(map: GameMap, ax: number, ay: number, bx: number, by: number, r = 0.2): boolean {
+export function lineClear(map: GameMap, ax: number, ay: number, bx: number, by: number, r = 0.2, owner?: number): boolean {
   const d = hypot(bx - ax, by - ay);
   const steps = Math.max(1, Math.ceil(d / 0.25));
   for (let i = 1; i <= steps; i++) {
     const t = i / steps;
     const x = ax + (bx - ax) * t, y = ay + (by - ay) * t;
-    if (!map.walkable(Math.floor(x - r), Math.floor(y - r)) || !map.walkable(Math.floor(x + r), Math.floor(y - r)) ||
-        !map.walkable(Math.floor(x - r), Math.floor(y + r)) || !map.walkable(Math.floor(x + r), Math.floor(y + r))) return false;
+    if (!map.walkableFor(Math.floor(x - r), Math.floor(y - r), owner) || !map.walkableFor(Math.floor(x + r), Math.floor(y - r), owner) ||
+        !map.walkableFor(Math.floor(x - r), Math.floor(y + r), owner) || !map.walkableFor(Math.floor(x + r), Math.floor(y + r), owner)) return false;
   }
   return true;
 }
 
 /** Elimina puntos intermedios innecesarios para que las unidades no zigzagueen. */
-export function smoothPath(map: GameMap, sx: number, sy: number, pts: Pt[]): Pt[] {
+export function smoothPath(map: GameMap, sx: number, sy: number, pts: Pt[], owner?: number): Pt[] {
   if (pts.length <= 1) return pts;
   const out: Pt[] = [];
   let ax = sx, ay = sy, i = 0;
   while (i < pts.length) {
     let j = Math.min(pts.length - 1, i + 14);
-    for (; j > i; j--) if (lineClear(map, ax, ay, pts[j].x, pts[j].y)) break;
+    for (; j > i; j--) if (lineClear(map, ax, ay, pts[j].x, pts[j].y, 0.2, owner)) break;
     out.push(pts[j]);
     ax = pts[j].x; ay = pts[j].y;
     i = j + 1;

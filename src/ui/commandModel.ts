@@ -36,7 +36,7 @@ export interface CommandSet {
   /** Edificios propios seleccionados. */
   blds: Entity[];
   /** Menús de construcción (solo si hay constructores): botón de categoría y edificios visibles. */
-  build: Record<'economy' | 'military', { cmd: Cmd; items: Cmd[] }> | null;
+  build: Record<'economy' | 'military' | 'defense', { cmd: Cmd; items: Cmd[] }> | null;
   attackMove: Cmd | null;
   /** Auto-exploración (unidades con `autoExplore`). */
   explore: Cmd | null;
@@ -209,7 +209,7 @@ export function selectionCommands(s: Session): CommandSet {
 
   if (units.length) {
     if (units.some(u => g.unitDef(u).builder)) {
-      const list = (cat: 'economy' | 'military') => buildablesFor(g, p, cat).filter(id => buildingAvail(g, p, id).visible).map(id => {
+      const list = (cat: 'economy' | 'military' | 'defense') => buildablesFor(g, p, cat).filter(id => buildingAvail(g, p, id).visible).map(id => {
         const def = g.reg.building(id);
         const a = buildingAvail(g, p, id);
         const cost = costText(g, p.getCost(def));
@@ -228,6 +228,7 @@ export function selectionCommands(s: Session): CommandSet {
       set.build = {
         economy: { cmd: { icon: eco, label: 'Construir eco', avail: OK, tip: '<b>Construir edificio económico</b>', action: () => { ui.page = 'economy'; } }, items: list('economy') },
         military: { cmd: { icon: mil, label: 'Construir mil', avail: OK, tip: '<b>Construir edificio militar</b>', action: () => { ui.page = 'military'; } }, items: list('military') },
+        defense: { cmd: { icon: g.reg.buildings.has('stoneWall') ? pic(g, 'building', 'stoneWall', p.id) : '🧱', label: 'Construir defensas', avail: OK, tip: '<b>Construir defensas</b><br>Empalizadas, murallas, puertas, zanjas y torres de muralla. Las líneas se trazan arrastrando.', action: () => { ui.page = 'defense'; } }, items: list('defense') },
       };
     }
     if (units.some(u => (g.unitDef(u).attack ?? 0) > 0 && !g.unitDef(u).gatherer)) {

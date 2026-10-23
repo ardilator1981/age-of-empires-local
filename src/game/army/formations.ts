@@ -185,9 +185,9 @@ export function assignSlots(game: Game, units: Entity[], type: FormationType, fa
  * Hueco en el mundo, sin caer en roca, agua ni en otra región (se busca la casilla libre
  * más cercana que no esté ya ocupada por otro hueco).
  */
-export function safeSlot(game: Game, p: Pt, region: number, used?: Set<number>): Pt {
+export function safeSlot(game: Game, p: Pt, region: number, used?: Set<number>, owner?: number): Pt {
   const m = game.map;
-  const ok = (x: number, y: number) => m.walkable(x, y) && (region < 0 || m.region(x, y) === region) && !used?.has(y * m.w + x);
+  const ok = (x: number, y: number) => m.walkableFor(x, y, owner) && (region < 0 || m.region(x, y, owner) === region) && !used?.has(y * m.w + x);
   let fx = Math.floor(p.x), fy = Math.floor(p.y);
   if (!ok(fx, fy)) {
     let best: Pt | null = null, bd = Infinity;

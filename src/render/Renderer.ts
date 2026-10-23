@@ -165,9 +165,20 @@ export class Renderer {
     const def: any = kind === 'resource' ? reg.resourceNodes.get(defId) : kind === 'unit' ? reg.units.get(defId) : reg.buildings.get(defId);
     if (!def) return null;
     const project = hb === undefined ? this.project : (wx: number, wy: number) => this.cam.worldToScreen(wx, wy, hb);
+    const params = def.spriteParams ?? {};
+    let link: SpriteContext['link'];
+    if (e && params.link && foot) {
+      const g = this.game, m = g.map;
+      link = (dx, dy) => {
+        const x = foot.tx + dx, y = foot.ty + dy;
+        if (!m.inBounds(x, y)) return false;
+        const o = g.entities.get(m.occupant[y * m.w + x]);
+        return !!o && !o.dead && g.reg.buildings.get(o.defId)?.spriteParams?.link === params.link;
+      };
+    }
     return {
       ctx: this.ctx, x: sx, y: sy, z: this.cam.zoom, time: this.game.time,
-      color: this.game.players[owner]?.color ?? '#aaa', entity: e, def, params: def.spriteParams ?? {}, project, foot,
+      color: this.game.players[owner]?.color ?? '#aaa', entity: e, def, params, project, foot, link,
       age: this.game.players[owner]?.age ?? 0,
     };
   }
@@ -510,18 +521,21 @@ export class Renderer {
       }
     }
 
-    // Fantasma de construcción
+    // Fantasma de construcción (los de línea, un fantasma por casilla del trazo)
     if (ui.placing) {
-      const { defId, tx, ty, valid } = ui.placing;
+      const { defId, valid } = ui.placing;
       const def = game.reg.building(defId);
-      const hb = this.gl ? game.map.baseHeight(tx, ty, def.size) : 0;
-      ctx.fillStyle = valid ? 'rgba(80,255,80,0.25)' : 'rgba(255,60,60,0.35)';
-      poly(ctx, this.footprint({ tx, ty, size: def.size }, hb)); ctx.fill();
-      ctx.globalAlpha = 0.7;
-      const c = cam.worldToScreen(tx + def.size / 2, ty + def.size / 2, hb);
-      const s = this.spriteCtx(null, defId, 'building', c.x, c.y, game.humanId, { tx, ty, size: def.size }, hb);
-      if (s) game.reg.sprites.get(def.sprite)?.(s);
-      ctx.globalAlpha = 1;
+      const spots = ui.placing.line ?? [{ x: ui.placing.tx, y: ui.placing.ty, ok: valid }];
+      for (const t of spots) {
+        const hb = this.gl ? game.map.baseHeight(t.x, t.y, def.size) : 0;
+        ctx.fillStyle = t.ok ? 'rgba(80,255,80,0.25)' : 'rgba(255,60,60,0.35)';
+        poly(ctx, this.footprint({ tx: t.x, ty: t.y, size: def.size }, hb)); ctx.fill();
+        ctx.globalAlpha = 0.7;
+        const c = cam.worldToScreen(t.x + def.size / 2, t.y + def.size / 2, hb);
+        const s = this.spriteCtx(null, defId, 'building', c.x, c.y, game.humanId, { tx: t.x, ty: t.y, size: def.size }, hb);
+        if (s) game.reg.sprites.get(def.sprite)?.(s);
+        ctx.globalAlpha = 1;
+      }
     }
 
     // Marcadores de órdenes

@@ -6,6 +6,7 @@ import type { Stance } from '../army/stances';
 import type { Entity } from '../Entity';
 import type { Game } from '../Game';
 import { buildingAvail, techAvail, unitAvail } from '../rules';
+import { placeLine } from '../defense';
 
 /**
  * Órdenes de jugador en datos simples (JSON), para enviarlas por la red o guardarlas en una
@@ -29,6 +30,8 @@ export type NetCommand =
   | { t: 'formation'; units: number[]; formation: FormationType }
   | { t: 'stance'; units: number[]; stance: Stance }
   | { t: 'place'; building: string; tx: number; ty: number; builders: number[] }
+  /** Una línea de segmentos (empalizada, muralla, zanja): casillas [x, y] en orden. Ver `game/defense.ts`. */
+  | { t: 'placeLine'; building: string; tiles: [number, number][]; builders: number[] }
   | { t: 'train'; at: number; unit: string }
   | { t: 'research'; at: number; tech: string }
   | { t: 'cancel'; at: number; index: number }
@@ -124,6 +127,15 @@ export function applyNetCommand(game: Game, pid: number, c: NetCommand): boolean
         else game.rejectAvail(pid, a);
       }
       return ok;
+    }
+    case 'placeLine': {
+      if (!Array.isArray(c.tiles)) return false;
+      const n = placeLine(game, pid, c.building, c.tiles, own(game, pid, c.builders));
+      if (!n) {
+        const a = buildingAvail(game, p, c.building);
+        if (a.ok) game.reject(pid, 'placement', 'No se puede construir ahí'); else game.rejectAvail(pid, a);
+      }
+      return n > 0;
     }
     case 'train': {
       const [b] = own(game, pid, [c.at]);

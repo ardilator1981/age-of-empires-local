@@ -62,13 +62,13 @@ export function moveTo(game: Game, u: Entity, x: number, y: number) {
   }
   const gx = Math.floor(x), gy = Math.floor(y);
   const walk = m.walkable(gx, gy);
-  const r = findPath(m, u.x, u.y, { x0: gx, y0: gy, x1: gx, y1: gy }, walk ? 0 : 1);
+  const r = findPath(m, u.x, u.y, { x0: gx, y0: gy, x1: gx, y1: gy }, walk ? 0 : 1, undefined, u.owner);
   const raw = r.path;
   if (walk && r.reached) {
     if (raw.length) raw[raw.length - 1] = { x, y };
     else raw.push({ x, y });
   }
-  u.path = smoothPath(m, u.x, u.y, raw);
+  u.path = smoothPath(m, u.x, u.y, raw, u.owner);
   u.pathFor = -1;
 }
 
@@ -85,15 +85,23 @@ export function approach(game: Game, u: Entity, t: Entity, range: number): numbe
   return st;
 }
 
+/** ¿Se puede pisar el edificio? Las granjas sí; una puerta, solo quien no es enemigo de su dueño. */
+function isWalkableFor(game: Game, owner: number | undefined, t: Entity): boolean {
+  const def = game.reg.building(t.defId);
+  return !!def.walkable && !(def.gate && owner !== undefined && game.isEnemy(owner, t.owner));
+}
+
 /** ¿Puede la unidad llegar hasta el objetivo? (comprobación instantánea por regiones) */
 export function canReach(game: Game, u: { x: number; y: number }, t: Entity): boolean {
   if ((u as Entity).kind === 'unit' && flies(game, u as Entity)) return true;
   const m = game.map;
-  const r = m.regionAt(u.x, u.y);
+  // Las puertas cerradas para esta unidad (de un enemigo) cuentan como pared
+  const owner = (u as Entity).kind === 'unit' ? (u as Entity).owner : undefined;
+  const r = m.regionAt(u.x, u.y, owner);
   if (r < 0) return true;
-  if (t.kind === 'unit') return m.regionAt(t.x, t.y) === r || m.regionAt(t.x, t.y) < 0;
-  const walk = t.kind === 'building' && !!game.reg.building(t.defId).walkable;
-  return m.rectTouchesRegion(t.tx, t.ty, t.tx + t.size - 1, t.ty + t.size - 1, r, walk);
+  if (t.kind === 'unit') return m.regionAt(t.x, t.y, owner) === r || m.regionAt(t.x, t.y, owner) < 0;
+  const walk = t.kind === 'building' && isWalkableFor(game, owner, t);
+  return m.rectTouchesRegion(t.tx, t.ty, t.tx + t.size - 1, t.ty + t.size - 1, r, walk, owner);
 }
 
 function approachStep(game: Game, u: Entity, t: Entity, d: number): number {
@@ -111,16 +119,16 @@ function approachStep(game: Game, u: Entity, t: Entity, d: number): number {
     if (!u.path.length || u.pathFor !== t.id || game.time >= u.nextRepath) {
       u.nextRepath = game.time + 0.5 + game.rng() * 0.3;
       u.pathFor = t.id;
-      if (d < 4 && lineClear(m, u.x, u.y, t.x, t.y)) {
+      if (d < 4 && lineClear(m, u.x, u.y, t.x, t.y, 0.2, u.owner)) {
         u.path = [{ x: t.x, y: t.y }];
       } else if (!pathBudget(game)) {
         u.nextRepath = game.time; // se intentará el próximo tick
         return MOVING;
       } else {
-        const r = findPath(m, u.x, u.y, rectOf(t), 0);
+        const r = findPath(m, u.x, u.y, rectOf(t), 0, undefined, u.owner);
         const raw = r.path;
         if (r.reached) raw.push({ x: t.x, y: t.y });
-        u.path = smoothPath(m, u.x, u.y, raw);
+        u.path = smoothPath(m, u.x, u.y, raw, u.owner);
         if (!u.path.length) return UNREACHABLE;
       }
     }
@@ -128,9 +136,9 @@ function approachStep(game: Game, u: Entity, t: Entity, d: number): number {
   }
   if (!u.path.length || u.pathFor !== t.id || game.time >= u.nextRepath) {
     if (!pathBudget(game)) return MOVING; // sin presupuesto este tick: se sigue con el camino actual
-    const walkableTarget = t.kind === 'building' && !!game.reg.building(t.defId).walkable;
-    const r = findPath(m, u.x, u.y, rectOf(t), walkableTarget ? 0 : 1);
-    u.path = smoothPath(m, u.x, u.y, r.path);
+    const walkableTarget = t.kind === 'building' && isWalkableFor(game, u.owner, t);
+    const r = findPath(m, u.x, u.y, rectOf(t), walkableTarget ? 0 : 1, undefined, u.owner);
+    u.path = smoothPath(m, u.x, u.y, r.path, u.owner);
     u.pathFor = t.id;
     u.nextRepath = game.time + 4 + game.rng();
     if (!u.path.length) {

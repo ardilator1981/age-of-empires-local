@@ -9,12 +9,12 @@
 | Tipo | Hecho | Sin animar | Pendiente |
 | --- | ---: | ---: | ---: |
 | unidad | 2 | 42 | 38 |
-| edificio | 0 | 12 | 48 |
+| edificio | 0 | 12 | 57 |
 | recurso | 6 | 0 | 6 |
 | terreno | 9 | 0 | 0 |
 | decoración | 9 | 0 | 0 |
 | efecto | 8 | 0 | 5 |
-| interfaz | 11 | 0 | 97 |
+| interfaz | 11 | 0 | 101 |
 
 ## Siguiente en generar (por prioridad)
 
@@ -147,6 +147,15 @@
 | kremlin | Kremlin de piedra | 🔴 pendiente | imagen base (Edad de los Castillos), Edad Imperial, Edad de la Pólvora, Edad Industrial | buildings/kremlin.png (+ -mask.png)<br>buildings/kremlin-3.png (+ -mask.png)<br>buildings/kremlin-4.png (+ -mask.png)<br>buildings/kremlin-5.png (+ -mask.png) | 3 | `building:base` |
 | ostrog | Ostrog | 🔴 pendiente | imagen base (Edad Imperial), Edad de la Pólvora, Edad Industrial | buildings/ostrog.png (+ -mask.png)<br>buildings/ostrog-4.png (+ -mask.png)<br>buildings/ostrog-5.png (+ -mask.png) | 3 | `building:base` |
 | corral | Corral | 🔴 pendiente | imagen base (Edad Feudal), Edad de los Castillos, Edad Imperial, Edad de la Pólvora, Edad Industrial | buildings/corral.png (+ -mask.png)<br>buildings/corral-2.png (+ -mask.png)<br>buildings/corral-3.png (+ -mask.png)<br>buildings/corral-4.png (+ -mask.png)<br>buildings/corral-5.png (+ -mask.png) | 3 | `building:base` |
+| palisade | Empalizada | 🔴 pendiente | imagen base (Edad Oscura), Edad Feudal, Edad de los Castillos, Edad Imperial, Edad de la Pólvora, Edad Industrial | buildings/palisade.png (+ -mask.png)<br>buildings/palisade-1.png (+ -mask.png)<br>buildings/palisade-2.png (+ -mask.png)<br>buildings/palisade-3.png (+ -mask.png)<br>buildings/palisade-4.png (+ -mask.png)<br>buildings/palisade-5.png (+ -mask.png) | 3 | `building:base` |
+| palisadeGate | Puerta de empalizada | 🔴 pendiente | imagen base (Edad Oscura), Edad Feudal, Edad de los Castillos, Edad Imperial, Edad de la Pólvora, Edad Industrial | buildings/palisadeGate.png (+ -mask.png)<br>buildings/palisadeGate-1.png (+ -mask.png)<br>buildings/palisadeGate-2.png (+ -mask.png)<br>buildings/palisadeGate-3.png (+ -mask.png)<br>buildings/palisadeGate-4.png (+ -mask.png)<br>buildings/palisadeGate-5.png (+ -mask.png) | 3 | `building:base` |
+| ditch | Zanja | 🔴 pendiente | imagen base (Edad Feudal), Edad de los Castillos, Edad Imperial, Edad de la Pólvora, Edad Industrial | buildings/ditch.png (+ -mask.png)<br>buildings/ditch-2.png (+ -mask.png)<br>buildings/ditch-3.png (+ -mask.png)<br>buildings/ditch-4.png (+ -mask.png)<br>buildings/ditch-5.png (+ -mask.png) | 3 | `building:base` |
+| bridge | Puente | 🔴 pendiente | imagen base (Edad Feudal), Edad de los Castillos, Edad Imperial, Edad de la Pólvora, Edad Industrial | buildings/bridge.png (+ -mask.png)<br>buildings/bridge-2.png (+ -mask.png)<br>buildings/bridge-3.png (+ -mask.png)<br>buildings/bridge-4.png (+ -mask.png)<br>buildings/bridge-5.png (+ -mask.png) | 3 | `building:base` |
+| stoneWall | Muralla de piedra | 🔴 pendiente | imagen base (Edad de los Castillos), Edad Imperial, Edad de la Pólvora, Edad Industrial | buildings/stoneWall.png (+ -mask.png)<br>buildings/stoneWall-3.png (+ -mask.png)<br>buildings/stoneWall-4.png (+ -mask.png)<br>buildings/stoneWall-5.png (+ -mask.png) | 3 | `building:base` |
+| stoneGate | Puerta de piedra | 🔴 pendiente | imagen base (Edad de los Castillos), Edad Imperial, Edad de la Pólvora, Edad Industrial | buildings/stoneGate.png (+ -mask.png)<br>buildings/stoneGate-3.png (+ -mask.png)<br>buildings/stoneGate-4.png (+ -mask.png)<br>buildings/stoneGate-5.png (+ -mask.png) | 3 | `building:base` |
+| wallTower | Torre de muralla | 🔴 pendiente | imagen base (Edad de los Castillos), Edad Imperial, Edad de la Pólvora, Edad Industrial | buildings/wallTower.png (+ -mask.png)<br>buildings/wallTower-3.png (+ -mask.png)<br>buildings/wallTower-4.png (+ -mask.png)<br>buildings/wallTower-5.png (+ -mask.png) | 3 | `building:base` |
+| fortifiedWall | Muralla fortificada | 🔴 pendiente | imagen base (Edad Imperial), Edad de la Pólvora, Edad Industrial | buildings/fortifiedWall.png (+ -mask.png)<br>buildings/fortifiedWall-4.png (+ -mask.png)<br>buildings/fortifiedWall-5.png (+ -mask.png) | 3 | `building:base` |
+| fortifiedGate | Puerta fortificada | 🔴 pendiente | imagen base (Edad Imperial), Edad de la Pólvora, Edad Industrial | buildings/fortifiedGate.png (+ -mask.png)<br>buildings/fortifiedGate-4.png (+ -mask.png)<br>buildings/fortifiedGate-5.png (+ -mask.png) | 3 | `building:base` |
 | gunpowderWorks | Fábrica de pólvora | 🔴 pendiente | imagen base (Edad de la Pólvora), Edad Industrial | buildings/gunpowderWorks.png (+ -mask.png)<br>buildings/gunpowderWorks-5.png (+ -mask.png) | 3 | `building:base` |
 | fortress | Fortaleza | 🔴 pendiente | imagen base (Edad de la Pólvora), Edad Industrial | buildings/fortress.png (+ -mask.png)<br>buildings/fortress-5.png (+ -mask.png) | 3 | `building:base` |
 | printingHouse | Imprenta | 🔴 pendiente | imagen base (Edad de la Pólvora), Edad Industrial | buildings/printingHouse.png (+ -mask.png)<br>buildings/printingHouse-5.png (+ -mask.png) | 3 | `building:base` |
@@ -311,6 +320,10 @@
 | russkayaPravda | Tecnología: Russkaya Pravda | 🔴 pendiente | imagen | ui/tech/russkayaPravda.png | 5 | `ui:tech` |
 | siberianMarch | Tecnología: Marcha a Siberia | 🔴 pendiente | imagen | ui/tech/siberianMarch.png | 5 | `ui:tech` |
 | selectiveBreeding | Tecnología: Cría selectiva | 🔴 pendiente | imagen | ui/tech/selectiveBreeding.png | 5 | `ui:tech` |
+| defenseArchitecture | Tecnología: Arquitectura de defensa | 🔴 pendiente | imagen | ui/tech/defenseArchitecture.png | 5 | `ui:tech` |
+| buttresses | Tecnología: Contrafuertes | 🔴 pendiente | imagen | ui/tech/buttresses.png | 5 | `ui:tech` |
+| boilingOil | Tecnología: Aceite hirviendo | 🔴 pendiente | imagen | ui/tech/boilingOil.png | 5 | `ui:tech` |
+| wallCrews | Tecnología: Cuadrillas de albañiles | 🔴 pendiente | imagen | ui/tech/wallCrews.png | 5 | `ui:tech` |
 | gunpowderAge | Tecnología: Edad de la Pólvora | 🔴 pendiente | imagen | ui/tech/gunpowderAge.png | 5 | `ui:tech` |
 | printing | Tecnología: Imprenta | 🔴 pendiente | imagen | ui/tech/printing.png | 5 | `ui:tech` |
 | cartography | Tecnología: Cartografía | 🔴 pendiente | imagen | ui/tech/cartography.png | 5 | `ui:tech` |

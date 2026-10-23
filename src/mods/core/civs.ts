@@ -14,8 +14,8 @@ const baseCivs: CivDef[] = [
     eras: {
       0: {
         name: 'Anglosajones', description: 'Alfredo de Wessex (871–899), la red de burhs fortificados y la fyrd.',
-        bonuses: [{ type: 'cost', target: { classes: ['tower'], kind: 'building' }, resource: 'wood', op: 'mul', value: 0.75 }],
-        bonusText: ['Torres y burhs -25% de madera', 'Unidad única: Fyrdman', 'Edificio único: Burh', 'Tecnología única: Reforma de Alfredo'],
+        bonuses: [{ type: 'cost', target: { classes: ['tower', 'wall'], kind: 'building' }, resource: 'wood', op: 'mul', value: 0.75 }],
+        bonusText: ['Torres, burhs y empalizadas -25% de madera', 'Unidad única: Fyrdman', 'Edificio único: Burh', 'Tecnología única: Reforma de Alfredo'],
       },
       1: {
         name: 'Inglaterra normanda', description: 'Hastings (1066), el Domesday Book y los castillos de piedra.',
@@ -172,8 +172,8 @@ const baseCivs: CivDef[] = [
       },
       3: {
         name: 'Ming', description: 'Muralla, tesoro y arcabuz (1368–1644): la Gran Muralla, Qi Jiguang y el Shenjiying.',
-        bonuses: [{ type: 'stat', target: { classes: ['tower', 'castle'], kind: 'building' }, stat: 'hp', op: 'mul', value: 1.2 }],
-        bonusText: ['Murallas y torres: torres y castillos +20% de PV', 'Unidad única: Arcabucero de las divisiones divinas', 'Edificio único: Ciudad Prohibida', 'Tecnología única: Pato mandarín'],
+        bonuses: [{ type: 'stat', target: { classes: ['tower', 'castle', 'wall'], kind: 'building' }, stat: 'hp', op: 'mul', value: 1.2 }],
+        bonusText: ['Murallas y torres: murallas, torres y castillos +20% de PV', 'Unidad única: Arcabucero de las divisiones divinas', 'Edificio único: Ciudad Prohibida', 'Tecnología única: Pato mandarín'],
       },
       4: {
         name: 'Qing', description: 'Estado manchú-chino y comercio por un solo puerto (1644–1800): Ocho Banderas, conquista de Zungaria, sistema de Cantón.',

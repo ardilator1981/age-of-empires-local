@@ -131,12 +131,12 @@ function widthOf(offsets: Map<number, Offset>): number {
 
 function placeSlots(game: Game, grp: Group, units: Entity[]) {
   const used = new Set<number>();
-  const reg = game.map.regionAt(grp.pos.x, grp.pos.y);
+  const reg = game.map.regionAt(grp.pos.x, grp.pos.y, grp.owner);
   grp.world.clear();
   for (const u of units) {
     const o = grp.offsets.get(u.id);
     if (!o) continue;
-    grp.world.set(u.id, safeSlot(game, toWorld(grp.pos, grp.facing, o), reg, used));
+    grp.world.set(u.id, safeSlot(game, toWorld(grp.pos, grp.facing, o), reg, used, grp.owner));
   }
 }
 
@@ -159,10 +159,10 @@ function advance(game: Game, grp: Group, units: Entity[], dt: number): boolean {
     if (hypot(wp.x - grp.pos.x, wp.y - grp.pos.y) < 0.35) return true;
     if (!pathBudget(game)) return false;
     const m = game.map, gx = Math.floor(wp.x), gy = Math.floor(wp.y), walk = m.walkable(gx, gy);
-    const r = findPath(m, grp.pos.x, grp.pos.y, { x0: gx, y0: gy, x1: gx, y1: gy }, walk ? 0 : 1);
+    const r = findPath(m, grp.pos.x, grp.pos.y, { x0: gx, y0: gy, x1: gx, y1: gy }, walk ? 0 : 1, undefined, grp.owner);
     const raw = r.path;
     if (walk && r.reached) { if (raw.length) raw[raw.length - 1] = { x: wp.x, y: wp.y }; else raw.push({ x: wp.x, y: wp.y }); }
-    grp.path = smoothPath(m, grp.pos.x, grp.pos.y, raw);
+    grp.path = smoothPath(m, grp.pos.x, grp.pos.y, raw, grp.owner);
     if (!grp.path.length) { grp.route[grp.ri] = { ...grp.pos }; return true; } // inalcanzable: se queda donde está
   }
   // Si la tropa va muy atrasada, el centro espera (va despacio)
@@ -330,7 +330,7 @@ export const formationOrder: OrderHandler = {
     const goal = u.path[u.path.length - 1];
     const goalMoved = !goal || hypot(goal.x - slot.x, goal.y - slot.y) > 0.3;
     if (!goalMoved && game.time < (o.repathAt ?? 0)) return;
-    if (d < 5 && lineClear(game.map, u.x, u.y, slot.x, slot.y)) { u.path = [{ x: slot.x, y: slot.y }]; return; }
+    if (d < 5 && lineClear(game.map, u.x, u.y, slot.x, slot.y, 0.2, u.owner)) { u.path = [{ x: slot.x, y: slot.y }]; return; }
     if (game.time < (o.repathAt ?? 0) || !pathBudget(game)) return;
     o.repathAt = game.time + 1;
     moveTo(game, u, slot.x, slot.y);

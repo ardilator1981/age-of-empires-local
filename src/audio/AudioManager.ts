@@ -96,6 +96,7 @@ export class AudioManager {
       ev.on('underAttack', ({ playerId, kind }) => { if (playerId === h) this.play(kind === 'building' ? 'alertBuildings' : 'alertUnits'); }),
       ev.on('villagerIdle', ({ entity }) => { if (entity.owner === h) this.play('villagerIdle'); }),
       ev.on('damaged', ({ target, attacker }) => this.combatSound(target, attacker)),
+      ev.on('footBurn', ({ target }) => { const sp = this.spatial(target); if (sp) this.play('oilHiss', { gain: sp.gain, pan: sp.pan, rate: 0.9 + Math.random() * 0.2 }); }),
       ev.on('entityDied', ({ entity }) => this.animalSound(entity)),
     ];
     this.startAmbient();

@@ -172,12 +172,12 @@ export class HUD {
         out[14] = { icon: '↩️', label: 'Volver', avail: OK, tip: '<b>Volver</b> (Esc)', action: () => { ui.page = 'main'; } };
         return out;
       }
-      if (set.build) { out[0] = set.build.economy.cmd; out[1] = set.build.military.cmd; }
-      [2, 3, 4, 9].forEach((slot, i) => { out[slot] = set.missions[i] ?? null; });
+      if (set.build) { out[0] = set.build.economy.cmd; out[1] = set.build.military.cmd; if (set.build.defense.items.length) out[2] = set.build.defense.cmd; }
+      [3, 4, 9].forEach((slot, i) => { out[slot] = set.missions[i] ?? null; });
       out[5] = set.attackMove;
       out[6] = set.explore;
       out[7] = set.strategy;
-      out[8] = set.shelter;
+      out[8] = set.shelter ?? set.missions[3] ?? null;
       out[10] = set.stop;
       out[14] = set.del;
       set.powers.slice(0, 3).forEach((c, i) => { out[11 + i] = c; });

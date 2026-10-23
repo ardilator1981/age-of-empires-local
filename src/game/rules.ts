@@ -169,7 +169,7 @@ export function researchablesAt(game: Game, p: Player, buildingDefId: string): s
   return out;
 }
 
-export function buildablesFor(game: Game, p: Player, category: 'economy' | 'military'): string[] {
+export function buildablesFor(game: Game, p: Player, category: 'economy' | 'military' | 'defense'): string[] {
   const out: string[] = [];
   for (const b of game.reg.buildings.values()) {
     if (b.category === category && civAllowed(b, p)) out.push(b.id);

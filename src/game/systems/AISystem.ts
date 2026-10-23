@@ -126,7 +126,7 @@ export class AIController {
     if (g.rng() < 0.5) {
       for (const b of blds) {
         if (!b.complete || b.queue.length) continue;
-        const opts = researchablesAt(g, p, b.defId).filter(t => g.reg.tech(t).setsAge === undefined && techAvail(g, p, t).ok && canSpend(p.getCost(g.reg.tech(t))));
+        const opts = researchablesAt(g, p, b.defId).filter(t => g.reg.tech(t).setsAge === undefined && !g.reg.tech(t).aiManaged && techAvail(g, p, t).ok && canSpend(p.getCost(g.reg.tech(t))));
         if (!opts.length) continue;
         if (!this.isTC(b) && army.length < 5 && g.buildingDef(b).category === 'military' && g.rng() < 0.7) continue;
         Commands.research(g, b, opts[Math.floor(g.rng() * opts.length)]);

@@ -16,15 +16,15 @@
 | Tipo | Total | ✔ Integrado | ⚠ Sin usar | 🛠 En desarrollo | 🎨 Decorativo |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | 🧍 Unidades | 82 | 81 | 1 | 0 | 0 |
-| 🏛️ Edificios | 60 | 60 | 0 | 0 | 0 |
-| 📜 Tecnologías | 91 | 90 | 1 | 0 | 0 |
+| 🏛️ Edificios | 69 | 61 | 8 | 0 | 0 |
+| 📜 Tecnologías | 95 | 94 | 1 | 0 | 0 |
 | 🪙 Recursos | 6 | 6 | 0 | 0 | 0 |
 | 🌲 Nodos del mapa | 12 | 12 | 0 | 0 | 0 |
 | ⚡ Poderes | 10 | 10 | 0 | 0 | 0 |
 | 🚩 Civilizaciones | 6 | 6 | 0 | 0 | 0 |
 | 🏆 Victorias | 3 | 3 | 0 | 0 | 0 |
 | 🗺️ Terrenos | 9 | 9 | 0 | 0 | 0 |
-| ⚙️ Motor y mods | 44 | 44 | 0 | 0 | 0 |
+| ⚙️ Motor y mods | 46 | 46 | 0 | 0 | 0 |
 
 ## Desarrollos, implicaciones y aplicaciones
 
@@ -62,6 +62,14 @@ Todo lo que no está plenamente integrado, con lo que le falta.
 
 | Tipo | Elemento | Estado | Qué le falta / nota |
 | --- | --- | --- | --- |
+| Edificios | 🪵 Empalizada (`palisade`) | ⚠ Sin usar | No entrena, no investiga, no es depósito ni refugio, no aloja, no ataca y nada lo pide como requisito. |
+| Edificios | 🚪 Puerta de empalizada (`palisadeGate`) | ⚠ Sin usar | No entrena, no investiga, no es depósito ni refugio, no aloja, no ataca y nada lo pide como requisito. |
+| Edificios | ⛏️ Zanja (`ditch`) | ⚠ Sin usar | No entrena, no investiga, no es depósito ni refugio, no aloja, no ataca y nada lo pide como requisito. |
+| Edificios | 🌉 Puente (`bridge`) | ⚠ Sin usar | No entrena, no investiga, no es depósito ni refugio, no aloja, no ataca y nada lo pide como requisito. |
+| Edificios | 🧱 Muralla de piedra (`stoneWall`) | ⚠ Sin usar | No entrena, no investiga, no es depósito ni refugio, no aloja, no ataca y nada lo pide como requisito. |
+| Edificios | 🚪 Puerta de piedra (`stoneGate`) | ⚠ Sin usar | No entrena, no investiga, no es depósito ni refugio, no aloja, no ataca y nada lo pide como requisito. |
+| Edificios | 🏰 Muralla fortificada (`fortifiedWall`) | ⚠ Sin usar | No entrena, no investiga, no es depósito ni refugio, no aloja, no ataca y nada lo pide como requisito. |
+| Edificios | 🚪 Puerta fortificada (`fortifiedGate`) | ⚠ Sin usar | No entrena, no investiga, no es depósito ni refugio, no aloja, no ataca y nada lo pide como requisito. |
 | Unidades | 🐪 Caravana (`caravan`) | ⚠ Sin usar | No ataca, no recolecta, no construye y no tiene habilidad: solo ocupa población. |
 | Tecnologías | 🔍 Contraespionaje (`counterespionage`) | ⚠ Sin usar | No tiene efectos. |
 
@@ -69,7 +77,7 @@ Todo lo que no está plenamente integrado, con lo que le falta.
 
 Un rival controlado por la IA no lo construye, entrena, investiga ni lanza: solo lo aprovecha un jugador humano. Conviene revisarlo al equilibrar civilizaciones.
 
-- **Edificios** (16): Gorodishche [Rusia], Monasterio-fortaleza [Rusia], Ostrog [Rusia], Granero estatal [China], Casa de moneda [China], Gran Canal [China], Villa real [Francia], Catedral gótica [Francia], Château [Francia], Burh [Británicos], Castillo de mota [Británicos], Castillo concéntrico [Británicos], Qanat [Persia], Caravasar [Persia], Estela [Etiopía], Iglesia rupestre [Etiopía]
+- **Edificios** (19): Gorodishche [Rusia], Monasterio-fortaleza [Rusia], Ostrog [Rusia], Zanja, Puente, Torre de muralla, Granero estatal [China], Casa de moneda [China], Gran Canal [China], Villa real [Francia], Catedral gótica [Francia], Château [Francia], Burh [Británicos], Castillo de mota [Británicos], Castillo concéntrico [Británicos], Qanat [Persia], Caravasar [Persia], Estela [Etiopía], Iglesia rupestre [Etiopía]
 - **Tecnologías** (1): Billete jiaozi [China]
 
 ## Comercio, diplomacia y espionaje
@@ -113,23 +121,23 @@ Para revisar las diferencias, el equilibrio estratégico y la jugabilidad. Los r
 
 | Civilización | Edad Oscura | Edad Feudal | Edad de los Castillos | Edad Imperial | Edad de la Pólvora | Edad Industrial |
 | --- | --- | --- | --- | --- | --- | --- |
-| Británicos | 7 | 14 | 18 | 18 | 24 | 29 |
-| Francia | 7 | 14 | 18 | 19 | 26 | 31 |
-| Rusia | 7 | 14 | 18 | 19 | 25 | 30 |
-| China | 7 | 14 | 18 | 19 | 25 | 30 |
-| Persia | 7 | 14 | 18 | 19 | 25 | 30 |
-| Etiopía | 7 | 14 | 18 | 19 | 25 | 30 |
+| Británicos | 9 | 18 | 25 | 27 | 33 | 38 |
+| Francia | 9 | 18 | 25 | 28 | 35 | 40 |
+| Rusia | 9 | 18 | 25 | 28 | 34 | 39 |
+| China | 9 | 18 | 25 | 28 | 34 | 39 |
+| Persia | 9 | 18 | 25 | 28 | 34 | 39 |
+| Etiopía | 9 | 18 | 25 | 28 | 34 | 39 |
 
 ### Tecnologías
 
 | Civilización | Edad Oscura | Edad Feudal | Edad de los Castillos | Edad Imperial | Edad de la Pólvora | Edad Industrial |
 | --- | --- | --- | --- | --- | --- | --- |
-| Británicos | 3 | 16 | 30 | 36 | 49 | 60 |
-| Francia | 3 | 16 | 31 | 37 | 52 | 63 |
-| Rusia | 2 | 15 | 28 | 34 | 46 | 56 |
-| China | 3 | 17 | 31 | 37 | 50 | 61 |
-| Persia | 3 | 16 | 31 | 37 | 50 | 61 |
-| Etiopía | 3 | 16 | 31 | 37 | 50 | 61 |
+| Británicos | 3 | 18 | 34 | 40 | 53 | 64 |
+| Francia | 3 | 18 | 35 | 41 | 56 | 67 |
+| Rusia | 2 | 17 | 32 | 38 | 50 | 60 |
+| China | 3 | 19 | 35 | 41 | 54 | 65 |
+| Persia | 3 | 18 | 35 | 41 | 54 | 65 |
+| Etiopía | 3 | 18 | 35 | 41 | 54 | 65 |
 
 ### Mejor unidad militar (índice)
 
@@ -255,11 +263,11 @@ Para revisar las diferencias, el equilibrio estratégico y la jugabilidad. Los r
 | `general` | 🎖️ General | declared-war | Edad de los Castillos | todas | 500 alimento, 300 madera | ✔ Integrado | ✔ | procedural | Se entrena en Castillo · Ataca (14) · Da un aura a las tropas cercanas | Lo contrarrestan: Lancero, Piquero, Fubing, Guerrero axumita y 1 más. · Máximo 1 vivo a la vez; si cae, 180 s de espera. | — |
 | `king` | 👑 Rey | regicide | Edad Oscura | todas | — | ✔ Integrado | — | procedural | — | Máximo 1 vivo a la vez. | No se entrena en ningún edificio y nada la crea ni la mejora. · Nota: Lo crea el modo Matar al rey (mod regicide) al empezar la partida; por eso no se entrena en ningún edificio. |
 
-## 🏛️ Edificios (60)
+## 🏛️ Edificios (69)
 
 | Id | Nombre | Mod | Edad | Civilizaciones | Coste | Estado | IA | Arte | Qué hace | Implicaciones | Qué le falta |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `townCenter` | 🏰 Centro urbano | core | Edad de los Castillos | todas | 275 madera, 100 piedra | ✔ Integrado | ✔ | imagen | Entrena: Aldeano · Investiga 24 tecnologías · Depósito de Alimento, Madera, Oro, Piedra, Hierro, Carbón · Aloja +5 población · Refugio (1) para king · Defensa: dispara a los enemigos · Centro urbano: punto de partida · Requisito de: Kremlin de piedra, Ciudad Prohibida, Bastida, Katama · Lo usa el código de un mod | Sin él no se pueden entrenar: Aldeano. · Aquí se investigan 24 mejoras (hasta Edad de la Pólvora). · Acorta el trayecto de los aldeanos que recogen Alimento, Madera, Oro, Piedra, Hierro, Carbón: conviene construirlo junto a los nodos. · Sube el límite de población: sin él el ejército y la economía no crecen. | — |
+| `townCenter` | 🏰 Centro urbano | core | Edad de los Castillos | todas | 275 madera, 100 piedra | ✔ Integrado | ✔ | imagen | Entrena: Aldeano · Investiga 26 tecnologías · Depósito de Alimento, Madera, Oro, Piedra, Hierro, Carbón · Aloja +5 población · Refugio (1) para king · Defensa: dispara a los enemigos · Centro urbano: punto de partida · Requisito de: Kremlin de piedra, Ciudad Prohibida, Bastida, Katama · Lo usa el código de un mod | Sin él no se pueden entrenar: Aldeano. · Aquí se investigan 26 mejoras (hasta Edad de la Pólvora). · Acorta el trayecto de los aldeanos que recogen Alimento, Madera, Oro, Piedra, Hierro, Carbón: conviene construirlo junto a los nodos. · Sube el límite de población: sin él el ejército y la economía no crecen. | — |
 | `house` | 🏠 Casa | core | Edad Oscura | todas | 25 madera | ✔ Integrado | ✔ | imagen | Aloja +5 población | Sube el límite de población: sin él el ejército y la economía no crecen. | — |
 | `mill` | 🌾 Molino | core | Edad Oscura | todas | 100 madera | ✔ Integrado | ✔ | imagen | Investiga 3 tecnologías · Depósito de Alimento · Requisito de: Granja, Corral, Edad Feudal | Aquí se investigan 3 mejoras (hasta Edad de los Castillos). · Acorta el trayecto de los aldeanos que recogen Alimento: conviene construirlo junto a los nodos. | — |
 | `lumberCamp` | 🪓 Campamento maderero | core | Edad Oscura | todas | 100 madera | ✔ Integrado | ✔ | imagen | Investiga 2 tecnologías · Depósito de Madera · Requisito de: Edad Feudal | Aquí se investigan 2 mejoras (hasta Edad de los Castillos). · Acorta el trayecto de los aldeanos que recogen Madera: conviene construirlo junto a los nodos. | — |
@@ -268,7 +276,7 @@ Para revisar las diferencias, el equilibrio estratégico y la jugabilidad. Los r
 | `barracks` | 🛖 Cuartel | core | Edad Oscura | todas | 175 madera | ✔ Integrado | ✔ | imagen | Entrena: Milicia, Hombre de armas, Espadachín de mandoble, Lancero y 10 más · Investiga 3 tecnologías · Requisito de: Galería de tiro con arco, Establo, Edad Feudal | Sin él no se pueden entrenar: Milicia, Hombre de armas, Espadachín de mandoble, Lancero, Piquero y 9 más. · Aquí se investigan 3 mejoras (hasta Edad de los Castillos). | — |
 | `archeryRange` | 🎯 Galería de tiro con arco | core | Edad Feudal | todas | 175 madera | ✔ Integrado | ✔ | imagen | Entrena: Arquero, Ballestero, Hostigador · Investiga 1 tecnología · Requisito de: Edad de los Castillos | Sin él no se pueden entrenar: Arquero, Ballestero, Hostigador. · Aquí se investigan 1 mejoras (hasta Edad de los Castillos). · Para construirlo hace falta Cuartel. | — |
 | `stable` | 🐴 Establo | core | Edad Feudal | todas | 175 madera | ✔ Integrado | ✔ | imagen | Entrena: Caballería de exploración, Caballería ligera, Caballero, Paladín y 9 más · Investiga 3 tecnologías · Requisito de: Ordu, Edad de los Castillos | Sin él no se pueden entrenar: Caballería de exploración, Caballería ligera, Caballero, Paladín, Dragón y 8 más. · Aquí se investigan 3 mejoras (hasta Edad Imperial). · Para construirlo hace falta Cuartel. | — |
-| `blacksmith` | ⚒️ Herrería | core | Edad Feudal | todas | 150 madera | ✔ Integrado | ✔ | imagen | Investiga 9 tecnologías · Requisito de: Taller de asedio, Fábrica de pólvora, Edad de los Castillos, Edad de la Pólvora | Aquí se investigan 9 mejoras (hasta Edad de la Pólvora). | — |
+| `blacksmith` | ⚒️ Herrería | core | Edad Feudal | todas | 150 madera | ✔ Integrado | ✔ | imagen | Investiga 11 tecnologías · Requisito de: Taller de asedio, Fábrica de pólvora, Edad de los Castillos, Edad de la Pólvora | Aquí se investigan 11 mejoras (hasta Edad de la Pólvora). | — |
 | `watchTower` | 🗼 Torre de vigilancia | core | Edad Feudal | todas | 25 madera, 125 piedra | ✔ Integrado | ✔ | imagen | Defensa: dispara a los enemigos | — | — |
 | `siegeWorkshop` | 🛠️ Taller de asedio | core | Edad de los Castillos | todas | 200 madera | ✔ Integrado | ✔ | imagen | Entrena: Ariete, Trabuquete de contrapeso, Catapulta, Escorpión y 5 más · Investiga 4 tecnologías · Requisito de: Edad Imperial, Edad de la Pólvora | Sin él no se pueden entrenar: Ariete, Trabuquete de contrapeso, Catapulta, Escorpión, Ariete cubierto y 4 más. · Aquí se investigan 4 mejoras (hasta Edad de la Pólvora). · Para construirlo hace falta Herrería. | — |
 | `castle` | 🏯 Castillo | core | Edad de los Castillos | todas | 650 piedra | ✔ Integrado | ✔ | imagen | Entrena: Arquero de tiro largo, Hijo de boyardo, Strelets, Cosaco y 15 más · Investiga 5 tecnologías · Aloja +20 población · Refugio (1) para king · Defensa: dispara a los enemigos · Requisito de: Fortaleza, Fortaleza de Vauban, Edad Imperial, Edad de la Pólvora | Sin él no se pueden entrenar: Arquero de tiro largo, Hijo de boyardo, Strelets, Cosaco, Granadero y 14 más. · Aquí se investigan 5 mejoras (hasta Edad Imperial). · Sube el límite de población: sin él el ejército y la economía no crecen. | — |
@@ -277,6 +285,15 @@ Para revisar las diferencias, el equilibrio estratégico y la jugabilidad. Los r
 | `kremlin` | 🏰 Kremlin de piedra | core | Edad de los Castillos | Rusia | 200 madera, 450 piedra | ✔ Integrado | ✔ | procedural | Entrena: Aldeano · Depósito de Alimento, Madera, Oro, Piedra, Hierro, Carbón · Aloja +15 población · Defensa: dispara a los enemigos · Centro urbano: punto de partida | Sin él no se pueden entrenar: Aldeano. · Para construirlo hace falta Centro urbano. · Acorta el trayecto de los aldeanos que recogen Alimento, Madera, Oro, Piedra, Hierro, Carbón: conviene construirlo junto a los nodos. · Sube el límite de población: sin él el ejército y la economía no crecen. | — |
 | `ostrog` | 🗼 Ostrog | core | Edad Imperial | Rusia | 90 madera, 30 piedra | ✔ Integrado | ✗ | procedural | Defensa: dispara a los enemigos | — | La IA no lo construye. |
 | `corral` | 🐑 Corral | core | Edad Feudal | todas | 100 madera | ✔ Integrado | ✔ | procedural | Entrena: Oveja · Investiga 1 tecnología | Sin él no se pueden entrenar: Oveja. · Aquí se investigan 1 mejoras (hasta Edad de los Castillos). · Para construirlo hace falta Molino. | — |
+| `palisade` | 🪵 Empalizada | core | Edad Oscura | todas | 4 madera | ⚠ Sin usar | ✔ | procedural | — | — | No entrena, no investiga, no es depósito ni refugio, no aloja, no ataca y nada lo pide como requisito. |
+| `palisadeGate` | 🚪 Puerta de empalizada | core | Edad Oscura | todas | 30 madera | ⚠ Sin usar | ✔ | procedural | — | — | No entrena, no investiga, no es depósito ni refugio, no aloja, no ataca y nada lo pide como requisito. |
+| `ditch` | ⛏️ Zanja | core | Edad Feudal | todas | 2 madera | ⚠ Sin usar | ✗ | procedural | — | — | No entrena, no investiga, no es depósito ni refugio, no aloja, no ataca y nada lo pide como requisito. · La IA no lo construye. |
+| `bridge` | 🌉 Puente | core | Edad Feudal | todas | 20 madera | ⚠ Sin usar | ✗ | procedural | — | — | No entrena, no investiga, no es depósito ni refugio, no aloja, no ataca y nada lo pide como requisito. · La IA no lo construye. |
+| `stoneWall` | 🧱 Muralla de piedra | core | Edad de los Castillos | todas | 6 piedra | ⚠ Sin usar | ✔ | procedural | — | — | No entrena, no investiga, no es depósito ni refugio, no aloja, no ataca y nada lo pide como requisito. |
+| `stoneGate` | 🚪 Puerta de piedra | core | Edad de los Castillos | todas | 30 piedra, 20 madera | ⚠ Sin usar | ✔ | procedural | — | — | No entrena, no investiga, no es depósito ni refugio, no aloja, no ataca y nada lo pide como requisito. |
+| `wallTower` | 🗼 Torre de muralla | core | Edad de los Castillos | todas | 100 piedra, 20 madera | ✔ Integrado | ✗ | procedural | Defensa: dispara a los enemigos | — | La IA no lo construye. |
+| `fortifiedWall` | 🏰 Muralla fortificada | core | Edad Imperial | todas | 10 piedra | ⚠ Sin usar | ✔ | procedural | — | — | No entrena, no investiga, no es depósito ni refugio, no aloja, no ataca y nada lo pide como requisito. |
+| `fortifiedGate` | 🚪 Puerta fortificada | core | Edad Imperial | todas | 50 piedra, 30 madera | ⚠ Sin usar | ✔ | procedural | — | — | No entrena, no investiga, no es depósito ni refugio, no aloja, no ataca y nada lo pide como requisito. |
 | `gunpowderWorks` | 💥 Fábrica de pólvora | core | Edad de la Pólvora | todas | 100 madera, 150 piedra, 50 oro | ✔ Integrado | ✔ | procedural | Entrena: Mosquetero, Cañón, Cañón Gribeauval · Investiga 1 tecnología · Requisito de: Academia de ingenieros, Fábrica, Arsenal de Jiangnan, Edad Industrial | Sin él no se pueden entrenar: Mosquetero, Cañón, Cañón Gribeauval. · Aquí se investigan 1 mejoras (hasta Edad de la Pólvora). · Para construirlo hace falta Herrería. | — |
 | `fortress` | 🏯 Fortaleza | core | Edad de la Pólvora | todas | 900 piedra | ✔ Integrado | ✔ | procedural | Investiga 1 tecnología · Aloja +20 población · Defensa: dispara a los enemigos · Gran visión (12) · Requisito de: Edad Industrial | Aquí se investigan 1 mejoras (hasta Edad de la Pólvora). · Para construirlo hace falta Castillo. · Sube el límite de población: sin él el ejército y la economía no crecen. | — |
 | `printingHouse` | 📰 Imprenta | core | Edad de la Pólvora | todas | 100 madera, 150 oro | ✔ Integrado | ✔ | procedural | Investiga 1 tecnología · Requisito de: Edad Industrial | Aquí se investigan 1 mejoras (hasta Edad de la Pólvora). | — |
@@ -320,7 +337,7 @@ Para revisar las diferencias, el equilibrio estratégico y la jugabilidad. Los r
 | `djiboutiRailway` | 🚂 Ferrocarril de Yibuti | core | Edad Industrial | Etiopía | 150 madera, 80 piedra, 50 oro | ✔ Integrado | ✔ | procedural | Investiga 1 tecnología · Depósito de Alimento, Madera, Oro, Piedra, Hierro, Carbón · Aloja +5 población | Aquí se investigan 1 mejoras (hasta Edad Industrial). · Solo se puede tener 1 a la vez. · Acorta el trayecto de los aldeanos que recogen Alimento, Madera, Oro, Piedra, Hierro, Carbón: conviene construirlo junto a los nodos. · Sube el límite de población: sin él el ejército y la economía no crecen. | — |
 | `market` | 🏪 Mercado | core | Edad Feudal | todas | 150 madera, 50 piedra | ✔ Integrado | ✔ | procedural | Entrena: Caravana, Espía · Investiga 3 tecnologías | Sin él no se pueden entrenar: Caravana, Espía. · Aquí se investigan 3 mejoras (hasta Edad de la Pólvora). | — |
 
-## 📜 Tecnologías (91)
+## 📜 Tecnologías (95)
 
 | Id | Nombre | Mod | Edad | Civilizaciones | Coste | Estado | IA | Arte | Qué hace | Implicaciones | Qué le falta |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -338,8 +355,8 @@ Para revisar las diferencias, el equilibrio estratégico y la jugabilidad. Los r
 | `stoneMining` | 🪨 Cantería | core | Edad Feudal | todas | 100 alimento, 75 madera | ✔ Integrado | ✔ | — | Recolección de Piedra ×1.15 | Desbloquea: Mina profunda. | — |
 | `forging` | 🔨 Forja | core | Edad Feudal | todas | 150 alimento | ✔ Integrado | ✔ | — | attack +1: militia, manAtArms, longSwordsman y 50 más | Desbloquea: Fundición de hierro. | — |
 | `ironCasting` | 🔥 Fundición de hierro | core | Edad de los Castillos | todas | 220 alimento, 120 oro | ✔ Integrado | ✔ | — | attack +1: militia, manAtArms, longSwordsman y 50 más | Requiere antes: Forja. · Desbloquea: Metalurgia avanzada. | — |
-| `fletching` | 🪶 Emplumado | core | Edad Feudal | todas | 100 alimento, 50 oro | ✔ Integrado | ✔ | — | attack +1: archer, crossbowman, skirmisher y 19 más · range +1: archer, crossbowman, skirmisher y 19 más | Desbloquea: Flecha punzante. | — |
-| `bodkinArrow` | ➶ Flecha punzante | core | Edad de los Castillos | todas | 200 alimento, 100 oro | ✔ Integrado | ✔ | — | attack +1: archer, crossbowman, skirmisher y 19 más · range +1: archer, crossbowman, skirmisher y 19 más | Requiere antes: Emplumado. | — |
+| `fletching` | 🪶 Emplumado | core | Edad Feudal | todas | 100 alimento, 50 oro | ✔ Integrado | ✔ | — | attack +1: archer, crossbowman, skirmisher y 20 más · range +1: archer, crossbowman, skirmisher y 20 más | Desbloquea: Flecha punzante. | — |
+| `bodkinArrow` | ➶ Flecha punzante | core | Edad de los Castillos | todas | 200 alimento, 100 oro | ✔ Integrado | ✔ | — | attack +1: archer, crossbowman, skirmisher y 20 más · range +1: archer, crossbowman, skirmisher y 20 más | Requiere antes: Emplumado. | — |
 | `scaleMail` | 🦺 Cota de escamas | core | Edad Feudal | todas | 100 alimento | ✔ Integrado | ✔ | — | armorMelee +1: militia, manAtArms, longSwordsman y 29 más · armorPierce +1: militia, manAtArms, longSwordsman y 29 más | — | — |
 | `scaleBarding` | 🐎 Barda de escamas | core | Edad Feudal | todas | 150 alimento | ✔ Integrado | ✔ | — | armorMelee +1: scoutCavalry, lightCavalry, knight y 18 más · armorPierce +1: scoutCavalry, lightCavalry, knight y 18 más | — | — |
 | `paddedArcherArmor` | 🧥 Armadura acolchada | core | Edad Feudal | todas | 100 alimento | ✔ Integrado | ✔ | — | armorMelee +1: archer, crossbowman, skirmisher y 3 más · armorPierce +1: archer, crossbowman, skirmisher y 3 más | — | — |
@@ -349,22 +366,26 @@ Para revisar las diferencias, el equilibrio estratégico y la jugabilidad. Los r
 | `up_crossbowman` | 🎯 Ballestero | core | Edad de los Castillos | todas | 125 alimento, 75 oro | ✔ Integrado | ✔ | — | Mejora Arquero → Ballestero | — | — |
 | `up_lightCavalry` | 🐎 Caballería ligera | core | Edad de los Castillos | todas | 150 alimento, 50 oro | ✔ Integrado | ✔ | — | Mejora Caballería de exploración → Caballería ligera | — | — |
 | `up_cavalier` | 🏇 Paladín | core | Edad Imperial | todas | 300 alimento, 300 oro | ✔ Integrado | ✔ | — | Mejora Caballero → Paladín | — | — |
-| `yeomen` | 🏹 Arqueros ingleses | core | Edad de los Castillos | Británicos | 750 alimento, 450 madera | ✔ Integrado | ✔ | — | range +1: archer, crossbowman, skirmisher y 3 más · attack +2: watchTower, gorodishche, ostrog y 4 más | — | — |
+| `yeomen` | 🏹 Arqueros ingleses | core | Edad de los Castillos | Británicos | 750 alimento, 450 madera | ✔ Integrado | ✔ | — | range +1: archer, crossbowman, skirmisher y 3 más · attack +2: watchTower, gorodishche, ostrog y 5 más | — | — |
 | `beardedAxe` | 🪓 Hacha barbada | core | Edad de los Castillos | Francia | 400 alimento, 400 oro | ✔ Integrado | ✔ | — | range +1: throwingAxeman | — | — |
 | `russkayaPravda` | 📜 Russkaya Pravda | core | Edad Feudal | Rusia | 200 alimento, 100 oro | ✔ Integrado | ✔ | — | Cambia el coste de house, mill, lumberCamp y 2 más | — | — |
 | `siberianMarch` | 🧭 Marcha a Siberia | core | Edad Imperial | Rusia | 600 alimento, 400 oro | ✔ Integrado | ✔ | — | los +2: scoutCavalry, lightCavalry, knight y 18 más · Recolectar deerCarcass, boarCarcass da además Oro | — | — |
 | `selectiveBreeding` | 🐏 Cría selectiva | core | Edad de los Castillos | todas | 150 alimento, 100 madera | ✔ Integrado | ✔ | — | Cambia el coste de sheep | — | — |
+| `defenseArchitecture` | 📐 Arquitectura de defensa | core | Edad Feudal | todas | 150 madera, 100 piedra | ✔ Integrado | ✔ | — | hp ×1.25: watchTower, gorodishche, ostrog y 11 más | Desbloquea: Contrafuertes, Aceite hirviendo. | — |
+| `buttresses` | 🏛️ Contrafuertes | core | Edad de los Castillos | todas | 200 alimento, 200 piedra | ✔ Integrado | ✔ | — | hp ×1.25: watchTower, gorodishche, ostrog y 11 más · armorMelee +1: watchTower, gorodishche, ostrog y 11 más · armorPierce +1: watchTower, gorodishche, ostrog y 11 más | Requiere antes: Arquitectura de defensa. | — |
+| `boilingOil` | 🛢️ Aceite hirviendo | core | Edad de los Castillos | todas | 200 madera, 120 oro | ✔ Integrado | ✔ | — | footDamage +8: watchTower, gorodishche, ostrog y 11 más | Requiere antes: Arquitectura de defensa. | — |
+| `wallCrews` | 🔨 Cuadrillas de albañiles | core | Edad Feudal | todas | 120 alimento, 80 madera | ✔ Integrado | ✔ | — | buildTime ×0.6: palisade, palisadeGate, ditch y 5 más | — | — |
 | `gunpowderAge` | 💥 Edad de la Pólvora | core | Edad Imperial | todas | 1400 alimento, 1000 oro | ✔ Integrado | ✔ | — | Sube a la edad: Edad de la Pólvora | Cambia de edad: desbloquea el contenido de la nueva edad y la identidad de la civilización. | — |
-| `printing` | 📰 Imprenta | core | Edad de la Pólvora | todas | 300 alimento, 200 oro | ✔ Integrado | ✔ | — | Cambia el coste de feudalAge, castleAge, imperialAge y 88 más | — | — |
+| `printing` | 📰 Imprenta | core | Edad de la Pólvora | todas | 300 alimento, 200 oro | ✔ Integrado | ✔ | — | Cambia el coste de feudalAge, castleAge, imperialAge y 92 más | — | — |
 | `cartography` | 🗺️ Cartografía | core | Edad de la Pólvora | todas | 200 alimento, 150 oro | ✔ Integrado | ✔ | — | los +1: villager, militia, manAtArms y 79 más | — | — |
 | `ballistics` | 📐 Balística | core | Edad de la Pólvora | todas | 300 alimento, 300 oro | ✔ Integrado | ✔ | — | attack +1: musketeer, dragoon, grenadier y 17 más · range +1: cannon, unicorn, gribeauvalCannon y 4 más | — | — |
 | `advancedMetallurgy` | 🔥 Metalurgia avanzada | core | Edad de la Pólvora | todas | 400 alimento, 250 oro | ✔ Integrado | ✔ | — | attack +1: militia, manAtArms, longSwordsman y 51 más | Requiere antes: Fundición de hierro. | — |
 | `bayonet` | 🗡️ Bayoneta | core | Edad de la Pólvora | todas | 250 alimento, 150 oro | ✔ Integrado | ✔ | — | armorMelee +2: musketeer, dragoon, grenadier y 17 más | — | — |
 | `refinedPowder` | ⚗️ Pólvora refinada | core | Edad de la Pólvora | todas | 350 alimento, 250 oro | ✔ Integrado | ✔ | — | attack +4: cannon, unicorn, gribeauvalCannon y 4 más · reloadTime ×0.9: musketeer, dragoon, grenadier y 17 más | — | — |
-| `bastionTheory` | 📏 Fortificación abaluartada | core | Edad de la Pólvora | todas | 300 alimento, 400 piedra | ✔ Integrado | ✔ | — | hp ×1.15: townCenter, watchTower, castle y 13 más · armorMelee +1: townCenter, watchTower, castle y 13 más · armorPierce +1: townCenter, watchTower, castle y 13 más | — | — |
+| `bastionTheory` | 📏 Fortificación abaluartada | core | Edad de la Pólvora | todas | 300 alimento, 400 piedra | ✔ Integrado | ✔ | — | hp ×1.15: townCenter, watchTower, castle y 14 más · armorMelee +1: townCenter, watchTower, castle y 14 más · armorPierce +1: townCenter, watchTower, castle y 14 más | — | — |
 | `deepMining` | ⛏️ Mina profunda | core | Edad de la Pólvora | todas | 300 alimento, 200 madera | ✔ Integrado | ✔ | — | Recolección de Oro ×1.15 · Recolección de Piedra ×1.15 | Requiere antes: Minería de oro. · Requiere antes: Cantería. | — |
 | `mercantilism` | ⚖️ Mercantilismo | core | Edad de la Pólvora | todas | 300 madera, 100 oro | ✔ Integrado | ✔ | — | Recolección de Oro ×1.15 | — | — |
-| `imperialExams` | 📜 Exámenes imperiales | core | Edad Oscura | China | 150 alimento, 50 oro | ✔ Integrado | ✔ | — | Cambia el coste de feudalAge, castleAge, imperialAge y 88 más | — | — |
+| `imperialExams` | 📜 Exámenes imperiales | core | Edad Oscura | China | 150 alimento, 50 oro | ✔ Integrado | ✔ | — | Cambia el coste de feudalAge, castleAge, imperialAge y 92 más | — | — |
 | `champaRice` | 🌾 Arroz de Champa | core | Edad Feudal | China | 150 alimento, 100 madera | ✔ Integrado | ✔ | — | Recolección de Alimento ×1.15 | — | — |
 | `jiaozi` | 💴 Billete jiaozi | core | Edad Feudal | China | 400 alimento, 100 madera | ✔ Integrado | ✗ | — | Regala recursos | — | La IA no la investiga: no construye Casa de moneda. |
 | `thunderBomb` | 💣 Bomba trueno | core | Edad de los Castillos | China | 400 alimento, 300 oro | ✔ Integrado | ✔ | — | attack +3: batteringRam, cannon, unicorn y 12 más | — | — |
@@ -375,9 +396,9 @@ Para revisar las diferencias, el equilibrio estratégico y la jugabilidad. Los r
 | `taille` | 🪙 Taille | core | Edad de los Castillos | Francia | 300 alimento, 100 oro | ✔ Integrado | ✔ | — | Recolección de Oro ×1.1 | — | — |
 | `hireMercenaries` | 🛡️ Contratar mercenarios | core | Edad Imperial | Francia | 600 oro | ✔ Integrado | ✔ | — | Efecto propio (código) | — | — |
 | `colbertism` | ⚖️ Colbertismo | core | Edad de la Pólvora | Francia | 300 madera, 200 oro | ✔ Integrado | ✔ | — | Recolección de Oro ×1.15 | — | — |
-| `vaubanDoctrine` | ⭐ Doctrina de Vauban | core | Edad de la Pólvora | Francia | 350 alimento, 250 piedra | ✔ Integrado | ✔ | — | hp ×1.25: watchTower, castle, gorodishche y 8 más · range +1: watchTower, castle, gorodishche y 8 más | Doctrina excluyente: impide Doctrina de Gribeauval. | — |
+| `vaubanDoctrine` | ⭐ Doctrina de Vauban | core | Edad de la Pólvora | Francia | 350 alimento, 250 piedra | ✔ Integrado | ✔ | — | hp ×1.25: watchTower, castle, gorodishche y 9 más · range +1: watchTower, castle, gorodishche y 9 más | Doctrina excluyente: impide Doctrina de Gribeauval. | — |
 | `gribeauvalDoctrine` | 💣 Doctrina de Gribeauval | core | Edad de la Pólvora | Francia | 350 alimento, 250 oro | ✔ Integrado | ✔ | — | attack +3: cannon, unicorn, gribeauvalCannon y 4 más · Cambia el coste de cannon, unicorn, gribeauvalCannon y 4 más | Doctrina excluyente: impide Doctrina de Vauban. | — |
-| `alfredReform` | 📜 Reforma de Alfredo | core | Edad Oscura | Británicos | 150 alimento, 50 oro | ✔ Integrado | ✔ | — | hp ×1.15: watchTower, gorodishche, ostrog y 4 más · attack +1: watchTower, gorodishche, ostrog y 4 más | — | — |
+| `alfredReform` | 📜 Reforma de Alfredo | core | Edad Oscura | Británicos | 150 alimento, 50 oro | ✔ Integrado | ✔ | — | hp ×1.15: watchTower, gorodishche, ostrog y 5 más · attack +1: watchTower, gorodishche, ostrog y 5 más | — | — |
 | `domesday` | 📖 Domesday | core | Edad Feudal | Británicos | 250 alimento, 100 oro | ✔ Integrado | ✔ | — | Recolección de Oro ×1.1 | — | — |
 | `companyCharter` | 📜 Carta de compañía | core | Edad Imperial | Británicos | 400 alimento, 100 oro | ✔ Integrado | ✔ | — | Regala recursos · Recolección de Oro ×1.1 | — | — |
 | `nationalDebt` | 💷 Deuda nacional | core | Edad de la Pólvora | Británicos | 200 alimento | ✔ Integrado | ✔ | — | Regala recursos · Cambia el coste de villager, militia, manAtArms y 79 más | — | — |
@@ -395,12 +416,12 @@ Para revisar las diferencias, el equilibrio estratégico y la jugabilidad. Los r
 | `interchangeableParts` | 🔩 Intercambiabilidad de piezas | core | Edad Industrial | Británicos | 150 hierro, 100 carbón, 100 oro | ✔ Integrado | ✔ | — | Recolección de Hierro ×1.1 · Recolección de Carbón ×1.1 · reloadTime ×0.95: musketeer, dragoon, grenadier y 17 más | — | — |
 | `irrigation` | 💧 Regadío | core | Edad Oscura | Persia | 150 alimento, 50 oro | ✔ Integrado | ✔ | — | Recolección de Alimento ×1.1 | — | — |
 | `iqta` | 📜 Iqta | core | Edad Feudal | Persia | 200 alimento, 100 oro | ✔ Integrado | ✔ | — | Cambia el coste de militia, manAtArms, longSwordsman y 50 más | — | — |
-| `astronomy` | 🌙 Astronomía | core | Edad de los Castillos | Persia | 250 alimento, 200 oro | ✔ Integrado | ✔ | — | los +1: villager, militia, manAtArms y 79 más · Cambia el coste de feudalAge, castleAge, imperialAge y 88 más | — | — |
+| `astronomy` | 🌙 Astronomía | core | Edad de los Castillos | Persia | 250 alimento, 200 oro | ✔ Integrado | ✔ | — | los +1: villager, militia, manAtArms y 79 más · Cambia el coste de feudalAge, castleAge, imperialAge y 92 más | — | — |
 | `silkMonopoly` | 🧵 Monopolio de la seda | core | Edad Imperial | Persia | 300 alimento, 250 oro | ✔ Integrado | ✔ | — | Recolección de Oro ×1.1 | — | — |
 | `mobileWarfare` | 🐫 Guerra móvil | core | Edad de la Pólvora | Persia | 400 alimento, 250 oro | ✔ Integrado | ✔ | — | speed ×1.1: scoutCavalry, lightCavalry, knight y 18 más · hp ×1.1: scoutCavalry, lightCavalry, knight y 18 más | — | — |
 | `nizamJadid` | 🎖️ Nizam-i Jadid | core | Edad Industrial | Persia | 300 alimento, 100 hierro, 150 oro | ✔ Integrado | ✔ | — | armorMelee +1: militia, manAtArms, longSwordsman y 32 más · armorPierce +1: militia, manAtArms, longSwordsman y 32 más · trainTime ×0.85: militia, manAtArms, longSwordsman y 32 más | — | — |
 | `axumCoinage` | 🪙 Moneda de Axum | core | Edad Oscura | Etiopía | 100 alimento, 50 oro | ✔ Integrado | ✔ | — | Recolección de Oro ×1.1 | — | — |
-| `prestorJohn` | ✝️ Prestes Juan | core | Edad Feudal | Etiopía | 200 alimento, 100 oro | ✔ Integrado | ✔ | — | hp ×1.1: townCenter, house, mill y 57 más | — | — |
+| `prestorJohn` | ✝️ Prestes Juan | core | Edad Feudal | Etiopía | 200 alimento, 100 oro | ✔ Integrado | ✔ | — | hp ×1.1: townCenter, house, mill y 66 más | — | — |
 | `itinerantCourt` | 🏕️ Corte itinerante | core | Edad de los Castillos | Etiopía | 250 alimento, 100 oro | ✔ Integrado | ✔ | — | speed ×1.1: villager · trainTime ×0.9: villager | — | — |
 | `portugueseAlliance` | 🤝 Alianza portuguesa | core | Edad Imperial | Etiopía | 400 alimento, 350 oro | ✔ Integrado | ✔ | — | attack +1: musketeer, dragoon, grenadier y 17 más · range +1: musketeer, dragoon, grenadier y 17 más | — | — |
 | `horseBreeding` | 🐴 Cría de caballos | core | Edad de la Pólvora | Etiopía | 300 alimento, 150 oro | ✔ Integrado | ✔ | — | hp ×1.1: scoutCavalry, lightCavalry, knight y 18 más · speed ×1.05: scoutCavalry, lightCavalry, knight y 18 más | — | — |
@@ -420,10 +441,10 @@ Para revisar las diferencias, el equilibrio estratégico y la jugabilidad. Los r
 
 | Id | Nombre | Mod | Edad | Civilizaciones | Coste | Estado | IA | Arte | Qué hace | Implicaciones | Qué le falta |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `food` | Alimento | core | — | todas | — | ✔ Integrado | — | — | Lo producen: Arbusto de bayas, Ciervo abatido, Jabalí abatido, Oveja sacrificada y 1 más · Lo gastan 126 elementos (Aldeano, Milicia, Hombre de armas y 123 más) | Limita 126 elementos del juego: es una restricción de ritmo y de estrategia. | — |
-| `wood` | Madera | core | — | todas | — | ✔ Integrado | — | — | Lo producen: Árbol, Pino, Pino nevado · Lo gastan 103 elementos (Lancero, Piquero, Arquero y 100 más) | Limita 103 elementos del juego: es una restricción de ritmo y de estrategia. | — |
-| `gold` | Oro | core | — | todas | — | ✔ Integrado | — | — | Lo producen: Mina de oro, Cofre del tesoro, Marcha a Siberia, Billete jiaozi y 3 más · Lo gastan 145 elementos (Milicia, Hombre de armas, Espadachín de mandoble y 142 más) | Limita 145 elementos del juego: es una restricción de ritmo y de estrategia. | — |
-| `stone` | Piedra | core | — | todas | — | ✔ Integrado | — | — | Lo producen: Cantera de piedra · Lo gastan 44 elementos (Centro urbano, Torre de vigilancia, Castillo y 41 más) | Limita 44 elementos del juego: es una restricción de ritmo y de estrategia. | — |
+| `food` | Alimento | core | — | todas | — | ✔ Integrado | — | — | Lo producen: Arbusto de bayas, Ciervo abatido, Jabalí abatido, Oveja sacrificada y 1 más · Lo gastan 128 elementos (Aldeano, Milicia, Hombre de armas y 125 más) | Limita 128 elementos del juego: es una restricción de ritmo y de estrategia. | — |
+| `wood` | Madera | core | — | todas | — | ✔ Integrado | — | — | Lo producen: Árbol, Pino, Pino nevado · Lo gastan 113 elementos (Lancero, Piquero, Arquero y 110 más) | Limita 113 elementos del juego: es una restricción de ritmo y de estrategia. | — |
+| `gold` | Oro | core | — | todas | — | ✔ Integrado | — | — | Lo producen: Mina de oro, Cofre del tesoro, Marcha a Siberia, Billete jiaozi y 3 más · Lo gastan 146 elementos (Milicia, Hombre de armas, Espadachín de mandoble y 143 más) | Limita 146 elementos del juego: es una restricción de ritmo y de estrategia. | — |
+| `stone` | Piedra | core | — | todas | — | ✔ Integrado | — | — | Lo producen: Cantera de piedra · Lo gastan 51 elementos (Centro urbano, Torre de vigilancia, Castillo y 48 más) | Limita 51 elementos del juego: es una restricción de ritmo y de estrategia. | — |
 | `iron` | Hierro | core | Edad Industrial | todas | — | ✔ Integrado | — | — | Lo producen: Mina de hierro · Lo gastan 30 elementos (Fusilero, Cañón de campaña, Ametralladora y 27 más) | Limita 30 elementos del juego: es una restricción de ritmo y de estrategia. · Obliga a llegar a Edad Industrial para empezar a recogerlo. | — |
 | `coal` | Carbón | core | Edad Industrial | todas | — | ✔ Integrado | — | — | Lo producen: Mina de carbón · Lo gastan 13 elementos (Cañón de campaña, Ametralladora, Biplano y 10 más) | Limita 13 elementos del juego: es una restricción de ritmo y de estrategia. · Obliga a llegar a Edad Industrial para empezar a recogerlo. | — |
 
@@ -492,7 +513,7 @@ Para revisar las diferencias, el equilibrio estratégico y la jugabilidad. Los r
 | `snow` | 🗺️ Nieve | core | — | todas | — | ✔ Integrado | — | — | Se puede caminar · Se puede construir | — | — |
 | `rock` | 🗺️ Roca | core | — | todas | — | ✔ Integrado | — | — | Intransitable · No se puede construir | — | — |
 
-## ⚙️ Motor y mods (44)
+## ⚙️ Motor y mods (46)
 
 | Id | Nombre | Mod | Edad | Civilizaciones | Coste | Estado | IA | Arte | Qué hace | Implicaciones | Qué le falta |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -519,6 +540,7 @@ Para revisar las diferencias, el equilibrio estratégico y la jugabilidad. Los r
 | `system-aura` | ⚙️ Sistema «aura» | core | — | todas | — | ✔ Integrado | — | — | Sistema de la simulación | — | — |
 | `system-espionage` | ⚙️ Sistema «espionage» | core | — | todas | — | ✔ Integrado | — | — | Sistema de la simulación | — | — |
 | `system-combat` | ⚙️ Sistema «combat» | core | — | todas | — | ✔ Integrado | — | — | Sistema de la simulación | — | — |
+| `system-defense` | ⚙️ Sistema «defense» | core | — | todas | — | ✔ Integrado | — | — | Sistema de la simulación | — | — |
 | `system-vision` | ⚙️ Sistema «vision» | core | — | todas | — | ✔ Integrado | — | — | Sistema de la simulación | — | — |
 | `system-declared-war` | ⚙️ Sistema «declared-war» | declared-war | — | todas | — | ✔ Integrado | — | — | Sistema de la simulación | — | — |
 | `system-regicide` | ⚙️ Sistema «regicide» | regicide | — | todas | — | ✔ Integrado | — | — | Sistema de la simulación | — | — |
@@ -531,6 +553,7 @@ Para revisar las diferencias, el equilibrio estratégico y la jugabilidad. Los r
 | `net-declare-war` | ⚙️ Orden de red «declare-war» | declared-war | — | todas | — | ✔ Integrado | — | — | Orden de jugador | — | — |
 | `ai-gunpowder` | ⚙️ IA: gunpowder | core | — | todas | — | ✔ Integrado | — | — | Extensión de la IA | — | — |
 | `ai-siege` | ⚙️ IA: siege | core | — | todas | — | ✔ Integrado | — | — | Extensión de la IA | — | — |
+| `ai-defense` | ⚙️ IA: defense | core | — | todas | — | ✔ Integrado | — | — | Extensión de la IA | — | — |
 | `ai-powers` | ⚙️ IA: powers | core | — | todas | — | ✔ Integrado | — | — | Extensión de la IA | — | — |
 | `ai-trade` | ⚙️ IA: trade | core | — | todas | — | ✔ Integrado | — | — | Extensión de la IA | — | — |
 | `ai-diplomacy` | ⚙️ IA: diplomacy | core | — | todas | — | ✔ Integrado | — | — | Extensión de la IA | — | — |

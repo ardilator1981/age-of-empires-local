@@ -23,8 +23,8 @@ interface Btn {
   run: () => void;
 }
 
-type Tab = 'economy' | 'military' | 'units' | 'techs' | 'actions' | 'powers';
-const TAB_NAMES: Record<Tab, string> = { economy: 'Economía', military: 'Militar', units: 'Unidades', techs: 'Tecnologías', actions: 'Acciones', powers: 'Poderes' };
+type Tab = 'economy' | 'military' | 'defense' | 'units' | 'techs' | 'actions' | 'powers';
+const TAB_NAMES: Record<Tab, string> = { economy: 'Economía', military: 'Militar', defense: 'Defensas', units: 'Unidades', techs: 'Tecnologías', actions: 'Acciones', powers: 'Poderes' };
 type Screen = 'game' | 'stats' | 'techs' | 'diplomacy' | 'settings';
 const SCREENS: [Screen, string][] = [['game', 'Partida'], ['stats', 'Estadísticas'], ['techs', 'Tecnologías'], ['diplomacy', 'Diplomacia'], ['settings', 'Ajustes']];
 const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI'];
@@ -292,7 +292,7 @@ export class MobileHUD {
 
   private tabsFor(set: CommandSet): Tab[] {
     const tabs: Tab[] = [];
-    if (set.build) tabs.push('economy', 'military');
+    if (set.build) tabs.push('economy', 'military', ...(set.build.defense.items.length ? ['defense' as const] : []));
     if (set.train.length) tabs.push('units');
     if (set.research.length) tabs.push('techs');
     if (set.del || set.stop || set.evacuate || set.missions.length) tabs.push('actions');
@@ -417,7 +417,7 @@ export class MobileHUD {
 
   private openSheet(tab: Tab) {
     this.sheetTab = tab;
-    if (tab === 'economy' || tab === 'military') this.lastBuildTab = tab;
+    if (tab === 'economy' || tab === 'military' || tab === 'defense') this.lastBuildTab = tab;
     this.root.classList.add('sheet-open');
     this.sig.sheet = '';
     this.renderSheet();
@@ -437,7 +437,7 @@ export class MobileHUD {
     if (!this.sheetTab || !tabs.includes(this.sheetTab)) this.sheetTab = tabs[0];
     const tab = this.sheetTab;
     let btns: Btn[] = [];
-    if ((tab === 'economy' || tab === 'military') && set.build) btns = set.build[tab].items.map(c => this.btnFromCmd(c));
+    if ((tab === 'economy' || tab === 'military' || tab === 'defense') && set.build) btns = set.build[tab].items.map(c => this.btnFromCmd(c));
     else if (tab === 'units') btns = set.train.map(c => this.btnFromCmd(c));
     else if (tab === 'techs') btns = set.research.map(c => this.btnFromCmd(c));
     else if (tab === 'powers') btns = set.powers.map(c => this.btnFromCmd(c));
@@ -471,7 +471,12 @@ export class MobileHUD {
     const g = this.s.game, ui = this.s.ui, pl = ui.placing!;
     const def = g.reg.building(pl.defId);
     this.el['m-place'].classList.toggle('invalid', !pl.valid);
-    this.setHtml('place', this.el.placeInfo, `<b>${esc(def.name)}</b><span>${costText(g, g.human.getCost(def))}</span><small>Arrastra para moverlo</small>`);
+    // Edificios de línea (muros, zanjas): primero se fija el inicio y luego se arrastra hasta el final
+    const hint = !def.line ? 'Arrastra para moverlo' : !pl.start ? 'Arrastra al inicio y confirma' : `${pl.line?.filter(t => t.ok).length ?? 0} tramos · arrastra al final y confirma`;
+    const total = def.line && pl.line ? costText(g, Object.fromEntries(Object.entries(g.human.getCost(def)).map(([r, v]) => [r, (v ?? 0) * pl.line!.filter(t => t.ok).length]))) : costText(g, g.human.getCost(def));
+    this.setHtml('place', this.el.placeInfo, `<b>${esc(def.name)}</b><span>${total}</span><small>${hint}</small>`);
+    const ok = this.root.querySelector('[data-a="place-ok"] span');
+    if (ok) ok.textContent = def.line && !pl.start ? 'Inicio' : 'Construir';
   }
 
   // ------------------------------------------------------------ toques
