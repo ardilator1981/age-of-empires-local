@@ -11,6 +11,8 @@ import { hypot } from '../fmath';
 import { leaveShelter } from '../garrison';
 import { isHuntable } from '../wildlife';
 import { zoneSpeedFactor } from '../powers';
+import { allAllied, isAllied } from '../diplomacy';
+import { revealAreas } from '../espionage';
 
 /**
  * Sistemas básicos de la simulación. Se registran en el Registry desde el mod
@@ -304,13 +306,16 @@ export class VisionSystem implements System {
       // Varias unidades en la misma casilla ven lo mismo: se calcula una vez
       const done = new Set<number>();
       for (const e of g.actors) {
-        if (e.owner !== p.id || e.dead) continue;
+        if (e.dead) continue;
+        // Propio, de un aliado (visión compartida) o agente doble (espionaje)
+        if (e.owner !== p.id && e.data.agentOf !== p.id && !(e.owner !== 0 && isAllied(g, p.id, e.owner))) continue;
         const r = sightRadius(g, e), eye = eyeHeight(g, e);
         const key = ((Math.floor(e.y) * m.w + Math.floor(e.x)) * 64 + Math.round(r * 2)) * 16 + Math.round(eye * 2);
         if (done.has(key)) continue;
         done.add(key);
         castVision(m, e.x, e.y, eye, r, p.visible, p.explored);
       }
+      revealAreas(g, p);
     }
     g.data.visionVersion = (g.data.visionVersion ?? 0) + 1;
   }
@@ -367,7 +372,7 @@ export class VictorySystem implements System {
     // cliente tiene el suyo y todos deben acabar en el mismo tick. Termina cuando caen todos los
     // humanos o cuando solo queda un jugador en pie; `won` es para el jugador de esta copia.
     const all = g.players.slice(1), humans = all.filter(p => p.isHuman), alive = all.filter(p => !p.defeated);
-    if ((humans.length && humans.every(p => p.defeated)) || (all.length > 1 && alive.length <= 1)) {
+    if ((humans.length && humans.every(p => p.defeated)) || (all.length > 1 && (alive.length <= 1 || allAllied(g, alive.map(p => p.id))))) {
       g.over = true;
       g.events.emit('gameOver', { won: !g.human.defeated });
     }

@@ -9,6 +9,9 @@ import {
 import type { Session } from '../app/Session';
 import { portrait } from '../render/icons';
 import { playerPowers, powerAvail, powerWait } from '../game/powers';
+import { ACT_NAMES, spyProblem, spyWait, type SpyAct } from '../game/espionage';
+import { isPost, isTrader } from '../game/trade';
+import { BALANCE } from '../config/balance';
 import { canShelterSomewhere, garrisonOf, nearestShelter } from '../game/garrison';
 
 /**
@@ -51,6 +54,8 @@ export interface CommandSet {
   del: Cmd | null;
   /** Poderes activos de la civilización (no dependen de la selección). */
   powers: Cmd[];
+  /** Misiones de las unidades de comercio y espionaje seleccionadas (comerciar, informe, robar, sabotear, sobornar). */
+  missions: Cmd[];
 }
 
 export const OK: Avail = { visible: true, ok: true };
@@ -130,13 +135,71 @@ export function powerCommands(s: Session): Cmd[] {
   });
 }
 
+/** Entidad bajo un punto del mundo que cumpla el filtro (edificio que lo contiene, o unidad a menos de 1 casilla). */
+function entityAt(g: Game, pt: { x: number; y: number }, ok: (e: Entity) => boolean): Entity | null {
+  for (const b of g.buildings) if (!b.dead && ok(b) && pt.x >= b.tx && pt.x < b.tx + b.size && pt.y >= b.ty && pt.y < b.ty + b.size) return b;
+  let best: Entity | null = null, bd = 1;
+  for (const u of g.units) {
+    if (u.dead || u.inside || !ok(u)) continue;
+    const d = Math.hypot(u.x - pt.x, u.y - pt.y);
+    if (d < bd) { bd = d; best = u; }
+  }
+  return best;
+}
+
+const SPY_ICON: Record<SpyAct, string> = { intel: '📋', steal: '📜', sabotage: '🔥', bribe: '💰' };
+const SPY_TIP: Record<SpyAct, string> = {
+  intel: 'Entra en un edificio enemigo: informe de su ejército, aldeanos y recursos, y deja ver la zona un rato.',
+  steal: 'Copia la tecnología más cara que el enemigo tenga y tú no (de tu edad o menor), pagando una parte. Enfriamiento largo.',
+  sabotage: 'Daña un edificio enemigo y retrasa lo que fabrica.',
+  bribe: 'Soborna a una unidad enemiga: se convierte en agente doble y su dueño real ve lo que ella ve. Si pasa junto a su vigilancia, la descubren.',
+};
+
+/** Misiones de caravanas (comerciar) y espías (informe, robo, sabotaje, soborno). */
+function missionCommands(s: Session, units: Entity[]): Cmd[] {
+  const g = s.game, p = g.human, ui = s.ui, out: Cmd[] = [];
+  const pick = (owner: string, hint: string, ok: (e: Entity) => boolean, send: (target: Entity) => void) => {
+    g.notify(hint, p.id, 'info');
+    ui.placing = null; ui.targeting = null;
+    ui.pickPoint = { owner, onPick: pt => { ui.pickPoint = null; const t = entityAt(g, pt, ok); if (t) send(t); else g.reject(p.id, 'other', 'No hay un objetivo válido ahí'); } };
+  };
+  const caravans = units.filter(u => isTrader(g, u));
+  if (caravans.length) {
+    out.push({
+      icon: '🐪', label: 'Comerciar', avail: OK,
+      tip: '<b>Comerciar</b> (o clic derecho en un mercado)<br>Elige un puesto comercial propio lejano o de alguien que no esté en guerra contigo: la caravana va y viene cobrando oro según la distancia. Más con aliados.',
+      action: () => pick('trade', '🐪 Toca el mercado con el que comerciar', e => e.kind === 'building' && isPost(g, e),
+        t => s.orders.send({ t: 'mod', id: 'trade', args: { units: ids(caravans), dest: t.id } })),
+    });
+  }
+  const spies = units.filter(u => g.unitDef(u).stealth);
+  if (spies.length) {
+    const wait = Math.min(...spies.map(u => spyWait(g, u)));
+    for (const act of ['intel', 'steal', 'sabotage', 'bribe'] as SpyAct[]) {
+      const cost = act === 'bribe' ? costText(g, { gold: BALANCE.espionage.bribeCost }) : '';
+      const a: Avail = wait > 0 ? { visible: true, ok: false, reason: `El espía descansa ${wait} s`, code: 'requirement' } : OK;
+      out.push({
+        icon: SPY_ICON[act], label: ACT_NAMES[act], avail: a, cost, badge: wait > 0 ? String(wait) : undefined,
+        tip: tipHtml(ACT_NAMES[act], cost, SPY_TIP[act], a),
+        action: () => {
+          if (!a.ok) { g.rejectAvail(p.id, a); return; }
+          pick(`spy-${act}`, `🕵️ ${ACT_NAMES[act]}: toca ${act === 'bribe' ? 'la unidad enemiga' : 'el edificio enemigo'}`,
+            e => !spyProblem(g, p.id, act, e) && (act === 'bribe' ? e.kind === 'unit' : e.kind === 'building'),
+            t => s.orders.send({ t: 'mod', id: 'spy', args: { units: ids(spies), act, target: t.id } }));
+        },
+      });
+    }
+  }
+  return out;
+}
+
 /** Calcula los comandos disponibles para la selección actual del jugador humano. */
 export function selectionCommands(s: Session): CommandSet {
   const g = s.game, p = g.human, ui = s.ui;
   const sel = ui.selected(g).filter(e => e.owner === p.id);
   const units = sel.filter(e => e.kind === 'unit');
   const blds = sel.filter(e => e.kind === 'building');
-  const set: CommandSet = { units, blds, build: null, attackMove: null, explore: null, stop: null, shelter: null, evacuate: null, strategy: null, train: [], research: [], del: null, powers: powerCommands(s) };
+  const set: CommandSet = { units, blds, build: null, attackMove: null, explore: null, stop: null, shelter: null, evacuate: null, strategy: null, train: [], research: [], del: null, powers: powerCommands(s), missions: [] };
   if (!sel.length) return set;
   const del: Cmd = {
     icon: '❌', label: 'Eliminar', avail: OK, tip: '<b>Eliminar</b> (Supr)<br>Destruye la selección.',
@@ -179,6 +242,7 @@ export function selectionCommands(s: Session): CommandSet {
         action: () => { ui.targeting = 'attackMove'; },
       };
     }
+    set.missions = missionCommands(s, units);
     const scouts = units.filter(u => g.unitDef(u).autoExplore);
     if (scouts.length) {
       const a = exploreAvail(g, p, scouts[0].defId);

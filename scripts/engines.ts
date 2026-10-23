@@ -11,7 +11,7 @@
  * (imprime la partida recién creada como JSON) y `sim <min> <semilla> <mapa> <archivo>` (parte de
  * esa partida guardada: todos los motores empiezan del mismo estado, como al unirse a una partida).
  * Un sexto argumento (`sim <min> <semilla> <mapa> - <edad>`) empieza en esa edad: con la 4, las IA
- * usan los poderes activos de sus civilizaciones.
+ * usan los poderes activos de sus civilizaciones; un séptimo (`... - 3 persia,china,france,britain`) elige las civilizaciones.
  *
  * No usa nada de Node: en el `jsc` de macOS no hay `console` ni `process`.
  */
@@ -53,7 +53,8 @@ if (mode === 'math') {
   // Partida de 4 IA en un mapa aleatorio
   const mods = ALL_MODS.filter(m => m.id !== 'declared-war' && m.id !== 'regicide');
   const reg = buildRegistry(mods);
-  const civs = ['france', 'britain', 'rus', 'france'];
+  // Séptimo argumento (opcional): civilizaciones de las IA separadas por comas
+const civs = args[6]?.split(',') ?? ['france', 'britain', 'rus', 'france'];
   const save: SaveData | undefined = mode === 'sim' && args[4] && args[4] !== '-' ? JSON.parse(readText(args[4])) : undefined;
   // Los mapas reales cargan sus datos antes (al partir de una partida guardada no hace falta)
   if (!save) await reg.mapTypes.get(mapType)?.load?.();

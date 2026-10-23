@@ -8,13 +8,13 @@
 
 | Tipo | Hecho | Sin animar | Pendiente |
 | --- | ---: | ---: | ---: |
-| unidad | 2 | 14 | 57 |
-| edificio | 0 | 12 | 47 |
+| unidad | 2 | 14 | 59 |
+| edificio | 0 | 12 | 48 |
 | recurso | 6 | 0 | 6 |
 | terreno | 9 | 0 | 0 |
 | decoración | 9 | 0 | 0 |
 | efecto | 7 | 0 | 5 |
-| interfaz | 11 | 0 | 88 |
+| interfaz | 11 | 0 | 91 |
 
 ## Siguiente en generar (por prioridad)
 
@@ -110,6 +110,8 @@
 | oromoRider | Jinete oromo | 🔴 pendiente | idle, walk, attack, death | units/oromoRider.png (+ -mask.png)<br>units/oromoRider-walk.png (+ -mask.png)<br>units/oromoRider-attack.png (+ -mask.png)<br>units/oromoRider-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk:mounted` `anim:attack-melee:mounted` `anim:death:mounted` |
 | shewanRifleman | Fusilero shewano | 🔴 pendiente | idle, walk, attack, death | units/shewanRifleman.png (+ -mask.png)<br>units/shewanRifleman-walk.png (+ -mask.png)<br>units/shewanRifleman-attack.png (+ -mask.png)<br>units/shewanRifleman-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack` `anim:death` |
 | mountainGun | Artillería de montaña | 🔴 pendiente | idle, walk, attack, death | units/mountainGun.png (+ -mask.png)<br>units/mountainGun-walk.png (+ -mask.png)<br>units/mountainGun-attack.png (+ -mask.png)<br>units/mountainGun-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack` `anim:death` |
+| caravan | Caravana | 🔴 pendiente | idle, walk, death | units/caravan.png (+ -mask.png)<br>units/caravan-walk.png (+ -mask.png)<br>units/caravan-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:death` |
+| spy | Espía | 🔴 pendiente | idle, walk, death | units/spy.png (+ -mask.png)<br>units/spy-walk.png (+ -mask.png)<br>units/spy-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:death` |
 | warElephant | Elefante de guerra | 🔴 pendiente | idle, walk, attack, death | units/warElephant.png (+ -mask.png)<br>units/warElephant-walk.png (+ -mask.png)<br>units/warElephant-attack.png (+ -mask.png)<br>units/warElephant-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk:mounted` `anim:attack-melee:mounted` `anim:death:mounted` |
 | general | General | 🔴 pendiente | idle, walk, attack, death | units/general.png (+ -mask.png)<br>units/general-walk.png (+ -mask.png)<br>units/general-attack.png (+ -mask.png)<br>units/general-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk:mounted` `anim:attack-melee:mounted` `anim:death:mounted` |
 | king | Rey | 🔴 pendiente | idle, walk, death | units/king.png (+ -mask.png)<br>units/king-walk.png (+ -mask.png)<br>units/king-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:death` |
@@ -179,6 +181,7 @@
 | gondarCastle | Castillo de Gondar | 🔴 pendiente | imagen base (Edad Imperial), Edad de la Pólvora, Edad Industrial | buildings/gondarCastle.png (+ -mask.png)<br>buildings/gondarCastle-4.png (+ -mask.png)<br>buildings/gondarCastle-5.png (+ -mask.png) | 3 | `building:base` |
 | rasPalace | Palacio del ras | 🔴 pendiente | imagen base (Edad de la Pólvora), Edad Industrial | buildings/rasPalace.png (+ -mask.png)<br>buildings/rasPalace-5.png (+ -mask.png) | 3 | `building:base` |
 | djiboutiRailway | Ferrocarril de Yibuti | 🔴 pendiente | imagen base (Edad Industrial) | buildings/djiboutiRailway.png (+ -mask.png) | 3 | `building:base` |
+| market | Mercado | 🔴 pendiente | imagen base (Edad Feudal), Edad de los Castillos, Edad Imperial, Edad de la Pólvora, Edad Industrial | buildings/market.png (+ -mask.png)<br>buildings/market-2.png (+ -mask.png)<br>buildings/market-3.png (+ -mask.png)<br>buildings/market-4.png (+ -mask.png)<br>buildings/market-5.png (+ -mask.png) | 3 | `building:base` |
 
 *huella 4x4*
 *huella 2x2*
@@ -351,6 +354,9 @@
 | portugueseAlliance | Tecnología: Alianza portuguesa | 🔴 pendiente | imagen | ui/tech/portugueseAlliance.png | 5 | `ui:tech` |
 | horseBreeding | Tecnología: Cría de caballos | 🔴 pendiente | imagen | ui/tech/horseBreeding.png | 5 | `ui:tech` |
 | armsImport | Tecnología: Importación de armas | 🔴 pendiente | imagen | ui/tech/armsImport.png | 5 | `ui:tech` |
+| caravanserai | Tecnología: Caravasar | 🔴 pendiente | imagen | ui/tech/caravanserai.png | 5 | `ui:tech` |
+| counterespionage | Tecnología: Contraespionaje | 🔴 pendiente | imagen | ui/tech/counterespionage.png | 5 | `ui:tech` |
+| bankingHouses | Tecnología: Casas de cambio | 🔴 pendiente | imagen | ui/tech/bankingHouses.png | 5 | `ui:tech` |
 | ironTusks | Tecnología: Colmillos de hierro | 🔴 pendiente | imagen | ui/tech/ironTusks.png | 5 | `ui:tech` |
 
 *el motor todavía no usa estas imágenes (se dibuja por código)*

@@ -10,6 +10,7 @@ import { artFor } from './art/artRegistry';
 import { prop } from './art/props';
 import { type Deco, drawDecoration, generateDecorations } from './decorations';
 import { QUALITY, type QualityProfile } from './quality';
+import { hiddenFrom } from '../game/espionage';
 
 interface Drawn { e: Entity; sx: number; sy: number; hb: number; depth: number }
 
@@ -144,7 +145,8 @@ export class Renderer {
     if (e.owner === p.id) return true;
     const m = this.game.map;
     const i = Math.floor(e.y) * m.w + Math.floor(e.x);
-    return e.kind === 'unit' ? p.visible[i] === 1 : p.explored[i] === 1;
+    if (e.kind === 'unit') return p.visible[i] === 1 && !(this.game.reg.units.get(e.defId)?.stealth && hiddenFrom(this.game, e, p.id));
+    return p.explored[i] === 1;
   }
 
   /** Explorada pero sin visión actual: se dibuja oscurecida. */

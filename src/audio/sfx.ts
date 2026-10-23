@@ -8,7 +8,7 @@
 
 export type SfxId =
   | 'confirmMove' | 'confirmGather' | 'confirmBuild' | 'confirmAttack'
-  | 'buildingDone' | 'unitTrained' | 'techDone' | 'ageUp' | 'powerUsed'
+  | 'buildingDone' | 'unitTrained' | 'techDone' | 'ageUp' | 'powerUsed' | 'coins' | 'treaty' | 'spyDone'
   | 'depleted' | 'alertUnits' | 'alertBuildings' | 'villagerIdle'
   | 'errResources' | 'errPlacement' | 'errPopulation' | 'errGeneric'
   | 'hitMelee' | 'hitArrow' | 'hitMusket' | 'hitCannon' | 'hitRifle' | 'hitGatling' | 'hitBuilding' | 'animalDeath' | 'bird';
@@ -204,6 +204,27 @@ export const SFX: Record<SfxId, SfxDef> = {
       tone(c, o, { freq: 110, to: 50, t: 0, dur: 0.5, gain: 0.7 });
     },
   },
+  coins: {
+    dur: 0.7, bus: 'effects', prio: 1, cooldown: 0.6, gain: 0.3,
+    make: (c, o) => { [88, 93].forEach((m, i) => bell(c, o, mtof(m), i * 0.09, 0.25, 0.5)); },
+  },
+  treaty: {
+    dur: 1.4, bus: 'effects', prio: 3, cooldown: 0.6, gain: 0.4,
+    make: (c, o) => {
+      // Dos notas de trompa que se encuentran en una quinta, como un apretón de manos
+      held(c, o, { freq: mtof(60), t: 0, dur: 0.5, gain: 0.25, lp: 2200, attack: 0.04 });
+      held(c, o, { freq: mtof(67), t: 0.25, dur: 0.9, gain: 0.25, lp: 2200, attack: 0.04, vibrato: 0.004 });
+    },
+  },
+  spyDone: {
+    dur: 0.6, bus: 'effects', prio: 2, cooldown: 0.5, gain: 0.3,
+    make: (c, o) => {
+      // Dos golpecitos secos y una nota grave: una misión hecha en silencio
+      tone(c, o, { freq: 520, to: 380, t: 0, dur: 0.06, gain: 0.4, attack: 0.005 });
+      tone(c, o, { freq: 520, to: 380, t: 0.12, dur: 0.06, gain: 0.4, attack: 0.005 });
+      tone(c, o, { freq: 130, to: 90, t: 0.2, dur: 0.3, gain: 0.35 });
+    },
+  },
   ageUp: {
     dur: 3.2, bus: 'effects', prio: 4, cooldown: 2, gain: 0.5,
     make: (c, o) => {
@@ -352,5 +373,5 @@ export const SFX: Record<SfxId, SfxDef> = {
 export const PRELOAD_ORDER: SfxId[] = [
   'confirmMove', 'confirmGather', 'confirmBuild', 'confirmAttack', 'errPlacement', 'errResources', 'errGeneric',
   'unitTrained', 'buildingDone', 'alertUnits', 'alertBuildings', 'errPopulation', 'depleted', 'techDone', 'ageUp', 'powerUsed',
-  'villagerIdle', 'hitMelee', 'hitArrow', 'hitMusket', 'hitCannon', 'hitRifle', 'hitGatling', 'hitBuilding', 'animalDeath', 'bird',
+  'coins', 'treaty', 'spyDone', 'villagerIdle', 'hitMelee', 'hitArrow', 'hitMusket', 'hitCannon', 'hitRifle', 'hitGatling', 'hitBuilding', 'animalDeath', 'bird',
 ];

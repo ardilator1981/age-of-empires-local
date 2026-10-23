@@ -15,6 +15,9 @@ ningún sonido de *Age of Empires* ni de otros juegos comerciales, ni muestras d
 | Unidad entrenada | `sfx.ts` (`unitTrained`) | Dos notas de cuerno | Original del proyecto |
 | Tecnología investigada | `sfx.ts` (`techDone`) | Arpegio de campanillas | Original del proyecto |
 | Poder activo lanzado | `sfx.ts` (`powerUsed`) | Toque de trompa con timbal | Original del proyecto |
+| Ganancia del comercio | `sfx.ts` (`coins`) | Dos campanitas agudas | Original del proyecto |
+| Paz, alianza o propuesta | `sfx.ts` (`treaty`) | Dos notas de trompa en quinta | Original del proyecto |
+| Misión de espía cumplida | `sfx.ts` (`spyDone`) | Dos golpecitos secos y una nota grave | Original del proyecto |
 | Nueva edad | `sfx.ts` (`ageUp`) | Fanfarria de trompetas sintéticas con timbal | Original del proyecto |
 | Recurso agotado | `sfx.ts` (`depleted`) | Dos notas graves descendentes y un golpe sordo | Original del proyecto |
 | Ataque a unidades | `sfx.ts` (`alertUnits`) | Cuerno de guerra (dos toques graves) | Original del proyecto |

@@ -58,6 +58,7 @@ function startSpot(game: Game, pid: number): Pt | null {
 /** Al empezar la partida: un rey por jugador (solo con la victoria «Matar al rey» elegida). */
 export function initRegicide(game: Game) {
   if (game.opts.victory !== REGICIDE) return;
+  game.data.noDiplomacy = true; // la caza del rey no admite paz ni alianzas
   const st: RegicideState = { kings: {} };
   for (const p of game.players.slice(1)) {
     const at = startSpot(game, p.id);

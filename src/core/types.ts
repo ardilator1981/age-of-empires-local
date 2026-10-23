@@ -136,6 +136,8 @@ export interface UnitDef extends BaseDef {
   hunting?: boolean;
   /** Vuela: ignora el terreno y las unidades de tierra, y solo la golpean armas a distancia (aviación básica). */
   flying?: boolean;
+  /** Espía: invisible y no atacable salvo cerca de vigilancia enemiga (ver `game/espionage.ts`). */
+  stealth?: boolean;
 }
 
 /** Comportamiento de un animal. Al morir deja un cadáver (nodo de recurso) recolectable. */
@@ -206,6 +208,8 @@ export type Effect =
   | { type: 'gatherRate'; resource: ResourceId | '*'; op: 'add' | 'mul'; value: number }
   /** Al recolectar de estos nodos (ids de `ResourceNodeDef`), el jugador recibe además `ratio` × lo recolectado en `resource`. */
   | { type: 'gatherYield'; nodes: string[]; resource: ResourceId; ratio: number }
+  /** Las caravanas del jugador ganan `mul` veces más (multiplicativo; ver `game/trade.ts`). */
+  | { type: 'tradeYield'; mul: number }
   | { type: 'cost'; target: Target; resource: ResourceId | '*'; op: 'add' | 'mul'; value: number }
   | { type: 'grant'; resources: Cost }
   | { type: 'upgrade'; from: string; to: string }

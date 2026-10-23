@@ -104,6 +104,17 @@ describe('pasos sincronizados (prototipo)', () => {
     expect(r.joinDiff).toBeNull();
   }, 120_000);
 
+  it('comercio, diplomacia y espionaje (humanos con guion e IA) no desincronizan a los clientes', () => {
+    const o = netOptions(2, 2, 5);
+    o.startAge = 3;
+    const r = runMatch({ reg, opts: o, humans: 2, minutes: 12, delay: 4, net: WIFI, hashEvery: 5, joinAt: 240 * 20 });
+    expect(r.trade.gold).toBeGreaterThan(0);
+    expect(r.trade.treaties).toBeGreaterThanOrEqual(2);
+    expect(r.firstDiff).toBeNull();
+    expect(r.desync).toBeNull();
+    expect(r.joinDiff).toBeNull();
+  }, 240_000);
+
   it('detecta una desincronización en el tick en que ocurre', () => {
     const r = runMatch({ reg, opts: netOptions(2, 0), humans: 2, minutes: 1, delay: 3, net: WIFI, fault: { client: 1, tick: 400 } });
     expect(r.firstDiff).toBe(401);

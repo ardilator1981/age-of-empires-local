@@ -58,3 +58,14 @@ for (const [map, seed] of [['arabia', 7], ['arabia', 3]]) {
   const res = i < 0 ? `iguales (${a.length - 2} huellas)` : `difieren desde el tick ${a[i].split(' ')[1]} (${(Number(a[i].split(' ')[1]) / 20).toFixed(0)} s)`;
   console.log(`| ${map} (${seed}) | era 4 | ${a[0] === b[0] ? 'igual' : 'distinto'} | ${res} |`);
 }
+
+// 4. Comercio, diplomacia y espionaje (las IA empiezan en la era 3: mercados, caravanas, tratados y espías)
+const tm = Math.min(minutes, 30);
+console.log(`\n| Mapa | Inicio | Mapa generado | Comercio, diplomacia y espionaje (era 3, ${tm} min) |\n| --- | --- | --- | --- |`);
+for (const [map, seed] of [['arabia', 2], ['arabia', 7]]) {
+  const args = ['sim', tm, seed, map, '-', 3, 'persia,china,france,britain'].map(String);
+  const a = run(A, args), b = run(B, args);
+  const i = a.findIndex((l, k) => l !== b[k]);
+  const res = i < 0 ? `iguales (${a.length - 2} huellas)` : `difieren desde el tick ${a[i].split(' ')[1]} (${(Number(a[i].split(' ')[1]) / 20).toFixed(0)} s)`;
+  console.log(`| ${map} (${seed}) | era 3 | ${a[0] === b[0] ? 'igual' : 'distinto'} | ${res} |`);
+}

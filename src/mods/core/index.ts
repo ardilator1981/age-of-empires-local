@@ -24,6 +24,11 @@ import { ethiopiaBuildings, ethiopiaTechs, ethiopiaUnits } from './civ-ethiopia'
 import { gunpowderAI, gunpowderBuildings, gunpowderTechs, gunpowderUnits } from './gunpowder';
 import { powers, powersAI } from './powers';
 import { PowerSystem, truceRule, usePower } from '../../game/powers';
+import { diploCommand, DiplomacySystem, initDiplomacy } from '../../game/diplomacy';
+import { EspionageSystem, spyCommand, spyOrder, stealthRule } from '../../game/espionage';
+import { tradeCommand, tradeOrder } from '../../game/trade';
+import { diplomacyPanel } from './diplomacyPanel';
+import { diplomacyAI, drawRoutes, registerTrade, spyAI, tradeAI } from './trade';
 import { WildlifeSystem, retaliateOrder } from '../../game/wildlife';
 
 const victories: VictoryDef[] = [
@@ -74,6 +79,18 @@ export const coreMod: GameMod = {
     reg.addNetCommand('power', usePower);
     reg.addCombatRule(truceRule);
     civs.forEach(c => reg.addCiv(c));
+    // Fase 5: comercio, diplomacia y espionaje (después de las civilizaciones y los edificios que modifica)
+    registerTrade(reg);
+    reg.addAIPlugin(tradeAI);
+    reg.addAIPlugin(diplomacyAI);
+    reg.addAIPlugin(spyAI);
+    reg.addNetCommand('trade', tradeCommand);
+    reg.addNetCommand('spy', spyCommand);
+    reg.addNetCommand('diplo', diploCommand);
+    reg.addCombatRule(stealthRule);
+    reg.addWorldOverlay(drawRoutes);
+    reg.addHudPanel(diplomacyPanel);
+    reg.onGameStart(initDiplomacy);
     maps.forEach(m => reg.addMapType(m));
     victories.forEach(v => reg.addVictory(v));
     reg.setup = { ...setup, wildlife: wildlifeSpawns };
@@ -89,9 +106,12 @@ export const coreMod: GameMod = {
     reg.addOrder('build', buildOrder);
     reg.addOrder('garrison', garrisonOrder);
     reg.addOrder('retaliate', retaliateOrder);
+    reg.addOrder('trade', tradeOrder);
+    reg.addOrder('spy', spyOrder);
 
     reg.addSystem('playerStats', g => new PlayerStatsSystem(g), 0);
     reg.addSystem('powers', g => new PowerSystem(g), 3);
+    reg.addSystem('diplomacy', g => new DiplomacySystem(g), 4);
     reg.addSystem('ai', g => new AISystem(g), 5);
     reg.addSystem('formations', g => new FormationSystem(g), 9);
     reg.addSystem('wildlife', g => new WildlifeSystem(g), 8);
@@ -99,6 +119,7 @@ export const coreMod: GameMod = {
     reg.addSystem('movement', g => new MovementSystem(g), 20);
     reg.addSystem('production', g => new ProductionSystem(g), 30);
     reg.addSystem('aura', g => new AuraSystem(g), 35);
+    reg.addSystem('espionage', g => new EspionageSystem(g), 36);
     reg.addSystem('combat', g => new CombatSystem(g), 40);
     reg.addSystem('vision', g => new VisionSystem(g), 50);
     reg.addSystem('victory', g => new VictorySystem(g), 60);

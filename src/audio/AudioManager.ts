@@ -86,6 +86,11 @@ export class AudioManager {
         if (player.id === h && game.reg.techs.get(techId)?.setsAge === undefined) this.play('techDone');
       }),
       ev.on('powerUsed', ({ playerId }) => { if (playerId === h) this.play('powerUsed'); }),
+      ev.on('tradeProfit', ({ playerId }) => { if (playerId === h) this.play('coins'); }),
+      ev.on('diplomacyChanged', ({ a, b, rel, old }) => { if (a === h || b === h) this.play(rel > old ? 'treaty' : 'alertUnits'); }),
+      ev.on('diplomacyProposal', ({ to }) => { if (to === h) this.play('treaty'); }),
+      ev.on('spyAction', ({ playerId }) => { if (playerId === h) this.play('spyDone'); }),
+      ev.on('spyCaught', ({ playerId }) => { if (playerId === h) this.play('errGeneric'); }),
       ev.on('ageReached', ({ player }) => { if (player.id === h) this.play('ageUp'); }),
       ev.on('resourceDepleted', ({ playerId, area }) => { if (playerId === h && area) this.play('depleted'); }),
       ev.on('underAttack', ({ playerId, kind }) => { if (playerId === h) this.play(kind === 'building' ? 'alertBuildings' : 'alertUnits'); }),
