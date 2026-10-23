@@ -301,7 +301,8 @@ export class Game {
     b.progress = 1;
     this.events.emit('buildingCompleted', { entity: b });
     const p = this.players[b.owner];
-    if (p.isHuman) this.notify(`${this.buildingDef(b).name} terminado`, p.id, 'good');
+    // Una línea de muro son muchos tramos: no se avisa de cada uno
+    if (p.isHuman && !this.buildingDef(b).line) this.notify(`${this.buildingDef(b).name} terminado`, p.id, 'good');
   }
 
   // ------------------------------------------------------------ destrucción

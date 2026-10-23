@@ -34,6 +34,8 @@ export interface GameEventMap {
   villagerIdle: { entity: Entity };
   /** Un jugador ha lanzado un poder activo de su civilización (`PowerDef`). */
   powerUsed: { playerId: number; powerId: string; at?: { x: number; y: number } };
+  /** Un muro o torre hiere a un enemigo a su pie (aceite hirviendo): solo para el sonido y los efectos. */
+  footBurn: { target: Entity; source: Entity };
   [custom: string]: any;
 }
 

@@ -11,7 +11,7 @@ export type SfxId =
   | 'buildingDone' | 'unitTrained' | 'techDone' | 'ageUp' | 'powerUsed' | 'coins' | 'treaty' | 'spyDone'
   | 'depleted' | 'alertUnits' | 'alertBuildings' | 'villagerIdle'
   | 'errResources' | 'errPlacement' | 'errPopulation' | 'errGeneric'
-  | 'hitMelee' | 'hitArrow' | 'hitMusket' | 'hitCannon' | 'hitRock' | 'hitRifle' | 'hitGatling' | 'hitBuilding' | 'animalDeath' | 'bird';
+  | 'hitMelee' | 'hitArrow' | 'hitMusket' | 'hitCannon' | 'hitRock' | 'hitRifle' | 'hitGatling' | 'hitBuilding' | 'animalDeath' | 'bird' | 'oilHiss';
 
 export type SfxBus = 'effects' | 'alerts';
 
@@ -369,6 +369,15 @@ export const SFX: Record<SfxId, SfxDef> = {
       burst(c, o, { type: 'bandpass', freq: 900, q: 1.5, t: 0, dur: 0.12, gain: 0.2 });
     },
   },
+  oilHiss: {
+    dur: 0.6, bus: 'effects', prio: 1, cooldown: 0.6, gain: 0.35,
+    make: (c, o) => {
+      // Aceite que cae y chisporrotea: siseo de ruido agudo con un chapoteo grave
+      burst(c, o, { type: 'highpass', freq: 3200, t: 0, dur: 0.5, gain: 0.35 });
+      burst(c, o, { type: 'bandpass', freq: 900, q: 1.2, t: 0.02, dur: 0.35, gain: 0.3 });
+      tone(c, o, { freq: 180, to: 90, t: 0, dur: 0.18, gain: 0.3 });
+    },
+  },
   bird: {
     dur: 0.6, bus: 'effects', prio: 0, cooldown: 2, gain: 0.1,
     make: (c, o) => {
@@ -382,5 +391,5 @@ export const SFX: Record<SfxId, SfxDef> = {
 export const PRELOAD_ORDER: SfxId[] = [
   'confirmMove', 'confirmGather', 'confirmBuild', 'confirmAttack', 'errPlacement', 'errResources', 'errGeneric',
   'unitTrained', 'buildingDone', 'alertUnits', 'alertBuildings', 'errPopulation', 'depleted', 'techDone', 'ageUp', 'powerUsed',
-  'coins', 'treaty', 'spyDone', 'villagerIdle', 'hitMelee', 'hitArrow', 'hitMusket', 'hitCannon', 'hitRock', 'hitRifle', 'hitGatling', 'hitBuilding', 'animalDeath', 'bird',
+  'coins', 'treaty', 'spyDone', 'villagerIdle', 'hitMelee', 'hitArrow', 'hitMusket', 'hitCannon', 'hitRock', 'hitRifle', 'hitGatling', 'hitBuilding', 'animalDeath', 'bird', 'oilHiss',
 ];

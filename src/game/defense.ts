@@ -75,7 +75,10 @@ export class DefenseSystem implements System {
         const d = g.players[b.owner].getStat(g.buildingDef(b), 'footDamage');
         if (d > 0) { dmg += d * seconds; from = from ?? b; }
       }
-      if (from && dmg > 0) dealDamage(g, u, { attack: dmg, type: 'melee', bonus: [], owner: from.owner, attackerId: from.id, ignoreArmor: true });
+      if (from && dmg > 0) {
+        dealDamage(g, u, { attack: dmg, type: 'melee', bonus: [], owner: from.owner, attackerId: from.id, ignoreArmor: true });
+        g.events.emit('footBurn', { target: u, source: from });
+      }
     }
   }
 }

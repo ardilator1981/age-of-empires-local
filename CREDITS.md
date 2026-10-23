@@ -32,6 +32,7 @@ ningún sonido de *Age of Empires* ni de otros juegos comerciales, ni muestras d
 | Combate: mosquete y cañón (era de la Pólvora) | `sfx.ts` (`hitMusket`, `hitCannon`) | Estampido: ruido filtrado que se apaga rápido más un golpe grave; el cañón, un tono muy grave con caída y cola de ruido | Original del proyecto |
 | Combate: piedra de catapulta y trabuquete | `sfx.ts` (`hitRock`) | Golpe sordo: tono muy grave con caída, ruido grave filtrado y un crujido de escombros | Original del proyecto |
 | Combate: fusil estriado, ametralladora y aviones (era Industrial) | `sfx.ts` (`hitRifle`, `hitGatling`) | Fusil: chasquido agudo de ruido filtrado más un golpe corto; ráfaga: tres chasquidos seguidos | Original del proyecto |
+| Aceite hirviendo (muros y torres hieren al pie) | `sfx.ts` (`oilHiss`) | Siseo de ruido agudo, ruido de banda media y un chapoteo grave | Original del proyecto |
 | Ambiente: pájaros | `sfx.ts` (`bird`) | Glissandos agudos cortos | Original del proyecto |
 | Ambiente: viento | `src/audio/AudioManager.ts` | Ruido filtrado con ráfagas lentas | Original del proyecto |
 

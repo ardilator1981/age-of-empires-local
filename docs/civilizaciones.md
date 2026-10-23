@@ -476,3 +476,69 @@ Reglas del motor que sostienen la tabla: el daño es *ataque − armadura* más 
 - 🔶 **Quitar unidades comunes incoherentes** por civilización (p. ej. Caballero europeo en Persia, China o Etiopía): hoy `CivDef` solo añade. Propuesta: `CivDef.hides`.
 - 🔶 **Alcance mínimo** del trabuquete y la bombarda (como en AoE II).
 - 🔶 Mover el Elefante de guerra a la Edad Oscura junto a los demás únicos de Persia y Etiopía.
+
+## 14. Defensas: empalizadas, zanjas, murallas y puertas
+
+Cómo se defiende una base con construcciones lineales, qué se ha hecho y qué queda. Pensada para quien no conozca el código. Leyenda: ✔ implementado, ⏳ pendiente, 🔶 especulativo o por decidir. Los valores son indicativos y viven en `src/mods/core/defenses.ts` (contenido e IA) y `BALANCE.defense` (`src/config/balance.ts`).
+
+### 14.1 Idea general
+
+- Cada **tramo** es un edificio de **una casilla**. Se traza en línea (arrastrando de un punto a otro; en el móvil, «Inicio» y «Construir») y los aldeanos los levantan uno tras otro, pagando cada tramo. No hay un «edificio muralla» largo: así un muro se rompe por tramos, se repara por tramos y las regiones de conectividad se recalculan sin más.
+- **Bloquean el paso** como cualquier otro edificio (`blocked` en el mapa): el A* los trata como obstáculos y `canReach` sabe al instante si algo queda dentro de un recinto. Las **puertas** son casillas que no estorban el paso, pero cuyo dueño decide quién cruza (ver 14.3).
+- Todo es **dato del mod base** (`BuildingDef`): `line` (se traza en línea), `gate`, `replaces`, `footDamage`. El motor solo conoce eso, no ids de contenido. Clases: `wall` (empalizada, muros y puertas: reciben los bonos de PV y el aceite hirviendo), `barrier` (solo estorba el paso; no cuenta para la victoria por conquista), `gate`, `ditch`.
+
+### 14.2 Qué hay por era
+
+| Era | Contenido | Estado |
+| --- | --- | --- |
+| 0 Oscura | **Empalizada** (280 PV, armadura 2/5, 4 madera) y **Puerta de empalizada** | ✔ |
+| 1 Feudal | **Zanja** (ninguna unidad de tierra la cruza; las flechas apenas la dañan) y **Puente** (se construye sobre un tramo de zanja propio y la sustituye) | ✔ |
+| 2 Castillos | **Muralla de piedra** (1800 PV, armadura 8/10, 6 piedra), **Puerta de piedra** y **Torre de muralla** (dispara flechas, 1 casilla) | ✔ |
+| 3 Imperial | **Muralla fortificada** (3000 PV, armadura 12/14) y **Puerta fortificada** | ✔ |
+| 4–5 | Bastiones y fortines (Vauban, §5.3), muralla contra artillería, trincheras y alambradas | ⏳ / 🔶 |
+
+**Tecnologías** (todas en el motor como efectos `stat` sobre las clases `wall` y `tower`):
+
+| Tecnología | Edad | Dónde | Efecto | Estado |
+| --- | --- | --- | --- | --- |
+| Arquitectura de defensa | 1 | Centro urbano | +25 % PV a empalizadas, muros, puertas y torres | ✔ |
+| Contrafuertes | 2 | Herrería | +25 % PV y +1/+1 de armadura (requiere la anterior) | ✔ |
+| **Aceite hirviendo** | 2 | Herrería | Muros, puertas y torres hieren a los enemigos **a su pie**: 8 de daño por segundo que la armadura no reduce (`footDamage`, `DefenseSystem`) | ✔ |
+| Cuadrillas de albañiles | 1 | Centro urbano | Aldeanos levantan **y reparan** empalizadas, muros, puertas y zanjas un 40 % más rápido (`buildTime` ×0,6; la reparación usa el mismo tiempo) | ✔ |
+
+Para reparar basta con ordenar a un aldeano que «construya» sobre un tramo dañado (clic derecho): es la orden de construir de siempre.
+
+### 14.3 Puertas y quién pasa
+
+- Una puerta (`gate`) **deja pasar a su dueño y a sus aliados** (los que no son enemigos suyos, según `Game.isEnemy`) y **está cerrada a los enemigos**, como si fuera pared.
+- Implementación: `GameMap.gate` guarda el dueño de cada puerta; `walkableFor(x, y, jugador)` lo tiene en cuenta; **cada jugador tiene su propio mapa de regiones** (`regionArr`) con las puertas ajenas cerradas, que solo se calcula si hay puertas en el mapa. El A*, el suavizado de caminos, el movimiento, las formaciones y `canReach` usan el dueño de la unidad. Cuando cambia la diplomacia (paz, alianza) se invalidan las regiones.
+- La puerta se puede atacar y destruir desde fuera, y es el punto débil del muro (las tropas a pie prefieren la puerta antes que picar el muro: `BALANCE.defense.wallTargetPenalty`).
+- ⏳ **Abrir y cerrar** a voluntad (abierta para todos) y puertas que dejan salir a un ejército en tropel (hoy hacen cola por una casilla).
+
+### 14.4 Zanja, puente y relieve
+
+- Decisión: la zanja es un **edificio lineal** (no una modificación del terreno guardable). Así se guarda con las entidades, se destruye y se repara como todo, y no toca el formato del mapa. Se **rellena** eliminándola (o la rellenan al atacarla) y se **cruza** con un puente, que la sustituye (`replaces`) y que, como la puerta, solo es de los suyos.
+- Coherencia con el relieve: se puede construir donde se puede construir cualquier cosa (terreno edificable y pendiente ≤ `BALANCE.relief.buildMaxSlope`). Las pruebas de conectividad de los mapas no cambian: los muros los levantan los jugadores, no el generador, y un recinto cerrado solo aísla su interior (`tests/defense.test.ts` lo comprueba).
+
+### 14.5 Cómo se ataca y cómo se defiende
+
+- **Flechas y tropas a pie contra un muro:** casi nada (armadura 8/10: infantería hace el mínimo de 1 de daño). **El asedio** sí: el ariete, la catapulta, el trabuquete y la artillería llevan bono `vs: building`, que no reduce la armadura. Es la tabla de §13 aplicada a un edificio con mucha vida.
+- **Tirar por encima:** quien dispara (arqueros, torres, escorpiones) elige como blanco lo que alcanza aunque no pueda llegar a pisarlo; las tropas cuerpo a cuerpo, solo lo que pueden alcanzar (`canReach`). Con un muro cerrado, el enemigo golpea el muro; los arqueros de dentro le disparan.
+- **IA** (plugin `defense`, `defenseAI`): solo si algún enemigo tiene ≥ 8 tropas de combate (`aiThreatArmy`), desde los 9 min, con edad ≥ Feudal, ≥ 12 aldeanos y 3 edificios militares, y dificultad normal o difícil (en fácil, nunca). Rodea su centro urbano con un anillo cuadrado de radio 9 del mejor muro de su edad, con **cuatro puertas** (primero las puertas: sin ellas no pone ni un tramo), salta las casillas ocupadas, repone los tramos caídos y solo gasta lo que sobra (`aiKeep`). Investiga las tecnologías de defensa cuando ya hay 12 tramos. Para atacar muros usa el asedio de siempre (`siege`).
+- **Civilizaciones** (`mods/core/civs.ts`): Gran Bretaña, era Anglosajona: torres, burhs y **empalizadas −25 % de madera** (`classes: ['tower', 'wall']`). China, era Ming: **murallas, torres y castillos +20 % de PV**. ⏳ El resto de §5 (Vauban con fortalezas abaluartadas, la Muralla grande y el Burh como edificios únicos, murallas «de tierra y madera» rusas) queda para cuando se haga la identidad de cada era.
+
+### 14.6 En la interfaz, en el guardado y en la red
+
+- Escritorio: botón nuevo «Construir defensas» (tercer botón de construir, tecla `E`). Con un edificio de línea elegido, se **pulsa donde empieza, se arrastra y se suelta donde acaba**; la vista previa pinta cada tramo en verde o rojo. Con táctil en escritorio funciona igual con un dedo. **Móvil** (`MobileHUD`): pestaña «Defensas»; el primer «Inicio» fija el comienzo, se arrastra el fantasma hasta el final y «Construir» coloca la línea. Los comandos salen de `ui/commandModel.ts`, así que están en las dos interfaces.
+- Red: orden `placeLine` (`NetCommand`, hasta `BALANCE.defense.maxLine` = 40 tramos): cada casilla se valida y se cobra por separado.
+- Guardado: todo son entidades, sin formato nuevo; el mapa de puertas y las regiones se recalculan al cargar (`adoptEntity`). No cambia `SAVE_VERSION`. `tests/defense.test.ts` comprueba que la partida cargada es idéntica.
+- Sonido: `footBurn` (evento) → `oilHiss` (efecto sintético en `audio/sfx.ts`, en `CREDITS.md`).
+- Dibujo: sprites procedurales `wall` y `ditch` (`render/defenseSprites.ts`), que se unen a sus vecinos con `spriteParams.link`. Arte de IA: pendiente, en `art-src/PENDIENTES.md`.
+
+### 14.7 Pendiente
+
+- ⏳ Abrir y cerrar puertas; reparar murallas de forma automática con aldeanos cercanos (hoy lo hace el jugador).
+- ⏳ Mejora de empalizada a muralla de piedra sin demoler (la IA deja su anillo de empalizada aunque llegue a Castillos).
+- ⏳ Escalada (escaleras, torres de asedio) para cruzar sin asedio; alcance mínimo de las catapultas contra el pie del muro.
+- 🔶 Muros que mejoran con el relieve (más alcance o daño desde lo alto: ya funciona para torres por `heightRules`).
+- 🔶 Defensas de la era 4 y posteriores (bastiones, trincheras, alambradas, minas) y unidades de ingeniería que las abran.
