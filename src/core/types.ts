@@ -432,6 +432,8 @@ export interface AIContext {
 /** Extensión de la IA (la registra un mod). */
 export interface AIPlugin {
   id: string;
+  /** Ids de contenido que esta extensión construye, entrena o lanza (lo lee el catálogo; el código de `think` también se rastrea). */
+  uses?: string[];
   /**
    * Se llama antes de entrenar el ejército. armyHandled: la IA no mueve el ejército por su
    * cuenta este turno; holdTraining: no entrena tropas este turno; reserve: recursos que la IA

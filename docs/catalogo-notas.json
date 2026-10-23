@@ -1,0 +1,38 @@
+{
+  "building:tradingCompany": {
+    "status": "dev", "phase": "5", "until": "\\b(trade|diplomacy|espionage)\\b",
+    "text": "Dice «comercio con el exterior», pero hoy solo es depósito de oro y piedra: no hay orden, sistema ni caravanas de comercio. Lo trae la fase 5 (comercio, diplomacia y espionaje)."
+  },
+  "building:caravanserai": {
+    "status": "dev", "phase": "5", "until": "\\b(trade|diplomacy|espionage)\\b",
+    "text": "Posada de ruta persa: hoy solo es depósito y alojamiento; la fase 5 le da su papel en las rutas comerciales."
+  },
+  "building:maidan": {
+    "status": "dev", "phase": "5", "until": "\\b(trade|diplomacy|espionage)\\b",
+    "text": "Plaza real persa vinculada a la seda: el comercio real (con quién y bajo qué condiciones) llega en la fase 5."
+  },
+  "tech:silkMonopoly": {
+    "status": "dev", "phase": "5", "until": "\\b(trade|diplomacy|espionage)\\b",
+    "text": "Su texto habla de comercio de seda, pero hoy solo da más velocidad de recolección de oro. Pendiente de enlazar con las rutas de la fase 5."
+  },
+  "tech:cantonSystem": {
+    "status": "dev", "phase": "5", "until": "\\b(trade|diplomacy|espionage)\\b",
+    "text": "«Comercio exterior por un solo puerto»: hoy solo da recolección de oro. Pendiente de enlazar con las rutas de la fase 5."
+  },
+  "tech:colbertism": {
+    "status": "dev", "phase": "5", "until": "\\b(trade|diplomacy|espionage)\\b",
+    "text": "«Manufacturas, aranceles y comercio»: hoy solo da recolección de oro. Pendiente de enlazar con las rutas de la fase 5."
+  },
+  "power:hordeTribute": {
+    "status": "dev", "phase": "5", "until": "\\b(diplomacy)\\b",
+    "text": "Es una pausa de ataques pagada, no diplomacia: no hay relaciones, tratados ni alianzas entre civilizaciones hasta la fase 5."
+  },
+  "unit:king": {
+    "status": "ok",
+    "text": "Lo crea el modo Matar al rey (mod regicide) al empezar la partida; por eso no se entrena en ningún edificio."
+  },
+  "node:treasure": {
+    "status": "ok",
+    "text": "Lo reparte el mod Búsqueda del tesoro al empezar la partida, no los generadores de mapas."
+  }
+}

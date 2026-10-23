@@ -196,6 +196,7 @@ const WANTS: { id: string; minAge: number; spare: number; after?: string; tech?:
 
 export const gunpowderAI: AIPlugin = {
   id: 'gunpowder',
+  uses: WANTS.map(w => w.id),
   think(ctx) {
     const { game, player: p } = ctx;
     if (p.age < 4) return;

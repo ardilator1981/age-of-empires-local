@@ -17,6 +17,7 @@
     "test": "node -e \"require('fs').rmSync('node_modules/.vitest-cache',{recursive:true,force:true})\" && vitest run",
     "regions": "node scripts/regions.mjs",
     "world-map": "node scripts/world-map.mjs",
+    "catalog": "vite build --ssr scripts/catalog.ts --outDir .sim-catalog --emptyOutDir --logLevel warn && node .sim-catalog/catalog.js",
     "art-todo": "vite build --ssr scripts/art-todo.ts --outDir .sim-art --emptyOutDir --logLevel warn && node .sim-art/art-todo.js",
     "art-import": "node scripts/art-import.mjs",
     "fix-textures": "node scripts/fix-textures.mjs"
