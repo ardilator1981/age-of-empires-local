@@ -1,0 +1,30 @@
+{
+  "kind": "unit",
+  "out": "units",
+  "groups": {},
+  "sources": [
+    {
+      "source": "pack2-naturaleza/animales.jpg",
+      "grid": [
+        3,
+        2
+      ],
+      "sharedScale": true,
+      "items": [
+        {
+          "id": "deer",
+          "height": 50
+        },
+        {
+          "id": "boar"
+        },
+        {
+          "id": "sheep"
+        },
+        null,
+        null,
+        null
+      ]
+    }
+  ]
+}

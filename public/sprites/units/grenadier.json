@@ -1,0 +1,19 @@
+{
+  "image": "grenadier.png",
+  "mask": "grenadier-mask.png",
+  "cell": {
+    "w": 40,
+    "h": 107
+  },
+  "anchor": {
+    "x": 20,
+    "y": 101
+  },
+  "scale": 2,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 1
+    }
+  }
+}

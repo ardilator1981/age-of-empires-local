@@ -8,7 +8,7 @@
 
 | Tipo | Hecho | Sin animar | Pendiente |
 | --- | ---: | ---: | ---: |
-| unidad | 2 | 14 | 66 |
+| unidad | 2 | 18 | 62 |
 | edificio | 0 | 12 | 48 |
 | recurso | 6 | 0 | 6 |
 | terreno | 9 | 0 | 0 |
@@ -31,10 +31,10 @@
 - P2 · **unidad deer**: idle, walk, death
 - P2 · **unidad boar**: idle, walk, attack, death
 - P2 · **unidad sheep**: idle, walk, death
-- P2 · **unidad musketeer**: idle, walk, attack, death
-- P2 · **unidad cannon**: idle, walk, attack, death
-- P2 · **unidad dragoon**: idle, walk, attack, death
-- P2 · **unidad grenadier**: idle, walk, attack, death
+- P2 · **unidad musketeer**: walk, attack, death
+- P2 · **unidad cannon**: walk, attack, death
+- P2 · **unidad dragoon**: walk, attack, death
+- P2 · **unidad grenadier**: walk, attack, death
 
 ## Unidades
 
@@ -63,10 +63,10 @@
 | deer | Ciervo | 🔴 pendiente | idle, walk, death | units/deer.png (+ -mask.png)<br>units/deer-walk.png (+ -mask.png)<br>units/deer-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:death` |
 | boar | Jabalí | 🔴 pendiente | idle, walk, attack, death | units/boar.png (+ -mask.png)<br>units/boar-walk.png (+ -mask.png)<br>units/boar-attack.png (+ -mask.png)<br>units/boar-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack-melee` `anim:death` |
 | sheep | Oveja | 🔴 pendiente | idle, walk, death | units/sheep.png (+ -mask.png)<br>units/sheep-walk.png (+ -mask.png)<br>units/sheep-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:death` |
-| musketeer | Mosquetero | 🔴 pendiente | idle, walk, attack, death | units/musketeer.png (+ -mask.png)<br>units/musketeer-walk.png (+ -mask.png)<br>units/musketeer-attack.png (+ -mask.png)<br>units/musketeer-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack` `anim:death` |
-| cannon | Cañón | 🔴 pendiente | idle, walk, attack, death | units/cannon.png (+ -mask.png)<br>units/cannon-walk.png (+ -mask.png)<br>units/cannon-attack.png (+ -mask.png)<br>units/cannon-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack` `anim:death` |
-| dragoon | Dragón | 🔴 pendiente | idle, walk, attack, death | units/dragoon.png (+ -mask.png)<br>units/dragoon-walk.png (+ -mask.png)<br>units/dragoon-attack.png (+ -mask.png)<br>units/dragoon-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk:mounted` `anim:attack:mounted` `anim:death:mounted` |
-| grenadier | Granadero | 🔴 pendiente | idle, walk, attack, death | units/grenadier.png (+ -mask.png)<br>units/grenadier-walk.png (+ -mask.png)<br>units/grenadier-attack.png (+ -mask.png)<br>units/grenadier-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack` `anim:death` |
+| musketeer | Mosquetero | 🟡 sin animar | walk, attack, death | units/musketeer-walk.png (+ -mask.png)<br>units/musketeer-attack.png (+ -mask.png)<br>units/musketeer-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack` `anim:death` |
+| cannon | Cañón | 🟡 sin animar | walk, attack, death | units/cannon-walk.png (+ -mask.png)<br>units/cannon-attack.png (+ -mask.png)<br>units/cannon-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack` `anim:death` |
+| dragoon | Dragón | 🟡 sin animar | walk, attack, death | units/dragoon-walk.png (+ -mask.png)<br>units/dragoon-attack.png (+ -mask.png)<br>units/dragoon-death.png (+ -mask.png) | 2 | `anim:walk:mounted` `anim:attack:mounted` `anim:death:mounted` |
+| grenadier | Granadero | 🟡 sin animar | walk, attack, death | units/grenadier-walk.png (+ -mask.png)<br>units/grenadier-attack.png (+ -mask.png)<br>units/grenadier-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack` `anim:death` |
 | unicorn | Unicornio | 🔴 pendiente | idle, walk, attack, death | units/unicorn.png (+ -mask.png)<br>units/unicorn-walk.png (+ -mask.png)<br>units/unicorn-attack.png (+ -mask.png)<br>units/unicorn-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack` `anim:death` |
 | fubing | Fubing | 🔴 pendiente | idle, walk, attack, death | units/fubing.png (+ -mask.png)<br>units/fubing-walk.png (+ -mask.png)<br>units/fubing-attack.png (+ -mask.png)<br>units/fubing-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack-melee` `anim:death` |
 | fireLance | Lancero de fuego | 🔴 pendiente | idle, walk, attack, death | units/fireLance.png (+ -mask.png)<br>units/fireLance-walk.png (+ -mask.png)<br>units/fireLance-attack.png (+ -mask.png)<br>units/fireLance-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack` `anim:death` |

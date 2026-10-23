@@ -1,0 +1,19 @@
+{
+  "image": "cannon.png",
+  "mask": "cannon-mask.png",
+  "cell": {
+    "w": 148,
+    "h": 85
+  },
+  "anchor": {
+    "x": 74,
+    "y": 79
+  },
+  "scale": 2,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 1
+    }
+  }
+}

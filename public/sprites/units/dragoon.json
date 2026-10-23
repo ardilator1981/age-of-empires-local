@@ -1,0 +1,19 @@
+{
+  "image": "dragoon.png",
+  "mask": "dragoon-mask.png",
+  "cell": {
+    "w": 81,
+    "h": 132
+  },
+  "anchor": {
+    "x": 41,
+    "y": 126
+  },
+  "scale": 2,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 1
+    }
+  }
+}

@@ -1503,6 +1503,43 @@
           "state": "attack"
         }
       ]
+    },
+    {
+      "source": "pack6-unidades/polvora.jpg",
+      "grid": "auto",
+      "sharedScale": true,
+      "keep": 1,
+      "items": [
+        {
+          "id": "musketeer",
+          "height": 46
+        },
+        {
+          "id": "grenadier"
+        }
+      ]
+    },
+    {
+      "source": "pack6-unidades/polvora-dragon.jpg",
+      "grid": "auto",
+      "items": [
+        {
+          "id": "dragoon",
+          "height": 62
+        }
+      ]
+    },
+    {
+      "source": "pack6-unidades/polvora-canon.jpg",
+      "grid": "auto",
+      "sharedScale": true,
+      "items": [
+        null,
+        {
+          "id": "cannon",
+          "width": 70
+        }
+      ]
     }
   ]
 }

@@ -51,6 +51,14 @@ export const ART: ArtEntry[] = [
   unitArt('batteringRam', 'units/batteringRam'),
   unitArt('longbowman', 'units/longbowman'),
   unitArt('throwingAxeman', 'units/throwingAxeman'),
+  unitArt('musketeer', 'units/musketeer'),
+  unitArt('grenadier', 'units/grenadier'),
+  unitArt('dragoon', 'units/dragoon'),
+  unitArt('cannon', 'units/cannon'),
+  // Pack 2g · Animales (art-src/import/pack2-animales.json)
+  unitArt('deer', 'units/deer'),
+  unitArt('boar', 'units/boar'),
+  unitArt('sheep', 'units/sheep'),
 ];
 
 /** Hojas de prueba (public/sprites/ejemplo/). Se activan abriendo el juego con ?arte=ejemplo. */
