@@ -1561,6 +1561,17 @@
           "id": "cossack"
         }
       ]
+    },
+    {
+      "source": "pack6-unidades/china.jpg",
+      "grid": "auto",
+      "sharedScale": true,
+      "items": [
+        { "id": "fubing" },
+        { "id": "fireLance" },
+        { "id": "repeatingCrossbowman" },
+        { "id": "eightBannersRider", "height": 62 }
+      ]
     }
   ]
 }

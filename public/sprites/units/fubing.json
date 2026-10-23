@@ -1,0 +1,19 @@
+{
+  "image": "fubing.png",
+  "mask": "fubing-mask.png",
+  "cell": {
+    "w": 65,
+    "h": 128
+  },
+  "anchor": {
+    "x": 33,
+    "y": 122
+  },
+  "scale": 2,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 1
+    }
+  }
+}

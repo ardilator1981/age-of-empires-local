@@ -8,7 +8,7 @@
 
 | Tipo | Hecho | Sin animar | Pendiente |
 | --- | ---: | ---: | ---: |
-| unidad | 2 | 25 | 55 |
+| unidad | 2 | 29 | 51 |
 | edificio | 0 | 12 | 48 |
 | recurso | 6 | 0 | 6 |
 | terreno | 9 | 0 | 0 |
@@ -68,12 +68,12 @@
 | dragoon | Dragón | 🟡 sin animar | walk, attack, death | units/dragoon-walk.png (+ -mask.png)<br>units/dragoon-attack.png (+ -mask.png)<br>units/dragoon-death.png (+ -mask.png) | 2 | `anim:walk:mounted` `anim:attack:mounted` `anim:death:mounted` |
 | grenadier | Granadero | 🟡 sin animar | walk, attack, death | units/grenadier-walk.png (+ -mask.png)<br>units/grenadier-attack.png (+ -mask.png)<br>units/grenadier-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack` `anim:death` |
 | unicorn | Unicornio | 🔴 pendiente | idle, walk, attack, death | units/unicorn.png (+ -mask.png)<br>units/unicorn-walk.png (+ -mask.png)<br>units/unicorn-attack.png (+ -mask.png)<br>units/unicorn-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack` `anim:death` |
-| fubing | Fubing | 🔴 pendiente | idle, walk, attack, death | units/fubing.png (+ -mask.png)<br>units/fubing-walk.png (+ -mask.png)<br>units/fubing-attack.png (+ -mask.png)<br>units/fubing-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack-melee` `anim:death` |
-| fireLance | Lancero de fuego | 🔴 pendiente | idle, walk, attack, death | units/fireLance.png (+ -mask.png)<br>units/fireLance-walk.png (+ -mask.png)<br>units/fireLance-attack.png (+ -mask.png)<br>units/fireLance-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack` `anim:death` |
-| repeatingCrossbowman | Ballestero de repetición | 🔴 pendiente | idle, walk, attack, death | units/repeatingCrossbowman.png (+ -mask.png)<br>units/repeatingCrossbowman-walk.png (+ -mask.png)<br>units/repeatingCrossbowman-attack.png (+ -mask.png)<br>units/repeatingCrossbowman-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack` `anim:death` |
+| fubing | Fubing | 🟡 sin animar | walk, attack, death | units/fubing-walk.png (+ -mask.png)<br>units/fubing-attack.png (+ -mask.png)<br>units/fubing-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack-melee` `anim:death` |
+| fireLance | Lancero de fuego | 🟡 sin animar | walk, attack, death | units/fireLance-walk.png (+ -mask.png)<br>units/fireLance-attack.png (+ -mask.png)<br>units/fireLance-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack` `anim:death` |
+| repeatingCrossbowman | Ballestero de repetición | 🟡 sin animar | walk, attack, death | units/repeatingCrossbowman-walk.png (+ -mask.png)<br>units/repeatingCrossbowman-attack.png (+ -mask.png)<br>units/repeatingCrossbowman-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack` `anim:death` |
 | counterweightTrebuchet | Trabuquete de contrapeso | 🔴 pendiente | idle, walk, attack, death | units/counterweightTrebuchet.png (+ -mask.png)<br>units/counterweightTrebuchet-walk.png (+ -mask.png)<br>units/counterweightTrebuchet-attack.png (+ -mask.png)<br>units/counterweightTrebuchet-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack` `anim:death` |
 | divineArquebusier | Arcabucero de las divisiones divinas | 🔴 pendiente | idle, walk, attack, death | units/divineArquebusier.png (+ -mask.png)<br>units/divineArquebusier-walk.png (+ -mask.png)<br>units/divineArquebusier-attack.png (+ -mask.png)<br>units/divineArquebusier-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack` `anim:death` |
-| eightBannersRider | Jinete de las Ocho Banderas | 🔴 pendiente | idle, walk, attack, death | units/eightBannersRider.png (+ -mask.png)<br>units/eightBannersRider-walk.png (+ -mask.png)<br>units/eightBannersRider-attack.png (+ -mask.png)<br>units/eightBannersRider-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk:mounted` `anim:attack-melee:mounted` `anim:death:mounted` |
+| eightBannersRider | Jinete de las Ocho Banderas | 🟡 sin animar | walk, attack, death | units/eightBannersRider-walk.png (+ -mask.png)<br>units/eightBannersRider-attack.png (+ -mask.png)<br>units/eightBannersRider-death.png (+ -mask.png) | 2 | `anim:walk:mounted` `anim:attack-melee:mounted` `anim:death:mounted` |
 | crusaderKnight | Caballero cruzado | 🔴 pendiente | idle, walk, attack, death | units/crusaderKnight.png (+ -mask.png)<br>units/crusaderKnight-walk.png (+ -mask.png)<br>units/crusaderKnight-attack.png (+ -mask.png)<br>units/crusaderKnight-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk:mounted` `anim:attack-melee:mounted` `anim:death:mounted` |
 | gendarme | Gendarme | 🔴 pendiente | idle, walk, attack, death | units/gendarme.png (+ -mask.png)<br>units/gendarme-walk.png (+ -mask.png)<br>units/gendarme-attack.png (+ -mask.png)<br>units/gendarme-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk:mounted` `anim:attack-melee:mounted` `anim:death:mounted` |
 | ordinanceArquebusier | Arcabucero de la ordenanza | 🔴 pendiente | idle, walk, attack, death | units/ordinanceArquebusier.png (+ -mask.png)<br>units/ordinanceArquebusier-walk.png (+ -mask.png)<br>units/ordinanceArquebusier-attack.png (+ -mask.png)<br>units/ordinanceArquebusier-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack` `anim:death` |

@@ -1,0 +1,19 @@
+{
+  "image": "fireLance.png",
+  "mask": "fireLance-mask.png",
+  "cell": {
+    "w": 102,
+    "h": 136
+  },
+  "anchor": {
+    "x": 51,
+    "y": 130
+  },
+  "scale": 2,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 1
+    }
+  }
+}
