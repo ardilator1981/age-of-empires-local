@@ -1583,6 +1583,26 @@
         { "id": "bayonetFusilier" },
         { "id": "gribeauvalCannon", "width": 70 }
       ]
+    },
+    {
+      "source": "pack6-unidades/britania1.jpg",
+      "grid": "auto",
+      "sharedScale": true,
+      "items": [
+        { "id": "fyrdman" },
+        { "id": "normanKnight", "height": 62 },
+        { "id": "tudorArquebusier" }
+      ]
+    },
+    {
+      "source": "pack6-unidades/britania2.jpg",
+      "grid": "auto",
+      "sharedScale": true,
+      "items": [
+        { "id": "redcoat" },
+        { "id": "rifleman" },
+        { "id": "crusaderKnight", "height": 62 }
+      ]
     }
   ]
 }

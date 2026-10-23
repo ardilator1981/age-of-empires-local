@@ -1,0 +1,19 @@
+{
+  "image": "tudorArquebusier.png",
+  "mask": "tudorArquebusier-mask.png",
+  "cell": {
+    "w": 78,
+    "h": 125
+  },
+  "anchor": {
+    "x": 39,
+    "y": 119
+  },
+  "scale": 2,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 1
+    }
+  }
+}
