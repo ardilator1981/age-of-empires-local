@@ -1,0 +1,19 @@
+{
+  "image": "gendarme.png",
+  "mask": "gendarme-mask.png",
+  "cell": {
+    "w": 95,
+    "h": 132
+  },
+  "anchor": {
+    "x": 48,
+    "y": 126
+  },
+  "scale": 2,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 1
+    }
+  }
+}

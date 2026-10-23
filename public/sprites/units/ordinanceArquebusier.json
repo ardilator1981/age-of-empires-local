@@ -1,0 +1,19 @@
+{
+  "image": "ordinanceArquebusier.png",
+  "mask": "ordinanceArquebusier-mask.png",
+  "cell": {
+    "w": 76,
+    "h": 111
+  },
+  "anchor": {
+    "x": 38,
+    "y": 105
+  },
+  "scale": 2,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 1
+    }
+  }
+}

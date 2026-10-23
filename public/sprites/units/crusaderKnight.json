@@ -1,0 +1,19 @@
+{
+  "image": "crusaderKnight.png",
+  "mask": "crusaderKnight-mask.png",
+  "cell": {
+    "w": 89,
+    "h": 132
+  },
+  "anchor": {
+    "x": 45,
+    "y": 126
+  },
+  "scale": 2,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 1
+    }
+  }
+}

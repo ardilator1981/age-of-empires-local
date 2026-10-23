@@ -8,7 +8,7 @@
 
 | Tipo | Hecho | Sin animar | Pendiente |
 | --- | ---: | ---: | ---: |
-| unidad | 2 | 14 | 66 |
+| unidad | 2 | 42 | 38 |
 | edificio | 0 | 12 | 48 |
 | recurso | 6 | 0 | 6 |
 | terreno | 9 | 0 | 0 |
@@ -24,17 +24,17 @@
 - P2 · **unidad longSwordsman**: walk, attack, death
 - P2 · **unidad pikeman**: walk, attack, death
 - P2 · **unidad batteringRam**: walk, attack, death
-- P2 · **unidad druzhinnik**: idle, walk, attack, death
-- P2 · **unidad boyarSon**: idle, walk, attack, death
-- P2 · **unidad strelets**: idle, walk, attack, death
-- P2 · **unidad cossack**: idle, walk, attack, death
-- P2 · **unidad deer**: idle, walk, death
-- P2 · **unidad boar**: idle, walk, attack, death
-- P2 · **unidad sheep**: idle, walk, death
-- P2 · **unidad musketeer**: idle, walk, attack, death
-- P2 · **unidad cannon**: idle, walk, attack, death
-- P2 · **unidad dragoon**: idle, walk, attack, death
-- P2 · **unidad grenadier**: idle, walk, attack, death
+- P2 · **unidad druzhinnik**: walk, attack, death
+- P2 · **unidad boyarSon**: walk, attack, death
+- P2 · **unidad strelets**: walk, attack, death
+- P2 · **unidad cossack**: walk, attack, death
+- P2 · **unidad deer**: walk, death
+- P2 · **unidad boar**: walk, attack, death
+- P2 · **unidad sheep**: walk, death
+- P2 · **unidad musketeer**: walk, attack, death
+- P2 · **unidad cannon**: walk, attack, death
+- P2 · **unidad dragoon**: walk, attack, death
+- P2 · **unidad grenadier**: walk, attack, death
 
 ## Unidades
 
@@ -56,34 +56,34 @@
 | batteringRam | Ariete | 🟡 sin animar | walk, attack, death | units/batteringRam-walk.png (+ -mask.png)<br>units/batteringRam-attack.png (+ -mask.png)<br>units/batteringRam-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack-melee` `anim:death` |
 | longbowman | Arquero de tiro largo | 🟡 sin animar | death | units/longbowman-death.png (+ -mask.png) | 3 | `anim:death` |
 | throwingAxeman | Guerrero franco | 🟡 sin animar | death | units/throwingAxeman-death.png (+ -mask.png) | 3 | `anim:death` |
-| druzhinnik | Druzhinnik | 🔴 pendiente | idle, walk, attack, death | units/druzhinnik.png (+ -mask.png)<br>units/druzhinnik-walk.png (+ -mask.png)<br>units/druzhinnik-attack.png (+ -mask.png)<br>units/druzhinnik-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack-melee` `anim:death` |
-| boyarSon | Hijo de boyardo | 🔴 pendiente | idle, walk, attack, death | units/boyarSon.png (+ -mask.png)<br>units/boyarSon-walk.png (+ -mask.png)<br>units/boyarSon-attack.png (+ -mask.png)<br>units/boyarSon-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk:mounted` `anim:attack-melee:mounted` `anim:death:mounted` |
-| strelets | Strelets | 🔴 pendiente | idle, walk, attack, death | units/strelets.png (+ -mask.png)<br>units/strelets-walk.png (+ -mask.png)<br>units/strelets-attack.png (+ -mask.png)<br>units/strelets-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack` `anim:death` |
-| cossack | Cosaco | 🔴 pendiente | idle, walk, attack, death | units/cossack.png (+ -mask.png)<br>units/cossack-walk.png (+ -mask.png)<br>units/cossack-attack.png (+ -mask.png)<br>units/cossack-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk:mounted` `anim:attack-melee:mounted` `anim:death:mounted` |
-| deer | Ciervo | 🔴 pendiente | idle, walk, death | units/deer.png (+ -mask.png)<br>units/deer-walk.png (+ -mask.png)<br>units/deer-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:death` |
-| boar | Jabalí | 🔴 pendiente | idle, walk, attack, death | units/boar.png (+ -mask.png)<br>units/boar-walk.png (+ -mask.png)<br>units/boar-attack.png (+ -mask.png)<br>units/boar-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack-melee` `anim:death` |
-| sheep | Oveja | 🔴 pendiente | idle, walk, death | units/sheep.png (+ -mask.png)<br>units/sheep-walk.png (+ -mask.png)<br>units/sheep-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:death` |
-| musketeer | Mosquetero | 🔴 pendiente | idle, walk, attack, death | units/musketeer.png (+ -mask.png)<br>units/musketeer-walk.png (+ -mask.png)<br>units/musketeer-attack.png (+ -mask.png)<br>units/musketeer-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack` `anim:death` |
-| cannon | Cañón | 🔴 pendiente | idle, walk, attack, death | units/cannon.png (+ -mask.png)<br>units/cannon-walk.png (+ -mask.png)<br>units/cannon-attack.png (+ -mask.png)<br>units/cannon-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack` `anim:death` |
-| dragoon | Dragón | 🔴 pendiente | idle, walk, attack, death | units/dragoon.png (+ -mask.png)<br>units/dragoon-walk.png (+ -mask.png)<br>units/dragoon-attack.png (+ -mask.png)<br>units/dragoon-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk:mounted` `anim:attack:mounted` `anim:death:mounted` |
-| grenadier | Granadero | 🔴 pendiente | idle, walk, attack, death | units/grenadier.png (+ -mask.png)<br>units/grenadier-walk.png (+ -mask.png)<br>units/grenadier-attack.png (+ -mask.png)<br>units/grenadier-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack` `anim:death` |
-| unicorn | Unicornio | 🔴 pendiente | idle, walk, attack, death | units/unicorn.png (+ -mask.png)<br>units/unicorn-walk.png (+ -mask.png)<br>units/unicorn-attack.png (+ -mask.png)<br>units/unicorn-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack` `anim:death` |
-| fubing | Fubing | 🔴 pendiente | idle, walk, attack, death | units/fubing.png (+ -mask.png)<br>units/fubing-walk.png (+ -mask.png)<br>units/fubing-attack.png (+ -mask.png)<br>units/fubing-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack-melee` `anim:death` |
-| fireLance | Lancero de fuego | 🔴 pendiente | idle, walk, attack, death | units/fireLance.png (+ -mask.png)<br>units/fireLance-walk.png (+ -mask.png)<br>units/fireLance-attack.png (+ -mask.png)<br>units/fireLance-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack` `anim:death` |
-| repeatingCrossbowman | Ballestero de repetición | 🔴 pendiente | idle, walk, attack, death | units/repeatingCrossbowman.png (+ -mask.png)<br>units/repeatingCrossbowman-walk.png (+ -mask.png)<br>units/repeatingCrossbowman-attack.png (+ -mask.png)<br>units/repeatingCrossbowman-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack` `anim:death` |
-| counterweightTrebuchet | Trabuquete de contrapeso | 🔴 pendiente | idle, walk, attack, death | units/counterweightTrebuchet.png (+ -mask.png)<br>units/counterweightTrebuchet-walk.png (+ -mask.png)<br>units/counterweightTrebuchet-attack.png (+ -mask.png)<br>units/counterweightTrebuchet-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack` `anim:death` |
-| divineArquebusier | Arcabucero de las divisiones divinas | 🔴 pendiente | idle, walk, attack, death | units/divineArquebusier.png (+ -mask.png)<br>units/divineArquebusier-walk.png (+ -mask.png)<br>units/divineArquebusier-attack.png (+ -mask.png)<br>units/divineArquebusier-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack` `anim:death` |
-| eightBannersRider | Jinete de las Ocho Banderas | 🔴 pendiente | idle, walk, attack, death | units/eightBannersRider.png (+ -mask.png)<br>units/eightBannersRider-walk.png (+ -mask.png)<br>units/eightBannersRider-attack.png (+ -mask.png)<br>units/eightBannersRider-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk:mounted` `anim:attack-melee:mounted` `anim:death:mounted` |
-| crusaderKnight | Caballero cruzado | 🔴 pendiente | idle, walk, attack, death | units/crusaderKnight.png (+ -mask.png)<br>units/crusaderKnight-walk.png (+ -mask.png)<br>units/crusaderKnight-attack.png (+ -mask.png)<br>units/crusaderKnight-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk:mounted` `anim:attack-melee:mounted` `anim:death:mounted` |
-| gendarme | Gendarme | 🔴 pendiente | idle, walk, attack, death | units/gendarme.png (+ -mask.png)<br>units/gendarme-walk.png (+ -mask.png)<br>units/gendarme-attack.png (+ -mask.png)<br>units/gendarme-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk:mounted` `anim:attack-melee:mounted` `anim:death:mounted` |
-| ordinanceArquebusier | Arcabucero de la ordenanza | 🔴 pendiente | idle, walk, attack, death | units/ordinanceArquebusier.png (+ -mask.png)<br>units/ordinanceArquebusier-walk.png (+ -mask.png)<br>units/ordinanceArquebusier-attack.png (+ -mask.png)<br>units/ordinanceArquebusier-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack` `anim:death` |
-| bayonetFusilier | Fusilero con bayoneta | 🔴 pendiente | idle, walk, attack, death | units/bayonetFusilier.png (+ -mask.png)<br>units/bayonetFusilier-walk.png (+ -mask.png)<br>units/bayonetFusilier-attack.png (+ -mask.png)<br>units/bayonetFusilier-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack` `anim:death` |
-| gribeauvalCannon | Cañón Gribeauval | 🔴 pendiente | idle, walk, attack, death | units/gribeauvalCannon.png (+ -mask.png)<br>units/gribeauvalCannon-walk.png (+ -mask.png)<br>units/gribeauvalCannon-attack.png (+ -mask.png)<br>units/gribeauvalCannon-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack` `anim:death` |
-| fyrdman | Fyrdman | 🔴 pendiente | idle, walk, attack, death | units/fyrdman.png (+ -mask.png)<br>units/fyrdman-walk.png (+ -mask.png)<br>units/fyrdman-attack.png (+ -mask.png)<br>units/fyrdman-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack-melee` `anim:death` |
-| normanKnight | Caballero normando | 🔴 pendiente | idle, walk, attack, death | units/normanKnight.png (+ -mask.png)<br>units/normanKnight-walk.png (+ -mask.png)<br>units/normanKnight-attack.png (+ -mask.png)<br>units/normanKnight-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk:mounted` `anim:attack-melee:mounted` `anim:death:mounted` |
-| tudorArquebusier | Arcabucero Tudor | 🔴 pendiente | idle, walk, attack, death | units/tudorArquebusier.png (+ -mask.png)<br>units/tudorArquebusier-walk.png (+ -mask.png)<br>units/tudorArquebusier-attack.png (+ -mask.png)<br>units/tudorArquebusier-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack` `anim:death` |
-| redcoat | Casaca roja | 🔴 pendiente | idle, walk, attack, death | units/redcoat.png (+ -mask.png)<br>units/redcoat-walk.png (+ -mask.png)<br>units/redcoat-attack.png (+ -mask.png)<br>units/redcoat-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack` `anim:death` |
-| rifleman | Fusilero | 🔴 pendiente | idle, walk, attack, death | units/rifleman.png (+ -mask.png)<br>units/rifleman-walk.png (+ -mask.png)<br>units/rifleman-attack.png (+ -mask.png)<br>units/rifleman-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack` `anim:death` |
+| druzhinnik | Druzhinnik | 🟡 sin animar | walk, attack, death | units/druzhinnik-walk.png (+ -mask.png)<br>units/druzhinnik-attack.png (+ -mask.png)<br>units/druzhinnik-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack-melee` `anim:death` |
+| boyarSon | Hijo de boyardo | 🟡 sin animar | walk, attack, death | units/boyarSon-walk.png (+ -mask.png)<br>units/boyarSon-attack.png (+ -mask.png)<br>units/boyarSon-death.png (+ -mask.png) | 2 | `anim:walk:mounted` `anim:attack-melee:mounted` `anim:death:mounted` |
+| strelets | Strelets | 🟡 sin animar | walk, attack, death | units/strelets-walk.png (+ -mask.png)<br>units/strelets-attack.png (+ -mask.png)<br>units/strelets-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack` `anim:death` |
+| cossack | Cosaco | 🟡 sin animar | walk, attack, death | units/cossack-walk.png (+ -mask.png)<br>units/cossack-attack.png (+ -mask.png)<br>units/cossack-death.png (+ -mask.png) | 2 | `anim:walk:mounted` `anim:attack-melee:mounted` `anim:death:mounted` |
+| deer | Ciervo | 🟡 sin animar | walk, death | units/deer-walk.png (+ -mask.png)<br>units/deer-death.png (+ -mask.png) | 2 | `anim:walk` `anim:death` |
+| boar | Jabalí | 🟡 sin animar | walk, attack, death | units/boar-walk.png (+ -mask.png)<br>units/boar-attack.png (+ -mask.png)<br>units/boar-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack-melee` `anim:death` |
+| sheep | Oveja | 🟡 sin animar | walk, death | units/sheep-walk.png (+ -mask.png)<br>units/sheep-death.png (+ -mask.png) | 2 | `anim:walk` `anim:death` |
+| musketeer | Mosquetero | 🟡 sin animar | walk, attack, death | units/musketeer-walk.png (+ -mask.png)<br>units/musketeer-attack.png (+ -mask.png)<br>units/musketeer-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack` `anim:death` |
+| cannon | Cañón | 🟡 sin animar | walk, attack, death | units/cannon-walk.png (+ -mask.png)<br>units/cannon-attack.png (+ -mask.png)<br>units/cannon-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack` `anim:death` |
+| dragoon | Dragón | 🟡 sin animar | walk, attack, death | units/dragoon-walk.png (+ -mask.png)<br>units/dragoon-attack.png (+ -mask.png)<br>units/dragoon-death.png (+ -mask.png) | 2 | `anim:walk:mounted` `anim:attack:mounted` `anim:death:mounted` |
+| grenadier | Granadero | 🟡 sin animar | walk, attack, death | units/grenadier-walk.png (+ -mask.png)<br>units/grenadier-attack.png (+ -mask.png)<br>units/grenadier-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack` `anim:death` |
+| unicorn | Unicornio | 🟡 sin animar | walk, attack, death | units/unicorn-walk.png (+ -mask.png)<br>units/unicorn-attack.png (+ -mask.png)<br>units/unicorn-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack` `anim:death` |
+| fubing | Fubing | 🟡 sin animar | walk, attack, death | units/fubing-walk.png (+ -mask.png)<br>units/fubing-attack.png (+ -mask.png)<br>units/fubing-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack-melee` `anim:death` |
+| fireLance | Lancero de fuego | 🟡 sin animar | walk, attack, death | units/fireLance-walk.png (+ -mask.png)<br>units/fireLance-attack.png (+ -mask.png)<br>units/fireLance-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack` `anim:death` |
+| repeatingCrossbowman | Ballestero de repetición | 🟡 sin animar | walk, attack, death | units/repeatingCrossbowman-walk.png (+ -mask.png)<br>units/repeatingCrossbowman-attack.png (+ -mask.png)<br>units/repeatingCrossbowman-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack` `anim:death` |
+| counterweightTrebuchet | Trabuquete de contrapeso | 🟡 sin animar | walk, attack, death | units/counterweightTrebuchet-walk.png (+ -mask.png)<br>units/counterweightTrebuchet-attack.png (+ -mask.png)<br>units/counterweightTrebuchet-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack` `anim:death` |
+| divineArquebusier | Arcabucero de las divisiones divinas | 🟡 sin animar | walk, attack, death | units/divineArquebusier-walk.png (+ -mask.png)<br>units/divineArquebusier-attack.png (+ -mask.png)<br>units/divineArquebusier-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack` `anim:death` |
+| eightBannersRider | Jinete de las Ocho Banderas | 🟡 sin animar | walk, attack, death | units/eightBannersRider-walk.png (+ -mask.png)<br>units/eightBannersRider-attack.png (+ -mask.png)<br>units/eightBannersRider-death.png (+ -mask.png) | 2 | `anim:walk:mounted` `anim:attack-melee:mounted` `anim:death:mounted` |
+| crusaderKnight | Caballero cruzado | 🟡 sin animar | walk, attack, death | units/crusaderKnight-walk.png (+ -mask.png)<br>units/crusaderKnight-attack.png (+ -mask.png)<br>units/crusaderKnight-death.png (+ -mask.png) | 2 | `anim:walk:mounted` `anim:attack-melee:mounted` `anim:death:mounted` |
+| gendarme | Gendarme | 🟡 sin animar | walk, attack, death | units/gendarme-walk.png (+ -mask.png)<br>units/gendarme-attack.png (+ -mask.png)<br>units/gendarme-death.png (+ -mask.png) | 2 | `anim:walk:mounted` `anim:attack-melee:mounted` `anim:death:mounted` |
+| ordinanceArquebusier | Arcabucero de la ordenanza | 🟡 sin animar | walk, attack, death | units/ordinanceArquebusier-walk.png (+ -mask.png)<br>units/ordinanceArquebusier-attack.png (+ -mask.png)<br>units/ordinanceArquebusier-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack` `anim:death` |
+| bayonetFusilier | Fusilero con bayoneta | 🟡 sin animar | walk, attack, death | units/bayonetFusilier-walk.png (+ -mask.png)<br>units/bayonetFusilier-attack.png (+ -mask.png)<br>units/bayonetFusilier-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack` `anim:death` |
+| gribeauvalCannon | Cañón Gribeauval | 🟡 sin animar | walk, attack, death | units/gribeauvalCannon-walk.png (+ -mask.png)<br>units/gribeauvalCannon-attack.png (+ -mask.png)<br>units/gribeauvalCannon-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack` `anim:death` |
+| fyrdman | Fyrdman | 🟡 sin animar | walk, attack, death | units/fyrdman-walk.png (+ -mask.png)<br>units/fyrdman-attack.png (+ -mask.png)<br>units/fyrdman-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack-melee` `anim:death` |
+| normanKnight | Caballero normando | 🟡 sin animar | walk, attack, death | units/normanKnight-walk.png (+ -mask.png)<br>units/normanKnight-attack.png (+ -mask.png)<br>units/normanKnight-death.png (+ -mask.png) | 2 | `anim:walk:mounted` `anim:attack-melee:mounted` `anim:death:mounted` |
+| tudorArquebusier | Arcabucero Tudor | 🟡 sin animar | walk, attack, death | units/tudorArquebusier-walk.png (+ -mask.png)<br>units/tudorArquebusier-attack.png (+ -mask.png)<br>units/tudorArquebusier-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack` `anim:death` |
+| redcoat | Casaca roja | 🟡 sin animar | walk, attack, death | units/redcoat-walk.png (+ -mask.png)<br>units/redcoat-attack.png (+ -mask.png)<br>units/redcoat-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack` `anim:death` |
+| rifleman | Fusilero | 🟡 sin animar | walk, attack, death | units/rifleman-walk.png (+ -mask.png)<br>units/rifleman-attack.png (+ -mask.png)<br>units/rifleman-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack` `anim:death` |
 | fieldGun | Cañón de campaña | 🔴 pendiente | idle, walk, attack, death | units/fieldGun.png (+ -mask.png)<br>units/fieldGun-walk.png (+ -mask.png)<br>units/fieldGun-attack.png (+ -mask.png)<br>units/fieldGun-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack` `anim:death` |
 | gatlingGun | Ametralladora | 🔴 pendiente | idle, walk, attack, death | units/gatlingGun.png (+ -mask.png)<br>units/gatlingGun-walk.png (+ -mask.png)<br>units/gatlingGun-attack.png (+ -mask.png)<br>units/gatlingGun-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack` `anim:death` |
 | biplane | Biplano | 🔴 pendiente | idle, walk, attack, death | units/biplane.png (+ -mask.png)<br>units/biplane-walk.png (+ -mask.png)<br>units/biplane-attack.png (+ -mask.png)<br>units/biplane-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack` `anim:death` |

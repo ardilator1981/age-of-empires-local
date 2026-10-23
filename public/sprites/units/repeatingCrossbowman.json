@@ -1,0 +1,19 @@
+{
+  "image": "repeatingCrossbowman.png",
+  "mask": "repeatingCrossbowman-mask.png",
+  "cell": {
+    "w": 71,
+    "h": 119
+  },
+  "anchor": {
+    "x": 36,
+    "y": 113
+  },
+  "scale": 2,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 1
+    }
+  }
+}

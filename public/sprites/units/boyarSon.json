@@ -1,0 +1,19 @@
+{
+  "image": "boyarSon.png",
+  "mask": "boyarSon-mask.png",
+  "cell": {
+    "w": 85,
+    "h": 132
+  },
+  "anchor": {
+    "x": 43,
+    "y": 126
+  },
+  "scale": 2,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 1
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "image": "redcoat.png",
+  "mask": "redcoat-mask.png",
+  "cell": {
+    "w": 80,
+    "h": 128
+  },
+  "anchor": {
+    "x": 40,
+    "y": 122
+  },
+  "scale": 2,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 1
+    }
+  }
+}

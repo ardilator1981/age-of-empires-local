@@ -1,0 +1,19 @@
+{
+  "image": "normanKnight.png",
+  "mask": "normanKnight-mask.png",
+  "cell": {
+    "w": 119,
+    "h": 132
+  },
+  "anchor": {
+    "x": 60,
+    "y": 126
+  },
+  "scale": 2,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 1
+    }
+  }
+}

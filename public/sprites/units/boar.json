@@ -1,0 +1,18 @@
+{
+  "image": "boar.png",
+  "cell": {
+    "w": 89,
+    "h": 74
+  },
+  "anchor": {
+    "x": 45,
+    "y": 68
+  },
+  "scale": 2,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 1
+    }
+  }
+}

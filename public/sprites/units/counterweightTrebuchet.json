@@ -1,0 +1,19 @@
+{
+  "image": "counterweightTrebuchet.png",
+  "mask": "counterweightTrebuchet-mask.png",
+  "cell": {
+    "w": 188,
+    "h": 240
+  },
+  "anchor": {
+    "x": 94,
+    "y": 234
+  },
+  "scale": 2,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 1
+    }
+  }
+}
