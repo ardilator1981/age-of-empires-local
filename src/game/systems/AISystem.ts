@@ -165,13 +165,12 @@ export class AIController {
         if (!b.complete || b.queue.length >= 2) continue;
         const units = trainablesAt(g, p, b.defId).filter(id => {
           const d = g.reg.unit(id);
-          return !d.gatherer && (d.attack ?? 0) > 0 && unitAvail(g, p, id).ok && canSpend(p.getCost(d));
+          return !d.gatherer && (d.attack ?? 0) > 0 && !d.classes.includes('siege') && unitAvail(g, p, id).ok && canSpend(p.getCost(d));
         });
         if (!units.length) continue;
-        // Prefiere unidades de edades más avanzadas
+        // Prefiere unidades de edades más avanzadas (el asedio lo lleva el plugin `siege`)
         units.sort((a, c) => g.reg.unit(c).age - g.reg.unit(a).age);
         const pick = g.rng() < 0.6 ? units[0] : units[Math.floor(g.rng() * units.length)];
-        if (g.reg.unit(pick).classes.includes('siege') && army.filter(a => g.unitDef(a).classes.includes('siege')).length >= 2) continue;
         Commands.train(g, b, pick);
       }
     }

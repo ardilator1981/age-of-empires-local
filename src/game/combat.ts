@@ -5,7 +5,7 @@ import { BALANCE } from '../config/balance';
 import { edgeDist, setOrder } from './actions';
 import { advantage, heightDamageFactor, heightOf } from './heightRules';
 import { retaliation } from './army/stances';
-import { hypot } from './fmath';
+import { cos, hypot, sin } from './fmath';
 
 export interface DamageInfo {
   attack: number;
@@ -17,6 +17,10 @@ export interface DamageInfo {
   fromHeight?: number;
   /** Ataque a distancia (las reglas de altura cambian). */
   ranged?: boolean;
+  /** Daño de área: radio, pérdida de daño en el borde y daño ya reducido por la distancia al centro. */
+  splash?: { radius: number; falloff: number };
+  /** Factor del daño final (el área lo usa para atenuar el borde). */
+  mul?: number;
 }
 
 export interface Projectile {
@@ -29,6 +33,8 @@ export interface Projectile {
   targetId: number;
   info: DamageInfo;
   style: string;
+  /** No sigue al objetivo: cae en (ex, ey) (proyectiles de área). */
+  fixed?: boolean;
   done?: boolean;
 }
 
@@ -52,11 +58,22 @@ export function performAttack(game: Game, a: Entity, t: Entity) {
   if (adv.range > 0 || adv.damage !== 0) a.data.heightAdv = { ...adv, until: game.time + 2.5 };
   else delete a.data.heightAdv;
   if (info.ranged) {
-    const d = hypot(t.x - a.x, t.y - a.y);
+    // Área: cae donde estaba el objetivo, con el error de puntería de la unidad
+    let ex = t.x, ey = t.y;
+    if (def.splash) {
+      info.splash = { radius: def.splash.radius, falloff: def.splash.falloff ?? 0.5 };
+      const scatter = def.splash.scatter ?? 0;
+      if (scatter > 0) {
+        const ang = game.rng() * Math.PI * 2, r = Math.sqrt(game.rng()) * scatter;
+        ex += cos(ang) * r; ey += sin(ang) * r;
+      }
+    }
+    const d = hypot(ex - a.x, ey - a.y);
     game.projectiles.push({
-      sx: a.x, sy: a.y, ex: t.x, ey: t.y,
+      sx: a.x, sy: a.y, ex, ey,
       sh: a.kind === 'building' ? 40 : 14,
       t: 0, dur: Math.max(0.15, d / BALANCE.combat.projectileSpeed), targetId: t.id, info, style: def.projectile ?? 'arrow',
+      ...(info.splash ? { fixed: true } : {}),
     });
   } else {
     dealDamage(game, t, info);
@@ -80,6 +97,7 @@ export function computeDamage(game: Game, t: Entity, info: DamageInfo): number {
     const diff = (info.fromHeight - heightOf(game, t)) / BALANCE.relief.levelStep;
     dmg *= heightDamageFactor(diff, !!info.ranged);
   }
+  if (info.mul !== undefined) dmg *= info.mul;
   return Math.max(1, Math.round(dmg * 10) / 10);
 }
 
@@ -113,14 +131,39 @@ export function dealDamage(game: Game, t: Entity, info: DamageInfo) {
 export function updateProjectiles(game: Game, dt: number) {
   for (const pr of game.projectiles) {
     const tgt = game.get(pr.targetId);
-    if (tgt) { pr.ex = tgt.x; pr.ey = tgt.y; }
+    if (tgt && !pr.fixed) { pr.ex = tgt.x; pr.ey = tgt.y; }
     pr.t += dt / pr.dur;
     if (pr.t >= 1) {
       pr.done = true;
-      if (tgt) dealDamage(game, tgt, pr.info);
+      if (pr.info.splash) splashDamage(game, pr);
+      else if (tgt) dealDamage(game, tgt, pr.info);
     }
   }
   game.projectiles = game.projectiles.filter(p => !p.done);
+}
+
+/**
+ * El asedio solo elige edificios por su cuenta, salvo el que lleva la clase `antiUnit`
+ * (catapulta, escorpión, artillería de campaña), que también dispara a las tropas.
+ */
+export function buildingsOnly(def: { classes: string[] }): boolean {
+  return def.classes.includes('siege') && !def.classes.includes('antiUnit');
+}
+
+/** Daño de área en el punto de caída: a todos los enemigos dentro del radio, más flojo hacia el borde. */
+function splashDamage(game: Game, pr: Projectile) {
+  const { radius, falloff } = pr.info.splash!;
+  const attacker = game.get(pr.info.attackerId);
+  // Se recoge antes de dañar: matar a uno cambia las listas
+  const hit: { e: Entity; mul: number }[] = [];
+  for (const e of game.actors) {
+    if (e.dead || e.kind === 'resource' || !game.isEnemy(pr.info.owner, e.owner)) continue;
+    if (attacker && game.reg.combatRules.length && !game.canAttack(attacker, e, true)) continue;
+    const d = Math.max(0, hypot(e.x - pr.ex, e.y - pr.ey) - (e.kind === 'building' ? e.size / 2 : 0));
+    if (d > radius) continue;
+    hit.push({ e, mul: 1 - falloff * (d / radius) });
+  }
+  for (const h of hit) dealDamage(game, h.e, { ...pr.info, mul: h.mul });
 }
 
 /**

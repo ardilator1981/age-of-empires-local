@@ -22,6 +22,7 @@ import { industrialCivBuildings, industrialCivTechs, industrialCivUnits } from '
 import { persiaBuildings, persiaTechs, persiaUnits } from './civ-persia';
 import { ethiopiaBuildings, ethiopiaTechs, ethiopiaUnits } from './civ-ethiopia';
 import { gunpowderAI, gunpowderBuildings, gunpowderTechs, gunpowderUnits } from './gunpowder';
+import { fieldArtilleryTechs, siegeAI, siegeTechs, siegeUnits } from './siege';
 import { powers, powersAI } from './powers';
 import { PowerSystem, truceRule, usePower } from '../../game/powers';
 import { diploCommand, DiplomacySystem, initDiplomacy } from '../../game/diplomacy';
@@ -73,6 +74,10 @@ export const coreMod: GameMod = {
     [...industrialUnits, ...industrialCivUnits, ...persiaUnits, ...ethiopiaUnits].forEach(u => reg.addUnit(u));
     [...industrialBuildings, ...industrialCivBuildings, ...persiaBuildings, ...ethiopiaBuildings].forEach(b => reg.addBuilding(b));
     [...industrialTechs, ...industrialCivTechs, ...persiaTechs, ...ethiopiaTechs].forEach(t => reg.addTech(t));
+    // Asedio y artillería por era (mejoras encadenadas desde la catapulta, el ariete y el cañón)
+    siegeUnits.forEach(u => reg.addUnit(u));
+    [...siegeTechs, ...fieldArtilleryTechs].forEach(t => reg.addTech(t));
+    reg.addAIPlugin(siegeAI);
     reg.addCombatRule(airRule);
     powers.forEach(w => reg.addPower(w));
     reg.addAIPlugin(powersAI);

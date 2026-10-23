@@ -11,7 +11,7 @@ export type SfxId =
   | 'buildingDone' | 'unitTrained' | 'techDone' | 'ageUp' | 'powerUsed' | 'coins' | 'treaty' | 'spyDone'
   | 'depleted' | 'alertUnits' | 'alertBuildings' | 'villagerIdle'
   | 'errResources' | 'errPlacement' | 'errPopulation' | 'errGeneric'
-  | 'hitMelee' | 'hitArrow' | 'hitMusket' | 'hitCannon' | 'hitRifle' | 'hitGatling' | 'hitBuilding' | 'animalDeath' | 'bird';
+  | 'hitMelee' | 'hitArrow' | 'hitMusket' | 'hitCannon' | 'hitRock' | 'hitRifle' | 'hitGatling' | 'hitBuilding' | 'animalDeath' | 'bird';
 
 export type SfxBus = 'effects' | 'alerts';
 
@@ -325,6 +325,15 @@ export const SFX: Record<SfxId, SfxDef> = {
       burst(c, o, { type: 'bandpass', freq: 1400, q: 0.5, t: 0, dur: 0.08, gain: 0.6 });
     },
   },
+  hitRock: {
+    dur: 0.55, bus: 'effects', prio: 2, cooldown: 0.2, gain: 0.3, group: 'combat',
+    make: (c, o) => {
+      // Piedra de catapulta o trabuquete: golpe sordo y grave con un crujido de escombros
+      tone(c, o, { freq: 70, to: 32, t: 0, dur: 0.35, gain: 0.9 });
+      burst(c, o, { type: 'lowpass', freq: 380, t: 0, dur: 0.3, gain: 0.8 });
+      burst(c, o, { type: 'bandpass', freq: 900, q: 0.8, t: 0.02, dur: 0.16, gain: 0.45 });
+    },
+  },
   hitRifle: {
     dur: 0.28, bus: 'effects', prio: 1, cooldown: 0.07, gain: 0.22, group: 'combat',
     make: (c, o) => {
@@ -373,5 +382,5 @@ export const SFX: Record<SfxId, SfxDef> = {
 export const PRELOAD_ORDER: SfxId[] = [
   'confirmMove', 'confirmGather', 'confirmBuild', 'confirmAttack', 'errPlacement', 'errResources', 'errGeneric',
   'unitTrained', 'buildingDone', 'alertUnits', 'alertBuildings', 'errPopulation', 'depleted', 'techDone', 'ageUp', 'powerUsed',
-  'coins', 'treaty', 'spyDone', 'villagerIdle', 'hitMelee', 'hitArrow', 'hitMusket', 'hitCannon', 'hitRifle', 'hitGatling', 'hitBuilding', 'animalDeath', 'bird',
+  'coins', 'treaty', 'spyDone', 'villagerIdle', 'hitMelee', 'hitArrow', 'hitMusket', 'hitCannon', 'hitRock', 'hitRifle', 'hitGatling', 'hitBuilding', 'animalDeath', 'bird',
 ];

@@ -15,16 +15,16 @@
 
 | Tipo | Total | ✔ Integrado | ⚠ Sin usar | 🛠 En desarrollo | 🎨 Decorativo |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| 🧍 Unidades | 73 | 73 | 0 | 0 | 0 |
-| 🏛️ Edificios | 59 | 56 | 0 | 3 | 0 |
-| 📜 Tecnologías | 82 | 79 | 0 | 3 | 0 |
+| 🧍 Unidades | 82 | 81 | 1 | 0 | 0 |
+| 🏛️ Edificios | 60 | 60 | 0 | 0 | 0 |
+| 📜 Tecnologías | 91 | 90 | 1 | 0 | 0 |
 | 🪙 Recursos | 6 | 6 | 0 | 0 | 0 |
 | 🌲 Nodos del mapa | 12 | 12 | 0 | 0 | 0 |
-| ⚡ Poderes | 10 | 9 | 0 | 1 | 0 |
+| ⚡ Poderes | 10 | 10 | 0 | 0 | 0 |
 | 🚩 Civilizaciones | 6 | 6 | 0 | 0 | 0 |
 | 🏆 Victorias | 3 | 3 | 0 | 0 | 0 |
 | 🗺️ Terrenos | 9 | 9 | 0 | 0 | 0 |
-| ⚙️ Motor y mods | 32 | 32 | 0 | 0 | 0 |
+| ⚙️ Motor y mods | 44 | 44 | 0 | 0 | 0 |
 
 ## Desarrollos, implicaciones y aplicaciones
 
@@ -62,13 +62,8 @@ Todo lo que no está plenamente integrado, con lo que le falta.
 
 | Tipo | Elemento | Estado | Qué le falta / nota |
 | --- | --- | --- | --- |
-| Edificios | 🏦 Compañía comercial (`tradingCompany`) | 🛠 En desarrollo | **Nota (fase 5):** Dice «comercio con el exterior», pero hoy solo es depósito de oro y piedra: no hay orden, sistema ni caravanas de comercio. Lo trae la fase 5 (comercio, diplomacia y espionaje). |
-| Edificios | 🏪 Caravasar (`caravanserai`) | 🛠 En desarrollo | **Nota (fase 5):** Posada de ruta persa: hoy solo es depósito y alojamiento; la fase 5 le da su papel en las rutas comerciales. |
-| Edificios | 🕌 Maidan (`maidan`) | 🛠 En desarrollo | **Nota (fase 5):** Plaza real persa vinculada a la seda: el comercio real (con quién y bajo qué condiciones) llega en la fase 5. |
-| Tecnologías | 🚢 Cantón (`cantonSystem`) | 🛠 En desarrollo | **Nota (fase 5):** «Comercio exterior por un solo puerto»: hoy solo da recolección de oro. Pendiente de enlazar con las rutas de la fase 5. |
-| Tecnologías | ⚖️ Colbertismo (`colbertism`) | 🛠 En desarrollo | **Nota (fase 5):** «Manufacturas, aranceles y comercio»: hoy solo da recolección de oro. Pendiente de enlazar con las rutas de la fase 5. |
-| Tecnologías | 🧵 Monopolio de la seda (`silkMonopoly`) | 🛠 En desarrollo | **Nota (fase 5):** Su texto habla de comercio de seda, pero hoy solo da más velocidad de recolección de oro. Pendiente de enlazar con las rutas de la fase 5. |
-| Poderes | 🕊️ Tributo a la Horda (`hordeTribute`) | 🛠 En desarrollo | **Nota (fase 5):** Es una pausa de ataques pagada, no diplomacia: no hay relaciones, tratados ni alianzas entre civilizaciones hasta la fase 5. |
+| Unidades | 🐪 Caravana (`caravan`) | ⚠ Sin usar | No ataca, no recolecta, no construye y no tiene habilidad: solo ocupa población. |
+| Tecnologías | 🔍 Contraespionaje (`counterespionage`) | ⚠ Sin usar | No tiene efectos. |
 
 ## Contenido que la IA nunca usa
 
@@ -81,16 +76,22 @@ Un rival controlado por la IA no lo construye, entrena, investiga ni lanza: solo
 
 Qué dice hoy el contenido sobre comerciar (y temas afines) y qué infraestructura de juego hay detrás.
 
-**Infraestructura de motor encontrada** (órdenes, sistemas, órdenes de red, IA): **ninguna**. No hay orden ni sistema de comercio, rutas, relaciones con otras civilizaciones ni espionaje.
+**Infraestructura de motor encontrada** (órdenes, sistemas, órdenes de red, IA): Orden «trade», Orden «spy», Sistema «diplomacy», Sistema «espionage», Orden de red «trade», Orden de red «spy», IA: trade, IA: diplomacy, Panel «diplomacy»
 
 | Elemento | Qué dice | Estado |
 | --- | --- | --- |
-| 🏦 Compañía comercial (building) | Factoría de la compañía: depósito de oro y piedra, y comercio con el exterior. | 🛠 En desarrollo — Dice «comercio con el exterior», pero hoy solo es depósito de oro y piedra: no hay orden, sistema ni caravanas de comercio. Lo trae la fase 5 (comercio, diplomacia y espionaje). |
-| 🕌 Maidan (building) | Edificio único persa (Imperial): la plaza real de Isfahán. Depósito de oro, aloja población; investiga el Monopolio de la seda. | 🛠 En desarrollo — Plaza real persa vinculada a la seda: el comercio real (con quién y bajo qué condiciones) llega en la fase 5. |
-| 🚢 Cantón (tech) | Tecnología única china (Pólvora): el comercio exterior pasa por un solo puerto. El oro se recoge un 25% más rápido. | 🛠 En desarrollo — «Comercio exterior por un solo puerto»: hoy solo da recolección de oro. Pendiente de enlazar con las rutas de la fase 5. |
-| ⚖️ Colbertismo (tech) | Tecnología única francesa (Pólvora): manufacturas, aranceles y comercio. El oro se recoge un 15% más rápido. | 🛠 En desarrollo — «Manufacturas, aranceles y comercio»: hoy solo da recolección de oro. Pendiente de enlazar con las rutas de la fase 5. |
-| 🧵 Monopolio de la seda (tech) | Tecnología única persa (Imperial): Shah Abbas compra toda la seda del reino. El oro se recoge un 10% más rápido. | 🛠 En desarrollo — Su texto habla de comercio de seda, pero hoy solo da más velocidad de recolección de oro. Pendiente de enlazar con las rutas de la fase 5. |
-| 🕊️ Tributo a la Horda (power) | Pagas el tributo al jan: durante 60 s nadie te ataca, pero tus tropas tampoco atacan a nadie. | 🛠 En desarrollo — Es una pausa de ataques pagada, no diplomacia: no hay relaciones, tratados ni alianzas entre civilizaciones hasta la fase 5. |
+| 🏦 Compañía comercial (building) | Factoría de la compañía: depósito de oro y piedra, y comercio con el exterior. | ✔ Integrado |
+| 🕌 Maidan (building) | Edificio único persa (Imperial): la plaza real de Isfahán. Depósito de oro, aloja población; investiga el Monopolio de la seda. | ✔ Integrado |
+| 🏪 Mercado (building) | Puesto comercial: sus caravanas viajan a otros puestos y cobran oro según la distancia (más con un rival en paz o aliado). Aquí se entrenan caravanas y espías. | ✔ Integrado |
+| 🐪 Caravana (unit) | Va y viene entre dos puestos comerciales cobrando oro por la distancia. Elige un puesto propio lejano o de alguien que no esté en guerra contigo. Indefensa: escóltala. | ⚠ Sin usar |
+| 🕵️ Espía (unit) | Invisible salvo junto a torres, castillos, centros urbanos o espías enemigos. Informa, roba tecnología, sabotea y soborna. Si falla, cae. Descansa un rato tras cada misión. | ✔ Integrado |
+| 🚢 Cantón (tech) | Tecnología única china (Pólvora): el comercio exterior pasa por un solo puerto. El oro se recoge un 25% más rápido. | ✔ Integrado |
+| ⚖️ Colbertismo (tech) | Tecnología única francesa (Pólvora): manufacturas, aranceles y comercio. El oro se recoge un 15% más rápido. | ✔ Integrado |
+| 🧵 Monopolio de la seda (tech) | Tecnología única persa (Imperial): Shah Abbas compra toda la seda del reino. El oro se recoge un 10% más rápido. | ✔ Integrado |
+| 🛖 Caravasar (tech) | Posadas de ruta: las caravanas cobran un 20% más. | ✔ Integrado |
+| 🔍 Contraespionaje (tech) | Patrullas e informantes: la vigilancia descubre a los espías al doble de distancia. | ⚠ Sin usar |
+| 💱 Casas de cambio (tech) | Letras de cambio: las caravanas cobran un 25% más. | ✔ Integrado |
+| 🕊️ Tributo a la Horda (power) | Pagas el tributo al jan: durante 60 s nadie te ataca, pero tus tropas tampoco atacan a nadie. | ✔ Integrado |
 | 🚩 Persia (civ) | Encrucijada de rutas: caballería rápida, comercio y ciencia. De los sasánidas a los qayar (después, hacia el Irán del petróleo). | ✔ Integrado |
 
 ## Comparativa entre civilizaciones
@@ -101,43 +102,43 @@ Para revisar las diferencias, el equilibrio estratégico y la jugabilidad. Los r
 
 | Civilización | Edad Oscura | Edad Feudal | Edad de los Castillos | Edad Imperial | Edad de la Pólvora | Edad Industrial |
 | --- | --- | --- | --- | --- | --- | --- |
-| Británicos | 3 | 9 | 18 | 20 | 24 | 30 |
-| Francia | 3 | 9 | 18 | 20 | 25 | 31 |
-| Rusia | 3 | 8 | 17 | 20 | 25 | 31 |
-| China | 3 | 9 | 19 | 21 | 25 | 30 |
-| Persia | 3 | 9 | 19 | 22 | 26 | 32 |
-| Etiopía | 3 | 9 | 18 | 20 | 24 | 30 |
+| Británicos | 3 | 10 | 21 | 26 | 31 | 38 |
+| Francia | 3 | 10 | 21 | 26 | 32 | 39 |
+| Rusia | 3 | 9 | 20 | 26 | 32 | 39 |
+| China | 3 | 10 | 22 | 27 | 32 | 38 |
+| Persia | 3 | 10 | 23 | 29 | 34 | 41 |
+| Etiopía | 3 | 10 | 22 | 27 | 32 | 39 |
 
 ### Edificios
 
 | Civilización | Edad Oscura | Edad Feudal | Edad de los Castillos | Edad Imperial | Edad de la Pólvora | Edad Industrial |
 | --- | --- | --- | --- | --- | --- | --- |
-| Británicos | 7 | 13 | 17 | 17 | 23 | 28 |
-| Francia | 7 | 13 | 17 | 18 | 25 | 30 |
-| Rusia | 7 | 13 | 17 | 18 | 24 | 29 |
-| China | 7 | 13 | 17 | 18 | 24 | 29 |
-| Persia | 7 | 13 | 17 | 18 | 24 | 29 |
-| Etiopía | 7 | 13 | 17 | 18 | 24 | 29 |
+| Británicos | 7 | 14 | 18 | 18 | 24 | 29 |
+| Francia | 7 | 14 | 18 | 19 | 26 | 31 |
+| Rusia | 7 | 14 | 18 | 19 | 25 | 30 |
+| China | 7 | 14 | 18 | 19 | 25 | 30 |
+| Persia | 7 | 14 | 18 | 19 | 25 | 30 |
+| Etiopía | 7 | 14 | 18 | 19 | 25 | 30 |
 
 ### Tecnologías
 
 | Civilización | Edad Oscura | Edad Feudal | Edad de los Castillos | Edad Imperial | Edad de la Pólvora | Edad Industrial |
 | --- | --- | --- | --- | --- | --- | --- |
-| Británicos | 3 | 16 | 29 | 32 | 43 | 52 |
-| Francia | 3 | 16 | 30 | 33 | 46 | 55 |
-| Rusia | 2 | 15 | 27 | 30 | 40 | 48 |
-| China | 3 | 17 | 30 | 33 | 44 | 53 |
-| Persia | 3 | 16 | 29 | 32 | 43 | 52 |
-| Etiopía | 3 | 16 | 29 | 32 | 43 | 52 |
+| Británicos | 3 | 16 | 30 | 36 | 49 | 60 |
+| Francia | 3 | 16 | 31 | 37 | 52 | 63 |
+| Rusia | 2 | 15 | 28 | 34 | 46 | 56 |
+| China | 3 | 17 | 31 | 37 | 50 | 61 |
+| Persia | 3 | 16 | 31 | 37 | 50 | 61 |
+| Etiopía | 3 | 16 | 31 | 37 | 50 | 61 |
 
 ### Mejor unidad militar (índice)
 
 | Civilización | Edad Oscura | Edad Feudal | Edad de los Castillos | Edad Imperial | Edad de la Pólvora | Edad Industrial |
 | --- | --- | --- | --- | --- | --- | --- |
-| Británicos | Fyrdman (120) | Caballero normando (379) | Elefante de guerra (3600) | Elefante de guerra (3600) | Elefante de guerra (3600) | Elefante de guerra (3600) |
-| Francia | Guerrero franco (150) | Caballero cruzado (403) | Elefante de guerra (3600) | Elefante de guerra (3600) | Elefante de guerra (3600) | Elefante de guerra (3600) |
-| Rusia | Druzhinnik (150) | Druzhinnik (150) | Elefante de guerra (3600) | Elefante de guerra (3600) | Elefante de guerra (3600) | Elefante de guerra (3600) |
-| China | Fubing (113) | Lancero de fuego (173) | Elefante de guerra (3600) | Elefante de guerra (3600) | Elefante de guerra (3600) | Elefante de guerra (3600) |
+| Británicos | Fyrdman (120) | Caballero normando (379) | General (2489) | General (2489) | General (2489) | General (2489) |
+| Francia | Guerrero franco (150) | Caballero cruzado (403) | General (2489) | General (2489) | General (2489) | General (2489) |
+| Rusia | Druzhinnik (150) | Druzhinnik (150) | General (2489) | General (2489) | General (2489) | General (2489) |
+| China | Fubing (113) | Lancero de fuego (173) | General (2489) | General (2489) | General (2489) | General (2489) |
 | Persia | Savaran (379) | Savaran (379) | Elefante de guerra (3600) | Elefante de guerra (3600) | Elefante de guerra (3600) | Elefante de guerra (3600) |
 | Etiopía | Guerrero axumita (125) | Guardia de Lalibela (228) | Elefante de guerra (3600) | Elefante de guerra (3600) | Elefante de guerra (3600) | Elefante de guerra (3600) |
 
@@ -145,34 +146,38 @@ Para revisar las diferencias, el equilibrio estratégico y la jugabilidad. Los r
 
 | Civilización | Funciones |
 | --- | --- |
-| Británicos | infantería 12 · arqueros 4 · caballería 8 · asedio 3 · armas de fuego 8 · aire 1 |
-| Francia | infantería 11 · arqueros 3 · caballería 9 · asedio 5 · armas de fuego 7 · aire 1 |
-| Rusia | infantería 11 · arqueros 3 · caballería 10 · asedio 4 · armas de fuego 6 · aire 1 |
-| China | infantería 11 · arqueros 4 · caballería 8 · asedio 4 · armas de fuego 6 · aire 1 |
-| Persia | infantería 10 · arqueros 4 · caballería 13 · asedio 3 · armas de fuego 7 · aire 1 |
-| Etiopía | infantería 12 · arqueros 3 · caballería 8 · asedio 4 · armas de fuego 6 · aire 1 |
+| Británicos | infantería 12 · arqueros 4 · caballería 7 · asedio 10 · armas de fuego 8 · aire 1 |
+| Francia | infantería 11 · arqueros 3 · caballería 8 · asedio 12 · armas de fuego 7 · aire 1 |
+| Rusia | infantería 11 · arqueros 3 · caballería 9 · asedio 11 · armas de fuego 6 · aire 1 |
+| China | infantería 11 · arqueros 4 · caballería 7 · asedio 11 · armas de fuego 6 · aire 1 |
+| Persia | infantería 10 · arqueros 4 · caballería 13 · asedio 10 · armas de fuego 7 · aire 1 |
+| Etiopía | infantería 12 · arqueros 3 · caballería 8 · asedio 11 · armas de fuego 6 · aire 1 |
 
 ### Identidad, contenido único y poderes
 
 | Civilización | Bonos | Identidad por eras | Unidades únicas | Edificios únicos | Tecnologías únicas | Poderes |
 | --- | --- | --- | --- | --- | --- | --- |
-| Británicos | Arqueros +1 de alcance · Centros urbanos cuestan -50% de madera · Unidad única: Arquero de tiro largo | Anglosajones · Inglaterra normanda · Inglaterra Plantagenet · Inglaterra Tudor · Gran Bretaña · Reino Unido y Estados Unidos emergente | Arquero de tiro largo · Fyrdman · Caballero normando · Arcabucero Tudor · Casaca roja · Fusilero Enfield · Tirador | Burh · Castillo de mota · Castillo concéntrico · Banco · Ferrocarril transcontinental | Arqueros ingleses · Reforma de Alfredo · Domesday · Carta de compañía · Deuda nacional · Intercambiabilidad de piezas | Crédito |
+| Británicos | Arqueros +1 de alcance · Centros urbanos cuestan -50% de madera · Unidad única: Arquero de tiro largo · Compañías de comercio: caravanas +10% de ganancia | Anglosajones · Inglaterra normanda · Inglaterra Plantagenet · Inglaterra Tudor · Gran Bretaña · Reino Unido y Estados Unidos emergente | Arquero de tiro largo · Fyrdman · Caballero normando · Arcabucero Tudor · Casaca roja · Fusilero Enfield · Tirador | Burh · Castillo de mota · Castillo concéntrico · Banco · Ferrocarril transcontinental | Arqueros ingleses · Reforma de Alfredo · Domesday · Carta de compañía · Deuda nacional · Intercambiabilidad de piezas | Crédito |
 | Francia | Caballería +20% de PV · Mejoras del molino gratis · Castillos -25% de coste · Unidad única: Lanzador de hachas | Francos · Francia capeta · Francia medieval tardía · Renacimiento francés · Antiguo Régimen · Revolución, Napoleón y la República | Guerrero franco · Caballero cruzado · Gendarme · Arcabucero de la ordenanza · Fusilero con bayoneta · Cañón Gribeauval · Guardia Vieja · Gran Batería | Villa real · Catedral gótica · Bastida · Château · Fortaleza de Vauban · Manufactura real · École Polytechnique | Hacha barbada · Capitulares · Carta urbana · Taille · Contratar mercenarios · Colbertismo · Doctrina de Vauban · Doctrina de Gribeauval · Sistema de cuerpos | Leva en masa · Legión Extranjera |
 | Rusia | La caza da además oro (pieles) · Madera +10% de recolección · Unidad única: Druzhinnik (Edad Oscura) · Edificio único: Gorodishche | Eslavos orientales y Rus' de Kiev · Rus' de Kiev cristiana · Principado de Moscú · Zarato ruso · Imperio ruso · Imperio ruso industrializándose | Druzhinnik · Hijo de boyardo · Strelets · Cosaco · Granadero · Unicornio · Fusilero de la guardia · Cosaco del Don | Gorodishche · Monasterio-fortaleza · Kremlin de piedra · Ostrog · Academia de ingenieros · Transiberiano | Russkaya Pravda · Marcha a Siberia | Tributo a la Horda · Tierra quemada |
-| China | Economía de granjas estatal: alimento +5% de recolección · Unidad única: Fubing (Edad Oscura) · Edificio único: Granero estatal | Sui-Tang · Song del Norte · Song del Sur y Yuan · Ming · Qing · Qing tardío y primera república | Fubing · Lancero de fuego · Ballestero de repetición · Trabuquete de contrapeso · Arcabucero de las divisiones divinas · Jinete de las Ocho Banderas · Fusilero de ejército regional | Granero estatal · Casa de moneda · Gran Canal · Ciudad Prohibida · Hong de Cantón · Arsenal de Jiangnan | Exámenes imperiales · Arroz de Champa · Billete jiaozi · Bomba trueno · Pato mandarín · Cantón · Autofortalecimiento | Flota del Tesoro |
-| Persia | Ejército móvil: caballería +5% de velocidad · Unidad única: Savaran (Edad Oscura) · Edificio único: Qanat | Persia sasánida · Irán islámico · Ilkanato y timúridas · Persia safávida · Afsháridas y zand · Persia qayar | Savaran · Ghulam · Arquero a caballo timúrida · Elefante timúrida · Qizilbash · Tofangchi · Zamburakchi · Sarbaz · Cosaco persa | Qanat · Caravasar · Observatorio de Maragha · Maidan · Ordu · Dar ul-Funun | Regadío · Iqta · Astronomía · Monopolio de la seda · Guerra móvil · Nizam-i Jadid | Gran Saqueo · Bazar |
-| Etiopía | Infantería +10% de PV · Unidad única: Guerrero axumita (Edad Oscura) · Edificio único: Estela | Reino de Axum · Dinastía Zagüe · Dinastía salomónica · Guerras de Adal y Gondar · Era de los príncipes · Tewodros II y Menelik II | Guerrero axumita · Guardia de Lalibela · Soldado real · Mosquetero etíope-portugués · Jinete oromo · Fusilero shewano · Artillería de montaña | Estela · Iglesia rupestre · Katama · Castillo de Gondar · Palacio del ras · Ferrocarril de Yibuti | Moneda de Axum · Prestes Juan · Corte itinerante · Alianza portuguesa · Cría de caballos · Importación de armas | Resistencia · Nagarit |
+| China | Economía de granjas estatal: alimento +5% de recolección · Unidad única: Fubing (Edad Oscura) · Edificio único: Granero estatal · Gran Canal: caravanas +15% de ganancia | Sui-Tang · Song del Norte · Song del Sur y Yuan · Ming · Qing · Qing tardío y primera república | Fubing · Lancero de fuego · Ballestero de repetición · Trabuquete de contrapeso · Arcabucero de las divisiones divinas · Jinete de las Ocho Banderas · Fusilero de ejército regional | Granero estatal · Casa de moneda · Gran Canal · Ciudad Prohibida · Hong de Cantón · Arsenal de Jiangnan | Exámenes imperiales · Arroz de Champa · Billete jiaozi · Bomba trueno · Pato mandarín · Cantón · Autofortalecimiento | Flota del Tesoro |
+| Persia | Ejército móvil: caballería +5% de velocidad · Unidad única: Savaran (Edad Oscura) · Edificio único: Qanat · Rutas de la Seda: caravanas +25% de ganancia | Persia sasánida · Irán islámico · Ilkanato y timúridas · Persia safávida · Afsháridas y zand · Persia qayar | Savaran · Ghulam · Arquero a caballo timúrida · Elefante timúrida · Qizilbash · Tofangchi · Zamburakchi · Sarbaz · Cosaco persa · Elefante de guerra | Qanat · Caravasar · Observatorio de Maragha · Maidan · Ordu · Dar ul-Funun | Regadío · Iqta · Astronomía · Monopolio de la seda · Guerra móvil · Nizam-i Jadid · Colmillos de hierro | Gran Saqueo · Bazar |
+| Etiopía | Infantería +10% de PV · Unidad única: Guerrero axumita (Edad Oscura) · Edificio único: Estela · Ruta del incienso y el oro: caravanas +10% de ganancia | Reino de Axum · Dinastía Zagüe · Dinastía salomónica · Guerras de Adal y Gondar · Era de los príncipes · Tewodros II y Menelik II | Guerrero axumita · Guardia de Lalibela · Soldado real · Mosquetero etíope-portugués · Jinete oromo · Fusilero shewano · Artillería de montaña · Elefante de guerra | Estela · Iglesia rupestre · Katama · Castillo de Gondar · Palacio del ras · Ferrocarril de Yibuti | Moneda de Axum · Prestes Juan · Corte itinerante · Alianza portuguesa · Cría de caballos · Importación de armas · Colmillos de hierro | Resistencia · Nagarit |
 
-## 🧍 Unidades (73)
+## Avisos sobre las notas
+
+- Notas que ya no hacen falta (lo anotado existe ya; bórralas de `docs/catalogo-notas.json`): building:tradingCompany, building:caravanserai, building:maidan, tech:silkMonopoly, tech:cantonSystem, tech:colbertism, power:hordeTribute
+
+## 🧍 Unidades (82)
 
 | Id | Nombre | Mod | Edad | Civilizaciones | Coste | Estado | IA | Arte | Qué hace | Implicaciones | Qué le falta |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | `villager` | 🧑‍🌾 Aldeano | core | Edad Oscura | todas | 50 alimento | ✔ Integrado | ✔ | imagen | Se entrena en Centro urbano, Kremlin de piedra, Bastida, Ciudad Prohibida y 1 más · Unidad inicial · Ataca (3) · Recolecta · Construye | — | — |
-| `militia` | 🗡️ Milicia | core | Edad Oscura | todas | 60 alimento, 20 oro | ✔ Integrado | ✔ | imagen | Se entrena en Cuartel · Ataca (4) | Se puede mejorar a Hombre de armas. · Lo contrarrestan: Unicornio, Ametralladora. | — |
-| `manAtArms` | ⚔️ Hombre de armas | core | Edad Feudal | todas | 60 alimento, 20 oro | ✔ Integrado | ✔ | imagen | Se entrena en Cuartel · Mejora de Milicia · Ataca (6) | Se consigue investigando la mejora de Milicia. · Se puede mejorar a Espadachín de mandoble. · Lo contrarrestan: Unicornio, Ametralladora. | — |
-| `longSwordsman` | 🤺 Espadachín de mandoble | core | Edad de los Castillos | todas | 60 alimento, 20 oro | ✔ Integrado | ✔ | imagen | Se entrena en Cuartel · Mejora de Hombre de armas · Ataca (9) | Se consigue investigando la mejora de Hombre de armas. · Lo contrarrestan: Unicornio, Ametralladora. | — |
-| `spearman` | 🔱 Lancero | core | Edad Feudal | todas | 35 alimento, 25 madera | ✔ Integrado | ✔ | imagen | Se entrena en Cuartel · Ataca (3) | Se puede mejorar a Piquero. · Hace daño extra contra: cavalry (+15). · Lo contrarrestan: Arquero, Ballestero, Unicornio, Ametralladora. | — |
-| `pikeman` | 🔱 Piquero | core | Edad de los Castillos | todas | 35 alimento, 25 madera | ✔ Integrado | ✔ | imagen | Se entrena en Cuartel · Mejora de Lancero · Ataca (4) | Se consigue investigando la mejora de Lancero. · Hace daño extra contra: cavalry (+22). · Lo contrarrestan: Arquero, Ballestero, Unicornio, Ametralladora. | — |
+| `militia` | 🗡️ Milicia | core | Edad Oscura | todas | 60 alimento, 20 oro | ✔ Integrado | ✔ | imagen | Se entrena en Cuartel · Ataca (4) | Se puede mejorar a Hombre de armas. · Lo contrarrestan: Unicornio, Ametralladora, Escorpión, Escorpión pesado. | — |
+| `manAtArms` | ⚔️ Hombre de armas | core | Edad Feudal | todas | 60 alimento, 20 oro | ✔ Integrado | ✔ | imagen | Se entrena en Cuartel · Mejora de Milicia · Ataca (6) | Se consigue investigando la mejora de Milicia. · Se puede mejorar a Espadachín de mandoble. · Lo contrarrestan: Unicornio, Ametralladora, Escorpión, Escorpión pesado. | — |
+| `longSwordsman` | 🤺 Espadachín de mandoble | core | Edad de los Castillos | todas | 60 alimento, 20 oro | ✔ Integrado | ✔ | imagen | Se entrena en Cuartel · Mejora de Hombre de armas · Ataca (9) | Se consigue investigando la mejora de Hombre de armas. · Lo contrarrestan: Unicornio, Ametralladora, Escorpión, Escorpión pesado. | — |
+| `spearman` | 🔱 Lancero | core | Edad Feudal | todas | 35 alimento, 25 madera | ✔ Integrado | ✔ | imagen | Se entrena en Cuartel · Ataca (3) | Se puede mejorar a Piquero. · Hace daño extra contra: cavalry (+15). · Lo contrarrestan: Arquero, Ballestero, Unicornio, Ametralladora y 2 más. | — |
+| `pikeman` | 🔱 Piquero | core | Edad de los Castillos | todas | 35 alimento, 25 madera | ✔ Integrado | ✔ | imagen | Se entrena en Cuartel · Mejora de Lancero · Ataca (4) | Se consigue investigando la mejora de Lancero. · Hace daño extra contra: cavalry (+22). · Lo contrarrestan: Arquero, Ballestero, Unicornio, Ametralladora y 2 más. | — |
 | `archer` | 🏹 Arquero | core | Edad Feudal | todas | 25 madera, 45 oro | ✔ Integrado | ✔ | imagen | Se entrena en Galería de tiro con arco · Ataca (4, alcance 4) | Se puede mejorar a Ballestero. · Hace daño extra contra: spear (+3). · Lo contrarrestan: Hostigador, Jinete oromo. | — |
 | `crossbowman` | 🎯 Ballestero | core | Edad de los Castillos | todas | 25 madera, 45 oro | ✔ Integrado | ✔ | imagen | Se entrena en Galería de tiro con arco · Mejora de Arquero · Ataca (5, alcance 5) | Se consigue investigando la mejora de Arquero. · Hace daño extra contra: spear (+3). · Lo contrarrestan: Hostigador, Jinete oromo. | — |
 | `skirmisher` | 🪃 Hostigador | core | Edad Feudal | todas | 25 alimento, 35 madera | ✔ Integrado | ✔ | imagen | Se entrena en Galería de tiro con arco · Ataca (2, alcance 4) | Hace daño extra contra: archer (+3). · Lo contrarrestan: Hostigador, Jinete oromo. | — |
@@ -180,68 +185,77 @@ Para revisar las diferencias, el equilibrio estratégico y la jugabilidad. Los r
 | `lightCavalry` | 🐎 Caballería ligera | core | Edad de los Castillos | todas | 80 alimento | ✔ Integrado | ✔ | imagen | Se entrena en Establo · Mejora de Caballería de exploración · Ataca (7) · Explora sola | Se consigue investigando la mejora de Caballería de exploración. · Lo contrarrestan: Lancero, Piquero, Fubing, Guerrero axumita y 1 más. | — |
 | `knight` | 🏇 Caballero | core | Edad de los Castillos | todas | 60 alimento, 75 oro | ✔ Integrado | ✔ | imagen | Se entrena en Establo · Ataca (10) | Se puede mejorar a Paladín. · Lo contrarrestan: Lancero, Piquero, Fubing, Guerrero axumita y 1 más. | — |
 | `cavalier` | 🏇 Paladín | core | Edad Imperial | todas | 60 alimento, 75 oro | ✔ Integrado | ✔ | imagen | Se entrena en Establo · Mejora de Caballero · Ataca (12) | Se consigue investigando la mejora de Caballero. · Lo contrarrestan: Lancero, Piquero, Fubing, Guerrero axumita y 1 más. | — |
-| `batteringRam` | 🪵 Ariete | core | Edad de los Castillos | todas | 160 madera, 75 oro | ✔ Integrado | ✔ | imagen | Se entrena en Taller de asedio · Ataca (2) | Hace daño extra contra: building (+125). | — |
+| `batteringRam` | 🪵 Ariete | core | Edad de los Castillos | todas | 160 madera, 75 oro | ✔ Integrado | ✔ | imagen | Se entrena en Taller de asedio · Ataca (2) | Se puede mejorar a Ariete cubierto. · Hace daño extra contra: building (+125). · Lo contrarrestan: Escorpión, Escorpión pesado. | — |
 | `longbowman` | 🏹 Arquero de tiro largo | core | Edad de los Castillos | Británicos | 35 madera, 40 oro | ✔ Integrado | ✔ | imagen | Se entrena en Castillo · Ataca (6, alcance 5) | Lo contrarrestan: Hostigador, Jinete oromo. | — |
-| `throwingAxeman` | 🪓 Guerrero franco | core | Edad Oscura | Francia | 55 alimento, 25 oro | ✔ Integrado | ✔ | imagen | Se entrena en Cuartel · Ataca (6, alcance 3) | Lo contrarrestan: Unicornio, Ametralladora. | — |
-| `druzhinnik` | 🪓 Druzhinnik | core | Edad Oscura | Rusia | 55 alimento, 25 oro | ✔ Integrado | ✔ | procedural | Se entrena en Cuartel · Ataca (6) | Lo contrarrestan: Unicornio, Ametralladora. | — |
+| `throwingAxeman` | 🪓 Guerrero franco | core | Edad Oscura | Francia | 55 alimento, 25 oro | ✔ Integrado | ✔ | imagen | Se entrena en Cuartel · Ataca (6, alcance 3) | Lo contrarrestan: Unicornio, Ametralladora, Escorpión, Escorpión pesado. | — |
+| `druzhinnik` | 🪓 Druzhinnik | core | Edad Oscura | Rusia | 55 alimento, 25 oro | ✔ Integrado | ✔ | procedural | Se entrena en Cuartel · Ataca (6) | Lo contrarrestan: Unicornio, Ametralladora, Escorpión, Escorpión pesado. | — |
 | `boyarSon` | 🏇 Hijo de boyardo | core | Edad de los Castillos | Rusia | 70 alimento, 70 oro | ✔ Integrado | ✔ | procedural | Se entrena en Castillo · Ataca (11) | Lo contrarrestan: Lancero, Piquero, Fubing, Guerrero axumita y 1 más. | — |
-| `strelets` | 🔫 Strelets | core | Edad Imperial | Rusia | 55 alimento, 60 oro | ✔ Integrado | ✔ | procedural | Se entrena en Castillo · Ataca (14, alcance 6) | Lo contrarrestan: Unicornio, Ametralladora. | — |
+| `strelets` | 🔫 Strelets | core | Edad Imperial | Rusia | 55 alimento, 60 oro | ✔ Integrado | ✔ | procedural | Se entrena en Castillo · Ataca (14, alcance 6) | Lo contrarrestan: Unicornio, Ametralladora, Escorpión, Escorpión pesado. | — |
 | `cossack` | 🐎 Cosaco | core | Edad Imperial | Rusia | 60 alimento, 35 madera | ✔ Integrado | ✔ | procedural | Se entrena en Castillo · Ataca (8) · Caza | Lo contrarrestan: Lancero, Piquero, Fubing, Guerrero axumita y 1 más. | — |
 | `deer` | 🦌 Ciervo | core | Edad Oscura | todas | — | ✔ Integrado | — | procedural | Aparece en el mapa · Animal (flee) | — | — |
 | `boar` | 🐗 Jabalí | core | Edad Oscura | todas | — | ✔ Integrado | — | procedural | Aparece en el mapa · Ataca (5) · Animal (fight) | — | — |
 | `sheep` | 🐑 Oveja | core | Edad Feudal | todas | 40 alimento | ✔ Integrado | ✔ | procedural | Se entrena en Corral · Animal (passive) | Máximo 12 vivos a la vez. | — |
-| `musketeer` | 🔫 Mosquetero | core | Edad de la Pólvora | todas | 50 alimento, 40 oro | ✔ Integrado | ✔ | procedural | Se entrena en Fábrica de pólvora · Ataca (16, alcance 6) | Lo contrarrestan: Unicornio, Ametralladora. | — |
-| `cannon` | 💣 Cañón | core | Edad de la Pólvora | todas | 180 madera, 120 oro | ✔ Integrado | ✔ | procedural | Se entrena en Fábrica de pólvora · Ataca (32, alcance 9) | Hace daño extra contra: building (+28). · Ocupa 2 de población. | — |
+| `musketeer` | 🔫 Mosquetero | core | Edad de la Pólvora | todas | 50 alimento, 40 oro | ✔ Integrado | ✔ | procedural | Se entrena en Fábrica de pólvora · Ataca (16, alcance 6) | Lo contrarrestan: Unicornio, Ametralladora, Escorpión, Escorpión pesado. | — |
+| `cannon` | 💣 Cañón | core | Edad de la Pólvora | todas | 180 madera, 120 oro | ✔ Integrado | ✔ | procedural | Se entrena en Fábrica de pólvora · Ataca (32, alcance 9) | Se puede mejorar a Cañón de campaña. · Hace daño extra contra: building (+28). · Lo contrarrestan: Escorpión, Escorpión pesado. · Ocupa 2 de población. | — |
 | `dragoon` | 🏇 Dragón | core | Edad de la Pólvora | todas | 70 alimento, 50 oro | ✔ Integrado | ✔ | procedural | Se entrena en Establo · Ataca (9, alcance 4) | Lo contrarrestan: Lancero, Piquero, Fubing, Guerrero axumita y 1 más. | — |
-| `grenadier` | 💥 Granadero | core | Edad de la Pólvora | Rusia | 55 alimento, 50 oro | ✔ Integrado | ✔ | procedural | Se entrena en Castillo · Ataca (18, alcance 5) | Lo contrarrestan: Unicornio, Ametralladora. | — |
-| `unicorn` | 💣 Unicornio | core | Edad de la Pólvora | Rusia | 160 madera, 140 oro | ✔ Integrado | ✔ | procedural | Se entrena en Academia de ingenieros · Ataca (26, alcance 10) | Hace daño extra contra: building (+22), infantry (+8). · Ocupa 2 de población. | — |
-| `fubing` | 🌾 Fubing | core | Edad Oscura | China | 40 alimento, 10 oro | ✔ Integrado | ✔ | procedural | Se entrena en Cuartel · Ataca (5) | Hace daño extra contra: cavalry (+6). · Lo contrarrestan: Arquero, Ballestero, Unicornio, Ametralladora. | — |
-| `fireLance` | 🔥 Lancero de fuego | core | Edad Feudal | China | 50 alimento, 30 oro | ✔ Integrado | ✔ | procedural | Se entrena en Cuartel · Ataca (9, alcance 2) | Lo contrarrestan: Unicornio, Ametralladora. | — |
+| `grenadier` | 💥 Granadero | core | Edad de la Pólvora | Rusia | 55 alimento, 50 oro | ✔ Integrado | ✔ | procedural | Se entrena en Castillo · Ataca (18, alcance 5) | Lo contrarrestan: Unicornio, Ametralladora, Escorpión, Escorpión pesado. | — |
+| `unicorn` | 💣 Unicornio | core | Edad de la Pólvora | Rusia | 160 madera, 140 oro | ✔ Integrado | ✔ | procedural | Se entrena en Academia de ingenieros · Ataca (26, alcance 10) | Hace daño extra contra: building (+22), infantry (+8). · Lo contrarrestan: Escorpión, Escorpión pesado. · Ocupa 2 de población. | — |
+| `fubing` | 🌾 Fubing | core | Edad Oscura | China | 40 alimento, 10 oro | ✔ Integrado | ✔ | procedural | Se entrena en Cuartel · Ataca (5) | Hace daño extra contra: cavalry (+6). · Lo contrarrestan: Arquero, Ballestero, Unicornio, Ametralladora y 2 más. | — |
+| `fireLance` | 🔥 Lancero de fuego | core | Edad Feudal | China | 50 alimento, 30 oro | ✔ Integrado | ✔ | procedural | Se entrena en Cuartel · Ataca (9, alcance 2) | Lo contrarrestan: Unicornio, Ametralladora, Escorpión, Escorpión pesado. | — |
 | `repeatingCrossbowman` | 🏹 Ballestero de repetición | core | Edad de los Castillos | China | 35 madera, 45 oro | ✔ Integrado | ✔ | procedural | Se entrena en Castillo · Ataca (3, alcance 5) | Lo contrarrestan: Hostigador, Jinete oromo. | — |
-| `counterweightTrebuchet` | 🪨 Trabuquete de contrapeso | core | Edad de los Castillos | China | 200 madera, 150 oro | ✔ Integrado | ✔ | procedural | Se entrena en Taller de asedio · Ataca (40, alcance 10) | Hace daño extra contra: building (+35). · Ocupa 2 de población. | — |
-| `divineArquebusier` | 🔫 Arcabucero de las divisiones divinas | core | Edad Imperial | China | 55 alimento, 55 oro | ✔ Integrado | ✔ | procedural | Se entrena en Castillo · Ataca (13, alcance 6) | Lo contrarrestan: Unicornio, Ametralladora. | — |
+| `counterweightTrebuchet` | 🪨 Trabuquete de contrapeso | core | Edad de los Castillos | China | 200 madera, 150 oro | ✔ Integrado | ✔ | procedural | Se entrena en Taller de asedio · Ataca (40, alcance 10) | Hace daño extra contra: building (+35). · Lo contrarrestan: Escorpión, Escorpión pesado. · Ocupa 2 de población. | — |
+| `divineArquebusier` | 🔫 Arcabucero de las divisiones divinas | core | Edad Imperial | China | 55 alimento, 55 oro | ✔ Integrado | ✔ | procedural | Se entrena en Castillo · Ataca (13, alcance 6) | Lo contrarrestan: Unicornio, Ametralladora, Escorpión, Escorpión pesado. | — |
 | `eightBannersRider` | 🏇 Jinete de las Ocho Banderas | core | Edad de la Pólvora | China | 70 alimento, 70 oro | ✔ Integrado | ✔ | procedural | Se entrena en Castillo · Ataca (12) | Lo contrarrestan: Lancero, Piquero, Fubing, Guerrero axumita y 1 más. | — |
 | `crusaderKnight` | 🏇 Caballero cruzado | core | Edad Feudal | Francia | 60 alimento, 60 oro | ✔ Integrado | ✔ | procedural | Se entrena en Establo · Ataca (9) | Lo contrarrestan: Lancero, Piquero, Fubing, Guerrero axumita y 1 más. | — |
 | `gendarme` | 🏇 Gendarme | core | Edad de los Castillos | Francia | 70 alimento, 80 oro | ✔ Integrado | ✔ | procedural | Se entrena en Castillo · Ataca (12) | Lo contrarrestan: Lancero, Piquero, Fubing, Guerrero axumita y 1 más. | — |
-| `ordinanceArquebusier` | 🔫 Arcabucero de la ordenanza | core | Edad Imperial | Francia | 55 alimento, 55 oro | ✔ Integrado | ✔ | procedural | Se entrena en Castillo · Ataca (13, alcance 6) | Lo contrarrestan: Unicornio, Ametralladora. | — |
-| `bayonetFusilier` | 🔫 Fusilero con bayoneta | core | Edad de la Pólvora | Francia | 55 alimento, 45 oro | ✔ Integrado | ✔ | procedural | Se entrena en Castillo · Ataca (16, alcance 6) | Lo contrarrestan: Unicornio, Ametralladora. | — |
-| `gribeauvalCannon` | 💣 Cañón Gribeauval | core | Edad de la Pólvora | Francia | 160 madera, 110 oro | ✔ Integrado | ✔ | procedural | Se entrena en Fábrica de pólvora · Ataca (36, alcance 10) | Hace daño extra contra: building (+28). · Ocupa 2 de población. | — |
-| `fyrdman` | 🛡️ Fyrdman | core | Edad Oscura | Británicos | 45 alimento, 15 madera | ✔ Integrado | ✔ | procedural | Se entrena en Cuartel · Ataca (5) | Lo contrarrestan: Unicornio, Ametralladora. | — |
+| `ordinanceArquebusier` | 🔫 Arcabucero de la ordenanza | core | Edad Imperial | Francia | 55 alimento, 55 oro | ✔ Integrado | ✔ | procedural | Se entrena en Castillo · Ataca (13, alcance 6) | Lo contrarrestan: Unicornio, Ametralladora, Escorpión, Escorpión pesado. | — |
+| `bayonetFusilier` | 🔫 Fusilero con bayoneta | core | Edad de la Pólvora | Francia | 55 alimento, 45 oro | ✔ Integrado | ✔ | procedural | Se entrena en Castillo · Ataca (16, alcance 6) | Lo contrarrestan: Unicornio, Ametralladora, Escorpión, Escorpión pesado. | — |
+| `gribeauvalCannon` | 💣 Cañón Gribeauval | core | Edad de la Pólvora | Francia | 160 madera, 110 oro | ✔ Integrado | ✔ | procedural | Se entrena en Fábrica de pólvora · Ataca (36, alcance 10) | Hace daño extra contra: building (+28). · Lo contrarrestan: Escorpión, Escorpión pesado. · Ocupa 2 de población. | — |
+| `fyrdman` | 🛡️ Fyrdman | core | Edad Oscura | Británicos | 45 alimento, 15 madera | ✔ Integrado | ✔ | procedural | Se entrena en Cuartel · Ataca (5) | Lo contrarrestan: Unicornio, Ametralladora, Escorpión, Escorpión pesado. | — |
 | `normanKnight` | 🏇 Caballero normando | core | Edad Feudal | Británicos | 65 alimento, 50 oro | ✔ Integrado | ✔ | procedural | Se entrena en Establo · Ataca (9) | Lo contrarrestan: Lancero, Piquero, Fubing, Guerrero axumita y 1 más. | — |
-| `tudorArquebusier` | 🔫 Arcabucero Tudor | core | Edad Imperial | Británicos | 50 alimento, 55 oro | ✔ Integrado | ✔ | procedural | Se entrena en Castillo · Ataca (13, alcance 6) | Lo contrarrestan: Unicornio, Ametralladora. | — |
-| `redcoat` | 🔴 Casaca roja | core | Edad de la Pólvora | Británicos | 55 alimento, 45 oro | ✔ Integrado | ✔ | procedural | Se entrena en Castillo · Ataca (15, alcance 6) | Lo contrarrestan: Unicornio, Ametralladora. | — |
-| `rifleman` | 🔫 Fusilero | core | Edad Industrial | todas | 55 alimento, 40 hierro | ✔ Integrado | ✔ | procedural | Se entrena en Fábrica · Ataca (18, alcance 7) | Lo contrarrestan: Unicornio, Ametralladora. | — |
-| `fieldGun` | 💣 Cañón de campaña | core | Edad Industrial | todas | 100 madera, 80 hierro, 40 carbón | ✔ Integrado | ✔ | procedural | Se entrena en Fábrica · Ataca (40, alcance 11) | Hace daño extra contra: building (+30). · Ocupa 2 de población. | — |
+| `tudorArquebusier` | 🔫 Arcabucero Tudor | core | Edad Imperial | Británicos | 50 alimento, 55 oro | ✔ Integrado | ✔ | procedural | Se entrena en Castillo · Ataca (13, alcance 6) | Lo contrarrestan: Unicornio, Ametralladora, Escorpión, Escorpión pesado. | — |
+| `redcoat` | 🔴 Casaca roja | core | Edad de la Pólvora | Británicos | 55 alimento, 45 oro | ✔ Integrado | ✔ | procedural | Se entrena en Castillo · Ataca (15, alcance 6) | Lo contrarrestan: Unicornio, Ametralladora, Escorpión, Escorpión pesado. | — |
+| `rifleman` | 🔫 Fusilero | core | Edad Industrial | todas | 55 alimento, 40 hierro | ✔ Integrado | ✔ | procedural | Se entrena en Fábrica · Ataca (18, alcance 7) | Lo contrarrestan: Unicornio, Ametralladora, Escorpión, Escorpión pesado. | — |
+| `fieldGun` | 💣 Cañón de campaña | core | Edad Industrial | todas | 100 madera, 80 hierro, 40 carbón | ✔ Integrado | ✔ | procedural | Se entrena en Fábrica · Mejora de Cañón · Ataca (40, alcance 11) | Se consigue investigando la mejora de Cañón. · Hace daño extra contra: building (+30). · Lo contrarrestan: Escorpión, Escorpión pesado. · Ocupa 2 de población. | — |
 | `gatlingGun` | 🔫 Ametralladora | core | Edad Industrial | todas | 70 hierro, 40 carbón, 50 oro | ✔ Integrado | ✔ | procedural | Se entrena en Fábrica · Ataca (8, alcance 6) | Hace daño extra contra: infantry (+3). · Ocupa 2 de población. | — |
 | `biplane` | 🛩️ Biplano | core | Edad Industrial | todas | 60 hierro, 40 carbón, 40 oro | ✔ Integrado | ✔ | procedural | Se entrena en Aeródromo · Ataca (7, alcance 3) · Vuela | Ocupa 2 de población. | — |
-| `guardRifleman` | 🔫 Fusilero de la guardia | core | Edad Industrial | Rusia | 60 alimento, 45 hierro | ✔ Integrado | ✔ | procedural | Se entrena en Fábrica · Ataca (19, alcance 7) | Lo contrarrestan: Unicornio, Ametralladora. | — |
+| `guardRifleman` | 🔫 Fusilero de la guardia | core | Edad Industrial | Rusia | 60 alimento, 45 hierro | ✔ Integrado | ✔ | procedural | Se entrena en Fábrica · Ataca (19, alcance 7) | Lo contrarrestan: Unicornio, Ametralladora, Escorpión, Escorpión pesado. | — |
 | `donCossack` | 🐎 Cosaco del Don | core | Edad Industrial | Rusia | 65 alimento, 40 oro, 20 hierro | ✔ Integrado | ✔ | procedural | Se entrena en Establo · Ataca (12) · Caza | Lo contrarrestan: Lancero, Piquero, Fubing, Guerrero axumita y 1 más. | — |
-| `regionalRifleman` | 🔫 Fusilero de ejército regional | core | Edad Industrial | China | 40 alimento, 25 hierro | ✔ Integrado | ✔ | procedural | Se entrena en Fábrica, Arsenal de Jiangnan · Ataca (16, alcance 7) | Lo contrarrestan: Unicornio, Ametralladora. | — |
-| `oldGuard` | 🔫 Guardia Vieja | core | Edad Industrial | Francia | 70 alimento, 50 hierro, 40 oro | ✔ Integrado | ✔ | procedural | Se entrena en Fábrica · Ataca (21, alcance 7) | Lo contrarrestan: Unicornio, Ametralladora. | — |
-| `grandeBatterie` | 💣 Gran Batería | core | Edad Industrial | Francia | 90 madera, 70 hierro, 30 carbón, 30 oro | ✔ Integrado | ✔ | procedural | Se entrena en Fábrica · Ataca (42, alcance 11) | Hace daño extra contra: building (+30). · Ocupa 2 de población. | — |
-| `enfieldRifleman` | 🔫 Fusilero Enfield | core | Edad Industrial | Británicos | 55 alimento, 40 hierro, 15 oro | ✔ Integrado | ✔ | procedural | Se entrena en Fábrica · Ataca (19, alcance 8) | Lo contrarrestan: Unicornio, Ametralladora. | — |
-| `sharpshooter` | 🎯 Tirador | core | Edad Industrial | Británicos | 60 alimento, 55 hierro | ✔ Integrado | ✔ | procedural | Se entrena en Fábrica · Ataca (27, alcance 9) | Lo contrarrestan: Unicornio, Ametralladora. | — |
+| `regionalRifleman` | 🔫 Fusilero de ejército regional | core | Edad Industrial | China | 40 alimento, 25 hierro | ✔ Integrado | ✔ | procedural | Se entrena en Fábrica, Arsenal de Jiangnan · Ataca (16, alcance 7) | Lo contrarrestan: Unicornio, Ametralladora, Escorpión, Escorpión pesado. | — |
+| `oldGuard` | 🔫 Guardia Vieja | core | Edad Industrial | Francia | 70 alimento, 50 hierro, 40 oro | ✔ Integrado | ✔ | procedural | Se entrena en Fábrica · Ataca (21, alcance 7) | Lo contrarrestan: Unicornio, Ametralladora, Escorpión, Escorpión pesado. | — |
+| `grandeBatterie` | 💣 Gran Batería | core | Edad Industrial | Francia | 90 madera, 70 hierro, 30 carbón, 30 oro | ✔ Integrado | ✔ | procedural | Se entrena en Fábrica · Ataca (42, alcance 11) | Hace daño extra contra: building (+30). · Lo contrarrestan: Escorpión, Escorpión pesado. · Ocupa 2 de población. | — |
+| `enfieldRifleman` | 🔫 Fusilero Enfield | core | Edad Industrial | Británicos | 55 alimento, 40 hierro, 15 oro | ✔ Integrado | ✔ | procedural | Se entrena en Fábrica · Ataca (19, alcance 8) | Lo contrarrestan: Unicornio, Ametralladora, Escorpión, Escorpión pesado. | — |
+| `sharpshooter` | 🎯 Tirador | core | Edad Industrial | Británicos | 60 alimento, 55 hierro | ✔ Integrado | ✔ | procedural | Se entrena en Fábrica · Ataca (27, alcance 9) | Lo contrarrestan: Unicornio, Ametralladora, Escorpión, Escorpión pesado. | — |
 | `savaran` | 🏇 Savaran | core | Edad Oscura | Persia | 70 alimento, 55 oro | ✔ Integrado | ✔ | procedural | Se entrena en Cuartel · Ataca (8) | Lo contrarrestan: Lancero, Piquero, Fubing, Guerrero axumita y 1 más. | — |
-| `ghulam` | 🗡️ Ghulam | core | Edad Feudal | Persia | 55 alimento, 40 oro | ✔ Integrado | ✔ | procedural | Se entrena en Cuartel · Ataca (8) | Lo contrarrestan: Unicornio, Ametralladora. | — |
+| `ghulam` | 🗡️ Ghulam | core | Edad Feudal | Persia | 55 alimento, 40 oro | ✔ Integrado | ✔ | procedural | Se entrena en Cuartel · Ataca (8) | Lo contrarrestan: Unicornio, Ametralladora, Escorpión, Escorpión pesado. | — |
 | `timuridHorseArcher` | 🏹 Arquero a caballo timúrida | core | Edad de los Castillos | Persia | 40 madera, 60 oro | ✔ Integrado | ✔ | procedural | Se entrena en Establo · Ataca (6, alcance 5) | Lo contrarrestan: Lancero, Piquero, Hostigador, Fubing y 3 más. | — |
 | `timuridElephant` | 🐘 Elefante timúrida | core | Edad de los Castillos | Persia | 110 alimento, 90 oro | ✔ Integrado | ✔ | procedural | Se entrena en Castillo · Ataca (14) | Hace daño extra contra: building (+6). · Lo contrarrestan: Lancero, Piquero, Fubing, Guerrero axumita y 1 más. · Ocupa 3 de población. | — |
 | `qizilbash` | 🏇 Qizilbash | core | Edad Imperial | Persia | 70 alimento, 70 oro | ✔ Integrado | ✔ | procedural | Se entrena en Castillo · Ataca (11) | Lo contrarrestan: Lancero, Piquero, Fubing, Guerrero axumita y 1 más. | — |
-| `tofangchi` | 🔫 Tofangchi | core | Edad Imperial | Persia | 55 alimento, 55 oro | ✔ Integrado | ✔ | procedural | Se entrena en Castillo · Ataca (14, alcance 6) | Lo contrarrestan: Unicornio, Ametralladora. | — |
+| `tofangchi` | 🔫 Tofangchi | core | Edad Imperial | Persia | 55 alimento, 55 oro | ✔ Integrado | ✔ | procedural | Se entrena en Castillo · Ataca (14, alcance 6) | Lo contrarrestan: Unicornio, Ametralladora, Escorpión, Escorpión pesado. | — |
 | `zamburakchi` | 🐫 Zamburakchi | core | Edad de la Pólvora | Persia | 70 alimento, 70 oro | ✔ Integrado | ✔ | procedural | Se entrena en Establo, Ordu · Ataca (12, alcance 5) | Lo contrarrestan: Lancero, Piquero, Fubing, Guerrero axumita y 1 más. | — |
-| `sarbaz` | 🔫 Sarbaz | core | Edad Industrial | Persia | 45 alimento, 30 hierro | ✔ Integrado | ✔ | procedural | Se entrena en Fábrica · Ataca (16, alcance 6) | Lo contrarrestan: Unicornio, Ametralladora. | — |
+| `sarbaz` | 🔫 Sarbaz | core | Edad Industrial | Persia | 45 alimento, 30 hierro | ✔ Integrado | ✔ | procedural | Se entrena en Fábrica · Ataca (16, alcance 6) | Lo contrarrestan: Unicornio, Ametralladora, Escorpión, Escorpión pesado. | — |
 | `persianCossack` | 🐎 Cosaco persa | core | Edad Industrial | Persia | 65 alimento, 45 oro, 15 hierro | ✔ Integrado | ✔ | procedural | Se entrena en Establo · Ataca (11) | Lo contrarrestan: Lancero, Piquero, Fubing, Guerrero axumita y 1 más. | — |
-| `axumiteWarrior` | 🔱 Guerrero axumita | core | Edad Oscura | Etiopía | 50 alimento, 20 oro | ✔ Integrado | ✔ | procedural | Se entrena en Cuartel · Ataca (5) | Hace daño extra contra: cavalry (+10). · Lo contrarrestan: Arquero, Ballestero, Unicornio, Ametralladora. | — |
-| `lalibelaGuard` | 🗡️ Guardia de Lalibela | core | Edad Feudal | Etiopía | 55 alimento, 25 oro | ✔ Integrado | ✔ | procedural | Se entrena en Cuartel · Ataca (7) | Hace daño extra contra: cavalry (+6). · Lo contrarrestan: Unicornio, Ametralladora. | — |
-| `royalChewa` | ⚔️ Soldado real | core | Edad de los Castillos | Etiopía | 60 alimento, 50 oro | ✔ Integrado | ✔ | procedural | Se entrena en Castillo · Ataca (10) | Lo contrarrestan: Unicornio, Ametralladora. | — |
-| `ethiopianMusketeer` | 🔫 Mosquetero etíope-portugués | core | Edad Imperial | Etiopía | 55 alimento, 60 oro | ✔ Integrado | ✔ | procedural | Se entrena en Castillo · Ataca (15, alcance 6) | Lo contrarrestan: Unicornio, Ametralladora. | — |
+| `axumiteWarrior` | 🔱 Guerrero axumita | core | Edad Oscura | Etiopía | 50 alimento, 20 oro | ✔ Integrado | ✔ | procedural | Se entrena en Cuartel · Ataca (5) | Hace daño extra contra: cavalry (+10). · Lo contrarrestan: Arquero, Ballestero, Unicornio, Ametralladora y 2 más. | — |
+| `lalibelaGuard` | 🗡️ Guardia de Lalibela | core | Edad Feudal | Etiopía | 55 alimento, 25 oro | ✔ Integrado | ✔ | procedural | Se entrena en Cuartel · Ataca (7) | Hace daño extra contra: cavalry (+6). · Lo contrarrestan: Unicornio, Ametralladora, Escorpión, Escorpión pesado. | — |
+| `royalChewa` | ⚔️ Soldado real | core | Edad de los Castillos | Etiopía | 60 alimento, 50 oro | ✔ Integrado | ✔ | procedural | Se entrena en Castillo · Ataca (10) | Lo contrarrestan: Unicornio, Ametralladora, Escorpión, Escorpión pesado. | — |
+| `ethiopianMusketeer` | 🔫 Mosquetero etíope-portugués | core | Edad Imperial | Etiopía | 55 alimento, 60 oro | ✔ Integrado | ✔ | procedural | Se entrena en Castillo · Ataca (15, alcance 6) | Lo contrarrestan: Unicornio, Ametralladora, Escorpión, Escorpión pesado. | — |
 | `oromoRider` | 🐎 Jinete oromo | core | Edad de la Pólvora | Etiopía | 55 alimento, 40 oro | ✔ Integrado | ✔ | procedural | Se entrena en Establo · Ataca (9) · Caza | Hace daño extra contra: archer (+3). · Lo contrarrestan: Lancero, Piquero, Fubing, Guerrero axumita y 1 más. | — |
-| `shewanRifleman` | 🔫 Fusilero shewano | core | Edad Industrial | Etiopía | 50 alimento, 35 hierro | ✔ Integrado | ✔ | procedural | Se entrena en Fábrica · Ataca (17, alcance 7) | Lo contrarrestan: Unicornio, Ametralladora. | — |
-| `mountainGun` | 💣 Artillería de montaña | core | Edad Industrial | Etiopía | 80 madera, 60 hierro, 20 carbón | ✔ Integrado | ✔ | procedural | Se entrena en Fábrica · Ataca (30, alcance 10) | Hace daño extra contra: building (+22). · Ocupa 2 de población. | — |
-| `warElephant` | 🐘 Elefante de guerra | extra-content | Edad de los Castillos | todas | 170 alimento, 85 oro | ✔ Integrado | ✔ | procedural | Se entrena en Establo · Ataca (16) | Hace daño extra contra: building (+7). · Lo contrarrestan: Lancero, Piquero, Fubing, Guerrero axumita y 1 más. · Ocupa 2 de población. | — |
+| `shewanRifleman` | 🔫 Fusilero shewano | core | Edad Industrial | Etiopía | 50 alimento, 35 hierro | ✔ Integrado | ✔ | procedural | Se entrena en Fábrica · Ataca (17, alcance 7) | Lo contrarrestan: Unicornio, Ametralladora, Escorpión, Escorpión pesado. | — |
+| `mountainGun` | 💣 Artillería de montaña | core | Edad Industrial | Etiopía | 80 madera, 60 hierro, 20 carbón | ✔ Integrado | ✔ | procedural | Se entrena en Fábrica · Ataca (30, alcance 10) | Hace daño extra contra: building (+22). · Lo contrarrestan: Escorpión, Escorpión pesado. · Ocupa 2 de población. | — |
+| `catapult` | ☄️ Catapulta | core | Edad de los Castillos | todas | 135 madera, 75 oro | ✔ Integrado | ✔ | procedural | Se entrena en Taller de asedio · Ataca (30, alcance 7) | Se puede mejorar a Trabuquete. · Hace daño extra contra: building (+22). · Lo contrarrestan: Escorpión, Escorpión pesado. · Ocupa 2 de población. | — |
+| `scorpion` | 🏹 Escorpión | core | Edad de los Castillos | todas | 75 madera, 75 oro | ✔ Integrado | ✔ | procedural | Se entrena en Taller de asedio · Ataca (14, alcance 8) | Se puede mejorar a Escorpión pesado. · Hace daño extra contra: siege (+10), infantry (+4). · Lo contrarrestan: Escorpión, Escorpión pesado. | — |
+| `cappedRam` | 🪵 Ariete cubierto | core | Edad Imperial | todas | 170 madera, 90 oro | ✔ Integrado | ✔ | procedural | Se entrena en Taller de asedio · Mejora de Ariete · Ataca (3) | Se consigue investigando la mejora de Ariete. · Hace daño extra contra: building (+150). · Lo contrarrestan: Escorpión, Escorpión pesado. | — |
+| `trebuchet` | 🏗️ Trabuquete | core | Edad Imperial | todas | 200 madera, 150 oro | ✔ Integrado | ✔ | procedural | Se entrena en Taller de asedio · Mejora de Catapulta · Ataca (45, alcance 11) | Se consigue investigando la mejora de Catapulta. · Se puede mejorar a Bombarda. · Hace daño extra contra: building (+60). · Lo contrarrestan: Escorpión, Escorpión pesado. · Ocupa 3 de población. | — |
+| `heavyScorpion` | 🏹 Escorpión pesado | core | Edad Imperial | todas | 90 madera, 90 oro | ✔ Integrado | ✔ | procedural | Se entrena en Taller de asedio · Mejora de Escorpión · Ataca (20, alcance 9) | Se consigue investigando la mejora de Escorpión. · Hace daño extra contra: siege (+14), infantry (+6). · Lo contrarrestan: Escorpión, Escorpión pesado. | — |
+| `bombard` | 💣 Bombarda | core | Edad de la Pólvora | todas | 220 madera, 180 oro | ✔ Integrado | ✔ | procedural | Se entrena en Taller de asedio · Mejora de Trabuquete · Ataca (70, alcance 12) | Se consigue investigando la mejora de Trabuquete. · Se puede mejorar a Obús. · Hace daño extra contra: building (+90). · Lo contrarrestan: Escorpión, Escorpión pesado. · Ocupa 3 de población. | — |
+| `howitzer` | 💥 Obús | core | Edad Industrial | todas | 150 madera, 100 hierro, 50 carbón | ✔ Integrado | ✔ | procedural | Se entrena en Taller de asedio · Mejora de Bombarda · Ataca (60, alcance 13) | Se consigue investigando la mejora de Bombarda. · Hace daño extra contra: building (+50). · Lo contrarrestan: Escorpión, Escorpión pesado. · Ocupa 3 de población. | — |
+| `caravan` | 🐪 Caravana | core | Edad Feudal | todas | 100 madera, 50 oro | ⚠ Sin usar | ✔ | procedural | Se entrena en Mercado, Compañía comercial, Banco | — | No ataca, no recolecta, no construye y no tiene habilidad: solo ocupa población. |
+| `spy` | 🕵️ Espía | core | Edad de los Castillos | todas | 90 oro | ✔ Integrado | ✔ | procedural | Se entrena en Mercado · La crea el código de un mod o del mapa | Máximo 3 vivos a la vez. | — |
+| `warElephant` | 🐘 Elefante de guerra | extra-content | Edad de los Castillos | Persia, Etiopía | 170 alimento, 85 oro | ✔ Integrado | ✔ | procedural | Se entrena en Establo · Ataca (16) | Hace daño extra contra: building (+7). · Lo contrarrestan: Lancero, Piquero, Fubing, Guerrero axumita y 1 más. · Ocupa 2 de población. | — |
 | `general` | 🎖️ General | declared-war | Edad de los Castillos | todas | 500 alimento, 300 madera | ✔ Integrado | ✔ | procedural | Se entrena en Castillo · Ataca (14) · Da un aura a las tropas cercanas | Lo contrarrestan: Lancero, Piquero, Fubing, Guerrero axumita y 1 más. · Máximo 1 vivo a la vez; si cae, 180 s de espera. | — |
 | `king` | 👑 Rey | regicide | Edad Oscura | todas | — | ✔ Integrado | — | procedural | — | Máximo 1 vivo a la vez. | No se entrena en ningún edificio y nada la crea ni la mejora. · Nota: Lo crea el modo Matar al rey (mod regicide) al empezar la partida; por eso no se entrena en ningún edificio. |
 
-## 🏛️ Edificios (59)
+## 🏛️ Edificios (60)
 
 | Id | Nombre | Mod | Edad | Civilizaciones | Coste | Estado | IA | Arte | Qué hace | Implicaciones | Qué le falta |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -256,7 +270,7 @@ Para revisar las diferencias, el equilibrio estratégico y la jugabilidad. Los r
 | `stable` | 🐴 Establo | core | Edad Feudal | todas | 175 madera | ✔ Integrado | ✔ | imagen | Entrena: Caballería de exploración, Caballería ligera, Caballero, Paladín y 9 más · Investiga 3 tecnologías · Requisito de: Ordu, Edad de los Castillos | Sin él no se pueden entrenar: Caballería de exploración, Caballería ligera, Caballero, Paladín, Dragón y 8 más. · Aquí se investigan 3 mejoras (hasta Edad Imperial). · Para construirlo hace falta Cuartel. | — |
 | `blacksmith` | ⚒️ Herrería | core | Edad Feudal | todas | 150 madera | ✔ Integrado | ✔ | imagen | Investiga 9 tecnologías · Requisito de: Taller de asedio, Fábrica de pólvora, Edad de los Castillos, Edad de la Pólvora | Aquí se investigan 9 mejoras (hasta Edad de la Pólvora). | — |
 | `watchTower` | 🗼 Torre de vigilancia | core | Edad Feudal | todas | 25 madera, 125 piedra | ✔ Integrado | ✔ | imagen | Defensa: dispara a los enemigos | — | — |
-| `siegeWorkshop` | 🛠️ Taller de asedio | core | Edad de los Castillos | todas | 200 madera | ✔ Integrado | ✔ | imagen | Entrena: Ariete, Trabuquete de contrapeso · Requisito de: Edad Imperial, Edad de la Pólvora | Sin él no se pueden entrenar: Ariete, Trabuquete de contrapeso. · Para construirlo hace falta Herrería. | — |
+| `siegeWorkshop` | 🛠️ Taller de asedio | core | Edad de los Castillos | todas | 200 madera | ✔ Integrado | ✔ | imagen | Entrena: Ariete, Trabuquete de contrapeso, Catapulta, Escorpión y 5 más · Investiga 4 tecnologías · Requisito de: Edad Imperial, Edad de la Pólvora | Sin él no se pueden entrenar: Ariete, Trabuquete de contrapeso, Catapulta, Escorpión, Ariete cubierto y 4 más. · Aquí se investigan 4 mejoras (hasta Edad de la Pólvora). · Para construirlo hace falta Herrería. | — |
 | `castle` | 🏯 Castillo | core | Edad de los Castillos | todas | 650 piedra | ✔ Integrado | ✔ | imagen | Entrena: Arquero de tiro largo, Hijo de boyardo, Strelets, Cosaco y 15 más · Investiga 5 tecnologías · Aloja +20 población · Refugio (1) para king · Defensa: dispara a los enemigos · Requisito de: Fortaleza, Fortaleza de Vauban, Edad Imperial, Edad de la Pólvora | Sin él no se pueden entrenar: Arquero de tiro largo, Hijo de boyardo, Strelets, Cosaco, Granadero y 14 más. · Aquí se investigan 5 mejoras (hasta Edad Imperial). · Sube el límite de población: sin él el ejército y la economía no crecen. | — |
 | `gorodishche` | 🛖 Gorodishche | core | Edad Oscura | Rusia | 130 madera | ✔ Integrado | ✗ | procedural | Aloja +5 población · Defensa: dispara a los enemigos | Sube el límite de población: sin él el ejército y la economía no crecen. | La IA no lo construye. |
 | `monasteryFortress` | ⛪ Monasterio-fortaleza | core | Edad Feudal | Rusia | 150 madera, 100 piedra | ✔ Integrado | ✗ | procedural | Refugio (12) para villager/infantry/archer · Defensa: dispara a los enemigos | — | La IA no lo construye. |
@@ -267,7 +281,7 @@ Para revisar las diferencias, el equilibrio estratégico y la jugabilidad. Los r
 | `fortress` | 🏯 Fortaleza | core | Edad de la Pólvora | todas | 900 piedra | ✔ Integrado | ✔ | procedural | Investiga 1 tecnología · Aloja +20 población · Defensa: dispara a los enemigos · Gran visión (12) · Requisito de: Edad Industrial | Aquí se investigan 1 mejoras (hasta Edad de la Pólvora). · Para construirlo hace falta Castillo. · Sube el límite de población: sin él el ejército y la economía no crecen. | — |
 | `printingHouse` | 📰 Imprenta | core | Edad de la Pólvora | todas | 100 madera, 150 oro | ✔ Integrado | ✔ | procedural | Investiga 1 tecnología · Requisito de: Edad Industrial | Aquí se investigan 1 mejoras (hasta Edad de la Pólvora). | — |
 | `observatory` | 🔭 Observatorio | core | Edad de la Pólvora | todas | 50 madera, 200 piedra | ✔ Integrado | ✔ | procedural | Investiga 2 tecnologías · Gran visión (14) · Requisito de: Edad Industrial | Aquí se investigan 2 mejoras (hasta Edad de la Pólvora). | — |
-| `tradingCompany` | 🏦 Compañía comercial | core | Edad de la Pólvora | todas | 100 madera, 150 piedra, 50 oro | 🛠 En desarrollo | ✔ | procedural | Investiga 1 tecnología · Depósito de Oro, Piedra · Requisito de: Edad Industrial | Aquí se investigan 1 mejoras (hasta Edad de la Pólvora). · Acorta el trayecto de los aldeanos que recogen Oro, Piedra: conviene construirlo junto a los nodos. | Nota: Dice «comercio con el exterior», pero hoy solo es depósito de oro y piedra: no hay orden, sistema ni caravanas de comercio. Lo trae la fase 5 (comercio, diplomacia y espionaje). |
+| `tradingCompany` | 🏦 Compañía comercial | core | Edad de la Pólvora | todas | 100 madera, 150 piedra, 50 oro | ✔ Integrado | ✔ | procedural | Entrena: Caravana · Investiga 1 tecnología · Depósito de Oro, Piedra · Requisito de: Edad Industrial | Sin él no se pueden entrenar: Caravana. · Aquí se investigan 1 mejoras (hasta Edad de la Pólvora). · Acorta el trayecto de los aldeanos que recogen Oro, Piedra: conviene construirlo junto a los nodos. | — |
 | `engineerAcademy` | 📐 Academia de ingenieros | core | Edad de la Pólvora | Rusia | 100 madera, 200 piedra | ✔ Integrado | ✔ | procedural | Entrena: Unicornio | Sin él no se pueden entrenar: Unicornio. · Para construirlo hace falta Fábrica de pólvora. | — |
 | `stateGranary` | 🌾 Granero estatal | core | Edad Oscura | China | 120 madera | ✔ Integrado | ✗ | procedural | Depósito de Alimento · Aloja +5 población | Acorta el trayecto de los aldeanos que recogen Alimento: conviene construirlo junto a los nodos. · Sube el límite de población: sin él el ejército y la economía no crecen. | La IA no lo construye. |
 | `mint` | 🪙 Casa de moneda | core | Edad Feudal | China | 150 madera, 50 piedra | ✔ Integrado | ✗ | procedural | Investiga 1 tecnología · Depósito de Oro, Piedra | Aquí se investigan 1 mejoras (hasta Edad Feudal). · Acorta el trayecto de los aldeanos que recogen Oro, Piedra: conviene construirlo junto a los nodos. | La IA no lo construye. |
@@ -283,8 +297,8 @@ Para revisar las diferencias, el equilibrio estratégico y la jugabilidad. Los r
 | `burh` | 🛖 Burh | core | Edad Oscura | Británicos | 90 madera | ✔ Integrado | ✗ | procedural | Defensa: dispara a los enemigos | — | La IA no lo construye. |
 | `motteAndBailey` | 🏰 Castillo de mota | core | Edad Feudal | Británicos | 200 madera, 100 piedra | ✔ Integrado | ✗ | procedural | Aloja +5 población · Defensa: dispara a los enemigos | Sube el límite de población: sin él el ejército y la economía no crecen. | La IA no lo construye. |
 | `concentricCastle` | 🏯 Castillo concéntrico | core | Edad de los Castillos | Británicos | 750 piedra | ✔ Integrado | ✗ | procedural | Aloja +20 población · Defensa: dispara a los enemigos | Sube el límite de población: sin él el ejército y la economía no crecen. | La IA no lo construye. |
-| `bank` | 🏦 Banco | core | Edad de la Pólvora | Británicos | 100 madera, 250 piedra | ✔ Integrado | ✔ | procedural | Investiga 1 tecnología · Depósito de Oro | Aquí se investigan 1 mejoras (hasta Edad de la Pólvora). · Acorta el trayecto de los aldeanos que recogen Oro: conviene construirlo junto a los nodos. | — |
-| `factory` | 🏭 Fábrica | core | Edad Industrial | todas | 200 madera, 200 piedra | ✔ Integrado | ✔ | procedural | Entrena: Fusilero, Cañón de campaña, Ametralladora, Fusilero de la guardia y 8 más · Investiga 4 tecnologías | Sin él no se pueden entrenar: Fusilero, Cañón de campaña, Ametralladora, Fusilero de la guardia, Fusilero de ejército regional y 7 más. · Aquí se investigan 4 mejoras (hasta Edad Industrial). · Para construirlo hace falta Fábrica de pólvora. | — |
+| `bank` | 🏦 Banco | core | Edad de la Pólvora | Británicos | 100 madera, 250 piedra | ✔ Integrado | ✔ | procedural | Entrena: Caravana · Investiga 1 tecnología · Depósito de Oro | Sin él no se pueden entrenar: Caravana. · Aquí se investigan 1 mejoras (hasta Edad de la Pólvora). · Acorta el trayecto de los aldeanos que recogen Oro: conviene construirlo junto a los nodos. | — |
+| `factory` | 🏭 Fábrica | core | Edad Industrial | todas | 200 madera, 200 piedra | ✔ Integrado | ✔ | procedural | Entrena: Fusilero, Cañón de campaña, Ametralladora, Fusilero de la guardia y 8 más · Investiga 6 tecnologías | Sin él no se pueden entrenar: Fusilero, Cañón de campaña, Ametralladora, Fusilero de la guardia, Fusilero de ejército regional y 7 más. · Aquí se investigan 6 mejoras (hasta Edad Industrial). · Para construirlo hace falta Fábrica de pólvora. | — |
 | `railwayStation` | 🚉 Estación de ferrocarril | core | Edad Industrial | todas | 150 madera, 100 piedra, 50 oro | ✔ Integrado | ✔ | procedural | Investiga 1 tecnología · Depósito de Alimento, Madera, Oro, Piedra, Hierro, Carbón · Aloja +5 población · Requisito de: Transiberiano, Ferrocarril transcontinental | Aquí se investigan 1 mejoras (hasta Edad Industrial). · Acorta el trayecto de los aldeanos que recogen Alimento, Madera, Oro, Piedra, Hierro, Carbón: conviene construirlo junto a los nodos. · Sube el límite de población: sin él el ejército y la economía no crecen. | — |
 | `laboratory` | 🧪 Laboratorio | core | Edad Industrial | todas | 150 madera, 150 piedra, 100 oro | ✔ Integrado | ✔ | procedural | Investiga 4 tecnologías · Requisito de: Aeródromo | Aquí se investigan 4 mejoras (hasta Edad Industrial). | — |
 | `airfield` | 🛩️ Aeródromo | core | Edad Industrial | todas | 200 madera, 100 piedra, 100 oro | ✔ Integrado | ✔ | procedural | Entrena: Biplano | Sin él no se pueden entrenar: Biplano. · Para construirlo hace falta Laboratorio. | — |
@@ -293,9 +307,9 @@ Para revisar las diferencias, el equilibrio estratégico y la jugabilidad. Los r
 | `polytechnique` | 📐 École Polytechnique | core | Edad Industrial | Francia | 150 madera, 250 piedra, 100 oro | ✔ Integrado | ✔ | procedural | Investiga 1 tecnología | Aquí se investigan 1 mejoras (hasta Edad Industrial). | — |
 | `transcontinental` | 🚂 Ferrocarril transcontinental | core | Edad Industrial | Británicos | 500 madera, 400 piedra, 400 oro, 300 hierro | ✔ Integrado | ✔ | procedural | Depósito de Alimento, Madera, Oro, Piedra, Hierro, Carbón · Aloja +10 población | Para construirlo hace falta Estación de ferrocarril. · Solo se puede tener 1 a la vez. · Acorta el trayecto de los aldeanos que recogen Alimento, Madera, Oro, Piedra, Hierro, Carbón: conviene construirlo junto a los nodos. · Sube el límite de población: sin él el ejército y la economía no crecen. | — |
 | `qanat` | 💧 Qanat | core | Edad Oscura | Persia | 80 madera, 40 piedra | ✔ Integrado | ✗ | procedural | Depósito de Alimento | Acorta el trayecto de los aldeanos que recogen Alimento: conviene construirlo junto a los nodos. | La IA no lo construye. |
-| `caravanserai` | 🏪 Caravasar | core | Edad Feudal | Persia | 120 madera, 40 piedra | 🛠 En desarrollo | ✗ | procedural | Depósito de Oro, Piedra, Madera · Aloja +5 población | Acorta el trayecto de los aldeanos que recogen Oro, Piedra, Madera: conviene construirlo junto a los nodos. · Sube el límite de población: sin él el ejército y la economía no crecen. | Nota: Posada de ruta persa: hoy solo es depósito y alojamiento; la fase 5 le da su papel en las rutas comerciales. · La IA no lo construye. |
+| `caravanserai` | 🏪 Caravasar | core | Edad Feudal | Persia | 120 madera, 40 piedra | ✔ Integrado | ✗ | procedural | Depósito de Oro, Piedra, Madera · Aloja +5 población | Acorta el trayecto de los aldeanos que recogen Oro, Piedra, Madera: conviene construirlo junto a los nodos. · Sube el límite de población: sin él el ejército y la economía no crecen. | La IA no lo construye. |
 | `maraghaObservatory` | 🔭 Observatorio de Maragha | core | Edad de los Castillos | Persia | 100 madera, 200 piedra | ✔ Integrado | ✔ | procedural | Investiga 1 tecnología · Gran visión (14) | Aquí se investigan 1 mejoras (hasta Edad de los Castillos). | — |
-| `maidan` | 🕌 Maidan | core | Edad Imperial | Persia | 150 madera, 250 piedra | 🛠 En desarrollo | ✔ | procedural | Investiga 1 tecnología · Depósito de Oro · Aloja +10 población | Aquí se investigan 1 mejoras (hasta Edad Imperial). · Acorta el trayecto de los aldeanos que recogen Oro: conviene construirlo junto a los nodos. · Sube el límite de población: sin él el ejército y la economía no crecen. | Nota: Plaza real persa vinculada a la seda: el comercio real (con quién y bajo qué condiciones) llega en la fase 5. |
+| `maidan` | 🕌 Maidan | core | Edad Imperial | Persia | 150 madera, 250 piedra | ✔ Integrado | ✔ | procedural | Investiga 1 tecnología · Depósito de Oro · Aloja +10 población | Aquí se investigan 1 mejoras (hasta Edad Imperial). · Acorta el trayecto de los aldeanos que recogen Oro: conviene construirlo junto a los nodos. · Sube el límite de población: sin él el ejército y la economía no crecen. | — |
 | `ordu` | ⛺ Ordu | core | Edad de la Pólvora | Persia | 200 madera, 100 piedra | ✔ Integrado | ✔ | procedural | Entrena: Zamburakchi · Investiga 1 tecnología · Aloja +10 población | Sin él no se pueden entrenar: Zamburakchi. · Aquí se investigan 1 mejoras (hasta Edad de la Pólvora). · Para construirlo hace falta Establo. · Sube el límite de población: sin él el ejército y la economía no crecen. | — |
 | `darulFunun` | 🎓 Dar ul-Funun | core | Edad Industrial | Persia | 150 madera, 200 piedra, 100 oro | ✔ Integrado | ✔ | procedural | Investiga 1 tecnología | Aquí se investigan 1 mejoras (hasta Edad Industrial). | — |
 | `stele` | 🗿 Estela | core | Edad Oscura | Etiopía | 120 piedra | ✔ Integrado | ✗ | procedural | Aloja +8 población | Sube el límite de población: sin él el ejército y la economía no crecen. | La IA no lo construye. |
@@ -304,8 +318,9 @@ Para revisar las diferencias, el equilibrio estratégico y la jugabilidad. Los r
 | `gondarCastle` | 🏰 Castillo de Gondar | core | Edad Imperial | Etiopía | 250 madera, 350 piedra | ✔ Integrado | ✔ | procedural | Investiga 1 tecnología · Aloja +15 población · Defensa: dispara a los enemigos | Aquí se investigan 1 mejoras (hasta Edad Imperial). · Sube el límite de población: sin él el ejército y la economía no crecen. | — |
 | `rasPalace` | 🏛️ Palacio del ras | core | Edad de la Pólvora | Etiopía | 150 madera, 150 piedra | ✔ Integrado | ✔ | procedural | Investiga 1 tecnología · Depósito de Alimento, Oro · Aloja +15 población | Aquí se investigan 1 mejoras (hasta Edad de la Pólvora). · Acorta el trayecto de los aldeanos que recogen Alimento, Oro: conviene construirlo junto a los nodos. · Sube el límite de población: sin él el ejército y la economía no crecen. | — |
 | `djiboutiRailway` | 🚂 Ferrocarril de Yibuti | core | Edad Industrial | Etiopía | 150 madera, 80 piedra, 50 oro | ✔ Integrado | ✔ | procedural | Investiga 1 tecnología · Depósito de Alimento, Madera, Oro, Piedra, Hierro, Carbón · Aloja +5 población | Aquí se investigan 1 mejoras (hasta Edad Industrial). · Solo se puede tener 1 a la vez. · Acorta el trayecto de los aldeanos que recogen Alimento, Madera, Oro, Piedra, Hierro, Carbón: conviene construirlo junto a los nodos. · Sube el límite de población: sin él el ejército y la economía no crecen. | — |
+| `market` | 🏪 Mercado | core | Edad Feudal | todas | 150 madera, 50 piedra | ✔ Integrado | ✔ | procedural | Entrena: Caravana, Espía · Investiga 3 tecnologías | Sin él no se pueden entrenar: Caravana, Espía. · Aquí se investigan 3 mejoras (hasta Edad de la Pólvora). | — |
 
-## 📜 Tecnologías (82)
+## 📜 Tecnologías (91)
 
 | Id | Nombre | Mod | Edad | Civilizaciones | Coste | Estado | IA | Arte | Qué hace | Implicaciones | Qué le falta |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -340,68 +355,77 @@ Para revisar las diferencias, el equilibrio estratégico y la jugabilidad. Los r
 | `siberianMarch` | 🧭 Marcha a Siberia | core | Edad Imperial | Rusia | 600 alimento, 400 oro | ✔ Integrado | ✔ | — | los +2: scoutCavalry, lightCavalry, knight y 18 más · Recolectar deerCarcass, boarCarcass da además Oro | — | — |
 | `selectiveBreeding` | 🐏 Cría selectiva | core | Edad de los Castillos | todas | 150 alimento, 100 madera | ✔ Integrado | ✔ | — | Cambia el coste de sheep | — | — |
 | `gunpowderAge` | 💥 Edad de la Pólvora | core | Edad Imperial | todas | 1400 alimento, 1000 oro | ✔ Integrado | ✔ | — | Sube a la edad: Edad de la Pólvora | Cambia de edad: desbloquea el contenido de la nueva edad y la identidad de la civilización. | — |
-| `printing` | 📰 Imprenta | core | Edad de la Pólvora | todas | 300 alimento, 200 oro | ✔ Integrado | ✔ | — | Cambia el coste de feudalAge, castleAge, imperialAge y 79 más | — | — |
-| `cartography` | 🗺️ Cartografía | core | Edad de la Pólvora | todas | 200 alimento, 150 oro | ✔ Integrado | ✔ | — | los +1: villager, militia, manAtArms y 70 más | — | — |
-| `ballistics` | 📐 Balística | core | Edad de la Pólvora | todas | 300 alimento, 300 oro | ✔ Integrado | ✔ | — | attack +1: musketeer, dragoon, grenadier y 17 más · range +1: cannon, unicorn, gribeauvalCannon y 3 más | — | — |
+| `printing` | 📰 Imprenta | core | Edad de la Pólvora | todas | 300 alimento, 200 oro | ✔ Integrado | ✔ | — | Cambia el coste de feudalAge, castleAge, imperialAge y 88 más | — | — |
+| `cartography` | 🗺️ Cartografía | core | Edad de la Pólvora | todas | 200 alimento, 150 oro | ✔ Integrado | ✔ | — | los +1: villager, militia, manAtArms y 79 más | — | — |
+| `ballistics` | 📐 Balística | core | Edad de la Pólvora | todas | 300 alimento, 300 oro | ✔ Integrado | ✔ | — | attack +1: musketeer, dragoon, grenadier y 17 más · range +1: cannon, unicorn, gribeauvalCannon y 4 más | — | — |
 | `advancedMetallurgy` | 🔥 Metalurgia avanzada | core | Edad de la Pólvora | todas | 400 alimento, 250 oro | ✔ Integrado | ✔ | — | attack +1: militia, manAtArms, longSwordsman y 51 más | Requiere antes: Fundición de hierro. | — |
 | `bayonet` | 🗡️ Bayoneta | core | Edad de la Pólvora | todas | 250 alimento, 150 oro | ✔ Integrado | ✔ | — | armorMelee +2: musketeer, dragoon, grenadier y 17 más | — | — |
-| `refinedPowder` | ⚗️ Pólvora refinada | core | Edad de la Pólvora | todas | 350 alimento, 250 oro | ✔ Integrado | ✔ | — | attack +4: cannon, unicorn, gribeauvalCannon y 3 más · reloadTime ×0.9: musketeer, dragoon, grenadier y 17 más | — | — |
+| `refinedPowder` | ⚗️ Pólvora refinada | core | Edad de la Pólvora | todas | 350 alimento, 250 oro | ✔ Integrado | ✔ | — | attack +4: cannon, unicorn, gribeauvalCannon y 4 más · reloadTime ×0.9: musketeer, dragoon, grenadier y 17 más | — | — |
 | `bastionTheory` | 📏 Fortificación abaluartada | core | Edad de la Pólvora | todas | 300 alimento, 400 piedra | ✔ Integrado | ✔ | — | hp ×1.15: townCenter, watchTower, castle y 13 más · armorMelee +1: townCenter, watchTower, castle y 13 más · armorPierce +1: townCenter, watchTower, castle y 13 más | — | — |
 | `deepMining` | ⛏️ Mina profunda | core | Edad de la Pólvora | todas | 300 alimento, 200 madera | ✔ Integrado | ✔ | — | Recolección de Oro ×1.15 · Recolección de Piedra ×1.15 | Requiere antes: Minería de oro. · Requiere antes: Cantería. | — |
 | `mercantilism` | ⚖️ Mercantilismo | core | Edad de la Pólvora | todas | 300 madera, 100 oro | ✔ Integrado | ✔ | — | Recolección de Oro ×1.15 | — | — |
-| `imperialExams` | 📜 Exámenes imperiales | core | Edad Oscura | China | 150 alimento, 50 oro | ✔ Integrado | ✔ | — | Cambia el coste de feudalAge, castleAge, imperialAge y 79 más | — | — |
+| `imperialExams` | 📜 Exámenes imperiales | core | Edad Oscura | China | 150 alimento, 50 oro | ✔ Integrado | ✔ | — | Cambia el coste de feudalAge, castleAge, imperialAge y 88 más | — | — |
 | `champaRice` | 🌾 Arroz de Champa | core | Edad Feudal | China | 150 alimento, 100 madera | ✔ Integrado | ✔ | — | Recolección de Alimento ×1.15 | — | — |
 | `jiaozi` | 💴 Billete jiaozi | core | Edad Feudal | China | 400 alimento, 100 madera | ✔ Integrado | ✗ | — | Regala recursos | — | La IA no la investiga: no construye Casa de moneda. |
-| `thunderBomb` | 💣 Bomba trueno | core | Edad de los Castillos | China | 400 alimento, 300 oro | ✔ Integrado | ✔ | — | attack +3: batteringRam, cannon, unicorn y 5 más | — | — |
+| `thunderBomb` | 💣 Bomba trueno | core | Edad de los Castillos | China | 400 alimento, 300 oro | ✔ Integrado | ✔ | — | attack +3: batteringRam, cannon, unicorn y 12 más | — | — |
 | `mandarinDuck` | 🦆 Pato mandarín | core | Edad Imperial | China | 500 alimento, 400 oro | ✔ Integrado | ✔ | — | armorMelee +1: spearman, pikeman, musketeer y 21 más · armorPierce +1: spearman, pikeman, musketeer y 21 más | — | — |
-| `cantonSystem` | 🚢 Cantón | core | Edad de la Pólvora | China | 300 madera, 300 oro | 🛠 En desarrollo | ✔ | — | Recolección de Oro ×1.25 | — | Nota: «Comercio exterior por un solo puerto»: hoy solo da recolección de oro. Pendiente de enlazar con las rutas de la fase 5. |
+| `cantonSystem` | 🚢 Cantón | core | Edad de la Pólvora | China | 300 madera, 300 oro | ✔ Integrado | ✔ | — | Recolección de Oro ×1.25 | — | — |
 | `capitularies` | 📜 Capitulares | core | Edad Oscura | Francia | 150 alimento, 50 oro | ✔ Integrado | ✔ | — | Recolección de Alimento ×1.1 | — | — |
 | `townCharter` | 📜 Carta urbana | core | Edad Feudal | Francia | 200 alimento, 100 oro | ✔ Integrado | ✔ | — | trainTime ×0.85: villager | — | — |
 | `taille` | 🪙 Taille | core | Edad de los Castillos | Francia | 300 alimento, 100 oro | ✔ Integrado | ✔ | — | Recolección de Oro ×1.1 | — | — |
 | `hireMercenaries` | 🛡️ Contratar mercenarios | core | Edad Imperial | Francia | 600 oro | ✔ Integrado | ✔ | — | Efecto propio (código) | — | — |
-| `colbertism` | ⚖️ Colbertismo | core | Edad de la Pólvora | Francia | 300 madera, 200 oro | 🛠 En desarrollo | ✔ | — | Recolección de Oro ×1.15 | — | Nota: «Manufacturas, aranceles y comercio»: hoy solo da recolección de oro. Pendiente de enlazar con las rutas de la fase 5. |
+| `colbertism` | ⚖️ Colbertismo | core | Edad de la Pólvora | Francia | 300 madera, 200 oro | ✔ Integrado | ✔ | — | Recolección de Oro ×1.15 | — | — |
 | `vaubanDoctrine` | ⭐ Doctrina de Vauban | core | Edad de la Pólvora | Francia | 350 alimento, 250 piedra | ✔ Integrado | ✔ | — | hp ×1.25: watchTower, castle, gorodishche y 8 más · range +1: watchTower, castle, gorodishche y 8 más | Doctrina excluyente: impide Doctrina de Gribeauval. | — |
-| `gribeauvalDoctrine` | 💣 Doctrina de Gribeauval | core | Edad de la Pólvora | Francia | 350 alimento, 250 oro | ✔ Integrado | ✔ | — | attack +3: cannon, unicorn, gribeauvalCannon y 3 más · Cambia el coste de cannon, unicorn, gribeauvalCannon y 3 más | Doctrina excluyente: impide Doctrina de Vauban. | — |
+| `gribeauvalDoctrine` | 💣 Doctrina de Gribeauval | core | Edad de la Pólvora | Francia | 350 alimento, 250 oro | ✔ Integrado | ✔ | — | attack +3: cannon, unicorn, gribeauvalCannon y 4 más · Cambia el coste de cannon, unicorn, gribeauvalCannon y 4 más | Doctrina excluyente: impide Doctrina de Vauban. | — |
 | `alfredReform` | 📜 Reforma de Alfredo | core | Edad Oscura | Británicos | 150 alimento, 50 oro | ✔ Integrado | ✔ | — | hp ×1.15: watchTower, gorodishche, ostrog y 4 más · attack +1: watchTower, gorodishche, ostrog y 4 más | — | — |
 | `domesday` | 📖 Domesday | core | Edad Feudal | Británicos | 250 alimento, 100 oro | ✔ Integrado | ✔ | — | Recolección de Oro ×1.1 | — | — |
 | `companyCharter` | 📜 Carta de compañía | core | Edad Imperial | Británicos | 400 alimento, 100 oro | ✔ Integrado | ✔ | — | Regala recursos · Recolección de Oro ×1.1 | — | — |
-| `nationalDebt` | 💷 Deuda nacional | core | Edad de la Pólvora | Británicos | 200 alimento | ✔ Integrado | ✔ | — | Regala recursos · Cambia el coste de villager, militia, manAtArms y 70 más | — | — |
+| `nationalDebt` | 💷 Deuda nacional | core | Edad de la Pólvora | Británicos | 200 alimento | ✔ Integrado | ✔ | — | Regala recursos · Cambia el coste de villager, militia, manAtArms y 79 más | — | — |
 | `industrialAge` | 🏭 Edad Industrial | core | Edad de la Pólvora | todas | 1500 alimento, 1200 oro | ✔ Integrado | ✔ | — | Sube a la edad: Edad Industrial | Cambia de edad: desbloquea el contenido de la nueva edad y la identidad de la civilización. | — |
 | `steamEngine` | ♨️ Máquina de vapor | core | Edad Industrial | todas | 300 alimento, 250 oro | ✔ Integrado | ✔ | — | Recolección de Hierro ×1.2 · Recolección de Carbón ×1.2 | Desbloquea: Motor de combustión, Acero Bessemer. | — |
-| `electricity` | ⚡ Electricidad y telégrafo | core | Edad Industrial | todas | 350 alimento, 300 oro | ✔ Integrado | ✔ | — | los +1: villager, militia, manAtArms y 70 más · trainTime ×0.93: villager, militia, manAtArms y 70 más | — | — |
-| `combustionEngine` | ⚙️ Motor de combustión | core | Edad Industrial | todas | 150 hierro, 150 carbón, 100 oro | ✔ Integrado | ✔ | — | speed ×1.1: scoutCavalry, lightCavalry, knight y 24 más | Requiere antes: Máquina de vapor. · Desbloquea: Aviación. | — |
+| `electricity` | ⚡ Electricidad y telégrafo | core | Edad Industrial | todas | 350 alimento, 300 oro | ✔ Integrado | ✔ | — | los +1: villager, militia, manAtArms y 79 más · trainTime ×0.93: villager, militia, manAtArms y 79 más | — | — |
+| `combustionEngine` | ⚙️ Motor de combustión | core | Edad Industrial | todas | 150 hierro, 150 carbón, 100 oro | ✔ Integrado | ✔ | — | speed ×1.1: scoutCavalry, lightCavalry, knight y 25 más | Requiere antes: Máquina de vapor. · Desbloquea: Aviación. | — |
 | `aviation` | 🛩️ Aviación | core | Edad Industrial | todas | 250 hierro, 200 carbón, 200 oro | ✔ Integrado | ✔ | — | Desbloquea: Biplano | Requiere antes: Motor de combustión. · Permite entrenar: Biplano. | — |
 | `rifling` | 🎯 Estriado | core | Edad Industrial | todas | 200 hierro, 150 oro | ✔ Integrado | ✔ | — | attack +2: musketeer, dragoon, grenadier y 17 más · range +1: musketeer, dragoon, grenadier y 17 más | — | — |
 | `assemblyLine` | 🔩 Producción en cadena | core | Edad Industrial | todas | 250 hierro, 100 carbón, 150 oro | ✔ Integrado | ✔ | — | Desbloquea: Ametralladora · Cambia el coste de rifleman, fieldGun, gatlingGun | Permite entrenar: Ametralladora. | — |
-| `bessemerSteel` | 🛡️ Acero Bessemer | core | Edad Industrial | todas | 250 hierro, 150 carbón | ✔ Integrado | ✔ | — | armorMelee +1: musketeer, cannon, dragoon y 23 más · armorPierce +1: musketeer, cannon, dragoon y 23 más | Requiere antes: Máquina de vapor. | — |
+| `bessemerSteel` | 🛡️ Acero Bessemer | core | Edad Industrial | todas | 250 hierro, 150 carbón | ✔ Integrado | ✔ | — | armorMelee +1: musketeer, cannon, dragoon y 24 más · armorPierce +1: musketeer, cannon, dragoon y 24 más | Requiere antes: Máquina de vapor. | — |
 | `railway` | 🚂 Ferrocarril | core | Edad Industrial | todas | 250 madera, 150 oro, 100 hierro | ✔ Integrado | ✔ | — | carryCapacity +5: villager · speed ×1.15: villager | — | — |
 | `selfStrengthening` | 🏭 Autofortalecimiento | core | Edad Industrial | China | 150 hierro, 150 oro | ✔ Integrado | ✔ | — | attack +1: musketeer, dragoon, grenadier y 17 más · trainTime ×0.85: rifleman, fieldGun, regionalRifleman | — | — |
 | `corpsSystem` | 🎖️ Sistema de cuerpos | core | Edad Industrial | Francia | 300 alimento, 100 hierro, 200 oro | ✔ Integrado | ✔ | — | attack +1: militia, manAtArms, longSwordsman y 32 más · hp ×1.1: militia, manAtArms, longSwordsman y 32 más | — | — |
 | `interchangeableParts` | 🔩 Intercambiabilidad de piezas | core | Edad Industrial | Británicos | 150 hierro, 100 carbón, 100 oro | ✔ Integrado | ✔ | — | Recolección de Hierro ×1.1 · Recolección de Carbón ×1.1 · reloadTime ×0.95: musketeer, dragoon, grenadier y 17 más | — | — |
 | `irrigation` | 💧 Regadío | core | Edad Oscura | Persia | 150 alimento, 50 oro | ✔ Integrado | ✔ | — | Recolección de Alimento ×1.1 | — | — |
 | `iqta` | 📜 Iqta | core | Edad Feudal | Persia | 200 alimento, 100 oro | ✔ Integrado | ✔ | — | Cambia el coste de militia, manAtArms, longSwordsman y 50 más | — | — |
-| `astronomy` | 🌙 Astronomía | core | Edad de los Castillos | Persia | 250 alimento, 200 oro | ✔ Integrado | ✔ | — | los +1: villager, militia, manAtArms y 70 más · Cambia el coste de feudalAge, castleAge, imperialAge y 79 más | — | — |
-| `silkMonopoly` | 🧵 Monopolio de la seda | core | Edad Imperial | Persia | 300 alimento, 250 oro | 🛠 En desarrollo | ✔ | — | Recolección de Oro ×1.1 | — | Nota: Su texto habla de comercio de seda, pero hoy solo da más velocidad de recolección de oro. Pendiente de enlazar con las rutas de la fase 5. |
+| `astronomy` | 🌙 Astronomía | core | Edad de los Castillos | Persia | 250 alimento, 200 oro | ✔ Integrado | ✔ | — | los +1: villager, militia, manAtArms y 79 más · Cambia el coste de feudalAge, castleAge, imperialAge y 88 más | — | — |
+| `silkMonopoly` | 🧵 Monopolio de la seda | core | Edad Imperial | Persia | 300 alimento, 250 oro | ✔ Integrado | ✔ | — | Recolección de Oro ×1.1 | — | — |
 | `mobileWarfare` | 🐫 Guerra móvil | core | Edad de la Pólvora | Persia | 400 alimento, 250 oro | ✔ Integrado | ✔ | — | speed ×1.1: scoutCavalry, lightCavalry, knight y 18 más · hp ×1.1: scoutCavalry, lightCavalry, knight y 18 más | — | — |
 | `nizamJadid` | 🎖️ Nizam-i Jadid | core | Edad Industrial | Persia | 300 alimento, 100 hierro, 150 oro | ✔ Integrado | ✔ | — | armorMelee +1: militia, manAtArms, longSwordsman y 32 más · armorPierce +1: militia, manAtArms, longSwordsman y 32 más · trainTime ×0.85: militia, manAtArms, longSwordsman y 32 más | — | — |
 | `axumCoinage` | 🪙 Moneda de Axum | core | Edad Oscura | Etiopía | 100 alimento, 50 oro | ✔ Integrado | ✔ | — | Recolección de Oro ×1.1 | — | — |
-| `prestorJohn` | ✝️ Prestes Juan | core | Edad Feudal | Etiopía | 200 alimento, 100 oro | ✔ Integrado | ✔ | — | hp ×1.1: townCenter, house, mill y 56 más | — | — |
+| `prestorJohn` | ✝️ Prestes Juan | core | Edad Feudal | Etiopía | 200 alimento, 100 oro | ✔ Integrado | ✔ | — | hp ×1.1: townCenter, house, mill y 57 más | — | — |
 | `itinerantCourt` | 🏕️ Corte itinerante | core | Edad de los Castillos | Etiopía | 250 alimento, 100 oro | ✔ Integrado | ✔ | — | speed ×1.1: villager · trainTime ×0.9: villager | — | — |
 | `portugueseAlliance` | 🤝 Alianza portuguesa | core | Edad Imperial | Etiopía | 400 alimento, 350 oro | ✔ Integrado | ✔ | — | attack +1: musketeer, dragoon, grenadier y 17 más · range +1: musketeer, dragoon, grenadier y 17 más | — | — |
 | `horseBreeding` | 🐴 Cría de caballos | core | Edad de la Pólvora | Etiopía | 300 alimento, 150 oro | ✔ Integrado | ✔ | — | hp ×1.1: scoutCavalry, lightCavalry, knight y 18 más · speed ×1.05: scoutCavalry, lightCavalry, knight y 18 más | — | — |
-| `armsImport` | 📦 Importación de armas | core | Edad Industrial | Etiopía | 300 alimento, 250 oro | ✔ Integrado | ✔ | — | Cambia el coste de musketeer, cannon, dragoon y 23 más | — | — |
-| `ironTusks` | 🦣 Colmillos de hierro | extra-content | Edad de los Castillos | todas | 300 alimento, 200 oro | ✔ Integrado | ✔ | — | attack +4: warElephant · speed ×1.1: warElephant | — | — |
+| `armsImport` | 📦 Importación de armas | core | Edad Industrial | Etiopía | 300 alimento, 250 oro | ✔ Integrado | ✔ | — | Cambia el coste de musketeer, cannon, dragoon y 24 más | — | — |
+| `up_cappedRam` | 🪵 Ariete cubierto | core | Edad Imperial | todas | 300 madera, 200 oro | ✔ Integrado | ✔ | — | Mejora Ariete → Ariete cubierto | — | — |
+| `up_trebuchet` | 🏗️ Trabuquete | core | Edad Imperial | todas | 400 madera, 300 oro | ✔ Integrado | ✔ | — | Mejora Catapulta → Trabuquete | Desbloquea: Bombarda. | — |
+| `up_heavyScorpion` | 🏹 Escorpión pesado | core | Edad Imperial | todas | 250 madera, 200 oro | ✔ Integrado | ✔ | — | Mejora Escorpión → Escorpión pesado | — | — |
+| `up_bombard` | 💣 Bombarda | core | Edad de la Pólvora | todas | 300 alimento, 450 oro | ✔ Integrado | ✔ | — | Mejora Trabuquete → Bombarda | Requiere antes: Trabuquete. · Desbloquea: Obús. | — |
+| `up_howitzer` | 💥 Obús | core | Edad Industrial | todas | 250 hierro, 150 carbón, 250 oro | ✔ Integrado | ✔ | — | Mejora Bombarda → Obús | Requiere antes: Bombarda. | — |
+| `up_fieldGun` | 💣 Cañón de campaña | core | Edad Industrial | todas | 200 hierro, 100 carbón, 150 oro | ✔ Integrado | ✔ | — | Mejora Cañón → Cañón de campaña | — | — |
+| `caravanserai` | 🛖 Caravasar | core | Edad de los Castillos | todas | 100 madera, 200 oro | ✔ Integrado | ✔ | — | — | Desbloquea: Casas de cambio. | — |
+| `counterespionage` | 🔍 Contraespionaje | core | Edad de los Castillos | todas | 150 oro | ⚠ Sin usar | ✔ | — | — | — | No tiene efectos. |
+| `bankingHouses` | 💱 Casas de cambio | core | Edad de la Pólvora | todas | 350 oro | ✔ Integrado | ✔ | — | — | Requiere antes: Caravasar. | — |
+| `ironTusks` | 🦣 Colmillos de hierro | extra-content | Edad de los Castillos | Persia, Etiopía | 300 alimento, 200 oro | ✔ Integrado | ✔ | — | attack +4: warElephant · speed ×1.1: warElephant | — | — |
 
 ## 🪙 Recursos (6)
 
 | Id | Nombre | Mod | Edad | Civilizaciones | Coste | Estado | IA | Arte | Qué hace | Implicaciones | Qué le falta |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `food` | Alimento | core | — | todas | — | ✔ Integrado | — | — | Lo producen: Arbusto de bayas, Ciervo abatido, Jabalí abatido, Oveja sacrificada y 1 más · Lo gastan 125 elementos (Aldeano, Milicia, Hombre de armas y 122 más) | Limita 125 elementos del juego: es una restricción de ritmo y de estrategia. | — |
-| `wood` | Madera | core | — | todas | — | ✔ Integrado | — | — | Lo producen: Árbol, Pino, Pino nevado · Lo gastan 90 elementos (Lancero, Piquero, Arquero y 87 más) | Limita 90 elementos del juego: es una restricción de ritmo y de estrategia. | — |
-| `gold` | Oro | core | — | todas | — | ✔ Integrado | — | — | Lo producen: Mina de oro, Cofre del tesoro, Marcha a Siberia, Billete jiaozi y 3 más · Lo gastan 128 elementos (Milicia, Hombre de armas, Espadachín de mandoble y 125 más) | Limita 128 elementos del juego: es una restricción de ritmo y de estrategia. | — |
-| `stone` | Piedra | core | — | todas | — | ✔ Integrado | — | — | Lo producen: Cantera de piedra · Lo gastan 43 elementos (Centro urbano, Torre de vigilancia, Castillo y 40 más) | Limita 43 elementos del juego: es una restricción de ritmo y de estrategia. | — |
-| `iron` | Hierro | core | Edad Industrial | todas | — | ✔ Integrado | — | — | Lo producen: Mina de hierro · Lo gastan 27 elementos (Fusilero, Cañón de campaña, Ametralladora y 24 más) | Limita 27 elementos del juego: es una restricción de ritmo y de estrategia. · Obliga a llegar a Edad Industrial para empezar a recogerlo. | — |
-| `coal` | Carbón | core | Edad Industrial | todas | — | ✔ Integrado | — | — | Lo producen: Mina de carbón · Lo gastan 10 elementos (Cañón de campaña, Ametralladora, Biplano y 7 más) | Limita 10 elementos del juego: es una restricción de ritmo y de estrategia. · Obliga a llegar a Edad Industrial para empezar a recogerlo. | — |
+| `food` | Alimento | core | — | todas | — | ✔ Integrado | — | — | Lo producen: Arbusto de bayas, Ciervo abatido, Jabalí abatido, Oveja sacrificada y 1 más · Lo gastan 126 elementos (Aldeano, Milicia, Hombre de armas y 123 más) | Limita 126 elementos del juego: es una restricción de ritmo y de estrategia. | — |
+| `wood` | Madera | core | — | todas | — | ✔ Integrado | — | — | Lo producen: Árbol, Pino, Pino nevado · Lo gastan 103 elementos (Lancero, Piquero, Arquero y 100 más) | Limita 103 elementos del juego: es una restricción de ritmo y de estrategia. | — |
+| `gold` | Oro | core | — | todas | — | ✔ Integrado | — | — | Lo producen: Mina de oro, Cofre del tesoro, Marcha a Siberia, Billete jiaozi y 3 más · Lo gastan 145 elementos (Milicia, Hombre de armas, Espadachín de mandoble y 142 más) | Limita 145 elementos del juego: es una restricción de ritmo y de estrategia. | — |
+| `stone` | Piedra | core | — | todas | — | ✔ Integrado | — | — | Lo producen: Cantera de piedra · Lo gastan 44 elementos (Centro urbano, Torre de vigilancia, Castillo y 41 más) | Limita 44 elementos del juego: es una restricción de ritmo y de estrategia. | — |
+| `iron` | Hierro | core | Edad Industrial | todas | — | ✔ Integrado | — | — | Lo producen: Mina de hierro · Lo gastan 30 elementos (Fusilero, Cañón de campaña, Ametralladora y 27 más) | Limita 30 elementos del juego: es una restricción de ritmo y de estrategia. · Obliga a llegar a Edad Industrial para empezar a recogerlo. | — |
+| `coal` | Carbón | core | Edad Industrial | todas | — | ✔ Integrado | — | — | Lo producen: Mina de carbón · Lo gastan 13 elementos (Cañón de campaña, Ametralladora, Biplano y 10 más) | Limita 13 elementos del juego: es una restricción de ritmo y de estrategia. · Obliga a llegar a Edad Industrial para empezar a recogerlo. | — |
 
 ## 🌲 Nodos del mapa (12)
 
@@ -424,7 +448,7 @@ Para revisar las diferencias, el equilibrio estratégico y la jugabilidad. Los r
 
 | Id | Nombre | Mod | Edad | Civilizaciones | Coste | Estado | IA | Arte | Qué hace | Implicaciones | Qué le falta |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `hordeTribute` | 🕊️ Tributo a la Horda | core | Edad de los Castillos | Rusia | 300 oro | 🛠 En desarrollo | ✔ | — | Disponible desde Edad de los Castillos hasta Edad de los Castillos · Enfriamiento 420 s | Se lanza con la orden de mod «power»; el enfriamiento es de 420 s. · Solo para: Rusia. | Nota: Es una pausa de ataques pagada, no diplomacia: no hay relaciones, tratados ni alianzas entre civilizaciones hasta la fase 5. |
+| `hordeTribute` | 🕊️ Tributo a la Horda | core | Edad de los Castillos | Rusia | 300 oro | ✔ Integrado | ✔ | — | Disponible desde Edad de los Castillos hasta Edad de los Castillos · Enfriamiento 420 s | Se lanza con la orden de mod «power»; el enfriamiento es de 420 s. · Solo para: Rusia. | — |
 | `treasureFleet` | ⛵ Flota del Tesoro | core | Edad Imperial | China | 250 oro | ✔ Integrado | ✔ | — | Disponible desde Edad Imperial · Enfriamiento 360 s | Se lanza con la orden de mod «power»; el enfriamiento es de 360 s. · Solo para: China. | — |
 | `credit` | 🏦 Crédito | core | Edad de la Pólvora | Británicos | — | ✔ Integrado | ✔ | — | Disponible desde Edad de la Pólvora · Enfriamiento 420 s | Se lanza con la orden de mod «power»; el enfriamiento es de 420 s. · Solo para: Británicos. | — |
 | `scorchedEarth` | 🔥 Tierra quemada | core | Edad de la Pólvora | Rusia | — | ✔ Integrado | ✔ | — | Disponible desde Edad de la Pólvora · Enfriamiento 300 s · Se lanza sobre un punto del mapa | Se lanza con la orden de mod «power»; el enfriamiento es de 300 s. · Solo para: Rusia. | — |
@@ -439,12 +463,12 @@ Para revisar las diferencias, el equilibrio estratégico y la jugabilidad. Los r
 
 | Id | Nombre | Mod | Edad | Civilizaciones | Coste | Estado | IA | Arte | Qué hace | Implicaciones | Qué le falta |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `britain` | 🚩 Británicos | core | — | Británicos | — | ✔ Integrado | — | — | 2 bonos permanentes · Identidad por eras: Edad Oscura, Edad Feudal, Edad de los Castillos, Edad Imperial, Edad de la Pólvora, Edad Industrial · Unidades propias: Arquero de tiro largo, Fyrdman, Caballero normando, Arcabucero Tudor y 3 más · Edificios propios: Burh, Castillo de mota, Castillo concéntrico, Banco y 1 más · Tecnologías propias: 6 · Poderes: Crédito | Sus unidades únicas definen su estilo de ejército: Arquero de tiro largo, Fyrdman, Caballero normando, Arcabucero Tudor y 3 más. · Cambia de nombre y de bonos con la era: la partida larga cuenta su historia. | — |
+| `britain` | 🚩 Británicos | core | — | Británicos | — | ✔ Integrado | — | — | 3 bonos permanentes · Identidad por eras: Edad Oscura, Edad Feudal, Edad de los Castillos, Edad Imperial, Edad de la Pólvora, Edad Industrial · Unidades propias: Arquero de tiro largo, Fyrdman, Caballero normando, Arcabucero Tudor y 3 más · Edificios propios: Burh, Castillo de mota, Castillo concéntrico, Banco y 1 más · Tecnologías propias: 6 · Poderes: Crédito | Sus unidades únicas definen su estilo de ejército: Arquero de tiro largo, Fyrdman, Caballero normando, Arcabucero Tudor y 3 más. · Cambia de nombre y de bonos con la era: la partida larga cuenta su historia. | — |
 | `france` | 🚩 Francia | core | — | Francia | — | ✔ Integrado | — | — | 3 bonos permanentes · Identidad por eras: Edad Oscura, Edad Feudal, Edad de los Castillos, Edad Imperial, Edad de la Pólvora, Edad Industrial · Unidades propias: Guerrero franco, Caballero cruzado, Gendarme, Arcabucero de la ordenanza y 4 más · Edificios propios: Villa real, Catedral gótica, Bastida, Château y 3 más · Tecnologías propias: 9 · Poderes: Leva en masa, Legión Extranjera | Sus unidades únicas definen su estilo de ejército: Guerrero franco, Caballero cruzado, Gendarme, Arcabucero de la ordenanza y 4 más. · Cambia de nombre y de bonos con la era: la partida larga cuenta su historia. | — |
 | `rus` | 🚩 Rusia | core | — | Rusia | — | ✔ Integrado | — | — | 2 bonos permanentes · Identidad por eras: Edad Oscura, Edad Feudal, Edad de los Castillos, Edad Imperial, Edad de la Pólvora, Edad Industrial · Unidades propias: Druzhinnik, Hijo de boyardo, Strelets, Cosaco y 4 más · Edificios propios: Gorodishche, Monasterio-fortaleza, Kremlin de piedra, Ostrog y 2 más · Tecnologías propias: 2 · Poderes: Tributo a la Horda, Tierra quemada | Sus unidades únicas definen su estilo de ejército: Druzhinnik, Hijo de boyardo, Strelets, Cosaco y 4 más. · Cambia de nombre y de bonos con la era: la partida larga cuenta su historia. | — |
-| `china` | 🚩 China | core | — | China | — | ✔ Integrado | — | — | 1 bonos permanentes · Identidad por eras: Edad Oscura, Edad Feudal, Edad de los Castillos, Edad Imperial, Edad de la Pólvora, Edad Industrial · Unidades propias: Fubing, Lancero de fuego, Ballestero de repetición, Trabuquete de contrapeso y 3 más · Edificios propios: Granero estatal, Casa de moneda, Gran Canal, Ciudad Prohibida y 2 más · Tecnologías propias: 7 · Poderes: Flota del Tesoro | Sus unidades únicas definen su estilo de ejército: Fubing, Lancero de fuego, Ballestero de repetición, Trabuquete de contrapeso y 3 más. · Cambia de nombre y de bonos con la era: la partida larga cuenta su historia. | — |
-| `persia` | 🚩 Persia | core | — | Persia | — | ✔ Integrado | — | — | 1 bonos permanentes · Identidad por eras: Edad Oscura, Edad Feudal, Edad de los Castillos, Edad Imperial, Edad de la Pólvora, Edad Industrial · Unidades propias: Savaran, Ghulam, Arquero a caballo timúrida, Elefante timúrida y 5 más · Edificios propios: Qanat, Caravasar, Observatorio de Maragha, Maidan y 2 más · Tecnologías propias: 6 · Poderes: Gran Saqueo, Bazar | Sus unidades únicas definen su estilo de ejército: Savaran, Ghulam, Arquero a caballo timúrida, Elefante timúrida y 5 más. · Cambia de nombre y de bonos con la era: la partida larga cuenta su historia. | — |
-| `ethiopia` | 🚩 Etiopía | core | — | Etiopía | — | ✔ Integrado | — | — | 1 bonos permanentes · Identidad por eras: Edad Oscura, Edad Feudal, Edad de los Castillos, Edad Imperial, Edad de la Pólvora, Edad Industrial · Unidades propias: Guerrero axumita, Guardia de Lalibela, Soldado real, Mosquetero etíope-portugués y 3 más · Edificios propios: Estela, Iglesia rupestre, Katama, Castillo de Gondar y 2 más · Tecnologías propias: 6 · Poderes: Resistencia, Nagarit | Sus unidades únicas definen su estilo de ejército: Guerrero axumita, Guardia de Lalibela, Soldado real, Mosquetero etíope-portugués y 3 más. · Cambia de nombre y de bonos con la era: la partida larga cuenta su historia. | — |
+| `china` | 🚩 China | core | — | China | — | ✔ Integrado | — | — | 2 bonos permanentes · Identidad por eras: Edad Oscura, Edad Feudal, Edad de los Castillos, Edad Imperial, Edad de la Pólvora, Edad Industrial · Unidades propias: Fubing, Lancero de fuego, Ballestero de repetición, Trabuquete de contrapeso y 3 más · Edificios propios: Granero estatal, Casa de moneda, Gran Canal, Ciudad Prohibida y 2 más · Tecnologías propias: 7 · Poderes: Flota del Tesoro | Sus unidades únicas definen su estilo de ejército: Fubing, Lancero de fuego, Ballestero de repetición, Trabuquete de contrapeso y 3 más. · Cambia de nombre y de bonos con la era: la partida larga cuenta su historia. | — |
+| `persia` | 🚩 Persia | core | — | Persia | — | ✔ Integrado | — | — | 2 bonos permanentes · Identidad por eras: Edad Oscura, Edad Feudal, Edad de los Castillos, Edad Imperial, Edad de la Pólvora, Edad Industrial · Unidades propias: Savaran, Ghulam, Arquero a caballo timúrida, Elefante timúrida y 6 más · Edificios propios: Qanat, Caravasar, Observatorio de Maragha, Maidan y 2 más · Tecnologías propias: 7 · Poderes: Gran Saqueo, Bazar | Sus unidades únicas definen su estilo de ejército: Savaran, Ghulam, Arquero a caballo timúrida, Elefante timúrida y 6 más. · Cambia de nombre y de bonos con la era: la partida larga cuenta su historia. | — |
+| `ethiopia` | 🚩 Etiopía | core | — | Etiopía | — | ✔ Integrado | — | — | 2 bonos permanentes · Identidad por eras: Edad Oscura, Edad Feudal, Edad de los Castillos, Edad Imperial, Edad de la Pólvora, Edad Industrial · Unidades propias: Guerrero axumita, Guardia de Lalibela, Soldado real, Mosquetero etíope-portugués y 4 más · Edificios propios: Estela, Iglesia rupestre, Katama, Castillo de Gondar y 2 más · Tecnologías propias: 7 · Poderes: Resistencia, Nagarit | Sus unidades únicas definen su estilo de ejército: Guerrero axumita, Guardia de Lalibela, Soldado real, Mosquetero etíope-portugués y 4 más. · Cambia de nombre y de bonos con la era: la partida larga cuenta su historia. | — |
 
 ## 🏆 Victorias (3)
 
@@ -468,7 +492,7 @@ Para revisar las diferencias, el equilibrio estratégico y la jugabilidad. Los r
 | `snow` | 🗺️ Nieve | core | — | todas | — | ✔ Integrado | — | — | Se puede caminar · Se puede construir | — | — |
 | `rock` | 🗺️ Roca | core | — | todas | — | ✔ Integrado | — | — | Intransitable · No se puede construir | — | — |
 
-## ⚙️ Motor y mods (32)
+## ⚙️ Motor y mods (44)
 
 | Id | Nombre | Mod | Edad | Civilizaciones | Coste | Estado | IA | Arte | Qué hace | Implicaciones | Qué le falta |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -481,8 +505,11 @@ Para revisar las diferencias, el equilibrio estratégico y la jugabilidad. Los r
 | `order-build` | ⚙️ Orden «build» | core | — | todas | — | ✔ Integrado | — | — | Orden de unidad | — | — |
 | `order-garrison` | ⚙️ Orden «garrison» | core | — | todas | — | ✔ Integrado | — | — | Orden de unidad | — | — |
 | `order-retaliate` | ⚙️ Orden «retaliate» | core | — | todas | — | ✔ Integrado | — | — | Orden de unidad | — | — |
+| `order-trade` | ⚙️ Orden «trade» | core | — | todas | — | ✔ Integrado | — | — | Orden de unidad | — | — |
+| `order-spy` | ⚙️ Orden «spy» | core | — | todas | — | ✔ Integrado | — | — | Orden de unidad | — | — |
 | `system-playerStats` | ⚙️ Sistema «playerStats» | core | — | todas | — | ✔ Integrado | — | — | Sistema de la simulación | — | — |
 | `system-powers` | ⚙️ Sistema «powers» | core | — | todas | — | ✔ Integrado | — | — | Sistema de la simulación | — | — |
+| `system-diplomacy` | ⚙️ Sistema «diplomacy» | core | — | todas | — | ✔ Integrado | — | — | Sistema de la simulación | — | — |
 | `system-ai` | ⚙️ Sistema «ai» | core | — | todas | — | ✔ Integrado | — | — | Sistema de la simulación | — | — |
 | `system-wildlife` | ⚙️ Sistema «wildlife» | core | — | todas | — | ✔ Integrado | — | — | Sistema de la simulación | — | — |
 | `system-formations` | ⚙️ Sistema «formations» | core | — | todas | — | ✔ Integrado | — | — | Sistema de la simulación | — | — |
@@ -490,6 +517,7 @@ Para revisar las diferencias, el equilibrio estratégico y la jugabilidad. Los r
 | `system-movement` | ⚙️ Sistema «movement» | core | — | todas | — | ✔ Integrado | — | — | Sistema de la simulación | — | — |
 | `system-production` | ⚙️ Sistema «production» | core | — | todas | — | ✔ Integrado | — | — | Sistema de la simulación | — | — |
 | `system-aura` | ⚙️ Sistema «aura» | core | — | todas | — | ✔ Integrado | — | — | Sistema de la simulación | — | — |
+| `system-espionage` | ⚙️ Sistema «espionage» | core | — | todas | — | ✔ Integrado | — | — | Sistema de la simulación | — | — |
 | `system-combat` | ⚙️ Sistema «combat» | core | — | todas | — | ✔ Integrado | — | — | Sistema de la simulación | — | — |
 | `system-vision` | ⚙️ Sistema «vision» | core | — | todas | — | ✔ Integrado | — | — | Sistema de la simulación | — | — |
 | `system-declared-war` | ⚙️ Sistema «declared-war» | declared-war | — | todas | — | ✔ Integrado | — | — | Sistema de la simulación | — | — |
@@ -497,10 +525,18 @@ Para revisar las diferencias, el equilibrio estratégico y la jugabilidad. Los r
 | `system-victory` | ⚙️ Sistema «victory» | core | — | todas | — | ✔ Integrado | — | — | Sistema de la simulación | — | — |
 | `system-treasure-hunt` | ⚙️ Sistema «treasure-hunt» | treasure-hunt | — | todas | — | ✔ Integrado | — | — | Sistema de la simulación | — | — |
 | `net-power` | ⚙️ Orden de red «power» | core | — | todas | — | ✔ Integrado | — | — | Orden de jugador | — | — |
+| `net-trade` | ⚙️ Orden de red «trade» | core | — | todas | — | ✔ Integrado | — | — | Orden de jugador | — | — |
+| `net-spy` | ⚙️ Orden de red «spy» | core | — | todas | — | ✔ Integrado | — | — | Orden de jugador | — | — |
+| `net-diplo` | ⚙️ Orden de red «diplo» | core | — | todas | — | ✔ Integrado | — | — | Orden de jugador | — | — |
 | `net-declare-war` | ⚙️ Orden de red «declare-war» | declared-war | — | todas | — | ✔ Integrado | — | — | Orden de jugador | — | — |
 | `ai-gunpowder` | ⚙️ IA: gunpowder | core | — | todas | — | ✔ Integrado | — | — | Extensión de la IA | — | — |
+| `ai-siege` | ⚙️ IA: siege | core | — | todas | — | ✔ Integrado | — | — | Extensión de la IA | — | — |
 | `ai-powers` | ⚙️ IA: powers | core | — | todas | — | ✔ Integrado | — | — | Extensión de la IA | — | — |
+| `ai-trade` | ⚙️ IA: trade | core | — | todas | — | ✔ Integrado | — | — | Extensión de la IA | — | — |
+| `ai-diplomacy` | ⚙️ IA: diplomacy | core | — | todas | — | ✔ Integrado | — | — | Extensión de la IA | — | — |
+| `ai-spies` | ⚙️ IA: spies | core | — | todas | — | ✔ Integrado | — | — | Extensión de la IA | — | — |
 | `ai-declared-war` | ⚙️ IA: declared-war | declared-war | — | todas | — | ✔ Integrado | — | — | Extensión de la IA | — | — |
 | `ai-regicide` | ⚙️ IA: regicide | regicide | — | todas | — | ✔ Integrado | — | — | Extensión de la IA | — | — |
+| `panel-diplomacy` | ⚙️ Panel «diplomacy» | core | — | todas | — | ✔ Integrado | — | — | Panel de interfaz | — | — |
 | `panel-declared-war` | ⚙️ Panel «declared-war» | declared-war | — | todas | — | ✔ Integrado | — | — | Panel de interfaz | — | — |
 | `panel-regicide` | ⚙️ Panel «regicide» | regicide | — | todas | — | ✔ Integrado | — | — | Panel de interfaz | — | — |

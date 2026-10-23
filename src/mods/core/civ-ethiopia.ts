@@ -100,9 +100,9 @@ export const ethiopiaUnits: UnitDef[] = [
   },
   {
     id: 'mountainGun', name: 'Artillería de montaña', icon: '💣', description: 'Unidad única etíope (Industrial): cañón ligero de montaña, barato y más rápido que el de campaña.',
-    classes: ['siege', 'artillery'], civs: ETHIOPIA, cost: { wood: 80, iron: 60, coal: 20 }, trainTime: 32, trainedAt: ['factory'],
+    classes: ['siege', 'artillery', 'antiUnit'], civs: ETHIOPIA, cost: { wood: 80, iron: 60, coal: 20 }, trainTime: 32, trainedAt: ['factory'],
     hp: 75, attack: 30, attackType: 'pierce', range: 10, reloadTime: 4.4, armor: { melee: 1, pierce: 3 },
-    bonus: [{ vs: 'building', amount: 22 }], speed: 0.8, los: 5, pop: 2, age: 5, radius: 0.35, projectile: 'cannonball',
+    bonus: [{ vs: 'building', amount: 22 }], speed: 0.8, los: 5, pop: 2, age: 5, radius: 0.35, projectile: 'cannonball', splash: { radius: 1, falloff: 0.5, scatter: 0.6 },
     sprite: 'cannon', spriteParams: { howitzer: true, barrel: '#6a5a3a' },
   },
 ];

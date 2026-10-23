@@ -403,9 +403,14 @@ export class Renderer {
         ellipse(ctx, p.x, p.y - hgt * z, 2.6 * z, 2.6 * z); ctx.fill();
         continue;
       }
-      const L = (pr.style === 'arrow' ? 9 : pr.style === 'bullet' ? 3 : 5) * z;
-      ctx.strokeStyle = pr.style === 'arrow' ? '#2e2214' : '#8a8f94';
-      ctx.lineWidth = Math.max(1, (pr.style === 'arrow' ? 1.3 : 2.8) * z);
+      if (pr.style === 'rock') {
+        ctx.fillStyle = '#7d7d78';
+        ellipse(ctx, p.x, p.y - hgt * z, 3 * z, 3 * z); ctx.fill();
+        continue;
+      }
+      const L = (pr.style === 'arrow' ? 9 : pr.style === 'bolt' ? 12 : pr.style === 'bullet' ? 3 : 5) * z;
+      ctx.strokeStyle = pr.style === 'arrow' || pr.style === 'bolt' ? '#2e2214' : '#8a8f94';
+      ctx.lineWidth = Math.max(1, (pr.style === 'arrow' ? 1.3 : pr.style === 'bolt' ? 2 : 2.8) * z);
       ctx.beginPath();
       ctx.moveTo(p.x - (dx / len) * L, p.y - hgt * z - (dy / len) * L);
       ctx.lineTo(p.x, p.y - hgt * z);

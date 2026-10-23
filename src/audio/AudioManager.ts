@@ -339,6 +339,7 @@ export class AudioManager {
     // La pólvora suena distinta a la flecha: mosquetes y cañones, según el proyectil
     // (los fusiles de la era industrial, las ametralladoras y los aviones tienen el suyo)
     const gun = ad?.projectile === 'cannonball' ? 'hitCannon'
+      : ad?.projectile === 'rock' ? 'hitRock'
       : ad?.projectile === 'bullet' ? (ad.classes.includes('machinegun') || ad.flying ? 'hitGatling' : ad.age >= 5 ? 'hitRifle' : 'hitMusket')
         : null;
     const id: SfxId = gun ?? (target.kind === 'building' ? 'hitBuilding' : ranged ? 'hitArrow' : 'hitMelee');

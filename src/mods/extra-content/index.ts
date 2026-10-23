@@ -3,10 +3,14 @@ import { ellipse, shade } from '../../render/draw';
 
 /**
  * MOD DE EJEMPLO: añade contenido nuevo sin tocar el motor.
- *  - Una unidad nueva (Elefante de guerra) con su propio sprite.
+ *  - Una unidad nueva (Elefante de guerra) con su propio sprite. Solo las civilizaciones que
+ *    los usaron (Persia y Etiopía/Axum, docs/civilizaciones.md §5); el resto no los tiene.
  *  - Una tecnología que la mejora.
  *  - Un tipo de mapa nuevo (Oasis).
  */
+
+/** Civilizaciones con elefantes de guerra: Persia (sasánidas y timúridas) y Etiopía (Axum). */
+const ELEPHANT_CIVS = ['persia', 'ethiopia'];
 
 const elephant: SpriteFn = s => {
   const { ctx, x, y, z, color, entity: e, time } = s;
@@ -46,7 +50,7 @@ const elephant: SpriteFn = s => {
 export const extraContentMod: GameMod = {
   id: 'extra-content',
   name: 'Contenido extra',
-  description: 'Ejemplo de mod: Elefante de guerra (establo, Edad de los Castillos), tecnología "Colmillos de hierro" y el mapa "Oasis".',
+  description: 'Ejemplo de mod: Elefante de guerra (establo, Edad de los Castillos; solo Persia y Etiopía), tecnología "Colmillos de hierro" y el mapa "Oasis".',
   defaultEnabled: true,
   register(reg) {
     reg.addSprite('elephant', elephant);
@@ -54,7 +58,7 @@ export const extraContentMod: GameMod = {
     reg.addUnit({
       id: 'warElephant', name: 'Elefante de guerra', icon: '🐘',
       description: 'Lento pero devastador. Mucha vida.',
-      classes: ['cavalry', 'elephant'], cost: { food: 170, gold: 85 }, trainTime: 32, trainedAt: ['stable'],
+      classes: ['cavalry', 'elephant'], civs: ELEPHANT_CIVS, cost: { food: 170, gold: 85 }, trainTime: 32, trainedAt: ['stable'],
       hp: 450, attack: 16, attackType: 'melee', reloadTime: 2, armor: { melee: 1, pierce: 2 },
       bonus: [{ vs: 'building', amount: 7 }], speed: 0.6, los: 4, pop: 2, age: 2, radius: 0.5,
       sprite: 'elephant',
@@ -63,7 +67,7 @@ export const extraContentMod: GameMod = {
     reg.addTech({
       id: 'ironTusks', name: 'Colmillos de hierro', icon: '🦣',
       description: 'Elefantes de guerra: +4 ataque y +10% velocidad.',
-      cost: { food: 300, gold: 200 }, researchTime: 40, age: 2, researchedAt: 'stable',
+      cost: { food: 300, gold: 200 }, researchTime: 40, age: 2, researchedAt: 'stable', civs: ELEPHANT_CIVS,
       effects: [
         { type: 'stat', target: { classes: ['elephant'] }, stat: 'attack', op: 'add', value: 4 },
         { type: 'stat', target: { classes: ['elephant'] }, stat: 'speed', op: 'mul', value: 1.1 },

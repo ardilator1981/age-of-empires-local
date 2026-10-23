@@ -8,13 +8,13 @@
 
 | Tipo | Hecho | Sin animar | Pendiente |
 | --- | ---: | ---: | ---: |
-| unidad | 2 | 14 | 59 |
+| unidad | 2 | 14 | 66 |
 | edificio | 0 | 12 | 48 |
 | recurso | 6 | 0 | 6 |
 | terreno | 9 | 0 | 0 |
 | decoración | 9 | 0 | 0 |
-| efecto | 7 | 0 | 5 |
-| interfaz | 11 | 0 | 91 |
+| efecto | 8 | 0 | 5 |
+| interfaz | 11 | 0 | 97 |
 
 ## Siguiente en generar (por prioridad)
 
@@ -110,6 +110,13 @@
 | oromoRider | Jinete oromo | 🔴 pendiente | idle, walk, attack, death | units/oromoRider.png (+ -mask.png)<br>units/oromoRider-walk.png (+ -mask.png)<br>units/oromoRider-attack.png (+ -mask.png)<br>units/oromoRider-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk:mounted` `anim:attack-melee:mounted` `anim:death:mounted` |
 | shewanRifleman | Fusilero shewano | 🔴 pendiente | idle, walk, attack, death | units/shewanRifleman.png (+ -mask.png)<br>units/shewanRifleman-walk.png (+ -mask.png)<br>units/shewanRifleman-attack.png (+ -mask.png)<br>units/shewanRifleman-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack` `anim:death` |
 | mountainGun | Artillería de montaña | 🔴 pendiente | idle, walk, attack, death | units/mountainGun.png (+ -mask.png)<br>units/mountainGun-walk.png (+ -mask.png)<br>units/mountainGun-attack.png (+ -mask.png)<br>units/mountainGun-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack` `anim:death` |
+| catapult | Catapulta | 🔴 pendiente | idle, walk, attack, death | units/catapult.png (+ -mask.png)<br>units/catapult-walk.png (+ -mask.png)<br>units/catapult-attack.png (+ -mask.png)<br>units/catapult-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack` `anim:death` |
+| scorpion | Escorpión | 🔴 pendiente | idle, walk, attack, death | units/scorpion.png (+ -mask.png)<br>units/scorpion-walk.png (+ -mask.png)<br>units/scorpion-attack.png (+ -mask.png)<br>units/scorpion-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack` `anim:death` |
+| cappedRam | Ariete cubierto | 🔴 pendiente | idle, walk, attack, death | units/cappedRam.png (+ -mask.png)<br>units/cappedRam-walk.png (+ -mask.png)<br>units/cappedRam-attack.png (+ -mask.png)<br>units/cappedRam-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack-melee` `anim:death` |
+| trebuchet | Trabuquete | 🔴 pendiente | idle, walk, attack, death | units/trebuchet.png (+ -mask.png)<br>units/trebuchet-walk.png (+ -mask.png)<br>units/trebuchet-attack.png (+ -mask.png)<br>units/trebuchet-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack` `anim:death` |
+| heavyScorpion | Escorpión pesado | 🔴 pendiente | idle, walk, attack, death | units/heavyScorpion.png (+ -mask.png)<br>units/heavyScorpion-walk.png (+ -mask.png)<br>units/heavyScorpion-attack.png (+ -mask.png)<br>units/heavyScorpion-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack` `anim:death` |
+| bombard | Bombarda | 🔴 pendiente | idle, walk, attack, death | units/bombard.png (+ -mask.png)<br>units/bombard-walk.png (+ -mask.png)<br>units/bombard-attack.png (+ -mask.png)<br>units/bombard-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack` `anim:death` |
+| howitzer | Obús | 🔴 pendiente | idle, walk, attack, death | units/howitzer.png (+ -mask.png)<br>units/howitzer-walk.png (+ -mask.png)<br>units/howitzer-attack.png (+ -mask.png)<br>units/howitzer-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack` `anim:death` |
 | caravan | Caravana | 🔴 pendiente | idle, walk, death | units/caravan.png (+ -mask.png)<br>units/caravan-walk.png (+ -mask.png)<br>units/caravan-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:death` |
 | spy | Espía | 🔴 pendiente | idle, walk, death | units/spy.png (+ -mask.png)<br>units/spy-walk.png (+ -mask.png)<br>units/spy-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:death` |
 | warElephant | Elefante de guerra | 🔴 pendiente | idle, walk, attack, death | units/warElephant.png (+ -mask.png)<br>units/warElephant-walk.png (+ -mask.png)<br>units/warElephant-attack.png (+ -mask.png)<br>units/warElephant-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk:mounted` `anim:attack-melee:mounted` `anim:death:mounted` |
@@ -243,6 +250,7 @@
 | projectile-bullet | Proyectil: bullet | 🔴 pendiente | imagen | effects/projectile-bullet.png | 5 | `effect` |
 | projectile-cannonball | Proyectil: cannonball | 🔴 pendiente | imagen | effects/projectile-cannonball.png | 5 | `effect` |
 | projectile-rock | Proyectil: rock | 🔴 pendiente | imagen | effects/projectile-rock.png | 5 | `effect` |
+| projectile-bolt | Proyectil: bolt | ✅ hecho | — | — | — | — |
 | rubble | Escombros de edificio | ✅ hecho | — | — | — | — |
 | fire | Llama | ✅ hecho | — | — | — | — |
 | smoke | Humo | ✅ hecho | — | — | — | — |
@@ -354,6 +362,12 @@
 | portugueseAlliance | Tecnología: Alianza portuguesa | 🔴 pendiente | imagen | ui/tech/portugueseAlliance.png | 5 | `ui:tech` |
 | horseBreeding | Tecnología: Cría de caballos | 🔴 pendiente | imagen | ui/tech/horseBreeding.png | 5 | `ui:tech` |
 | armsImport | Tecnología: Importación de armas | 🔴 pendiente | imagen | ui/tech/armsImport.png | 5 | `ui:tech` |
+| up_cappedRam | Tecnología: Ariete cubierto | 🔴 pendiente | imagen | ui/tech/up_cappedRam.png | 5 | `ui:tech` |
+| up_trebuchet | Tecnología: Trabuquete | 🔴 pendiente | imagen | ui/tech/up_trebuchet.png | 5 | `ui:tech` |
+| up_heavyScorpion | Tecnología: Escorpión pesado | 🔴 pendiente | imagen | ui/tech/up_heavyScorpion.png | 5 | `ui:tech` |
+| up_bombard | Tecnología: Bombarda | 🔴 pendiente | imagen | ui/tech/up_bombard.png | 5 | `ui:tech` |
+| up_howitzer | Tecnología: Obús | 🔴 pendiente | imagen | ui/tech/up_howitzer.png | 5 | `ui:tech` |
+| up_fieldGun | Tecnología: Cañón de campaña | 🔴 pendiente | imagen | ui/tech/up_fieldGun.png | 5 | `ui:tech` |
 | caravanserai | Tecnología: Caravasar | 🔴 pendiente | imagen | ui/tech/caravanserai.png | 5 | `ui:tech` |
 | counterespionage | Tecnología: Contraespionaje | 🔴 pendiente | imagen | ui/tech/counterespionage.png | 5 | `ui:tech` |
 | bankingHouses | Tecnología: Casas de cambio | 🔴 pendiente | imagen | ui/tech/bankingHouses.png | 5 | `ui:tech` |

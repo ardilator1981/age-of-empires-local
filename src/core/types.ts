@@ -84,6 +84,12 @@ export interface CombatStats {
   bonus?: Bonus[];
   /** Estilo del proyectil ('arrow', 'axe', 'javelin'...). */
   projectile?: string;
+  /**
+   * Daño de área: el proyectil cae en el punto donde estaba el objetivo al disparar (no lo sigue) y
+   * daña a todos los enemigos a `radius` casillas, con un `falloff` (0–1) menos de daño en el borde.
+   * `scatter` es el error de puntería, en casillas (aleatoriedad determinista de la partida).
+   */
+  splash?: { radius: number; falloff?: number; scatter?: number };
 }
 
 export interface BaseDef extends CombatStats {
