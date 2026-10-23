@@ -29,6 +29,7 @@ export class Input {
   private lastClick = { t: 0, id: 0 };
   private lastGroupKey = { t: 0, k: -1 };
   private idleIndex = 0;
+  private lastIdlePress = 0;
   private off: (() => void)[] = [];
   // táctil
   private touches = new Map<number, TouchPt>();
