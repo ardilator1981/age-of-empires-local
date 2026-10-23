@@ -402,24 +402,77 @@ Cada fase se hace en su propia rama (`feat/...`) y pasa `npm run build`, `npm ru
 
 ## 13. Asedio, artillería y blindados por era
 
-Implementado hasta la era 5 (`mods/core/siege.ts`, más `gunpowder.ts` e `industrial.ts`). Cada paso es una **mejora** (`upgrade`) de la unidad anterior: se entrena en el mismo edificio con el nombre y las estadísticas de la última, y las que ya existen se convierten. Valores indicativos.
+Esta sección describe cómo evolucionan las armas pesadas (asedio, artillería y, más adelante, blindados) a lo largo de las eras, qué civilización usa qué y por qué, y cómo se relaciona con el taller de asedio y la IA. Está pensada para quien no conozca el código. Leyenda: ✔ implementado, 🔶 especulativo o pendiente de decidir, ⏳ planeado para la fase 6 (era Contemporánea, aún sin implementar). Todos los valores numéricos son indicativos y viven en `src/mods/core/siege.ts` (asedio), `gunpowder.ts` (era 4) e `industrial.ts` (era 5).
 
-| Era | Asedio pesado (taller de asedio) | Artillería de campaña | Se enfrenta a |
+### 13.1 Idea general
+
+- Cada paso de la línea es una **mejora** (`upgrade`) de la unidad anterior, no una unidad aparte: se investiga una vez en un edificio, las unidades que ya existen se convierten y, a partir de ahí, el edificio entrena siempre la versión más moderna. El jugador ve un solo botón por línea («Catapulta», que pasa a llamarse «Trabuquete», «Bombarda»...).
+- Hay **dos familias**: el *asedio pesado* (se fabrica en el taller de asedio; sirve para derribar edificios) y la *artillería de campaña* (cañón y sucesores, de la fábrica de pólvora y la fábrica; mueve más y también sirve contra tropas).
+- Las civilizaciones comparten el árbol común; lo propio de cada una son **unidades únicas** (§5) que se añaden al árbol, no lo sustituyen.
+
+### 13.2 Línea de evolución por era
+
+| Era | Asedio pesado (taller de asedio) | Artillería de campaña | Notas |
 | --- | --- | --- | --- |
-| 2 Castillos | **Ariete** · **Catapulta** (área, imprecisa, hace de «mortero» de masas) · **Escorpión** (ballesta gigante: tiro tenso contra tropas y asedio) | — | Edificios (ariete, catapulta), tropas agrupadas y asedio (escorpión) |
-| 3 Imperial | **Ariete cubierto** · **Trabuquete** (de la catapulta; enorme alcance, solo edificios) · **Escorpión pesado** | — | Castillos y torres desde fuera de su alcance |
-| 4 Pólvora | **Bombarda** (del trabuquete: cañón de asedio de tubo corto) | **Cañón** (fábrica de pólvora; `gunpowder.ts`) | Fortalezas abaluartadas |
-| 5 Industrial | **Obús** (de la bombarda, en la fábrica: trayectoria alta, área grande) | **Cañón de campaña** (del cañón, en la fábrica) y **Ametralladora** (aparte: es arma de infantería) | Fortalezas y masas de fusileros |
-| 6 Contemporánea | *Pendiente (fase 6)* | *Pendiente (fase 6)* | |
+| 2 Castillos | ✔ **Ariete** · ✔ **Catapulta** · ✔ **Escorpión** | — | El ariete rompe edificios cuerpo a cuerpo y es casi inmune a flechas. La catapulta lanza piedras con daño de área, imprecisa. El escorpión es una ballesta gigante de tiro tenso |
+| 3 Imperial | ✔ **Ariete cubierto** · ✔ **Trabuquete** (mejora de la catapulta) · ✔ **Escorpión pesado** | — | El trabuquete tiene un alcance enorme pero solo ataca edificios por su cuenta |
+| 4 Pólvora | ✔ **Bombarda** (mejora del trabuquete) | ✔ **Cañón** (fábrica de pólvora) | La bombarda es el cañón de asedio de tubo corto: destruye edificios desde lejos; el cañón es móvil y también daña tropas |
+| 5 Industrial | ✔ **Obús** (mejora de la bombarda, se investiga en la fábrica) | ✔ **Cañón de campaña** (mejora del cañón, en la fábrica) · ✔ Ametralladora (aparte: es arma de infantería) | El obús dispara en trayectoria alta con área grande; el cañón de campaña es de retrocarga y estriado |
+| 6 Contemporánea | ⏳ **Blindados**: carro ligero → carro medio → carro pesado (sustituyen al ariete cubierto como rompedores de edificios) | ⏳ Obús autopropulsado · lanzacohetes múltiple · cañón antitanque y antiaéreo | Necesitan petróleo (§8b) |
+| 7 Futuro próximo | 🔶 Drones de combate y artillería guiada | 🔶 Misiles tácticos | Solo si se llega a la era 7; especulativo |
 
-**Reglas del motor que lo hacen posible:** `CombatStats.splash` (daño de área: radio, pérdida en el borde, error de puntería; el proyectil cae donde estaba el blanco al disparar), clase `antiUnit` (el asedio dispara por su cuenta a las tropas; sin ella, solo a edificios, como el ariete, el trabuquete y la bombarda) y el proyectil `rock` (sonido `hitRock`). Toda la artillería (`artillery`) lleva daño de área pequeño y `antiUnit`.
+**Líneas que acaban:** el escorpión pesado no tiene sucesor (lo sustituyen las armas de fuego: ametralladora e infantería de fusil). El ariete cubierto lo reemplazará el blindado en la fase 6.
 
-**Líneas que se quedan en su era:** el escorpión pesado no tiene sucesor (las armas de fuego lo sustituyen: ametralladora e infantería de fusil); el ariete cubierto tampoco (el blindado lo reemplazará en la fase 6). El **Trabuquete de contrapeso** chino (único, Castillos) coexiste con el trabuquete común de la Imperial.
+### 13.3 Qué civilización usa qué, y por qué
 
-### Para la fase 6 (era Contemporánea)
+Las unidades **comunes** (ariete, catapulta, escorpión, trabuquete, bombarda, cañón, cañón de campaña, obús) las tienen todas las civilizaciones: el asedio fue universal en el mundo antiguo y medieval, y la artillería de pólvora se difundió por todo el mundo. Lo que cambia entre civilizaciones son las **únicas**, que reflejan una aportación real documentada:
 
-- **Blindados.** Línea de «carro»: *carro ligero* (mejora de la ametralladora o unidad nueva en la **fábrica de automóviles**) → *carro medio* → *carro pesado*. Clases `armored`, `siege`, `antiUnit` (puede disparar a tropas y edificios), blindaje alto contra `pierce` y bajo contra el nuevo tipo `antiTank`; necesitan **petróleo** (combustible, coste de entrenamiento y mantenimiento). Sustituyen al ariete cubierto como romperedes (`upgrade` desde `cappedRam` en la fábrica de automóviles, o línea propia si el motor lo prefiere).
-- **Artillería moderna.** Obús (era 5) → *obús autopropulsado* (sobre chasis) y *lanzacohetes múltiple*; *cañón antitanque* y *antiaéreo* como contraataque de unidades (usar `airRule` y un nuevo tipo de daño).
-- **Tipo de daño nuevo** (`explosive`/`antiTank`) o bonos por clase `armored` en `bonus`; hoy solo hay `melee` y `pierce`.
-- **Únicas por civilización de §5 que cuelgan de esto:** Rusia: **T-34** (carro medio) y **Katiusha** (lanzacohetes); Francia: **Renault FT** (carro ligero); China: **Carro ligero** e **Infantería mecanizada**; Persia: **Camión blindado**; Etiopía: **Carro ligero** (comprado: vía `armsImport`); Gran Bretaña/EE. UU.: **Sherman**. Cada una como `civs: [...]` y, si encaja en la línea, como `upgrade` propio de su civilización (la tabla de `Player.upgrades` es por jugador).
-- **Asedio sin fase 6:** si la era 6 se retrasa, bastaría con un *obús autopropulsado* en la era 5.
+| Civilización | Unidad única de asedio o artillería | Era | Estado | Razón histórica |
+| --- | --- | --- | --- | --- |
+| China | **Trabuquete de contrapeso** | Castillos | ✔ | Llegó con los ingenieros del mundo musulmán (Xiangyang, 1273). Coexiste con el trabuquete común, que llega después |
+| Rusia | **Unicornio** (obús ligero, Academia de ingenieros) | Pólvora | ✔ | Obús de Shuválov, años 1750 |
+| Francia | **Cañón Gribeauval** · **Gran Batería** | Pólvora · Industrial | ✔ | Reforma de la artillería de 1765 y la artillería concentrada napoleónica |
+| Etiopía | **Artillería de montaña** | Industrial | ✔ | Cañón ligero de Menelik II, más móvil y barato (Adwa, 1896) |
+| Rusia | **T-34** (carro medio) · **Katiusha** (lanzacohetes BM-13) | Contemporánea | ⏳ | Producción en masa soviética |
+| Francia | **Carro ligero Renault FT** | Contemporánea | ⏳ | Primer carro moderno con torreta giratoria (1917) |
+| China | **Carro ligero** · **Infantería mecanizada** | Contemporánea | ⏳ | Taller del mundo |
+| Persia | **Camión blindado** · 🔶 **Misil táctico** | Contemporánea | ⏳ | Petróleo y vehículos |
+| Etiopía | **Carro ligero** (comprado vía *Importación de armas*) | Contemporánea | ⏳ | Dependencia de tecnología importada |
+| Gran Bretaña / EE. UU. | **Sherman** | Contemporánea | ⏳ | Arsenal de las democracias |
+
+**Elefantes de guerra** (coherencia de unidades): solo **Persia** (sasánidas y timúridas, Delhi 1398) y **Etiopía** (Axum) los tienen ✔. Rusia, China, Francia y Gran Bretaña no los usaron y ya no los reciben. Persia conserva además el Elefante timúrida (único del castillo). 🔶 En el diseño de §5 el elefante pertenece a la Edad Oscura; hoy se entrena en la Edad de los Castillos porque el establo exige la Feudal.
+
+### 13.4 Contadores: qué vence a qué
+
+| Unidad | Fuerte contra | Débil contra | Cómo se defiende |
+| --- | --- | --- | --- |
+| Ariete / ariete cubierto | Edificios (daño enorme); casi inmune a flechas | Infantería y caballería cuerpo a cuerpo; escorpiones | Necesita escolta |
+| Catapulta | Edificios y masas de tropas (daño de área) | Imprecisa contra unidades en movimiento; sin defensa cuerpo a cuerpo; caballería rápida | Ninguna: hay que protegerla |
+| Escorpión / pesado | Infantería agrupada y asedio (bono contra `siege` e `infantry`) | Casi inútil contra edificios; frágil ante caballería | Poca vida |
+| Trabuquete | Castillos, torres y fortalezas desde fuera de su alcance | Muy lento; solo edificios por su cuenta; caballería | Ninguna |
+| Bombarda | Edificios y fortalezas (daño altísimo) | Lenta; poco útil contra tropas; caballería | Armadura media |
+| Cañón / cañón de campaña | Edificios y tropas a distancia, con algo de área | Caballería y flanqueo; contrabatería de otra artillería | Armadura de pierce |
+| Obús | Edificios y masas (área grande) | Caballería rápida y aviación | Armadura de pierce |
+| Aviones (era 5) | Artillería y asedio (no pueden golpearles de vuelta cuerpo a cuerpo) | Solo los alcanzan armas a distancia que no sean asedio ni artillería (`airRule`) | — |
+| ⏳ Blindados | Infantería y edificios | Cañón antitanque; daño `antiTank` 🔶 | Mucho blindaje contra `pierce` |
+
+Reglas del motor que sostienen la tabla: el daño es *ataque − armadura* más los bonos por clase (`bonus: [{ vs: 'building', ... }]`). Hay dos tipos de daño (`melee`, `pierce`); ⏳ para los blindados se añadirá uno nuevo (`explosive`/`antiTank`) o bonos por clase `armored`.
+
+### 13.5 Cómo funciona en el juego
+
+- **Taller de asedio** (`siegeWorkshop`, desde la Edad de los Castillos, requiere herrería): entrena las unidades de asedio pesado. El botón muestra siempre la versión actual de cada línea. Las mejoras (`up_trebuchet`, `up_bombard`...) se investigan en el mismo taller; la del obús, en la fábrica (era 5), y la del cañón de campaña, también en la fábrica.
+- **Fábrica de pólvora** (era 4) entrena el cañón; la **fábrica** (era 5) gestiona sus mejoras.
+- **Daño de área:** el proyectil no sigue al blanco, cae donde estaba al disparar (más un error de puntería determinista) y daña a todos los enemigos del radio, algo menos hacia el borde. No hay fuego amigo. Por eso las catapultas fallan contra tropas que se mueven.
+- **Clase `antiUnit`:** el asedio con ella elige también tropas por su cuenta (catapulta, escorpiones, toda la artillería); sin ella (ariete, trabuquete, bombarda), solo edificios.
+- **IA** (plugin `siege`): con al menos seis tropas mantiene una pieza de asedio por cada tres (máximo `4 + 2×edad`), reparte entre las líneas disponibles con pesos (catapulta y artillería, más; ninguna línea pasa de la mitad), compra las mejoras de las líneas que usa, y no gasta si eso retrasa la edad siguiente o la fábrica clave de la era. La prueba `tests/siege.test.ts` lo verifica.
+- **Guardado y red:** los proyectiles de área son datos simples y entran en el guardado y en la huella; no cambia `SAVE_VERSION`.
+
+### 13.6 Pendiente para la fase 6 y después
+
+- ⏳ **Blindados:** *fábrica de automóviles*, carro ligero → medio → pesado; clases `armored`, `siege`, `antiUnit`; petróleo como coste y combustible; `upgrade` desde el ariete cubierto o línea propia.
+- ⏳ **Artillería moderna:** obús autopropulsado, lanzacohetes múltiple, cañón antitanque y antiaéreo (apoyado en `airRule`).
+- ⏳ **Unidades únicas de §5 de la era 6** (tabla de 13.3): T-34, Katiusha, Renault FT, Infantería mecanizada, Camión blindado, Sherman... Cada una con `civs` propio.
+- ⏳ **Tipo de daño nuevo** (`explosive`/`antiTank`) o bonos por `armored`.
+- 🔶 **Quitar unidades comunes incoherentes** por civilización (p. ej. Caballero europeo en Persia, China o Etiopía): hoy `CivDef` solo añade. Propuesta: `CivDef.hides`.
+- 🔶 **Alcance mínimo** del trabuquete y la bombarda (como en AoE II).
+- 🔶 Mover el Elefante de guerra a la Edad Oscura junto a los demás únicos de Persia y Etiopía.
