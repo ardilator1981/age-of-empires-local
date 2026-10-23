@@ -16,6 +16,8 @@ import { LockstepPeer, type Desync, type Turn } from '../../src/game/net/lockste
 import type { NetCommand } from '../../src/game/net/netCommands';
 import { playerPowers, powerAvail } from '../../src/game/powers';
 import { buildingAvail, unitAvail } from '../../src/game/rules';
+import { embargoed, isAllied, proposalsFor, relation } from '../../src/game/diplomacy';
+import { spyWait } from '../../src/game/espionage';
 import { snapshot, type SaveData } from '../../src/game/save';
 
 const TICK_MS = TICK_DT * 1000;
@@ -58,6 +60,7 @@ export class ScriptedPlayer {
     if (tc && vills.length) {
       const want = p.popCap - p.popUsed <= 3 && p.popCap < g.opts.popLimit && !building('house') ? 'house'
         : vills.length >= 8 && !has('lumberCamp') ? 'lumberCamp'
+        : vills.length >= 8 && p.age >= 1 && !has('market') && !building('market') ? 'market'
         : vills.length >= 11 && !has('barracks') ? 'barracks' : null;
       if (want && buildingAvail(g, p, want).ok) {
         const spot = this.findSpot(g, want, want === 'lumberCamp' ? this.nearestNode(g, tc, 'wood') ?? tc : tc);
@@ -72,6 +75,8 @@ export class ScriptedPlayer {
       const opts = [...g.reg.units.values()].filter(u => u.trainedAt?.includes('barracks') && unitAvail(g, p, u.id).ok);
       if (opts.length && p.res.food > 120) cmds.push({ t: 'train', at: b.id, unit: opts[Math.floor(this.rnd() * opts.length)].id });
     }
+
+    this.tradeAndDiplomacy(g, cmds, blds, units);
 
     // Poderes activos de su civilización (si ya los tiene): de vez en cuando, uno de los disponibles
     for (const d of playerPowers(g, p)) {
@@ -99,6 +104,43 @@ export class ScriptedPlayer {
       else if (tc) cmds.push({ t: 'move', units: ids, x: tc.x + (this.rnd() - 0.5) * 12, y: tc.y + (this.rnd() - 0.5) * 12 });
     }
     return cmds;
+  }
+
+  /** Comercio, diplomacia y espionaje: lo que un humano haría con el mercado y el panel de diplomacia. */
+  private tradeAndDiplomacy(g: Game, cmds: NetCommand[], blds: Entity[], units: Entity[]) {
+    const p = g.players[this.pid], others = g.players.slice(1).filter(q => q.id !== this.pid && !q.defeated);
+    const market = blds.find(b => b.defId === 'market' && b.complete);
+    if (market) {
+      const mine = units.filter(u => u.defId === 'caravan');
+      if (mine.length + market.queue.length < 3 && p.res.gold >= 50 && p.res.wood >= 100 && unitAvail(g, p, 'caravan').ok) cmds.push({ t: 'train', at: market.id, unit: 'caravan' });
+      const posts = g.buildings.filter(b => !b.dead && b.complete && g.buildingDef(b).classes.includes('tradePost'));
+      for (const c of mine) {
+        if (c.order) continue;
+        const dests = posts.filter(b => b.owner !== this.pid && relation(g, this.pid, b.owner) > 0 && !embargoed(g, this.pid, b.owner));
+        const far = posts.filter(b => b.owner === this.pid && Math.hypot(b.x - c.x, b.y - c.y) > 16);
+        const pool = dests.length ? dests : far;
+        // Sin con quién comerciar: pide la paz al dueño de otro mercado (y ya hay ruta cuando acepte)
+        const foreign = posts.find(b => b.owner !== this.pid && relation(g, this.pid, b.owner) === 0);
+        if (!dests.length && foreign && this.rnd() < 0.2) cmds.push({ t: 'mod', id: 'diplo', args: { a: 'propose', to: foreign.owner, kind: 'peace' } });
+        if (pool.length) cmds.push({ t: 'mod', id: 'trade', args: { units: [c.id], dest: pool[Math.floor(this.rnd() * pool.length)].id } });
+      }
+      if (p.age >= 2 && !units.some(u => u.defId === 'spy') && !market.queue.some(q => q.id === 'spy') && p.res.gold >= 150) cmds.push({ t: 'train', at: market.id, unit: 'spy' });
+      for (const sp of units.filter(u => u.defId === 'spy' && !u.order && spyWait(g, u) === 0)) {
+        const foe = g.buildings.filter(b => !b.dead && b.owner !== this.pid && b.owner !== 0 && b.complete && !g.buildingDef(b).walkable && !isAllied(g, this.pid, b.owner));
+        if (!foe.length) continue;
+        const t = foe[Math.floor(this.rnd() * foe.length)];
+        cmds.push({ t: 'mod', id: 'spy', args: { units: [sp.id], act: (['intel', 'steal', 'sabotage'] as const)[Math.floor(this.rnd() * 3)], target: t.id } });
+      }
+    }
+    for (const pr of proposalsFor(g, this.pid)) cmds.push({ t: 'mod', id: 'diplo', args: { a: pr.kind === 'peace' || this.rnd() < 0.7 ? 'accept' : 'decline', id: pr.id } });
+    if (others.length && this.rnd() < 0.04) {
+      const q = others[Math.floor(this.rnd() * others.length)], rel = relation(g, this.pid, q.id), r = this.rnd();
+      if (rel === 0) cmds.push({ t: 'mod', id: 'diplo', args: { a: 'propose', to: q.id, kind: 'peace' } });
+      else if (r < 0.3) cmds.push({ t: 'mod', id: 'diplo', args: { a: 'propose', to: q.id, kind: 'alliance' } });
+      else if (r < 0.5) cmds.push({ t: 'mod', id: 'diplo', args: { a: 'break', to: q.id } });
+      else if (r < 0.8) cmds.push({ t: 'mod', id: 'diplo', args: { a: 'tribute', to: q.id, res: 'gold', amount: 100 } });
+      else cmds.push({ t: 'mod', id: 'diplo', args: { a: 'embargo', to: q.id, on: this.rnd() < 0.5 } });
+    }
   }
 
   private nearestNode(g: Game, from: { x: number; y: number }, res: string): Entity | null {
@@ -188,6 +230,8 @@ export interface MatchResult {
   commands: number;
   /** Poderes activos lanzados durante la partida (los vistos por el primer cliente: humanos e IA). */
   powersUsed: number;
+  /** Comercio, diplomacia y espionaje que ha habido en la partida (cliente 0). */
+  trade: { gold: number; treaties: number; spyActions: number };
   /** Bytes enviados por cliente y segundo (turnos en JSON). */
   bytesPerSec: number;
   wallMs: number;
@@ -212,6 +256,10 @@ export function runMatch(o: MatchOptions): MatchResult {
   });
   let powersUsed = 0;
   clients[0].game.events.on('powerUsed', () => { powersUsed++; });
+  const trade = { gold: 0, treaties: 0, spyActions: 0 };
+  clients[0].game.events.on('tradeProfit', e => { trade.gold += e.amount; });
+  clients[0].game.events.on('diplomacyChanged', () => { trade.treaties++; });
+  clients[0].game.events.on('spyAction', () => { trade.spyActions++; });
   const targetTicks = Math.round(o.minutes * 60 / TICK_DT);
   const queue: Msg[] = [];
   const linkLast = new Map<string, number>();
@@ -304,6 +352,6 @@ export function runMatch(o: MatchOptions): MatchResult {
     stallPct: Math.round(1000 * stalled / now) / 10,
     longestStallMs: longest,
     orderDelayMs: Math.round(delaySum / Math.max(1, delayN)),
-    commands, powersUsed, bytesPerSec: Math.round(bytes / n / seconds), wallMs: Date.now() - t0,
+    commands, powersUsed, trade, bytesPerSec: Math.round(bytes / n / seconds), wallMs: Date.now() - t0,
   };
 }
