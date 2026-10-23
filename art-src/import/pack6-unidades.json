@@ -1655,6 +1655,32 @@
         { "id": "grenadier", "state": "attack" },
         { "id": "grenadier", "state": "attack" }
       ]
+    },
+    {
+      "source": "pack6-unidades/dragon-andar.jpg",
+      "grid": [6, 1],
+      "sharedScale": true,
+      "items": [
+        { "id": "dragoon", "state": "walk", "height": 62 },
+        { "id": "dragoon", "state": "walk" },
+        { "id": "dragoon", "state": "walk" },
+        { "id": "dragoon", "state": "walk" },
+        { "id": "dragoon", "state": "walk" },
+        { "id": "dragoon", "state": "walk" }
+      ]
+    },
+    {
+      "source": "pack6-unidades/dragon-atacar.jpg",
+      "grid": [6, 1],
+      "sharedScale": true,
+      "items": [
+        { "id": "dragoon", "state": "attack", "height": 62 },
+        { "id": "dragoon", "state": "attack" },
+        { "id": "dragoon", "state": "attack" },
+        { "id": "dragoon", "state": "attack" },
+        { "id": "dragoon", "state": "attack" },
+        { "id": "dragoon", "state": "attack" }
+      ]
     }
   ]
 }

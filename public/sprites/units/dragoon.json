@@ -14,6 +14,36 @@
     "idle": {
       "row": 0,
       "frames": 1
+    },
+    "walk": {
+      "image": "dragoon-walk.png",
+      "mask": "dragoon-walk-mask.png",
+      "row": 0,
+      "frames": 6,
+      "fps": 8,
+      "cell": {
+        "w": 84,
+        "h": 132
+      },
+      "anchor": {
+        "x": 42,
+        "y": 126
+      }
+    },
+    "attack": {
+      "image": "dragoon-attack.png",
+      "mask": "dragoon-attack-mask.png",
+      "row": 0,
+      "frames": 6,
+      "fps": 8,
+      "cell": {
+        "w": 86,
+        "h": 132
+      },
+      "anchor": {
+        "x": 43,
+        "y": 126
+      }
     }
   }
 }
