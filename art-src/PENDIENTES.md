@@ -8,7 +8,7 @@
 
 | Tipo | Hecho | Sin animar | Pendiente |
 | --- | ---: | ---: | ---: |
-| unidad | 2 | 18 | 62 |
+| unidad | 2 | 21 | 59 |
 | edificio | 0 | 12 | 48 |
 | recurso | 6 | 0 | 6 |
 | terreno | 9 | 0 | 0 |
@@ -28,9 +28,9 @@
 - P2 · **unidad boyarSon**: idle, walk, attack, death
 - P2 · **unidad strelets**: idle, walk, attack, death
 - P2 · **unidad cossack**: idle, walk, attack, death
-- P2 · **unidad deer**: idle, walk, death
-- P2 · **unidad boar**: idle, walk, attack, death
-- P2 · **unidad sheep**: idle, walk, death
+- P2 · **unidad deer**: walk, death
+- P2 · **unidad boar**: walk, attack, death
+- P2 · **unidad sheep**: walk, death
 - P2 · **unidad musketeer**: walk, attack, death
 - P2 · **unidad cannon**: walk, attack, death
 - P2 · **unidad dragoon**: walk, attack, death
@@ -60,9 +60,9 @@
 | boyarSon | Hijo de boyardo | 🔴 pendiente | idle, walk, attack, death | units/boyarSon.png (+ -mask.png)<br>units/boyarSon-walk.png (+ -mask.png)<br>units/boyarSon-attack.png (+ -mask.png)<br>units/boyarSon-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk:mounted` `anim:attack-melee:mounted` `anim:death:mounted` |
 | strelets | Strelets | 🔴 pendiente | idle, walk, attack, death | units/strelets.png (+ -mask.png)<br>units/strelets-walk.png (+ -mask.png)<br>units/strelets-attack.png (+ -mask.png)<br>units/strelets-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack` `anim:death` |
 | cossack | Cosaco | 🔴 pendiente | idle, walk, attack, death | units/cossack.png (+ -mask.png)<br>units/cossack-walk.png (+ -mask.png)<br>units/cossack-attack.png (+ -mask.png)<br>units/cossack-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk:mounted` `anim:attack-melee:mounted` `anim:death:mounted` |
-| deer | Ciervo | 🔴 pendiente | idle, walk, death | units/deer.png (+ -mask.png)<br>units/deer-walk.png (+ -mask.png)<br>units/deer-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:death` |
-| boar | Jabalí | 🔴 pendiente | idle, walk, attack, death | units/boar.png (+ -mask.png)<br>units/boar-walk.png (+ -mask.png)<br>units/boar-attack.png (+ -mask.png)<br>units/boar-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:attack-melee` `anim:death` |
-| sheep | Oveja | 🔴 pendiente | idle, walk, death | units/sheep.png (+ -mask.png)<br>units/sheep-walk.png (+ -mask.png)<br>units/sheep-death.png (+ -mask.png) | 2 | `unit:still` `anim:walk` `anim:death` |
+| deer | Ciervo | 🟡 sin animar | walk, death | units/deer-walk.png (+ -mask.png)<br>units/deer-death.png (+ -mask.png) | 2 | `anim:walk` `anim:death` |
+| boar | Jabalí | 🟡 sin animar | walk, attack, death | units/boar-walk.png (+ -mask.png)<br>units/boar-attack.png (+ -mask.png)<br>units/boar-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack-melee` `anim:death` |
+| sheep | Oveja | 🟡 sin animar | walk, death | units/sheep-walk.png (+ -mask.png)<br>units/sheep-death.png (+ -mask.png) | 2 | `anim:walk` `anim:death` |
 | musketeer | Mosquetero | 🟡 sin animar | walk, attack, death | units/musketeer-walk.png (+ -mask.png)<br>units/musketeer-attack.png (+ -mask.png)<br>units/musketeer-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack` `anim:death` |
 | cannon | Cañón | 🟡 sin animar | walk, attack, death | units/cannon-walk.png (+ -mask.png)<br>units/cannon-attack.png (+ -mask.png)<br>units/cannon-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack` `anim:death` |
 | dragoon | Dragón | 🟡 sin animar | walk, attack, death | units/dragoon-walk.png (+ -mask.png)<br>units/dragoon-attack.png (+ -mask.png)<br>units/dragoon-death.png (+ -mask.png) | 2 | `anim:walk:mounted` `anim:attack:mounted` `anim:death:mounted` |
