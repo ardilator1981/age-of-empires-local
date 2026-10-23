@@ -232,6 +232,8 @@ export const BALANCE = {
     tributeMin: 50,
     /** IA: la paz se acepta si el rival tiene al menos esta proporción de su ejército, o si ya hay buena voluntad. */
     aiPeaceRatio: 1.2,
+    /** IA: no pide la paz mientras el ejército rival sea menor que esto (los primeros escarceos no cuentan). */
+    aiPeaceMinArmy: 10,
     /** IA: oro (valor del tributo recibido) que equivale a una buena voluntad que inclina a aceptar la paz. */
     aiGoodwill: 150,
     /** IA: rompe la paz si su ejército supera al del otro por esta proporción y lleva este tiempo de tratado. */
@@ -246,11 +248,11 @@ export const BALANCE = {
 
   /** Comercio (`game/trade.ts`): caravanas entre puestos comerciales. Oro por casilla de distancia. */
   trade: {
-    perTile: 0.8,
+    perTile: 0.35,
     /** Multiplicadores según con quién se comercia. */
     domesticMul: 0.5,
-    foreignMul: 1.5,
-    allyMul: 1.9,
+    foreignMul: 1.3,
+    allyMul: 1.6,
     /** Distancia mínima (casillas) de una ruta propia, y máxima que se paga. */
     minDist: 15,
     maxDist: 90,

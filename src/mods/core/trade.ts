@@ -176,7 +176,8 @@ export const diplomacyAI: AIPlugin = {
     // 2. Pide la paz a quien le gana (si no hay ya propuesta suya) y propone alianza contra un enemigo común
     for (const q of withRelation(g, p.id, WAR)) {
       if (d.proposals.some(x => x.from === p.id && x.to === q)) continue;
-      if (mine * D.aiPeaceRatio < armyOf(g, q) && ctx.villagers.length >= 6) propose(g, p.id, q, 'peace');
+      const theirs = armyOf(g, q);
+      if (theirs >= D.aiPeaceMinArmy && mine * D.aiPeaceRatio < theirs) propose(g, p.id, q, 'peace');
     }
     for (const q of withRelation(g, p.id, PEACE)) {
       if (d.proposals.some(x => x.from === p.id && x.to === q)) continue;
