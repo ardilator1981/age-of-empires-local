@@ -369,7 +369,7 @@ Determinismo: los poderes y el comercio deben usar `fmath`, `game.rng()` y datos
 | **2** | **Era 4 Pólvora** completa (árbol común + Rusia) y primeras civilizaciones nuevas **solo en eras 0–4**: China, Francia, Británicos | Medio | Las 4 civilizaciones llegan a Pólvora con IA |
 | **3** | **Poderes activos** y `excludes` (doctrinas), porque la era 4–5 los usa (Tierra quemada, levée) | Medio | Funcionan en red |
 | **4** | **Era 5 Industrial** completa: hierro, carbón, ferrocarril, fábrica, aeródromo (aviación básica); Persia y Etiopía entran en eras 0–5 | Alto | Partida a Industrial sin bloqueos |
-| **5** | **Comercio, diplomacia y espionaje** (§8, §8b), porque el árbol de Industrial y Contemporánea ya los necesita (mercado y banco existen en eras anteriores; aquí se activan las rutas) | Alto | Funcionan en red y guardado |
+| **5** | **Comercio, diplomacia y espionaje** (§8, §8b), porque el árbol de Industrial y Contemporánea ya los necesita (mercado y banco existen en eras anteriores; aquí se activan las rutas) | Alto | Funcionan en red y guardado · **HECHA** (ver `docs/decisiones.md`, 2026-10-23) |
 | **6** | **Era 6 Contemporánea**: petróleo, energía, central nuclear (sin armas todavía), aviación completa, radar; giro político de Rusia y traspaso EE. UU. | Alto (balance) | Partida completa hasta la 6 |
 | **7** | **Armas nucleares** (prototipo descartable, §8c) | Alto | Decidido tras probar si divierte |
 | **8** | **Era 7 Futuro próximo** (IA, robots, drones, fusión) | Muy alto | Solo si la 6 es estable |
