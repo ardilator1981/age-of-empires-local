@@ -78,10 +78,11 @@ export class MovementSystem implements System {
       u.x = nx; u.y = ny;
       return true;
     }
-    const cur = m.walkable(Math.floor(u.x), Math.floor(u.y));
-    if (m.walkable(Math.floor(nx), Math.floor(ny)) || !cur) { u.x = nx; u.y = ny; return true; }
-    if (m.walkable(Math.floor(nx), Math.floor(u.y))) { u.x = nx; return true; }
-    if (m.walkable(Math.floor(u.x), Math.floor(ny))) { u.y = ny; return true; }
+    const o = u.owner;
+    const cur = m.walkableFor(Math.floor(u.x), Math.floor(u.y), o);
+    if (m.walkableFor(Math.floor(nx), Math.floor(ny), o) || !cur) { u.x = nx; u.y = ny; return true; }
+    if (m.walkableFor(Math.floor(nx), Math.floor(u.y), o)) { u.x = nx; return true; }
+    if (m.walkableFor(Math.floor(u.x), Math.floor(ny), o)) { u.y = ny; return true; }
     return false;
   }
 

@@ -26,6 +26,7 @@ function baseStat(def: AnyDef, stat: StatKey): number {
     case 'buildTime': return d.buildTime ?? 0;
     case 'popProvided': return d.popProvided ?? 0;
     case 'carryCapacity': return d.carryCapacity ?? 0;
+    case 'footDamage': return d.footDamage ?? 0;
   }
 }
 

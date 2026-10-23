@@ -191,6 +191,23 @@ export interface BuildingDef extends BaseDef {
    * edificio cae, salen. Ver `game/garrison.ts`.
    */
   shelter?: { classes: string[]; capacity: number };
+  /**
+   * Se coloca en línea: el jugador arrastra de un punto a otro y se levanta un segmento por casilla
+   * (empalizadas, murallas, zanjas). Ver `game/defense.ts`.
+   */
+  line?: boolean;
+  /**
+   * Puerta: no estorba el paso, pero cierra a los enemigos de su dueño como si fuera una pared
+   * (a los propios y a los aliados los deja pasar). Ver `GameMap.walkableFor`.
+   */
+  gate?: boolean;
+  /** Ids de edificios propios (terminados) sobre los que se construye este y a los que sustituye (puente sobre la zanja). */
+  replaces?: string[];
+  /**
+   * Daño por segundo a los enemigos que están al pie del edificio (aceite hirviendo, abrojos...).
+   * Lo suben las tecnologías con el efecto `stat` `footDamage`. Ver `DefenseSystem`.
+   */
+  footDamage?: number;
 }
 
 export type AnyDef = UnitDef | BuildingDef;
@@ -200,7 +217,7 @@ export type AnyDef = UnitDef | BuildingDef;
 export type StatKey =
   | 'hp' | 'attack' | 'range' | 'speed' | 'los' | 'reloadTime'
   | 'armorMelee' | 'armorPierce' | 'trainTime' | 'buildTime'
-  | 'popProvided' | 'carryCapacity';
+  | 'popProvided' | 'carryCapacity' | 'footDamage';
 
 /** A qué definiciones afecta un efecto. Sin ids ni clases = a todas las del tipo indicado. */
 export interface Target {
@@ -247,6 +264,8 @@ export interface TechDef {
   excludes?: string[];
   /** Solo para la IA: cuánto le conviene a este jugador (0 = no la quiere; mayor = más). Por defecto 1. */
   aiWeight?: (game: Game, player: Player) => number;
+  /** Solo la investiga un plugin de la IA a propósito (no entra en la elección al azar de la IA). */
+  aiManaged?: boolean;
 }
 
 /**
@@ -395,6 +414,11 @@ export interface SpriteContext {
   project: (wx: number, wy: number) => Pt;
   /** Huella del edificio en casillas. */
   foot?: { tx: number; ty: number; size: number };
+  /**
+   * Edificios de una casilla con `spriteParams.link`: ¿hay al lado (dx, dy) otro con la misma marca?
+   * Así los tramos de muro, empalizada o zanja se dibujan unidos.
+   */
+  link?: (dx: number, dy: number) => boolean;
   /** Edad del propietario (los edificios cambian de aspecto con la edad). */
   age: number;
 }

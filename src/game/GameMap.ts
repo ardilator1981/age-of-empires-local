@@ -21,7 +21,19 @@ export class GameMap {
   private build: boolean[];
   /** Región conectada de cada casilla caminable (-1 = no caminable). */
   private regions: Int32Array;
-  private regionsDirty = true;
+  /** Se incrementa con cada cambio de obstáculos (invalida las regiones calculadas). */
+  private stamp = 0;
+  private regionsStamp = -1;
+  /**
+   * Dueño de la puerta de cada casilla (0 = no hay puerta). Una puerta no es un obstáculo del mapa:
+   * deja pasar a quien no es enemigo de su dueño y cierra el paso a los enemigos (ver `walkableFor`).
+   */
+  gate: Uint8Array;
+  gateCount = 0;
+  /** ¿Son enemigos estos dos jugadores? Lo pone la partida; sin ella, todos lo son. */
+  enemy: (a: number, b: number) => boolean = (a, b) => a !== b;
+  /** Regiones vistas por cada jugador cuando hay puertas (las cerradas para él cuentan como pared). */
+  private ownerRegions = new Map<number, { arr: Int32Array; stamp: number }>();
 
   constructor(public w: number, public h: number, public reg: Registry) {
     this.terrain = new Uint8Array(w * h);
@@ -30,6 +42,7 @@ export class GameMap {
     this.walk = reg.terrains.map(t => t.walkable);
     this.build = reg.terrains.map(t => t.buildable);
     this.regions = new Int32Array(w * h);
+    this.gate = new Uint8Array(w * h);
     this.heights = new Float32Array((w + 1) * (h + 1));
   }
 
@@ -85,16 +98,17 @@ export class GameMap {
     return s / n;
   }
 
-  /** Avisa de que han cambiado los obstáculos (edificio nuevo, árbol talado...). */
-  obstaclesChanged() { this.regionsDirty = true; }
+  /** Avisa de que han cambiado los obstáculos (edificio nuevo, árbol talado, puerta, relación diplomática...). */
+  obstaclesChanged() { this.stamp++; }
 
-  private computeRegions() {
-    const { w, h } = this, reg = this.regions;
+  private computeRegions(reg: Int32Array, owner?: number) {
+    const { w, h } = this;
+    const walk = (x: number, y: number) => this.walkableFor(x, y, owner);
     reg.fill(-1);
     const stack: number[] = [];
     let next = 0;
     for (let i = 0; i < w * h; i++) {
-      if (reg[i] !== -1 || !this.walkable(i % w, (i / w) | 0)) continue;
+      if (reg[i] !== -1 || !walk(i % w, (i / w) | 0)) continue;
       const id = next++;
       reg[i] = id;
       stack.push(i);
@@ -106,43 +120,53 @@ export class GameMap {
           const nx = cx + dx, ny = cy + dy;
           if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue;
           const n = ny * w + nx;
-          if (reg[n] !== -1 || !this.walkable(nx, ny)) continue;
+          if (reg[n] !== -1 || !walk(nx, ny)) continue;
           // Igual que el A*: no se cuela en diagonal entre dos obstáculos
-          if (dx && dy && (!this.walkable(cx + dx, cy) || !this.walkable(cx, cy + dy))) continue;
+          if (dx && dy && (!walk(cx + dx, cy) || !walk(cx, cy + dy))) continue;
           reg[n] = id;
           stack.push(n);
         }
       }
     }
-    this.regionsDirty = false;
+  }
+
+  /** Regiones que ve `owner`: sin dueño (o sin puertas en el mapa), las de siempre con las puertas abiertas. */
+  private regionArr(owner?: number): Int32Array {
+    if (owner === undefined || owner === 0 || this.gateCount === 0) {
+      if (this.regionsStamp !== this.stamp) { this.computeRegions(this.regions); this.regionsStamp = this.stamp; }
+      return this.regions;
+    }
+    let r = this.ownerRegions.get(owner);
+    if (!r) { r = { arr: new Int32Array(this.w * this.h), stamp: -1 }; this.ownerRegions.set(owner, r); }
+    if (r.stamp !== this.stamp) { this.computeRegions(r.arr, owner); r.stamp = this.stamp; }
+    return r.arr;
   }
 
   /** Región de la casilla (x, y); -1 si no es caminable. */
-  region(x: number, y: number): number {
+  region(x: number, y: number, owner?: number): number {
     if (x < 0 || y < 0 || x >= this.w || y >= this.h) return -1;
-    if (this.regionsDirty) this.computeRegions();
-    return this.regions[y * this.w + x];
+    return this.regionArr(owner)[y * this.w + x];
   }
 
   /** Región de un punto (si cae en un obstáculo, la de una casilla vecina). */
-  regionAt(px: number, py: number): number {
+  regionAt(px: number, py: number, owner?: number): number {
     const x = Math.floor(px), y = Math.floor(py);
-    const r = this.region(x, y);
+    const r = this.region(x, y, owner);
     if (r >= 0) return r;
     for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
-      const n = this.region(x + dx, y + dy);
+      const n = this.region(x + dx, y + dy, owner);
       if (n >= 0) return n;
     }
     return -1;
   }
 
   /** ¿Toca el rectángulo (x0,y0)-(x1,y1) inclusivo la región indicada? */
-  rectTouchesRegion(x0: number, y0: number, x1: number, y1: number, region: number, inside: boolean): boolean {
+  rectTouchesRegion(x0: number, y0: number, x1: number, y1: number, region: number, inside: boolean, owner?: number): boolean {
     if (region < 0) return true;
     for (let y = y0 - 1; y <= y1 + 1; y++) for (let x = x0 - 1; x <= x1 + 1; x++) {
       const isInside = x >= x0 && x <= x1 && y >= y0 && y <= y1;
       if (isInside && !inside) continue;
-      if (this.region(x, y) === region) return true;
+      if (this.region(x, y, owner) === region) return true;
     }
     return false;
   }
@@ -156,6 +180,17 @@ export class GameMap {
     if (x < 0 || y < 0 || x >= this.w || y >= this.h) return false;
     const i = y * this.w + x;
     return this.walk[this.terrain[i]] && this.blocked[i] === 0;
+  }
+
+  /**
+   * ¿Puede pasar por la casilla una unidad de `owner`? Como `walkable`, y además una puerta cerrada
+   * para ella (de un enemigo) cuenta como pared. Sin dueño, las puertas están abiertas.
+   */
+  walkableFor(x: number, y: number, owner?: number): boolean {
+    if (!this.walkable(x, y)) return false;
+    if (owner === undefined || this.gateCount === 0) return true;
+    const g = this.gate[y * this.w + x];
+    return g === 0 || !this.enemy(g, owner);
   }
 
   buildable(x: number, y: number): boolean {

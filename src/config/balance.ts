@@ -85,6 +85,29 @@ export const BALANCE = {
     repairTimeFactor: 1.5,
   },
 
+  /** Defensas lineales: empalizadas, murallas, puertas y zanjas (`game/defense.ts`, docs/civilizaciones.md «Defensas»). */
+  defense: {
+    /** Máximo de segmentos de una línea trazada de una vez. */
+    maxLine: 40,
+    /** El daño «al pie» del muro (aceite hirviendo) se aplica cada tantos ticks (20 = cada segundo). */
+    footEveryTicks: 20,
+    /** La IA rodea su centro urbano con una empalizada (con puertas) a esta distancia, según la dificultad: [easy, normal, hard]; 0 = no. */
+    aiRingRadius: [0, 9, 9] as number[],
+    /** La IA solo levanta muros si algún enemigo tiene al menos tantas tropas de combate. */
+    aiThreatArmy: 8,
+    /** La IA empieza a pensar en muros pasados estos segundos de partida, y repasa su anillo cada `aiEvery` segundos. */
+    aiStartAt: 540,
+    aiEvery: 10,
+    /** Lo que la IA se deja sin gastar de cada recurso al levantar muros (la economía y la edad van primero). */
+    aiKeep: { wood: 60, stone: 60, gold: 150, food: 150 } as Record<string, number>,
+    /** Segmentos que la IA coloca como máximo por turno de pensar. */
+    aiSegmentsPerThink: 4,
+    /** Puertas de la IA en su anillo (por los cuatro lados: norte, este, sur, oeste). */
+    aiGates: 4,
+    /** Un ataque a un muro con tropas a pie: la IA sigue atacando muros si no tiene asedio, pero prefiere la puerta. */
+    wallTargetPenalty: 3,
+  },
+
   /** Caza y ganadería: animales salvajes y ganado. */
   wildlife: {
     /** Segundos entre dos paseos de un animal, mínimo y máximo. */

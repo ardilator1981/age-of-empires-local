@@ -63,7 +63,9 @@ export function attackStep(game: Game, u: Entity, o: Order, t: Entity): boolean 
  */
 function nextTarget(game: Game, u: Entity, radius: number, skip = 0): Entity | null {
   const siege = buildingsOnly(game.unitDef(u));
-  return findEnemyNear(game, u, radius, true, siege, e => e.id !== skip && canReach(game, u, e));
+  // Los que disparan alcanzan lo que hay tras un muro o una zanja; el resto, solo lo que pueden pisar
+  const range = game.players[u.owner].getStat(game.unitDef(u), 'range');
+  return findEnemyNear(game, u, radius, true, siege, e => e.id !== skip && (canReach(game, u, e) || (range >= 1 && edgeDist(u, e) <= range)));
 }
 
 /** Termina una orden de ataque automática: la unidad defensiva vuelve a su sitio. */

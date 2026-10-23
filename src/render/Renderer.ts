@@ -165,9 +165,20 @@ export class Renderer {
     const def: any = kind === 'resource' ? reg.resourceNodes.get(defId) : kind === 'unit' ? reg.units.get(defId) : reg.buildings.get(defId);
     if (!def) return null;
     const project = hb === undefined ? this.project : (wx: number, wy: number) => this.cam.worldToScreen(wx, wy, hb);
+    const params = def.spriteParams ?? {};
+    let link: SpriteContext['link'];
+    if (e && params.link && foot) {
+      const g = this.game, m = g.map;
+      link = (dx, dy) => {
+        const x = foot.tx + dx, y = foot.ty + dy;
+        if (!m.inBounds(x, y)) return false;
+        const o = g.entities.get(m.occupant[y * m.w + x]);
+        return !!o && !o.dead && g.reg.buildings.get(o.defId)?.spriteParams?.link === params.link;
+      };
+    }
     return {
       ctx: this.ctx, x: sx, y: sy, z: this.cam.zoom, time: this.game.time,
-      color: this.game.players[owner]?.color ?? '#aaa', entity: e, def, params: def.spriteParams ?? {}, project, foot,
+      color: this.game.players[owner]?.color ?? '#aaa', entity: e, def, params, project, foot, link,
       age: this.game.players[owner]?.age ?? 0,
     };
   }

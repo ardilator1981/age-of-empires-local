@@ -94,6 +94,7 @@ export class Game {
       return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
     };
     this.map = new GameMap(opts.mapSize, opts.mapSize, reg);
+    this.map.enemy = (a, b) => this.isEnemy(a, b);
     this.players.push(new Player(0, 'Naturaleza', '#aaaaaa', GAIA_CIV, false, 'normal', this.map.w, this.map.h));
     const firstCiv = [...reg.civs.values()][0];
     opts.players.forEach((ps, i) => {
@@ -259,6 +260,8 @@ export class Game {
 
   placeBuilding(defId: string, owner: number, tx: number, ty: number, complete: boolean): Entity {
     const def = this.reg.building(defId);
+    // Un puente se construye sobre la zanja: la zanja desaparece bajo él
+    if (def.replaces) for (const old of this.replacedBy(def, tx, ty, owner)) this.remove(old);
     const e = new Entity(this.nextId++, 'building', defId, owner);
     e.tx = tx; e.ty = ty; e.size = def.size;
     e.x = e.px = tx + def.size / 2; e.y = e.py = ty + def.size / 2;
@@ -310,15 +313,19 @@ export class Game {
 
   private occupy(e: Entity, on: boolean) {
     const m = this.map, blocks = this.blocksTiles(e);
-    if (blocks) m.obstaclesChanged();
+    const gate = e.kind === 'building' && !!this.reg.building(e.defId).gate;
+    if (blocks || gate) m.obstaclesChanged();
     for (let y = e.ty; y < e.ty + e.size; y++) {
       for (let x = e.tx; x < e.tx + e.size; x++) {
         if (!m.inBounds(x, y)) continue;
         const i = y * m.w + x;
-        if (on) { m.occupant[i] = e.id; if (blocks) m.blocked[i]++; }
-        else {
+        if (on) {
+          m.occupant[i] = e.id; if (blocks) m.blocked[i]++;
+          if (gate) { if (!m.gate[i]) m.gateCount++; m.gate[i] = e.owner; }
+        } else {
           if (m.occupant[i] === e.id) m.occupant[i] = 0;
           if (blocks && m.blocked[i] > 0) m.blocked[i]--;
+          if (gate && m.gate[i] === e.owner) { m.gate[i] = 0; m.gateCount--; }
         }
       }
     }
@@ -367,12 +374,26 @@ export class Game {
 
   // ------------------------------------------------------------ utilidades del mundo
 
+  /** Edificios propios que un edificio con `replaces` sustituiría al construirse en esas casillas (completos). */
+  replacedBy(def: BuildingDef, tx: number, ty: number, owner: number): Entity[] {
+    const out = new Set<Entity>();
+    const m = this.map;
+    for (let y = ty; y < ty + def.size; y++) for (let x = tx; x < tx + def.size; x++) {
+      if (!m.inBounds(x, y)) continue;
+      const e = this.entities.get(m.occupant[y * m.w + x]);
+      if (e && !e.dead && e.kind === 'building' && e.owner === owner && e.complete && def.replaces?.includes(e.defId)) out.add(e);
+    }
+    return [...out];
+  }
+
   canPlace(defId: string, tx: number, ty: number, playerId?: number): boolean {
     const def = this.reg.building(defId);
     const p = playerId !== undefined ? this.players[playerId] : undefined;
+    const sub = def.replaces && playerId !== undefined ? new Set(this.replacedBy(def, tx, ty, playerId).map(e => e.id)) : null;
     for (let y = ty; y < ty + def.size; y++) {
       for (let x = tx; x < tx + def.size; x++) {
-        if (!this.map.buildable(x, y)) return false;
+        // Sobre lo que sustituye (una zanja bajo un puente) solo se mira el terreno
+        if (sub?.has(this.map.occupant[y * this.map.w + x]) ? !this.map.inBounds(x, y) || !this.map.terrainDef(x, y).buildable : !this.map.buildable(x, y)) return false;
         if (p?.isHuman && !p.explored[y * this.map.w + x]) return false;
       }
     }

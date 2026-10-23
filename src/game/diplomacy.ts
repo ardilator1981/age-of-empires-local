@@ -100,6 +100,7 @@ function setRelation(game: Game, a: number, b: number, rel: Rel) {
   if (old === rel) return;
   d.rel[a * d.n + b] = d.rel[b * d.n + a] = rel;
   d.since[a * d.n + b] = d.since[b * d.n + a] = game.time;
+  game.map.obstaclesChanged(); // las puertas dejan de cerrar el paso a los nuevos aliados (y al revés)
   d.proposals = d.proposals.filter(p => !((p.from === a && p.to === b) || (p.from === b && p.to === a)));
   game.events.emit('diplomacyChanged', { a, b, rel, old });
 }

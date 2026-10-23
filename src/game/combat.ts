@@ -21,6 +21,8 @@ export interface DamageInfo {
   splash?: { radius: number; falloff: number };
   /** Factor del daño final (el área lo usa para atenuar el borde). */
   mul?: number;
+  /** El daño no se reduce con la armadura (aceite hirviendo). */
+  ignoreArmor?: boolean;
 }
 
 export interface Projectile {
@@ -90,7 +92,7 @@ export function computeDamage(game: Game, t: Entity, info: DamageInfo): number {
   const tp = game.players[t.owner];
   const tdef = game.defOf(t);
   const armor = tp.getStat(tdef, info.type === 'melee' ? 'armorMelee' : 'armorPierce') + auraOf(game, t).armorAdd;
-  let dmg = Math.max(0, info.attack - armor);
+  let dmg = info.ignoreArmor ? info.attack : Math.max(0, info.attack - armor);
   for (const b of info.bonus) if (tdef.classes.includes(b.vs)) dmg += b.amount;
   // Ventaja de altura (valores en BALANCE.highGround)
   if (info.fromHeight !== undefined) {
@@ -166,6 +168,12 @@ function splashDamage(game: Game, pr: Projectile) {
   for (const h of hit) dealDamage(game, h.e, { ...pr.info, mul: h.mul });
 }
 
+/** Tramo de muro o empalizada (no su puerta): lo último que atacan las tropas a pie. */
+function wallLike(game: Game, e: Entity): boolean {
+  const c = game.reg.building(e.defId).classes;
+  return c.includes('wall') && !c.includes('gate');
+}
+
 /**
  * Enemigo más cercano a `from` dentro de `radius`.
  * Las unidades tienen prioridad sobre los edificios; `buildingsOnly` para asedio.
@@ -182,7 +190,9 @@ export function findEnemyNear(game: Game, from: Entity, radius: number, includeB
       const d = hypot(e.x - from.x, e.y - from.y) - (from.kind === 'building' ? from.size / 2 : 0);
       if (d < bestUD && (!accept || accept(e, d))) { bestUD = d; bestU = e; }
     } else if (includeBuildings || buildingsOnly) {
-      const d = from.kind === 'unit' ? edgeDist(from, e) : hypot(e.x - from.x, e.y - from.y);
+      let d = from.kind === 'unit' ? edgeDist(from, e) : hypot(e.x - from.x, e.y - from.y);
+      // Las tropas a pie prefieren cualquier otra cosa antes que picar un muro (el asedio y las puertas no tienen esa manía)
+      if (from.kind === 'unit' && wallLike(game, e) && !game.unitDef(from).classes.includes('siege')) d *= BALANCE.defense.wallTargetPenalty;
       if (d < bestBD && (!accept || accept(e, d))) { bestBD = d; bestB = e; }
     }
   }
