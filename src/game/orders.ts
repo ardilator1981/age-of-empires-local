@@ -4,7 +4,7 @@ import type { Order, OrderHandler } from '../core/types';
 import {
   ARRIVED, UNREACHABLE, approach, canReach, edgeDist, face, isFarmTaken, moveTo, nearestDrop, nearestNode, pathBudget, setOrder,
 } from './actions';
-import { findEnemyNear, performAttack } from './combat';
+import { buildingsOnly, findEnemyNear, performAttack } from './combat';
 import { rangeBonus } from './heightRules';
 import type { Entity } from './Entity';
 import type { Game } from './Game';
@@ -62,7 +62,7 @@ export function attackStep(game: Game, u: Entity, o: Order, t: Entity): boolean 
  * el asedio solo edificios). Se salta lo que no se puede alcanzar y `skip`.
  */
 function nextTarget(game: Game, u: Entity, radius: number, skip = 0): Entity | null {
-  const siege = game.unitDef(u).classes.includes('siege');
+  const siege = buildingsOnly(game.unitDef(u));
   return findEnemyNear(game, u, radius, true, siege, e => e.id !== skip && canReach(game, u, e));
 }
 

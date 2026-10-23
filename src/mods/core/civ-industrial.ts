@@ -41,9 +41,9 @@ export const industrialCivUnits: UnitDef[] = [
   },
   {
     id: 'grandeBatterie', name: 'Gran Batería', icon: '💣', description: 'Unidad única francesa (Industrial): la artillería de campaña napoleónica, concentrada y barata.',
-    classes: ['siege', 'artillery'], civs: ['france'], cost: { wood: 90, iron: 70, coal: 30, gold: 30 }, trainTime: 36, trainedAt: ['factory'],
+    classes: ['siege', 'artillery', 'antiUnit'], civs: ['france'], cost: { wood: 90, iron: 70, coal: 30, gold: 30 }, trainTime: 36, trainedAt: ['factory'],
     hp: 105, attack: 42, attackType: 'pierce', range: 11, reloadTime: 4.6, armor: { melee: 1, pierce: 5 },
-    bonus: [{ vs: 'building', amount: 30 }], speed: 0.58, los: 5, pop: 2, age: 5, radius: 0.4, projectile: 'cannonball',
+    bonus: [{ vs: 'building', amount: 30 }], speed: 0.58, los: 5, pop: 2, age: 5, radius: 0.4, projectile: 'cannonball', splash: { radius: 1, falloff: 0.5, scatter: 0.6 },
     sprite: 'cannon', spriteParams: { barrel: '#6a5a3a', big: true },
   },
   // ---- Gran Bretaña (britain)

@@ -2,7 +2,7 @@ import { BALANCE } from '../../config/balance';
 import { MELEE_RANGE } from '../../core/constants';
 import type { Order, Pt } from '../../core/types';
 import { edgeDist } from '../actions';
-import { findEnemyNear } from '../combat';
+import { buildingsOnly, findEnemyNear } from '../combat';
 import type { Entity } from '../Entity';
 import type { Game } from '../Game';
 import { rangeBonus } from '../heightRules';
@@ -52,7 +52,7 @@ export function stanceTarget(game: Game, u: Entity, anchor: Pt, accept?: (e: Ent
   const def = game.unitDef(u);
   if (def.gatherer || !(def.attack ?? 0)) return null;
   const los = game.players[u.owner].getStat(def, 'los');
-  const siege = def.classes.includes('siege');
+  const siege = buildingsOnly(def);
   const leash = BALANCE.army.defensiveLeash;
   return findEnemyNear(game, u, los, siege || buildings, siege, (e, d) => {
     if (accept && !accept(e)) return false;

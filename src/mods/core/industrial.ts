@@ -54,9 +54,9 @@ export const industrialUnits: UnitDef[] = [
   },
   {
     id: 'fieldGun', name: 'Cañón de campaña', icon: '💣', description: 'Artillería rayada de retrocarga: destruye edificios y tropas a gran distancia.',
-    classes: ['siege', 'artillery'], cost: { wood: 100, iron: 80, coal: 40 }, trainTime: 38, trainedAt: ['factory'],
+    classes: ['siege', 'artillery', 'antiUnit'], cost: { wood: 100, iron: 80, coal: 40 }, trainTime: 38, trainedAt: ['factory'],
     hp: 100, attack: 40, attackType: 'pierce', range: 11, reloadTime: 5, armor: { melee: 1, pierce: 5 },
-    bonus: [{ vs: 'building', amount: 30 }], speed: 0.55, los: 5, pop: 2, age: 5, radius: 0.4, projectile: 'cannonball',
+    bonus: [{ vs: 'building', amount: 30 }], speed: 0.55, los: 5, pop: 2, age: 5, radius: 0.4, projectile: 'cannonball', splash: { radius: 1, falloff: 0.5, scatter: 0.6 },
     sprite: 'cannon', spriteParams: { barrel: '#3f444b' },
   },
   {

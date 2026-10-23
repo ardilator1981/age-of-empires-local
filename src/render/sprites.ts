@@ -328,7 +328,7 @@ export const ram: SpriteFn = s => {
   line(ctx, { x: -4 + bump, y: -9 }, { x: 16 + bump, y: -9 });
   ctx.fillStyle = '#8a8f94'; ctx.fillRect(15 + bump, -11.5, 3.5, 5);
   ctx.fillStyle = '#7a5530'; ctx.fillRect(-13, -11, 26, 7); ctx.strokeStyle = OUTLINE; ctx.lineWidth = 0.9; ctx.strokeRect(-13, -11, 26, 7);
-  ctx.fillStyle = '#6a4a2a';
+  ctx.fillStyle = s.params.roof ?? '#6a4a2a';
   poly(ctx, [{ x: -15, y: -11 }, { x: 0, y: -23 }, { x: 15, y: -11 }]); ctx.fill(); outline(ctx);
   ctx.strokeStyle = 'rgba(30,18,8,0.5)'; ctx.lineWidth = 0.6;
   for (let i = 1; i < 5; i++) line(ctx, { x: -15 + i * 3, y: -11 - i * 2.4 }, { x: 15 - i * 3, y: -11 - i * 2.4 });
@@ -338,6 +338,116 @@ export const ram: SpriteFn = s => {
     ctx.strokeStyle = '#a07a4a'; ctx.lineWidth = 0.9;
     line(ctx, { x: wx + Math.cos(roll) * 3, y: -3.5 + Math.sin(roll) * 3 }, { x: wx - Math.cos(roll) * 3, y: -3.5 - Math.sin(roll) * 3 });
   }
+  ctx.restore();
+};
+
+
+/** Rueda de madera de las máquinas de asedio. */
+function siegeWheel(ctx: CanvasRenderingContext2D, wx: number, wy: number, r: number, roll: number) {
+  ctx.fillStyle = '#3d2a17'; ellipse(ctx, wx, wy, r, r); ctx.fill(); outline(ctx, 0.8);
+  ctx.strokeStyle = '#a07a4a'; ctx.lineWidth = 0.9;
+  line(ctx, { x: wx + Math.cos(roll) * (r - 1), y: wy + Math.sin(roll) * (r - 1) }, { x: wx - Math.cos(roll) * (r - 1), y: wy - Math.sin(roll) * (r - 1) });
+}
+
+/** Catapulta: bastidor con ruedas, brazo de lanzamiento que se dispara y cesta con piedra. */
+export const catapult: SpriteFn = s => {
+  const { ctx, x, y, z, color, entity: e, time } = s;
+  const facing = e?.facing ?? 1;
+  // 0 = brazo atrás, 1 = disparado
+  const k = e && e.attackAnim > 0 ? Math.sin(((0.35 - e.attackAnim) / 0.35) * Math.PI) : 0;
+  const roll = e?.moving ? time * 5 : 0;
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(z * facing * UNIT_SCALE, z * UNIT_SCALE);
+  ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+  ctx.fillStyle = 'rgba(0,0,0,0.3)';
+  ellipse(ctx, 0, 0, 17, 5); ctx.fill();
+  // bastidor
+  ctx.fillStyle = '#7a5530'; ctx.fillRect(-14, -10, 28, 5); ctx.strokeStyle = OUTLINE; ctx.lineWidth = 0.9; ctx.strokeRect(-14, -10, 28, 5);
+  // montantes
+  ctx.strokeStyle = OUTLINE; ctx.lineWidth = 4;
+  line(ctx, { x: -3, y: -10 }, { x: -1, y: -19 }); line(ctx, { x: 5, y: -10 }, { x: 3, y: -19 });
+  ctx.strokeStyle = '#5a3e22'; ctx.lineWidth = 2.4;
+  line(ctx, { x: -3, y: -10 }, { x: -1, y: -19 }); line(ctx, { x: 5, y: -10 }, { x: 3, y: -19 });
+  // brazo de lanzamiento: gira de atrás (atado) hacia delante al disparar
+  const ang = -2.3 + k * 1.9;
+  const hx = 1, hy = -18, len = 17;
+  const tx = hx + Math.cos(ang) * len, ty = hy + Math.sin(ang) * len;
+  ctx.strokeStyle = OUTLINE; ctx.lineWidth = 3.8; line(ctx, { x: hx, y: hy }, { x: tx, y: ty });
+  ctx.strokeStyle = '#8a6238'; ctx.lineWidth = 2.2; line(ctx, { x: hx, y: hy }, { x: tx, y: ty });
+  // cesta con piedra (se pierde al disparar)
+  ctx.fillStyle = '#4a3320'; ellipse(ctx, tx, ty, 3.4, 2.4); ctx.fill(); outline(ctx, 0.8);
+  if (k < 0.25) { ctx.fillStyle = '#9a9a96'; ellipse(ctx, tx, ty - 1.5, 2.2, 2.2); ctx.fill(); }
+  ctx.fillStyle = color; ctx.fillRect(-12, -9.2, 7, 2.2);
+  for (const wx of [-9, 9]) siegeWheel(ctx, wx, -3.5, 4, roll);
+  ctx.restore();
+};
+
+/** Escorpión: ballesta gigante sobre un afuste con ruedas; las astas se destensan al disparar. */
+export const scorpion: SpriteFn = s => {
+  const { ctx, x, y, z, color, entity: e, time } = s;
+  const facing = e?.facing ?? 1;
+  const k = e && e.attackAnim > 0 ? Math.sin(((0.35 - e.attackAnim) / 0.35) * Math.PI) : 0;
+  const roll = e?.moving ? time * 5 : 0;
+  const heavy = !!s.params.heavy;
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(z * facing * UNIT_SCALE, z * UNIT_SCALE);
+  ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+  ctx.fillStyle = 'rgba(0,0,0,0.3)';
+  ellipse(ctx, 0, 0, 14, 4.5); ctx.fill();
+  // afuste
+  ctx.fillStyle = '#7a5530'; ctx.fillRect(-10, -8, 20, 4); ctx.strokeStyle = OUTLINE; ctx.lineWidth = 0.9; ctx.strokeRect(-10, -8, 20, 4);
+  // carril central con el virote
+  ctx.strokeStyle = OUTLINE; ctx.lineWidth = 3.6; line(ctx, { x: -9, y: -11 }, { x: 14, y: -13 });
+  ctx.strokeStyle = '#8a6238'; ctx.lineWidth = 2; line(ctx, { x: -9, y: -11 }, { x: 14, y: -13 });
+  if (k < 0.3) {
+    ctx.strokeStyle = '#2e2214'; ctx.lineWidth = 1.2; line(ctx, { x: -4, y: -12.2 }, { x: 17, y: -14 });
+    ctx.fillStyle = '#8a8f94'; poly(ctx, [{ x: 17, y: -15.4 }, { x: 20, y: -14 }, { x: 17, y: -12.6 }]); ctx.fill();
+  }
+  // astas (arco): se abren hacia atrás al tensarse y se cierran al soltar
+  const bow = 7 + (heavy ? 2 : 0), back = 4 * (1 - k);
+  ctx.strokeStyle = OUTLINE; ctx.lineWidth = 3.2;
+  ctx.beginPath(); ctx.moveTo(4, -12.5 - bow); ctx.quadraticCurveTo(0 - back, -12.5, 4, -12.5 + bow * 0.4); ctx.stroke();
+  ctx.strokeStyle = heavy ? '#5a3e22' : '#8a6238'; ctx.lineWidth = 1.9;
+  ctx.beginPath(); ctx.moveTo(4, -12.5 - bow); ctx.quadraticCurveTo(0 - back, -12.5, 4, -12.5 + bow * 0.4); ctx.stroke();
+  ctx.strokeStyle = 'rgba(240,230,200,0.8)'; ctx.lineWidth = 0.7;
+  line(ctx, { x: 4, y: -12.5 - bow }, { x: -4 - back, y: -12.2 });
+  ctx.fillStyle = color; ctx.fillRect(-9, -7.6, 5, 2);
+  for (const wx of [-6, 6]) siegeWheel(ctx, wx, -3.2, 3.6, roll);
+  ctx.restore();
+};
+
+/** Trabuquete: armazón en A, brazo largo con contrapeso y honda. */
+export const trebuchet: SpriteFn = s => {
+  const { ctx, x, y, z, color, entity: e, time } = s;
+  const facing = e?.facing ?? 1;
+  const k = e && e.attackAnim > 0 ? Math.sin(((0.35 - e.attackAnim) / 0.35) * Math.PI) : 0;
+  const roll = e?.moving ? time * 4 : 0;
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(z * facing * UNIT_SCALE, z * UNIT_SCALE);
+  ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+  ctx.fillStyle = 'rgba(0,0,0,0.3)';
+  ellipse(ctx, 0, 0, 19, 5.5); ctx.fill();
+  ctx.fillStyle = '#7a5530'; ctx.fillRect(-16, -8, 32, 5); ctx.strokeStyle = OUTLINE; ctx.lineWidth = 0.9; ctx.strokeRect(-16, -8, 32, 5);
+  // armazón en A
+  const top = { x: 0, y: -27 };
+  ctx.strokeStyle = OUTLINE; ctx.lineWidth = 4.2;
+  line(ctx, { x: -10, y: -8 }, top); line(ctx, { x: 10, y: -8 }, top);
+  ctx.strokeStyle = '#6a4a2a'; ctx.lineWidth = 2.6;
+  line(ctx, { x: -10, y: -8 }, top); line(ctx, { x: 10, y: -8 }, top);
+  // brazo: el contrapeso (corto) cae y la honda (larga) sube al disparar
+  const ang = -0.55 - k * 2.2;
+  const long = 22, short = 8;
+  const lx = top.x + Math.cos(ang + Math.PI) * short, ly = top.y + Math.sin(ang + Math.PI) * short;
+  const rx = top.x + Math.cos(ang) * long, ry = top.y + Math.sin(ang) * long;
+  ctx.strokeStyle = OUTLINE; ctx.lineWidth = 3.6; line(ctx, { x: lx, y: ly }, { x: rx, y: ry });
+  ctx.strokeStyle = '#8a6238'; ctx.lineWidth = 2; line(ctx, { x: lx, y: ly }, { x: rx, y: ry });
+  ctx.fillStyle = '#5a5e64'; ctx.fillRect(lx - 3.5, ly - 1, 7, 8); ctx.strokeStyle = OUTLINE; ctx.lineWidth = 0.8; ctx.strokeRect(lx - 3.5, ly - 1, 7, 8);
+  if (k < 0.3) { ctx.fillStyle = '#9a9a96'; ellipse(ctx, rx, ry + 2, 2.2, 2.2); ctx.fill(); }
+  ctx.fillStyle = color; ctx.fillRect(-14, -7.2, 8, 2.2);
+  for (const wx of [-11, 11]) siegeWheel(ctx, wx, -3.5, 4.2, roll);
   ctx.restore();
 };
 
@@ -1095,6 +1205,9 @@ export function registerCoreSprites(reg: Registry) {
   reg.addSprite('cavalry', cavalry);
   reg.addSprite('ram', ram);
   reg.addSprite('cannon', cannon);
+  reg.addSprite('catapult', catapult);
+  reg.addSprite('scorpion', scorpion);
+  reg.addSprite('trebuchet', trebuchet);
   reg.addSprite('gatling', gatling);
   reg.addSprite('biplane', biplane);
   reg.addSprite('building', building);

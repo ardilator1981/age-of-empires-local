@@ -71,9 +71,9 @@ export const gunpowderUnits: UnitDef[] = [
   },
   {
     id: 'cannon', name: 'Cañón', icon: '💣', description: 'Artillería de campaña: destruye edificios y tropas a gran distancia.',
-    classes: ['siege', 'artillery'], cost: { wood: 180, gold: 120 }, trainTime: 40, trainedAt: ['gunpowderWorks'],
+    classes: ['siege', 'artillery', 'antiUnit'], cost: { wood: 180, gold: 120 }, trainTime: 40, trainedAt: ['gunpowderWorks'],
     hp: 90, attack: 32, attackType: 'pierce', range: 9, reloadTime: 5, armor: { melee: 1, pierce: 4 },
-    bonus: [{ vs: 'building', amount: 28 }], speed: 0.55, los: 5, pop: 2, age: 4, radius: 0.4, projectile: 'cannonball',
+    bonus: [{ vs: 'building', amount: 28 }], speed: 0.55, los: 5, pop: 2, age: 4, radius: 0.4, projectile: 'cannonball', splash: { radius: 1, falloff: 0.5, scatter: 0.6 },
     sprite: 'cannon',
   },
   {
@@ -93,9 +93,9 @@ export const gunpowderUnits: UnitDef[] = [
   },
   {
     id: 'unicorn', name: 'Unicornio', icon: '💣', description: 'Unidad única rusa (Pólvora): obús ligero de Shuválov (años 1750). Eficaz contra edificios y tropas.',
-    classes: ['siege', 'artillery'], civs: ['rus'], cost: { wood: 160, gold: 140 }, trainTime: 40, trainedAt: ['engineerAcademy'],
+    classes: ['siege', 'artillery', 'antiUnit'], civs: ['rus'], cost: { wood: 160, gold: 140 }, trainTime: 40, trainedAt: ['engineerAcademy'],
     hp: 80, attack: 26, attackType: 'pierce', range: 10, reloadTime: 4, armor: { melee: 1, pierce: 3 },
-    bonus: [{ vs: 'building', amount: 22 }, { vs: 'infantry', amount: 8 }], speed: 0.6, los: 5, pop: 2, age: 4, radius: 0.4, projectile: 'cannonball',
+    bonus: [{ vs: 'building', amount: 22 }, { vs: 'infantry', amount: 8 }], speed: 0.6, los: 5, pop: 2, age: 4, radius: 0.4, projectile: 'cannonball', splash: { radius: 1, falloff: 0.5, scatter: 0.6 },
     sprite: 'cannon', spriteParams: { howitzer: true, barrel: '#5a4a3a' },
   },
 ];
