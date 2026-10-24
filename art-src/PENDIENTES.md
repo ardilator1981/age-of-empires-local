@@ -8,7 +8,7 @@
 
 | Tipo | Hecho | Sin animar | Pendiente |
 | --- | ---: | ---: | ---: |
-| unidad | 3 | 41 | 38 |
+| unidad | 9 | 35 | 38 |
 | edificio | 0 | 12 | 57 |
 | recurso | 6 | 0 | 6 |
 | terreno | 9 | 0 | 0 |
@@ -42,20 +42,20 @@
 | --- | --- | --- | --- | --- | ---: | --- |
 | villager | Aldeano | ✅ hecho | — | — | — | — |
 | militia | Milicia | ✅ hecho | — | — | — | — |
-| manAtArms | Hombre de armas | 🟡 sin animar | death | units/manAtArms-death.png (+ -mask.png) | 3 | `anim:death` |
+| manAtArms | Hombre de armas | ✅ hecho | — | — | — | — |
 | longSwordsman | Espadachín de mandoble | 🟡 sin animar | walk, attack, death | units/longSwordsman-walk.png (+ -mask.png)<br>units/longSwordsman-attack.png (+ -mask.png)<br>units/longSwordsman-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack-melee` `anim:death` |
-| spearman | Lancero | 🟡 sin animar | death | units/spearman-death.png (+ -mask.png) | 3 | `anim:death` |
+| spearman | Lancero | ✅ hecho | — | — | — | — |
 | pikeman | Piquero | 🟡 sin animar | walk, attack, death | units/pikeman-walk.png (+ -mask.png)<br>units/pikeman-attack.png (+ -mask.png)<br>units/pikeman-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack-melee` `anim:death` |
 | archer | Arquero | ✅ hecho | — | — | — | — |
-| crossbowman | Ballestero | 🟡 sin animar | death | units/crossbowman-death.png (+ -mask.png) | 3 | `anim:death` |
-| skirmisher | Hostigador | 🟡 sin animar | death | units/skirmisher-death.png (+ -mask.png) | 3 | `anim:death` |
+| crossbowman | Ballestero | ✅ hecho | — | — | — | — |
+| skirmisher | Hostigador | ✅ hecho | — | — | — | — |
 | scoutCavalry | Caballería de exploración | 🟡 sin animar | death | units/scoutCavalry-death.png (+ -mask.png) | 3 | `anim:death:mounted` |
 | lightCavalry | Caballería ligera | 🟡 sin animar | death | units/lightCavalry-death.png (+ -mask.png) | 3 | `anim:death:mounted` |
 | knight | Caballero | 🟡 sin animar | death | units/knight-death.png (+ -mask.png) | 3 | `anim:death:mounted` |
 | cavalier | Paladín | 🟡 sin animar | death | units/cavalier-death.png (+ -mask.png) | 3 | `anim:death:mounted` |
 | batteringRam | Ariete | 🟡 sin animar | walk, attack, death | units/batteringRam-walk.png (+ -mask.png)<br>units/batteringRam-attack.png (+ -mask.png)<br>units/batteringRam-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack-melee` `anim:death` |
-| longbowman | Arquero de tiro largo | 🟡 sin animar | death | units/longbowman-death.png (+ -mask.png) | 3 | `anim:death` |
-| throwingAxeman | Guerrero franco | 🟡 sin animar | death | units/throwingAxeman-death.png (+ -mask.png) | 3 | `anim:death` |
+| longbowman | Arquero de tiro largo | ✅ hecho | — | — | — | — |
+| throwingAxeman | Guerrero franco | ✅ hecho | — | — | — | — |
 | druzhinnik | Druzhinnik | 🟡 sin animar | walk, attack, death | units/druzhinnik-walk.png (+ -mask.png)<br>units/druzhinnik-attack.png (+ -mask.png)<br>units/druzhinnik-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack-melee` `anim:death` |
 | boyarSon | Hijo de boyardo | 🟡 sin animar | walk, attack, death | units/boyarSon-walk.png (+ -mask.png)<br>units/boyarSon-attack.png (+ -mask.png)<br>units/boyarSon-death.png (+ -mask.png) | 2 | `anim:walk:mounted` `anim:attack-melee:mounted` `anim:death:mounted` |
 | strelets | Strelets | 🟡 sin animar | walk, attack, death | units/strelets-walk.png (+ -mask.png)<br>units/strelets-attack.png (+ -mask.png)<br>units/strelets-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack` `anim:death` |

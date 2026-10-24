@@ -44,6 +44,21 @@
         "x": 34,
         "y": 106
       }
+    },
+    "death": {
+      "image": "throwingAxeman-death.png",
+      "mask": "throwingAxeman-death-mask.png",
+      "row": 0,
+      "frames": 6,
+      "fps": 8,
+      "cell": {
+        "w": 73,
+        "h": 100
+      },
+      "anchor": {
+        "x": 37,
+        "y": 94
+      }
     }
   }
 }

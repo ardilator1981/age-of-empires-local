@@ -1724,6 +1724,84 @@
         { "id": "villager", "state": "attack" },
         { "id": "villager", "state": "attack" }
       ]
+    },
+    {
+      "source": "pack6-unidades/muerte-hombre-armas.jpg",
+      "grid": [6, 1],
+      "sharedScale": true,
+      "items": [
+        { "id": "manAtArms", "state": "death", "height": 51 },
+        { "id": "manAtArms", "state": "death" },
+        { "id": "manAtArms", "state": "death" },
+        { "id": "manAtArms", "state": "death" },
+        { "id": "manAtArms", "state": "death" },
+        { "id": "manAtArms", "state": "death" }
+      ]
+    },
+    {
+      "source": "pack6-unidades/muerte-lancero.jpg",
+      "grid": [6, 1],
+      "sharedScale": true,
+      "items": [
+        { "id": "spearman", "state": "death", "height": 58 },
+        { "id": "spearman", "state": "death" },
+        { "id": "spearman", "state": "death" },
+        { "id": "spearman", "state": "death" },
+        { "id": "spearman", "state": "death" },
+        { "id": "spearman", "state": "death" }
+      ]
+    },
+    {
+      "source": "pack6-unidades/muerte-ballestero.jpg",
+      "grid": [6, 1],
+      "sharedScale": true,
+      "items": [
+        { "id": "crossbowman", "state": "death", "height": 52 },
+        { "id": "crossbowman", "state": "death" },
+        { "id": "crossbowman", "state": "death" },
+        { "id": "crossbowman", "state": "death" },
+        { "id": "crossbowman", "state": "death" },
+        { "id": "crossbowman", "state": "death" }
+      ]
+    },
+    {
+      "source": "pack6-unidades/muerte-arquero.jpg",
+      "grid": [6, 1],
+      "sharedScale": true,
+      "items": [
+        { "id": "longbowman", "state": "death", "height": 56 },
+        { "id": "longbowman", "state": "death" },
+        { "id": "longbowman", "state": "death" },
+        { "id": "longbowman", "state": "death" },
+        { "id": "longbowman", "state": "death" },
+        { "id": "longbowman", "state": "death" }
+      ]
+    },
+    {
+      "source": "pack6-unidades/muerte-hostigador.jpg",
+      "grid": [6, 1],
+      "sharedScale": true,
+      "items": [
+        { "id": "skirmisher", "state": "death", "height": 50 },
+        { "id": "skirmisher", "state": "death" },
+        { "id": "skirmisher", "state": "death" },
+        { "id": "skirmisher", "state": "death" },
+        { "id": "skirmisher", "state": "death" },
+        { "id": "skirmisher", "state": "death" }
+      ]
+    },
+    {
+      "source": "pack6-unidades/muerte-lanzahachas.jpg",
+      "grid": [6, 1],
+      "sharedScale": true,
+      "items": [
+        { "id": "throwingAxeman", "state": "death", "height": 46 },
+        { "id": "throwingAxeman", "state": "death" },
+        { "id": "throwingAxeman", "state": "death" },
+        { "id": "throwingAxeman", "state": "death" },
+        { "id": "throwingAxeman", "state": "death" },
+        { "id": "throwingAxeman", "state": "death" }
+      ]
     }
   ]
 }

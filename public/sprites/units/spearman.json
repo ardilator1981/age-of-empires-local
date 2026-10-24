@@ -44,6 +44,21 @@
         "x": 66,
         "y": 94
       }
+    },
+    "death": {
+      "image": "spearman-death.png",
+      "mask": "spearman-death-mask.png",
+      "row": 0,
+      "frames": 6,
+      "fps": 8,
+      "cell": {
+        "w": 93,
+        "h": 124
+      },
+      "anchor": {
+        "x": 47,
+        "y": 118
+      }
     }
   }
 }

@@ -44,6 +44,21 @@
         "x": 46,
         "y": 129
       }
+    },
+    "death": {
+      "image": "longbowman-death.png",
+      "mask": "longbowman-death-mask.png",
+      "row": 0,
+      "frames": 6,
+      "fps": 8,
+      "cell": {
+        "w": 111,
+        "h": 120
+      },
+      "anchor": {
+        "x": 56,
+        "y": 114
+      }
     }
   }
 }

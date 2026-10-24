@@ -44,6 +44,21 @@
         "x": 39,
         "y": 94
       }
+    },
+    "death": {
+      "image": "crossbowman-death.png",
+      "mask": "crossbowman-death-mask.png",
+      "row": 0,
+      "frames": 6,
+      "fps": 8,
+      "cell": {
+        "w": 92,
+        "h": 112
+      },
+      "anchor": {
+        "x": 46,
+        "y": 106
+      }
     }
   }
 }

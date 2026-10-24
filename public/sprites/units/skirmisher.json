@@ -44,6 +44,21 @@
         "x": 47,
         "y": 98
       }
+    },
+    "death": {
+      "image": "skirmisher-death.png",
+      "mask": "skirmisher-death-mask.png",
+      "row": 0,
+      "frames": 6,
+      "fps": 8,
+      "cell": {
+        "w": 82,
+        "h": 108
+      },
+      "anchor": {
+        "x": 41,
+        "y": 102
+      }
     }
   }
 }
