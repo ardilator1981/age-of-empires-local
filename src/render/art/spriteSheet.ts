@@ -3,6 +3,9 @@ import type { Entity } from '../../game/Entity';
 import { ellipse, poly } from '../draw';
 import { loadImage, loadJson, peekImage, relativeTo } from './assets';
 
+/** Recursos que se recogen igual que otro: si la hoja no tiene su animación, usa la del recurso parecido. */
+const ALIAS: Record<string, string> = { iron: 'stone', coal: 'stone' };
+
 /**
  * Hojas de sprites: una imagen (PNG con transparencia) dividida en celdas iguales,
  * descrita por un manifiesto JSON. Ver el README («Arte con imágenes») y
@@ -239,10 +242,10 @@ export class Sheet {
     const res = e.order?.type === 'build' ? 'build' : e.carry?.type;
     if (e.attackAnim > 0) return ['attack'];
     if (e.moving) {
-      if (e.carry && e.carry.amount > 0) return [`carry-${e.carry.type}`, 'carry', 'walk'];
+      if (e.carry && e.carry.amount > 0) return [`carry-${e.carry.type}`, ...(ALIAS[e.carry.type] ? [`carry-${ALIAS[e.carry.type]}`] : []), 'carry', 'walk'];
       return ['walk'];
     }
-    if (e.working) return res ? [`work-${res}`, 'work'] : ['work'];
+    if (e.working) return res ? [`work-${res}`, ...(ALIAS[res] ? [`work-${ALIAS[res]}`] : []), 'work'] : ['work'];
     return ['idle'];
   }
 

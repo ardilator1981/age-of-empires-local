@@ -65,7 +65,9 @@ export function buildCatalog(reg: Registry, art: ArtEntry[], disk: Disk, root = 
     const sheet = sheetOf('unit', u.id);
     const m = sheet ? manifestOf(disk, root, sheet) : null;
     const have = new Set(Object.keys(m?.states ?? {}));
-    const has = (s: string) => have.has(s) || (s.startsWith('work-') && have.has('work')) || (s.startsWith('carry-') && have.has('carry'));
+    // Hierro y carbón se recogen como la piedra (`ALIAS` en render/art/spriteSheet.ts)
+    const alias = (s: string) => s.replace(/^(work|carry)-(iron|coal)$/, '$1-stone');
+    const has = (s: string) => have.has(s) || have.has(alias(s)) || (s.startsWith('work-') && have.has('work')) || (s.startsWith('carry-') && have.has('carry'));
     const need = ['idle', 'walk'];
     if ((u.attack ?? 0) > 0) need.push('attack');
     if (u.gatherer) for (const r of reg.resources.keys()) need.push(`work-${r}`, `carry-${r}`);
