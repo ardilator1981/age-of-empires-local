@@ -88,6 +88,24 @@
           }
         }
       }
+    },
+    "5": {
+      "image": "lumberCamp-5.png",
+      "mask": "lumberCamp-5-mask.png",
+      "states": {
+        "idle": {
+          "row": 0,
+          "frames": 1,
+          "cell": {
+            "w": 264,
+            "h": 184
+          },
+          "anchor": {
+            "x": 132,
+            "y": 116
+          }
+        }
+      }
     }
   }
 }

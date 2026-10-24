@@ -88,6 +88,24 @@
           }
         }
       }
+    },
+    "5": {
+      "image": "miningCamp-5.png",
+      "mask": "miningCamp-5-mask.png",
+      "states": {
+        "idle": {
+          "row": 0,
+          "frames": 1,
+          "cell": {
+            "w": 264,
+            "h": 230
+          },
+          "anchor": {
+            "x": 132,
+            "y": 162
+          }
+        }
+      }
     }
   }
 }

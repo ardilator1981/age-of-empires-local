@@ -9,7 +9,7 @@
 | Tipo | Hecho | Sin animar | Pendiente |
 | --- | ---: | ---: | ---: |
 | unidad | 10 | 34 | 38 |
-| edificio | 0 | 12 | 57 |
+| edificio | 6 | 6 | 57 |
 | recurso | 6 | 0 | 6 |
 | terreno | 9 | 0 | 0 |
 | decoración | 9 | 0 | 0 |
@@ -129,13 +129,13 @@
 
 | id | nombre | estado | falta | archivos esperados (en public/sprites/) | prio | prompt |
 | --- | --- | --- | --- | --- | ---: | --- |
-| townCenter | Centro urbano | 🟡 sin animar | Edad Industrial | buildings/townCenter-5.png (+ -mask.png) | 4 | `building:age` |
-| house | Casa | 🟡 sin animar | Edad Industrial | buildings/house-5.png (+ -mask.png) | 4 | `building:age` |
-| mill | Molino | 🟡 sin animar | Edad Industrial | buildings/mill-5.png (+ -mask.png) | 4 | `building:age` |
-| lumberCamp | Campamento maderero | 🟡 sin animar | Edad Industrial | buildings/lumberCamp-5.png (+ -mask.png) | 4 | `building:age` |
-| miningCamp | Campamento minero | 🟡 sin animar | Edad Industrial | buildings/miningCamp-5.png (+ -mask.png) | 4 | `building:age` |
+| townCenter | Centro urbano | ✅ hecho | — | — | — | — |
+| house | Casa | ✅ hecho | — | — | — | — |
+| mill | Molino | ✅ hecho | — | — | — | — |
+| lumberCamp | Campamento maderero | ✅ hecho | — | — | — | — |
+| miningCamp | Campamento minero | ✅ hecho | — | — | — | — |
 | farm | Granja | 🔴 pendiente | imagen base (Edad Oscura), Edad Feudal, Edad de los Castillos, Edad Imperial, Edad de la Pólvora, Edad Industrial | buildings/farm.png (+ -mask.png)<br>buildings/farm-1.png (+ -mask.png)<br>buildings/farm-2.png (+ -mask.png)<br>buildings/farm-3.png (+ -mask.png)<br>buildings/farm-4.png (+ -mask.png)<br>buildings/farm-5.png (+ -mask.png) | 3 | `building:base` |
-| barracks | Cuartel | 🟡 sin animar | Edad Industrial | buildings/barracks-5.png (+ -mask.png) | 4 | `building:age` |
+| barracks | Cuartel | ✅ hecho | — | — | — | — |
 | archeryRange | Galería de tiro con arco | 🟡 sin animar | Edad de los Castillos, Edad Imperial, Edad de la Pólvora, Edad Industrial | buildings/archeryRange-2.png (+ -mask.png)<br>buildings/archeryRange-3.png (+ -mask.png)<br>buildings/archeryRange-4.png (+ -mask.png)<br>buildings/archeryRange-5.png (+ -mask.png) | 4 | `building:age` |
 | stable | Establo | 🟡 sin animar | Edad de los Castillos, Edad Imperial, Edad de la Pólvora, Edad Industrial | buildings/stable-2.png (+ -mask.png)<br>buildings/stable-3.png (+ -mask.png)<br>buildings/stable-4.png (+ -mask.png)<br>buildings/stable-5.png (+ -mask.png) | 4 | `building:age` |
 | blacksmith | Herrería | 🟡 sin animar | Edad de los Castillos, Edad Imperial, Edad de la Pólvora, Edad Industrial | buildings/blacksmith-2.png (+ -mask.png)<br>buildings/blacksmith-3.png (+ -mask.png)<br>buildings/blacksmith-4.png (+ -mask.png)<br>buildings/blacksmith-5.png (+ -mask.png) | 4 | `building:age` |
@@ -199,10 +199,10 @@
 | djiboutiRailway | Ferrocarril de Yibuti | 🔴 pendiente | imagen base (Edad Industrial) | buildings/djiboutiRailway.png (+ -mask.png) | 3 | `building:base` |
 | market | Mercado | 🔴 pendiente | imagen base (Edad Feudal), Edad de los Castillos, Edad Imperial, Edad de la Pólvora, Edad Industrial | buildings/market.png (+ -mask.png)<br>buildings/market-2.png (+ -mask.png)<br>buildings/market-3.png (+ -mask.png)<br>buildings/market-4.png (+ -mask.png)<br>buildings/market-5.png (+ -mask.png) | 3 | `building:base` |
 
-*huella 4x4*
 *huella 2x2*
 *huella 3x3*
 *huella 1x1*
+*huella 4x4*
 
 ## Recursos
 

@@ -88,6 +88,24 @@
           }
         }
       }
+    },
+    "5": {
+      "image": "barracks-5.png",
+      "mask": "barracks-5-mask.png",
+      "states": {
+        "idle": {
+          "row": 0,
+          "frames": 1,
+          "cell": {
+            "w": 392,
+            "h": 292
+          },
+          "anchor": {
+            "x": 196,
+            "y": 192
+          }
+        }
+      }
     }
   }
 }

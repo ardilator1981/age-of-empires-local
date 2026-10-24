@@ -85,6 +85,24 @@
           }
         }
       }
+    },
+    "5": {
+      "image": "house-5.png",
+      "mask": "house-5-mask.png",
+      "states": {
+        "idle": {
+          "row": 0,
+          "frames": 1,
+          "cell": {
+            "w": 264,
+            "h": 274
+          },
+          "anchor": {
+            "x": 132,
+            "y": 206
+          }
+        }
+      }
     }
   }
 }

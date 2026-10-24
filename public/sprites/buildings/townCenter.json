@@ -88,6 +88,24 @@
           }
         }
       }
+    },
+    "5": {
+      "image": "townCenter-5.png",
+      "mask": "townCenter-5-mask.png",
+      "states": {
+        "idle": {
+          "row": 0,
+          "frames": 1,
+          "cell": {
+            "w": 520,
+            "h": 489
+          },
+          "anchor": {
+            "x": 260,
+            "y": 357
+          }
+        }
+      }
     }
   }
 }

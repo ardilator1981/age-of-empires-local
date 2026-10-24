@@ -157,6 +157,45 @@
           "age": 4
         }
       ]
+    },
+    {
+      "source": "pack5-edades/industrial.jpg",
+      "grid": [
+        3,
+        2
+      ],
+      "items": [
+        {
+          "id": "townCenter",
+          "size": 4,
+          "age": 5
+        },
+        {
+          "id": "house",
+          "size": 2,
+          "age": 5
+        },
+        {
+          "id": "mill",
+          "size": 2,
+          "age": 5
+        },
+        {
+          "id": "lumberCamp",
+          "size": 2,
+          "age": 5
+        },
+        {
+          "id": "miningCamp",
+          "size": 2,
+          "age": 5
+        },
+        {
+          "id": "barracks",
+          "size": 3,
+          "age": 5
+        }
+      ]
     }
   ]
 }
