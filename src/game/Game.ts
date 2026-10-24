@@ -11,6 +11,7 @@ import type { Projectile } from './combat';
 import { decodeState, restoreSystems, restoreWorld, type SaveData } from './save';
 import { hypot } from './fmath';
 import { garrisonOf, leaveShelter } from './garrison';
+import { leaveWall, postedOn } from './walkway';
 
 export interface PlayerSetup {
   name: string;
@@ -199,6 +200,8 @@ export class Game {
    */
   canAttack(a: Entity, t: Entity, hitting = true): boolean {
     if (t.inside) return false; // refugiado: no se le puede atacar
+    // En el paso de ronda de una muralla solo se le alcanza a distancia
+    if (t.onWall && this.players[a.owner].getStat(this.defOf(a), 'range') < 1) return false;
     if (!this.isEnemy(a.owner, t.owner)) return false;
     for (const r of this.reg.combatRules) if (!r(this, a, t, hitting)) return false;
     return true;
@@ -340,6 +343,8 @@ export class Game {
     if (e.kind !== 'unit') this.occupy(e, false);
     // Si el edificio cae, quienes estaban refugiados salen (quedan a la vista)
     if (e.kind === 'building' && this.reg.buildings.get(e.defId)?.shelter) for (const u of garrisonOf(this, e)) leaveShelter(this, u);
+    // Y quienes estaban en su paso de ronda bajan
+    if (e.kind === 'building' && this.reg.buildings.get(e.defId)?.walkway) for (const u of postedOn(this, e)) leaveWall(this, u);
   }
 
   kill(e: Entity, killer?: Entity) {

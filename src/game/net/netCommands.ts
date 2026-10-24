@@ -40,6 +40,9 @@ export type NetCommand =
   /** Refugiarse en un edificio (`shelter`) / sacar a los refugiados de unos edificios. */
   | { t: 'garrison'; units: number[]; target: number }
   | { t: 'ungarrison'; at: number[] }
+  /** Subir al paso de ronda de una muralla (`walkway`; target 0 = los tramos libres más cercanos) / bajar de él (unidades o tramos). */
+  | { t: 'mountWall'; units: number[]; target: number }
+  | { t: 'dismountWall'; ids: number[] }
   /** Pausa (o la quita) para todos. */
   | { t: 'pause'; on: boolean }
   /** Velocidad de la partida para todos. */
@@ -175,6 +178,16 @@ export function applyNetCommand(game: Game, pid: number, c: NetCommand): boolean
       const blds = own(game, pid, c.at).filter(b => b.kind === 'building');
       Commands.ungarrison(game, blds);
       return !!blds.length;
+    }
+    case 'mountWall': {
+      const units = own(game, pid, c.units), target = c.target ? game.get(c.target) : null;
+      if (!units.length || (target && target.owner !== pid)) return false;
+      return Commands.mountWall(game, units, target ?? null) > 0;
+    }
+    case 'dismountWall': {
+      const list = own(game, pid, c.ids);
+      Commands.dismountWall(game, list);
+      return !!list.length;
     }
     case 'mod': {
       const fn = game.reg.netCommands.get(c.id);

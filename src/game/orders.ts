@@ -41,8 +41,10 @@ export function attackStep(game: Game, u: Entity, o: Order, t: Entity): boolean 
   let r = range >= 1 ? range + rangeBonus(game, u, t, range) : MELEE_RANGE + (t.kind === 'unit' ? 0 : 0.25);
   // Si una regla de los mods no le deja golpear desde donde está (p. ej. fuera de la zona de batalla), se acerca más
   if (game.reg.combatRules.length && !game.canAttack(u, t, true)) r = MELEE_RANGE;
-  if (o.hold && edgeDist(u, t) > r + 0.05) return false;
-  const st = o.hold ? ARRIVED : approach(game, u, t, r);
+  // En el paso de ronda tampoco se mueve: dispara desde allí o lo deja
+  const hold = o.hold || !!u.onWall;
+  if (hold && edgeDist(u, t) > r + 0.05) return false;
+  const st = hold ? ARRIVED : approach(game, u, t, r);
   if (st === ARRIVED) {
     face(u, t);
     if (u.cooldown <= 0) {
@@ -84,7 +86,7 @@ export const attackOrder: OrderHandler = {
     // Postura defensiva: no se aleja más de la correa
     if (o.anchor && hypot(u.x - o.anchor.x, u.y - o.anchor.y) > o.leash) { endAuto(u, o); return; }
     if (!t || t.kind === 'resource' || !attackStep(game, u, o, t)) {
-      if (o.auto) { endAuto(u, o); return; }
+      if (o.auto || u.onWall) { endAuto(u, o); return; }
       // Una orden dada por el jugador no se acaba al caer el objetivo (o si no se llega a él):
       // sigue con lo más cercano, como al asaltar un pueblo edificio a edificio.
       const next = nextTarget(game, u, los + 2, o.targetId);

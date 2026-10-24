@@ -235,6 +235,7 @@ export function auditCatalog({ reg, mods, art, notes = {} }: AuditInput): Catalo
     if (b.gatherable) does.push(`Fuente renovable de ${resName(b.gatherable.resource)}`);
     if (b.popProvided) does.push(`Aloja +${b.popProvided} población`);
     if (b.shelter) does.push(`Refugio (${b.shelter.capacity}) para ${b.shelter.classes.join('/')}`);
+    if (b.walkway) does.push(`Paso de ronda (${b.walkway.capacity}) para tiradores ${b.walkway.classes.join('/')}`);
     if ((b.attack ?? 0) > 0) does.push('Defensa: dispara a los enemigos');
     if (b.classes.includes('townCenter') || b.id === reg.setup.townCenter) does.push('Centro urbano: punto de partida');
     if (b.los >= 12) does.push(`Gran visión (${b.los})`);

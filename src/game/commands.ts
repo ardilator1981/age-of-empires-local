@@ -9,6 +9,7 @@ import type { Entity } from './Entity';
 import type { Game } from './Game';
 import { buildingAvail, exploreAvail, techAvail, unitAvail } from './rules';
 import { canShelter, garrisonOf, leaveShelter } from './garrison';
+import { assignPosts, canMount, fitsWalkway, leaveWall, postedOn, walkwayOf } from './walkway';
 import { canGatherFrom, isHuntable } from './wildlife';
 import { isPost, isTrader, tradeCommand } from './trade';
 
@@ -163,6 +164,19 @@ export const Commands = {
     for (const u of units) if (canShelter(game, u, target)) setOrder(u, { type: 'garrison', targetId: target.id });
   },
 
+  /** Las unidades que puedan suben al paso de ronda de `target` (o, si no cabe o no se da, a los tramos libres más cercanos). */
+  mountWall(game: Game, units: Entity[], target: Entity | null) {
+    return assignPosts(game, units, target);
+  },
+
+  /** Baja del paso de ronda a estas unidades y a las que hay subidas en estos tramos. */
+  dismountWall(game: Game, list: Entity[]) {
+    for (const e of list) {
+      if (e.kind === 'unit') { if (e.onWall) leaveWall(game, e); }
+      else for (const u of postedOn(game, e)) leaveWall(game, u);
+    }
+  },
+
   /** Saca del refugio a todos los que hay dentro de estos edificios. */
   ungarrison(game: Game, buildings: Entity[]) {
     for (const b of buildings) for (const u of garrisonOf(game, b)) leaveShelter(game, u);
@@ -247,7 +261,7 @@ export function smartKind(game: Game, pid: number, units: Entity[], target: Enti
   if (target && !target.dead) {
     if (game.isEnemy(pid, target.owner) && target.kind !== 'resource' && mine.some(u => game.canAttack(u, target, false))) return 'attack';
     if (target.kind === 'resource' || isHuntable(game, pid, target) || (target.kind === 'building' && !!target.resType && target.owner === pid && target.complete)) return 'gather';
-    if (target.kind === 'building' && target.owner === pid) return mine.some(u => canShelter(game, u, target)) ? 'move' : 'build';
+    if (target.kind === 'building' && target.owner === pid) return mine.some(u => canShelter(game, u, target) || canMount(game, u, target)) ? 'move' : 'build';
   }
   return 'move';
 }
@@ -279,6 +293,15 @@ function smartOrder(game: Game, pid: number, units: Entity[], x: number, y: numb
       const rest = mine.filter(u => !g.includes(u));
       if (rest.length) Commands.move(game, rest, target.x, target.y);
       return 'gather';
+    }
+    if (target.kind === 'building' && target.owner === pid && mine.some(u => canMount(game, u, target))) {
+      // Unidades a distancia sobre un tramo de muralla propio: suben al paso de ronda (las que no caben, a los tramos vecinos)
+      const w = walkwayOf(game, target)!;
+      const up = mine.filter(u => u.onWall !== target.id && fitsWalkway(game, u, w));
+      Commands.mountWall(game, up, target);
+      const rest = mine.filter(u => !up.includes(u));
+      if (rest.length) Commands.move(game, rest, x, y);
+      return 'move';
     }
     if (target.kind === 'building' && target.owner === pid && mine.some(u => canShelter(game, u, target))) {
       // Unidades que el edificio admite en su refugio: entran; el resto, como con cualquier edificio

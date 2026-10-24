@@ -24,7 +24,11 @@ export const STANCES: { id: Stance; name: string; icon: string; desc: string }[]
   { id: 'passive', name: 'Sin ataque', icon: '🕊️', desc: 'No ataca ni se defiende: evita el combate.' },
 ];
 
-export function stanceOf(u: Entity): Stance { return (u.stance as Stance) ?? BALANCE.army.defaultStance; }
+/** Postura de una unidad; en el paso de ronda de una muralla, siempre «mantener posición» (dispara sin bajar). */
+export function stanceOf(u: Entity): Stance {
+  if (u.onWall && u.stance !== 'passive') return 'hold';
+  return (u.stance as Stance) ?? BALANCE.army.defaultStance;
+}
 
 /** Alcance de ataque de una unidad contra un objetivo (con la ventaja de altura). */
 export function reachOf(game: Game, u: Entity, t: Entity): number {
