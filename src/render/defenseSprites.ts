@@ -25,9 +25,7 @@ const MATERIAL: Record<string, string> = { '#8a6a3e': 'wood', '#a9a398': 'stone'
 
 const EDGE = 'rgba(20,14,8,0.6)';
 /** Las alturas de `spriteParams.height` quedaban bajas junto a las tropas (unos 40 px): se escalan al dibujar. */
-const HEIGHT_SCALE = 1.95;
-/** Un color hexadecimal oscurecido (`shade` devuelve `rgb()`, que `slab` no admite como base). */
-const darken = (hex: string, f: number) => '#' + [1, 3, 5].map(i => Math.round(parseInt(hex.slice(i, i + 2), 16) * (1 - f)).toString(16).padStart(2, '0')).join('');
+const HEIGHT_SCALE = 2.4;
 const frac = (v: number) => v - Math.floor(v);
 /** Valor pseudoaleatorio estable de una casilla (para variar troncos y bordes sin `Math.random`). */
 const hash = (a: number, b: number, c = 0) => frac(Math.sin(a * 127.1 + b * 311.7 + c * 74.7) * 43758.5453);
@@ -88,123 +86,216 @@ function bar(s: SpriteContext, ax: number, ay: number, bx: number, by: number, t
     poly(ctx, [g(i, 0), g(j, 0), g(j, h), g(i, h)]);
     ctx.fillStyle = shade(col, 0.02 - 0.24 * (ox / ((Math.abs(ox) + Math.abs(oy)) || 1)));
     ctx.fill();
+    if (faceTex) {
+      const a = g(i, 0), b = g(j, 0), o = g(i, h);
+      paintTextured(ctx, faceTex, [g(i, 0), g(j, 0), g(j, h), g(i, h)], o, { x: (b.x - a.x) / len, y: (b.y - a.y) / len }, { x: 0, y: h * z });
+      if (ox > 0) { ctx.fillStyle = 'rgba(0,0,0,0.2)'; poly(ctx, [g(i, 0), g(j, 0), g(j, h), g(i, h)]); ctx.fill(); }
+    }
   }
-  poly(ctx, [g(0, h), g(1, h), g(2, h), g(3, h)]); ctx.fillStyle = shade(col, 0.14); ctx.fill(); ctx.stroke();
-}
-
-/** Almenas en las cuatro esquinas de un pilar de muro (cambios de dirección, cruces y extremos). */
-function merlons(s: SpriteContext, cx: number, cy: number, pw: number, h: number, col: string) {
-  const w = 0.055;
-  for (const [dx, dy] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
-    const mx = cx + dx * (pw - w), my = cy + dy * (pw - w);
-    slab(s, mx - w, my - w, mx + w, my + w, h, h + 5.5, col);
-  }
-}
-
-/** Tronco de empalizada: prisma de madera con la punta tallada. */
-function log(s: SpriteContext, x: number, y: number, w: number, h: number, k: number) {
-  const { ctx, z, project: pr } = s;
-  const A = pr(x - w, y - w), B = pr(x + w, y - w), C = pr(x + w, y + w), D = pr(x - w, y + w);
-  const L = (p: Pt, hh: number) => lift(p, hh, z);
-  const tint = (hash(x, y, k) - 0.5) * 0.32;
-  const base = '#8a6a3e', tip = lift(pr(x, y), h + 5, z);
-  ctx.lineJoin = 'round'; ctx.lineWidth = Math.max(0.5, 0.7 * z); ctx.strokeStyle = 'rgba(25,16,8,0.75)';
-  const front = [L(D, 0), L(C, 0), L(C, h), L(D, h)], side = [L(C, 0), L(B, 0), L(B, h), L(C, h)];
-  const tipFront = [L(D, h), L(C, h), tip], tipSide = [L(C, h), L(B, h), tip];
-  poly(ctx, front); ctx.fillStyle = shade(base, tint + 0.04); ctx.fill();
-  poly(ctx, side); ctx.fillStyle = shade(base, tint - 0.2); ctx.fill();
-  poly(ctx, tipFront); ctx.fillStyle = shade(base, tint + 0.12); ctx.fill();
-  poly(ctx, tipSide); ctx.fillStyle = shade(base, tint - 0.1); ctx.fill();
+  const topFace = [g(0, h), g(1, h), g(2, h), g(3, h)];
+  poly(ctx, topFace); ctx.fillStyle = shade(col, 0.14); ctx.fill();
   if (faceTex) {
-    // Un quinto de la imagen (un tronco) por tronco, según su posición; la misma imagen cubre el cuerpo y la punta
-    const col = Math.floor(hash(x, y, k + 3) * 5), hh = (h + 5) * z;
-    const uf = { x: (C.x - D.x) * 5, y: (C.y - D.y) * 5 }, of = L(D, h + 5);
-    const us = { x: (B.x - C.x) * 5, y: (B.y - C.y) * 5 }, os = L(C, h + 5);
-    for (const f of [front, tipFront]) paintTextured(ctx, faceTex, f, { x: of.x - col / 5 * uf.x, y: of.y - col / 5 * uf.y }, uf, { x: 0, y: hh });
-    for (const f of [side, tipSide]) paintTextured(ctx, faceTex, f, { x: os.x - col / 5 * us.x, y: os.y - col / 5 * us.y }, us, { x: 0, y: hh });
-    ctx.fillStyle = 'rgba(0,0,0,0.2)'; poly(ctx, side); ctx.fill(); poly(ctx, tipSide); ctx.fill();
-  } else {
-    ctx.fillStyle = 'rgba(0,0,0,0.22)'; poly(ctx, side); ctx.fill();
+    const o = lift(pr(Math.floor(ax), Math.floor(ay)), h, z), ex = lift(pr(Math.floor(ax) + 1, Math.floor(ay)), h, z), ey = lift(pr(Math.floor(ax), Math.floor(ay) + 1), h, z);
+    paintTextured(ctx, faceTex, topFace, o, { x: ex.x - o.x, y: ex.y - o.y }, { x: ey.x - o.x, y: ey.y - o.y });
+    ctx.fillStyle = 'rgba(255,255,255,0.14)'; poly(ctx, topFace); ctx.fill();
   }
-  ctx.beginPath(); ctx.moveTo(L(D, 0).x, L(D, 0).y); ctx.lineTo(L(D, h).x, L(D, h).y); ctx.lineTo(tip.x, tip.y); ctx.lineTo(L(C, h).x, L(C, h).y); ctx.lineTo(L(C, 0).x, L(C, 0).y);
-  ctx.moveTo(L(C, h).x, L(C, h).y); ctx.lineTo(L(B, h).x, L(B, h).y); ctx.lineTo(tip.x, tip.y); ctx.moveTo(L(B, h).x, L(B, h).y); ctx.lineTo(L(B, 0).x, L(B, 0).y);
-  ctx.stroke();
-  void A;
+  poly(ctx, topFace); ctx.stroke();
 }
 
-/** Empalizada: troncos con punta a lo largo de los tramos vecinos (de atrás hacia delante). */
-function palisade(s: SpriteContext, has: boolean[], H: number, complete: boolean) {
-  const { foot, link } = s;
+/** Almenas alrededor de la tapa de una torre: en las esquinas y en medio de cada lado (de atrás hacia delante). */
+function towerMerlons(s: SpriteContext, cx: number, cy: number, pw: number, h: number, col: string) {
+  const w = 0.05, e = pw - w;
+  const spots: [number, number][] = [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1]];
+  spots.sort((a, b) => a[0] + a[1] - (b[0] + b[1]));
+  for (const [dx, dy] of spots) {
+    const mx = cx + dx * e, my = cy + dy * e;
+    slab(s, mx - w, my - w, mx + w, my + w, h, h + 5, col);
+  }
+}
+
+/** Franja del color del jugador al pie de un prisma (como en las murallas de AoE2): solo en las dos caras que se ven. */
+function band(s: SpriteContext, x0: number, y0: number, x1: number, y1: number) {
+  if (!/^#[0-9a-f]{6}$/i.test(s.color)) return;
+  const { ctx, z, project: pr } = s;
+  const B = pr(x1, y0), C = pr(x1, y1), D = pr(x0, y1), h0 = 0.6, h1 = 2.6;
+  ctx.fillStyle = shade(s.color, -0.05);
+  poly(ctx, [lift(D, h0, z), lift(C, h0, z), lift(C, h1, z), lift(D, h1, z)]); ctx.fill();
+  ctx.fillStyle = shade(s.color, -0.35);
+  poly(ctx, [lift(C, h0, z), lift(B, h0, z), lift(B, h1, z), lift(C, h1, z)]); ctx.fill();
+}
+
+/** Torre cuadrada de muralla: más ancha y alta que el lienzo, con almenas y la franja del jugador. */
+function tower(s: SpriteContext, cx: number, cy: number, pw: number, h: number, col: string, crenels: boolean) {
+  slab(s, cx - pw, cy - pw, cx + pw, cy + pw, 0, h, col, true);
+  band(s, cx - pw, cy - pw, cx + pw, cy + pw);
+  if (crenels) towerMerlons(s, cx, cy, pw, h, col);
+}
+
+/** Tronco redondo de empalizada (de pie en (x, y)): cilindro sombreado con la punta tallada. */
+function log(s: SpriteContext, x: number, y: number, r: number, h: number, k: number, tex: HTMLImageElement | null) {
+  const { ctx, z, project: pr } = s;
+  const p = pr(x, y), rx = r * 32 * z, ry = rx * 0.5, top = p.y - h * z;
+  const t = hash(x, y, k), tint = (t - 0.5) * 0.3;
+  const base = '#7b6a56';
+  // Cuerpo: rectángulo vertical con el pie redondeado
+  ctx.beginPath();
+  ctx.moveTo(p.x - rx, top); ctx.lineTo(p.x - rx, p.y); ctx.ellipse(p.x, p.y, rx, ry, 0, Math.PI, 0, true); ctx.lineTo(p.x + rx, top); ctx.closePath();
+  ctx.fillStyle = shade(base, tint); ctx.fill();
+  const body = [{ x: p.x - rx, y: top }, { x: p.x + rx, y: top }, { x: p.x + rx, y: p.y }, { x: p.x - rx, y: p.y }];
+  if (tex) {
+    const col = Math.floor(hash(x, y, k + 3) * 5);
+    paintTextured(ctx, tex, body, { x: p.x - rx - col * 2 * rx, y: top }, { x: 10 * rx, y: 0 }, { x: 0, y: h * z });
+  }
+  // Volumen: luz por la izquierda, sombra por la derecha
+  const g = ctx.createLinearGradient(p.x - rx, 0, p.x + rx, 0);
+  g.addColorStop(0, 'rgba(255,240,215,0.22)'); g.addColorStop(0.45, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,0.42)');
+  poly(ctx, body); ctx.fillStyle = g; ctx.fill();
+  // Punta tallada, algo torcida
+  const tip = { x: p.x + (hash(x, y, k + 7) - 0.5) * rx, y: top - (3 + 3 * t) * z };
+  ctx.beginPath(); ctx.moveTo(p.x - rx, top); ctx.lineTo(tip.x, tip.y); ctx.lineTo(p.x + rx, top); ctx.closePath();
+  ctx.fillStyle = shade('#a08c72', tint); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(tip.x, tip.y); ctx.lineTo(p.x + rx, top); ctx.lineTo(p.x + rx * 0.2, top); ctx.closePath();
+  ctx.fillStyle = 'rgba(0,0,0,0.25)'; ctx.fill();
+  ctx.strokeStyle = 'rgba(25,18,10,0.55)'; ctx.lineWidth = Math.max(0.4, 0.5 * z);
+  ctx.beginPath(); ctx.moveTo(p.x + rx, p.y); ctx.lineTo(p.x + rx, top); ctx.lineTo(tip.x, tip.y); ctx.lineTo(p.x - rx, top); ctx.stroke();
+}
+
+/** Bastión de empalizada: un corro de troncos más altos (esquinas, extremos, puertas y cada pocos tramos). */
+function bastion(s: SpriteContext, cx: number, cy: number, h: number, tex: HTMLImageElement | null) {
+  const pts: [number, number][] = [[cx, cy]];
+  for (let i = 0; i < 10; i++) { const a = (i / 10) * Math.PI * 2; pts.push([cx + Math.cos(a) * 0.17, cy + Math.sin(a) * 0.17]); }
+  pts.sort((a, b) => a[0] + a[1] - (b[0] + b[1]) || a[0] - b[0]);
+  pts.forEach(([x, y], i) => log(s, x, y, 0.1, h * (0.92 + 0.12 * hash(x, y, 5)), i, tex));
+}
+
+/** ¿Lleva torre (o bastión) esta casilla? En esquinas, cruces, extremos y cada tres casillas de un tramo recto. */
+function hasTower(tx: number, ty: number, has: boolean[], diagOnly: [number, number][]): boolean {
+  const n = has.filter(Boolean).length + diagOnly.length;
+  if (n !== 2) return true;
+  if (has[0] && has[2]) return tx % 3 === 0;
+  if (has[1] && has[3]) return ty % 3 === 0;
+  if (diagOnly.length === 2 && diagOnly[0][0] === -diagOnly[1][0] && diagOnly[0][1] === -diagOnly[1][1]) return tx % 3 === 0;
+  return true;
+}
+
+/** Empalizada: troncos redondos muy juntos sobre una franja de tierra, con bastiones. */
+function palisade(s: SpriteContext, has: boolean[], diagOnly: [number, number][], H: number, towerHere: boolean) {
+  const { ctx, foot, project: pr } = s;
   if (!foot) return;
   const { tx, ty } = foot;
-  const cx = tx + 0.5, cy = ty + 0.5;
-  const pts: [number, number][] = [[cx, cy]];
-  DIRS.forEach(([dx, dy], i) => { if (has[i]) pts.push([cx + dx * 0.2, cy + dy * 0.2], [cx + dx * 0.4, cy + dy * 0.4]); });
-  for (const [dx, dy] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) if (link?.(dx, dy)) pts.push([cx + dx * 0.17, cy + dy * 0.17], [cx + dx * 0.34, cy + dy * 0.34]);
-  if (!has.some(Boolean) && pts.length === 1) pts.push([cx - 0.2, cy], [cx + 0.2, cy]);
-  pts.sort((a, b) => a[0] + a[1] - (b[0] + b[1]));
-  pts.forEach(([x, y], i) => log(s, x, y, 0.1, H * (0.86 + 0.18 * hash(x, y, 9)) * (complete ? 1 : 1), i));
+  const cx = tx + 0.5, cy = ty + 0.5, tex = defenseTexture('palisade');
+  // Franja de tierra apisonada bajo los troncos
+  ctx.fillStyle = 'rgba(128,100,64,0.7)';
+  const strip = (dx: number, dy: number) => {
+    const len = Math.hypot(dx, dy), nx = -dy / len * 0.13, ny = dx / len * 0.13, ex = cx + dx * 0.5, ey = cy + dy * 0.5;
+    poly(ctx, [pr(cx + nx, cy + ny), pr(ex + nx, ey + ny), pr(ex - nx, ey - ny), pr(cx - nx, cy - ny)]); ctx.fill();
+  };
+  DIRS.forEach(([dx, dy], i) => { if (has[i]) strip(dx, dy); });
+  diagOnly.forEach(([dx, dy]) => strip(dx, dy));
+  ctx.beginPath(); ctx.ellipse(pr(cx, cy).x, pr(cx, cy).y, 0.2 * 32 * s.z, 0.1 * 32 * s.z, 0, 0, Math.PI * 2); ctx.fill();
+  // Troncos: el del centro y los de cada brazo (el que cae justo en el borde lo pone la casilla de abajo o la derecha)
+  const pts: [number, number][] = towerHere ? [] : [[cx, cy]];
+  const step = 0.125;
+  DIRS.forEach(([dx, dy], i) => {
+    if (!has[i]) return;
+    const last = dx > 0 || dy > 0 ? 4 : 3;
+    for (let k = towerHere ? 2 : 1; k <= last; k++) pts.push([cx + dx * step * k, cy + dy * step * k]);
+  });
+  diagOnly.forEach(([dx, dy]) => {
+    const last = dy > 0 ? 5 : 4;
+    for (let k = towerHere ? 2 : 1; k <= last; k++) pts.push([cx + dx * 0.1 * k, cy + dy * 0.1 * k]);
+  });
+  if (!has.some(Boolean) && !diagOnly.length && !towerHere) pts.push([cx - step, cy], [cx + step, cy]);
+  const front = pts.filter(([x, y]) => x + y > cx + cy), back = pts.filter(([x, y]) => x + y <= cx + cy);
+  const draw = (list: [number, number][]) => {
+    list.sort((a, b) => a[0] + a[1] - (b[0] + b[1]) || a[0] - b[0]);
+    list.forEach(([x, y], i) => log(s, x, y, 0.085, H * (0.9 + 0.16 * hash(x, y, 9)), i, tex));
+  };
+  draw(back);
+  if (towerHere) bastion(s, cx, cy, H * 1.3, tex);
+  draw(front);
 }
 
-/** Muro, empalizada o puerta de una casilla: brazos continuos hacia los tramos vecinos. */
+/** Puerta: dos torres (o bastiones) a los lados, un dintel encima y un rastrillo en el hueco. */
+function gate(s: SpriteContext, alongY: boolean, H: number, col: string, woody: boolean, crenels: boolean, thc: number) {
+  const { ctx, z, foot, project: pr } = s;
+  if (!foot) return;
+  const { tx, ty } = foot;
+  const cx = tx + 0.5, cy = ty + 0.5, off = 0.32, pw = 0.17;
+  const at = (k: number): [number, number] => alongY ? [cx, cy + k * off] : [cx + k * off, cy];
+  const side = (k: number) => {
+    const [x, y] = at(k);
+    if (woody) bastion(s, x, y, H * 1.25, defenseTexture('palisade'));
+    else tower(s, x, y, pw, H * 1.3, col, crenels);
+  };
+  side(-1);
+  // Rastrillo: rejilla oscura en el plano de delante del hueco
+  const span = off - pw, hO = H * 0.68;
+  const P0 = alongY ? pr(cx + thc, cy - span) : pr(cx - span, cy + thc), P1 = alongY ? pr(cx + thc, cy + span) : pr(cx + span, cy + thc);
+  ctx.fillStyle = 'rgba(15,10,6,0.55)';
+  poly(ctx, [P0, P1, lift(P1, hO, z), lift(P0, hO, z)]); ctx.fill();
+  ctx.strokeStyle = woody ? 'rgba(70,50,30,0.95)' : 'rgba(40,40,44,0.95)'; ctx.lineWidth = Math.max(0.6, 1 * z);
+  for (let i = 0; i <= 5; i++) {
+    const a = { x: P0.x + (P1.x - P0.x) * i / 5, y: P0.y + (P1.y - P0.y) * i / 5 };
+    ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(a.x, a.y - hO * z); ctx.stroke();
+  }
+  for (let j = 1; j <= 4; j++) {
+    const h = hO * j / 4.5;
+    ctx.beginPath(); ctx.moveTo(P0.x, P0.y - h * z); ctx.lineTo(P1.x, P1.y - h * z); ctx.stroke();
+  }
+  // Dintel sobre el hueco
+  const lt = thc + 0.02;
+  const tex = faceTex; if (woody) faceTex = defenseTexture('wood');
+  if (alongY) slab(s, cx - lt, cy - span, cx + lt, cy + span, hO, H, woody ? '#6e5536' : col);
+  else slab(s, cx - span, cy - lt, cx + span, cy + lt, hO, H, woody ? '#6e5536' : col);
+  faceTex = tex;
+  side(1);
+}
+
+/** Muro, empalizada o puerta de una casilla: lienzo fino con paso de ronda, torres y uniones con los vecinos. */
 const wall: SpriteFn = s => {
   const { ctx, z, params: P, entity: e, foot, link, project: pr } = s;
   if (!foot) return;
   const { tx, ty } = foot;
   faceTex = textureFor(P);
   const complete = !e || e.complete, progress = e ? (e.complete ? 1 : e.progress) : 1;
-  const col: string = P.color ?? '#a9a398', top: string = P.top ?? col;
+  const col: string = P.color ?? '#a9a398';
   const H: number = (P.height ?? 22) * HEIGHT_SCALE * (complete ? 1 : 0.25 + 0.75 * progress);
-  const th = (P.thick ?? 0.17) * (P.stakes ? 1 : 0.95);
+  const thc = (P.thick ?? 0.17) * 0.6;
   const cx = tx + 0.5, cy = ty + 0.5;
-  // Sombra en el suelo
-  ctx.fillStyle = 'rgba(0,0,0,0.22)';
-  poly(ctx, [pr(tx + 0.1, ty + 0.1), pr(tx + 0.95, ty + 0.1), pr(tx + 0.95, ty + 0.95), pr(tx + 0.1, ty + 0.95)]); ctx.fill();
   const has = DIRS.map(([dx, dy]) => !!link?.(dx, dy));
-  if (P.stakes) {
-    palisade(s, has, H, complete);
+  // Uniones solo en oblicuo (si un lado ortogonal ya está unido, sobran)
+  const diagOnly: [number, number][] = ([[-1, -1], [1, -1], [-1, 1], [1, 1]] as [number, number][])
+    .filter(([dx, dy]) => !has[dx < 0 ? 0 : 2] && !has[dy < 0 ? 1 : 3] && !!link?.(dx, dy));
+  const towerHere = hasTower(tx, ty, has, diagOnly);
+  const woody = !!P.stakes || P.color === '#8a6a3e';
+  if (P.gate) {
+    gate(s, has[1] || has[3], H, col, woody, !!P.crenels || !woody, thc);
+  } else if (P.stakes) {
+    palisade(s, has, diagOnly, H, towerHere);
   } else {
-    const ah = P.gate ? Math.min(H, 8) : H;
-    const arm = (i: number) => {
-      const [dx, dy] = DIRS[i];
-      const x0 = dx < 0 ? tx : dx > 0 ? cx : cx - th, x1 = dx < 0 ? cx : dx > 0 ? tx + 1 : cx + th;
-      const y0 = dy < 0 ? ty : dy > 0 ? cy : cy - th, y1 = dy < 0 ? cy : dy > 0 ? ty + 1 : cy + th;
-      slab(s, x0, y0, x1, y1, 0, ah, col);
+    const pw = (P.thick ?? 0.17) + 0.08;
+    // Lienzo: de la torre (si la hay) o del centro hasta el borde de la casilla, con su paso de ronda y parapetos bajos
+    const curtain = (dx: number, dy: number) => {
+      const st = towerHere ? pw : 0;
+      if (dx || dy) {
+        if (dx && dy) { bar(s, cx + dx * st * 0.7, cy + dy * st * 0.7, cx + dx * 0.5, cy + dy * 0.5, thc, H, col); return; }
+        const a = dx < 0 ? tx : dx > 0 ? cx + st : cx - thc, b = dx < 0 ? cx - st : dx > 0 ? tx + 1 : cx + thc;
+        const c = dy < 0 ? ty : dy > 0 ? cy + st : cy - thc, d = dy < 0 ? cy - st : dy > 0 ? ty + 1 : cy + thc;
+        slab(s, a, c, b, d, 0, H, col);
+        band(s, a, c, b, d);
+        const lw = 0.035;
+        if (dx) { slab(s, a, c, b, c + lw, H, H + 2.6, col); slab(s, a, d - lw, b, d, H, H + 2.6, col); }
+        else { slab(s, a, c, a + lw, d, H, H + 2.6, col); slab(s, b - lw, c, b, d, H, H + 2.6, col); }
+      }
     };
-    const diag = (dx: number, dy: number) => {
-      // Solo las uniones que de verdad van en oblicuo: si algún lado ortogonal ya está unido, la barra sobra
-      if (has[dx < 0 ? 0 : 2] || has[dy < 0 ? 1 : 3]) return;
-      if (link?.(dx, dy)) bar(s, cx, cy, cx + dx * 0.5, cy + dy * 0.5, Math.max(0.1, th * 0.8), P.gate ? Math.min(H, 8) : H, col);
-    };
-    // De atrás hacia delante: los brazos hacia -x y -y primero, los de +x y +y después del pilar
-    diag(-1, -1);
-    if (P.gate) {
-      // Puerta: dos torreones a los lados de la casilla y un dintel encima; el hueco queda abierto
-      const alongY = has[1] || has[3], pw = th + 0.06, op = 0.26;
-      const box = (a0: number, a1: number, h0: number, h1: number, c: string) => alongY
-        ? slab(s, cx - pw, ty + a0, cx + pw, ty + a1, h0, h1, c, true)
-        : slab(s, tx + a0, cy - pw, tx + a1, cy + pw, h0, h1, c, true);
-      box(0, 0.5 - op, 0, H, col);
-      const tex = faceTex; faceTex = null; // el dintel es bajo: va liso
-      box(0.5 - op, 0.5 + op, H * 0.74, H, darken(col, 0.08));
-      faceTex = tex;
-      box(0.5 + op, 1, 0, H, col);
-    } else {
-      arm(0); arm(1);
-    }
-    const straight = (has[0] && has[2] && !has[1] && !has[3]) || (has[1] && has[3] && !has[0] && !has[2]);
-    if (P.gate) {
-      // (los torreones ya están dibujados)
-    } else if (!straight) {
-      // Esquinas, cruces y extremos: un pilar algo más alto y ancho que el muro
-      const pw = th + 0.04;
-      slab(s, cx - pw, cy - pw, cx + pw, cy + pw, 0, H + 1.5, col, true);
-      ctx.fillStyle = top;
-      if (P.crenels) merlons(s, cx, cy, pw, H + 1.5, col);
-    }
-    if (!P.gate) { arm(2); arm(3); }
-    // Uniones en diagonal (las líneas trazadas en oblicuo): una barra hasta la esquina compartida
-    for (const [dx, dy] of [[1, -1], [-1, 1], [1, 1]]) diag(dx, dy);
+    const back: [number, number][] = [], fwd: [number, number][] = [];
+    DIRS.forEach(([dx, dy], i) => { if (has[i]) (dx + dy < 0 ? back : fwd).push([dx, dy]); });
+    diagOnly.forEach(([dx, dy]) => (dx + dy < 0 || (dx + dy === 0 && dy < 0) ? back : fwd).push([dx, dy]));
+    back.forEach(([dx, dy]) => curtain(dx, dy));
+    if (towerHere) tower(s, cx, cy, pw, H * 1.35, col, !!P.crenels);
+    else if (!back.length && !fwd.length) tower(s, cx, cy, pw, H * 1.35, col, !!P.crenels);
+    fwd.forEach(([dx, dy]) => curtain(dx, dy));
   }
   if (!complete) {
     ctx.strokeStyle = '#7a5a32'; ctx.lineWidth = Math.max(0.6, 1.1 * z);
