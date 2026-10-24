@@ -1711,6 +1711,19 @@
         { "id": "cannon", "state": "attack" },
         null
       ]
+    },
+    {
+      "source": "pack6-unidades/aldeano-atacar.jpg",
+      "grid": "auto",
+      "sharedScale": true,
+      "items": [
+        { "id": "villager", "state": "attack", "height": 46 },
+        { "id": "villager", "state": "attack" },
+        { "id": "villager", "state": "attack" },
+        { "id": "villager", "state": "attack" },
+        { "id": "villager", "state": "attack" },
+        { "id": "villager", "state": "attack" }
+      ]
     }
   ]
 }

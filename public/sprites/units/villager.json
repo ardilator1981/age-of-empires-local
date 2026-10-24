@@ -179,6 +179,21 @@
         "x": 31,
         "y": 102
       }
+    },
+    "attack": {
+      "image": "villager-attack.png",
+      "mask": "villager-attack-mask.png",
+      "row": 0,
+      "frames": 6,
+      "fps": 8,
+      "cell": {
+        "w": 65,
+        "h": 123
+      },
+      "anchor": {
+        "x": 33,
+        "y": 117
+      }
     }
   }
 }

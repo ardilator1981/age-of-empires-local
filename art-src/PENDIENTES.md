@@ -8,7 +8,7 @@
 
 | Tipo | Hecho | Sin animar | Pendiente |
 | --- | ---: | ---: | ---: |
-| unidad | 2 | 42 | 38 |
+| unidad | 3 | 41 | 38 |
 | edificio | 0 | 12 | 57 |
 | recurso | 6 | 0 | 6 |
 | terreno | 9 | 0 | 0 |
@@ -20,7 +20,6 @@
 
 1. Aldeano: recoger, llevar carga y construir · 2. Unidades de combate: andar y atacar · 3. Muerte y edificios por edad · 4. Variantes por edad restantes · 5. Decoración, efectos e interfaz (necesitan además soporte en el motor).
 
-- P2 · **unidad villager**: attack
 - P2 · **unidad longSwordsman**: walk, attack, death
 - P2 · **unidad pikeman**: walk, attack, death
 - P2 · **unidad batteringRam**: walk, attack, death
@@ -35,12 +34,13 @@
 - P2 · **unidad unicorn**: walk, attack, death
 - P2 · **unidad fubing**: walk, attack, death
 - P2 · **unidad fireLance**: walk, attack, death
+- P2 · **unidad repeatingCrossbowman**: walk, attack, death
 
 ## Unidades
 
 | id | nombre | estado | falta | archivos esperados (en public/sprites/) | prio | prompt |
 | --- | --- | --- | --- | --- | ---: | --- |
-| villager | Aldeano | 🟡 sin animar | attack | units/villager-attack.png (+ -mask.png) | 2 | `anim:attack-melee` |
+| villager | Aldeano | ✅ hecho | — | — | — | — |
 | militia | Milicia | ✅ hecho | — | — | — | — |
 | manAtArms | Hombre de armas | 🟡 sin animar | death | units/manAtArms-death.png (+ -mask.png) | 3 | `anim:death` |
 | longSwordsman | Espadachín de mandoble | 🟡 sin animar | walk, attack, death | units/longSwordsman-walk.png (+ -mask.png)<br>units/longSwordsman-attack.png (+ -mask.png)<br>units/longSwordsman-death.png (+ -mask.png) | 2 | `anim:walk` `anim:attack-melee` `anim:death` |
