@@ -1,0 +1,101 @@
+{
+  "kind": "resource",
+  "out": "ui/tech",
+  "groups": {
+    "feudalAge": {
+      "shadow": false
+    },
+    "castleAge": {
+      "shadow": false
+    },
+    "imperialAge": {
+      "shadow": false
+    },
+    "loom": {
+      "shadow": false
+    },
+    "wheelbarrow": {
+      "shadow": false
+    },
+    "handCart": {
+      "shadow": false
+    },
+    "doubleBitAxe": {
+      "shadow": false
+    },
+    "bowSaw": {
+      "shadow": false
+    },
+    "horseCollar": {
+      "shadow": false
+    },
+    "heavyPlow": {
+      "shadow": false
+    },
+    "goldMining": {
+      "shadow": false
+    },
+    "stoneMining": {
+      "shadow": false
+    }
+  },
+  "sources": [
+    {
+      "source": "pack9-interfaz/tech-1.jpg",
+      "grid": [
+        4,
+        3
+      ],
+      "items": [
+        {
+          "id": "feudalAge",
+          "height": 48
+        },
+        {
+          "id": "castleAge",
+          "height": 48
+        },
+        {
+          "id": "imperialAge",
+          "height": 48
+        },
+        {
+          "id": "loom",
+          "height": 48
+        },
+        {
+          "id": "wheelbarrow",
+          "height": 48
+        },
+        {
+          "id": "handCart",
+          "height": 48
+        },
+        {
+          "id": "doubleBitAxe",
+          "height": 48
+        },
+        {
+          "id": "bowSaw",
+          "height": 48
+        },
+        {
+          "id": "horseCollar",
+          "height": 48
+        },
+        {
+          "id": "heavyPlow",
+          "height": 48
+        },
+        {
+          "id": "goldMining",
+          "height": 48
+        },
+        {
+          "id": "stoneMining",
+          "height": 48
+        }
+      ]
+    }
+  ]
+}

@@ -14,7 +14,7 @@
 | terreno | 9 | 0 | 0 |
 | decoración | 9 | 0 | 0 |
 | efecto | 8 | 0 | 5 |
-| interfaz | 11 | 0 | 101 |
+| interfaz | 23 | 0 | 89 |
 
 ## Siguiente en generar (por prioridad)
 
@@ -290,18 +290,18 @@
 | panel-wood | Panel de madera | 🔴 pendiente | imagen | ui/panel-wood.png | 5 | `ui:panel` |
 | panel-parchment | Pergamino | 🔴 pendiente | imagen | ui/panel-parchment.png | 5 | `ui:panel` |
 | frame-corner | Esquina de marco | 🔴 pendiente | imagen | ui/frame-corner.png | 5 | `ui:panel` |
-| feudalAge | Tecnología: Edad Feudal | 🔴 pendiente | imagen | ui/tech/feudalAge.png | 5 | `ui:tech` |
-| castleAge | Tecnología: Edad de los Castillos | 🔴 pendiente | imagen | ui/tech/castleAge.png | 5 | `ui:tech` |
-| imperialAge | Tecnología: Edad Imperial | 🔴 pendiente | imagen | ui/tech/imperialAge.png | 5 | `ui:tech` |
-| loom | Tecnología: Telar | 🔴 pendiente | imagen | ui/tech/loom.png | 5 | `ui:tech` |
-| wheelbarrow | Tecnología: Carretilla | 🔴 pendiente | imagen | ui/tech/wheelbarrow.png | 5 | `ui:tech` |
-| handCart | Tecnología: Carro de mano | 🔴 pendiente | imagen | ui/tech/handCart.png | 5 | `ui:tech` |
-| doubleBitAxe | Tecnología: Hacha de doble filo | 🔴 pendiente | imagen | ui/tech/doubleBitAxe.png | 5 | `ui:tech` |
-| bowSaw | Tecnología: Sierra de arco | 🔴 pendiente | imagen | ui/tech/bowSaw.png | 5 | `ui:tech` |
-| horseCollar | Tecnología: Collera | 🔴 pendiente | imagen | ui/tech/horseCollar.png | 5 | `ui:tech` |
-| heavyPlow | Tecnología: Arado pesado | 🔴 pendiente | imagen | ui/tech/heavyPlow.png | 5 | `ui:tech` |
-| goldMining | Tecnología: Minería de oro | 🔴 pendiente | imagen | ui/tech/goldMining.png | 5 | `ui:tech` |
-| stoneMining | Tecnología: Cantería | 🔴 pendiente | imagen | ui/tech/stoneMining.png | 5 | `ui:tech` |
+| feudalAge | Tecnología: Edad Feudal | ✅ hecho | — | — | — | — |
+| castleAge | Tecnología: Edad de los Castillos | ✅ hecho | — | — | — | — |
+| imperialAge | Tecnología: Edad Imperial | ✅ hecho | — | — | — | — |
+| loom | Tecnología: Telar | ✅ hecho | — | — | — | — |
+| wheelbarrow | Tecnología: Carretilla | ✅ hecho | — | — | — | — |
+| handCart | Tecnología: Carro de mano | ✅ hecho | — | — | — | — |
+| doubleBitAxe | Tecnología: Hacha de doble filo | ✅ hecho | — | — | — | — |
+| bowSaw | Tecnología: Sierra de arco | ✅ hecho | — | — | — | — |
+| horseCollar | Tecnología: Collera | ✅ hecho | — | — | — | — |
+| heavyPlow | Tecnología: Arado pesado | ✅ hecho | — | — | — | — |
+| goldMining | Tecnología: Minería de oro | ✅ hecho | — | — | — | — |
+| stoneMining | Tecnología: Cantería | ✅ hecho | — | — | — | — |
 | forging | Tecnología: Forja | 🔴 pendiente | imagen | ui/tech/forging.png | 5 | `ui:tech` |
 | ironCasting | Tecnología: Fundición de hierro | 🔴 pendiente | imagen | ui/tech/ironCasting.png | 5 | `ui:tech` |
 | fletching | Tecnología: Emplumado | 🔴 pendiente | imagen | ui/tech/fletching.png | 5 | `ui:tech` |
