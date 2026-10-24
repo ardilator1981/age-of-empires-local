@@ -14,5 +14,78 @@
       "row": 0,
       "frames": 1
     }
+  },
+  "ages": {
+    "2": {
+      "image": "stable-2.png",
+      "states": {
+        "idle": {
+          "row": 0,
+          "frames": 1,
+          "cell": {
+            "w": 392,
+            "h": 324
+          },
+          "anchor": {
+            "x": 196,
+            "y": 224
+          }
+        }
+      }
+    },
+    "3": {
+      "image": "stable-3.png",
+      "mask": "stable-3-mask.png",
+      "states": {
+        "idle": {
+          "row": 0,
+          "frames": 1,
+          "cell": {
+            "w": 392,
+            "h": 337
+          },
+          "anchor": {
+            "x": 196,
+            "y": 237
+          }
+        }
+      }
+    },
+    "4": {
+      "image": "stable-4.png",
+      "mask": "stable-4-mask.png",
+      "states": {
+        "idle": {
+          "row": 0,
+          "frames": 1,
+          "cell": {
+            "w": 392,
+            "h": 344
+          },
+          "anchor": {
+            "x": 196,
+            "y": 244
+          }
+        }
+      }
+    },
+    "5": {
+      "image": "stable-5.png",
+      "mask": "stable-5-mask.png",
+      "states": {
+        "idle": {
+          "row": 0,
+          "frames": 1,
+          "cell": {
+            "w": 392,
+            "h": 343
+          },
+          "anchor": {
+            "x": 196,
+            "y": 243
+          }
+        }
+      }
+    }
   }
 }

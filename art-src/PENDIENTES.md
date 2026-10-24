@@ -9,7 +9,7 @@
 | Tipo | Hecho | Sin animar | Pendiente |
 | --- | ---: | ---: | ---: |
 | unidad | 10 | 34 | 38 |
-| edificio | 6 | 6 | 57 |
+| edificio | 12 | 0 | 57 |
 | recurso | 6 | 0 | 6 |
 | terreno | 9 | 0 | 0 |
 | decoración | 9 | 0 | 0 |
@@ -136,12 +136,12 @@
 | miningCamp | Campamento minero | ✅ hecho | — | — | — | — |
 | farm | Granja | 🔴 pendiente | imagen base (Edad Oscura), Edad Feudal, Edad de los Castillos, Edad Imperial, Edad de la Pólvora, Edad Industrial | buildings/farm.png (+ -mask.png)<br>buildings/farm-1.png (+ -mask.png)<br>buildings/farm-2.png (+ -mask.png)<br>buildings/farm-3.png (+ -mask.png)<br>buildings/farm-4.png (+ -mask.png)<br>buildings/farm-5.png (+ -mask.png) | 3 | `building:base` |
 | barracks | Cuartel | ✅ hecho | — | — | — | — |
-| archeryRange | Galería de tiro con arco | 🟡 sin animar | Edad de los Castillos, Edad Imperial, Edad de la Pólvora, Edad Industrial | buildings/archeryRange-2.png (+ -mask.png)<br>buildings/archeryRange-3.png (+ -mask.png)<br>buildings/archeryRange-4.png (+ -mask.png)<br>buildings/archeryRange-5.png (+ -mask.png) | 4 | `building:age` |
-| stable | Establo | 🟡 sin animar | Edad de los Castillos, Edad Imperial, Edad de la Pólvora, Edad Industrial | buildings/stable-2.png (+ -mask.png)<br>buildings/stable-3.png (+ -mask.png)<br>buildings/stable-4.png (+ -mask.png)<br>buildings/stable-5.png (+ -mask.png) | 4 | `building:age` |
-| blacksmith | Herrería | 🟡 sin animar | Edad de los Castillos, Edad Imperial, Edad de la Pólvora, Edad Industrial | buildings/blacksmith-2.png (+ -mask.png)<br>buildings/blacksmith-3.png (+ -mask.png)<br>buildings/blacksmith-4.png (+ -mask.png)<br>buildings/blacksmith-5.png (+ -mask.png) | 4 | `building:age` |
-| watchTower | Torre de vigilancia | 🟡 sin animar | Edad de la Pólvora, Edad Industrial | buildings/watchTower-4.png (+ -mask.png)<br>buildings/watchTower-5.png (+ -mask.png) | 4 | `building:age` |
-| siegeWorkshop | Taller de asedio | 🟡 sin animar | Edad Imperial, Edad de la Pólvora, Edad Industrial | buildings/siegeWorkshop-3.png (+ -mask.png)<br>buildings/siegeWorkshop-4.png (+ -mask.png)<br>buildings/siegeWorkshop-5.png (+ -mask.png) | 4 | `building:age` |
-| castle | Castillo | 🟡 sin animar | Edad Imperial, Edad de la Pólvora, Edad Industrial | buildings/castle-3.png (+ -mask.png)<br>buildings/castle-4.png (+ -mask.png)<br>buildings/castle-5.png (+ -mask.png) | 4 | `building:age` |
+| archeryRange | Galería de tiro con arco | ✅ hecho | — | — | — | — |
+| stable | Establo | ✅ hecho | — | — | — | — |
+| blacksmith | Herrería | ✅ hecho | — | — | — | — |
+| watchTower | Torre de vigilancia | ✅ hecho | — | — | — | — |
+| siegeWorkshop | Taller de asedio | ✅ hecho | — | — | — | — |
+| castle | Castillo | ✅ hecho | — | — | — | — |
 | gorodishche | Gorodishche | 🔴 pendiente | imagen base (Edad Oscura), Edad Feudal, Edad de los Castillos, Edad Imperial, Edad de la Pólvora, Edad Industrial | buildings/gorodishche.png (+ -mask.png)<br>buildings/gorodishche-1.png (+ -mask.png)<br>buildings/gorodishche-2.png (+ -mask.png)<br>buildings/gorodishche-3.png (+ -mask.png)<br>buildings/gorodishche-4.png (+ -mask.png)<br>buildings/gorodishche-5.png (+ -mask.png) | 3 | `building:base` |
 | monasteryFortress | Monasterio-fortaleza | 🔴 pendiente | imagen base (Edad Feudal), Edad de los Castillos, Edad Imperial, Edad de la Pólvora, Edad Industrial | buildings/monasteryFortress.png (+ -mask.png)<br>buildings/monasteryFortress-2.png (+ -mask.png)<br>buildings/monasteryFortress-3.png (+ -mask.png)<br>buildings/monasteryFortress-4.png (+ -mask.png)<br>buildings/monasteryFortress-5.png (+ -mask.png) | 3 | `building:base` |
 | kremlin | Kremlin de piedra | 🔴 pendiente | imagen base (Edad de los Castillos), Edad Imperial, Edad de la Pólvora, Edad Industrial | buildings/kremlin.png (+ -mask.png)<br>buildings/kremlin-3.png (+ -mask.png)<br>buildings/kremlin-4.png (+ -mask.png)<br>buildings/kremlin-5.png (+ -mask.png) | 3 | `building:base` |
@@ -201,8 +201,8 @@
 
 *huella 2x2*
 *huella 3x3*
-*huella 1x1*
 *huella 4x4*
+*huella 1x1*
 
 ## Recursos
 
@@ -438,12 +438,6 @@ Draw a new picture: using the attached character as the exact model (same face, 
 
 ```text
 Draw a new picture: using the attached character as the exact model (same face, body, clothes, colors, weapon and magenta cloth), draw 6 poses of one complete walking step that loops smoothly: right hoof forward, passing, left hoof forward, passing (the horse moves, the rider stays in the saddle). The 6 poses are side by side in a single horizontal row on a plain white background, evenly spaced and not touching. Same viewing angle from slightly above, turned toward the lower right, the same size in every pose, the feet on the same level. Sunlight from the upper left; no shadow, no ground, no motion blur. No writing, no numbers, no frame.
-```
-
-### `building:age`
-
-```text
-Redraw the attached building as it would look in a later, richer period (feudal: half-timbered walls, red clay tiles; castles: dressed stone, slate roofs; imperial: ornate stone and brick, spires), keeping the same viewing angle, size, footprint and lighting from the upper left. Plain white background, no shadow, no ground. Flags and awnings in bright magenta. No writing, no numbers, no frame.
 ```
 
 ### `building:base`

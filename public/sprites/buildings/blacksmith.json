@@ -15,5 +15,78 @@
       "row": 0,
       "frames": 1
     }
+  },
+  "ages": {
+    "2": {
+      "image": "blacksmith-2.png",
+      "mask": "blacksmith-2-mask.png",
+      "states": {
+        "idle": {
+          "row": 0,
+          "frames": 1,
+          "cell": {
+            "w": 392,
+            "h": 369
+          },
+          "anchor": {
+            "x": 196,
+            "y": 269
+          }
+        }
+      }
+    },
+    "3": {
+      "image": "blacksmith-3.png",
+      "mask": "blacksmith-3-mask.png",
+      "states": {
+        "idle": {
+          "row": 0,
+          "frames": 1,
+          "cell": {
+            "w": 392,
+            "h": 376
+          },
+          "anchor": {
+            "x": 196,
+            "y": 276
+          }
+        }
+      }
+    },
+    "4": {
+      "image": "blacksmith-4.png",
+      "mask": "blacksmith-4-mask.png",
+      "states": {
+        "idle": {
+          "row": 0,
+          "frames": 1,
+          "cell": {
+            "w": 392,
+            "h": 362
+          },
+          "anchor": {
+            "x": 196,
+            "y": 262
+          }
+        }
+      }
+    },
+    "5": {
+      "image": "blacksmith-5.png",
+      "states": {
+        "idle": {
+          "row": 0,
+          "frames": 1,
+          "cell": {
+            "w": 392,
+            "h": 346
+          },
+          "anchor": {
+            "x": 196,
+            "y": 246
+          }
+        }
+      }
+    }
   }
 }

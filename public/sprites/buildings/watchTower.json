@@ -70,6 +70,42 @@
           }
         }
       }
+    },
+    "4": {
+      "image": "watchTower-4.png",
+      "mask": "watchTower-4-mask.png",
+      "states": {
+        "idle": {
+          "row": 0,
+          "frames": 1,
+          "cell": {
+            "w": 181,
+            "h": 196
+          },
+          "anchor": {
+            "x": 91,
+            "y": 149
+          }
+        }
+      }
+    },
+    "5": {
+      "image": "watchTower-5.png",
+      "mask": "watchTower-5-mask.png",
+      "states": {
+        "idle": {
+          "row": 0,
+          "frames": 1,
+          "cell": {
+            "w": 181,
+            "h": 157
+          },
+          "anchor": {
+            "x": 91,
+            "y": 110
+          }
+        }
+      }
     }
   }
 }

@@ -15,5 +15,60 @@
       "row": 0,
       "frames": 1
     }
+  },
+  "ages": {
+    "3": {
+      "image": "siegeWorkshop-3.png",
+      "mask": "siegeWorkshop-3-mask.png",
+      "states": {
+        "idle": {
+          "row": 0,
+          "frames": 1,
+          "cell": {
+            "w": 392,
+            "h": 271
+          },
+          "anchor": {
+            "x": 196,
+            "y": 171
+          }
+        }
+      }
+    },
+    "4": {
+      "image": "siegeWorkshop-4.png",
+      "mask": "siegeWorkshop-4-mask.png",
+      "states": {
+        "idle": {
+          "row": 0,
+          "frames": 1,
+          "cell": {
+            "w": 392,
+            "h": 265
+          },
+          "anchor": {
+            "x": 196,
+            "y": 165
+          }
+        }
+      }
+    },
+    "5": {
+      "image": "siegeWorkshop-5.png",
+      "states": {
+        "idle": {
+          "row": 0,
+          "frames": 1,
+          "cell": {
+            "w": 392,
+            "h": 327
+          },
+          "anchor": {
+            "x": 196,
+            "y": 227
+          }
+        }
+      }
+    }
   }
 }

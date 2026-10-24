@@ -15,5 +15,79 @@
       "row": 0,
       "frames": 1
     }
+  },
+  "ages": {
+    "2": {
+      "image": "archeryRange-2.png",
+      "mask": "archeryRange-2-mask.png",
+      "states": {
+        "idle": {
+          "row": 0,
+          "frames": 1,
+          "cell": {
+            "w": 392,
+            "h": 306
+          },
+          "anchor": {
+            "x": 196,
+            "y": 206
+          }
+        }
+      }
+    },
+    "3": {
+      "image": "archeryRange-3.png",
+      "mask": "archeryRange-3-mask.png",
+      "states": {
+        "idle": {
+          "row": 0,
+          "frames": 1,
+          "cell": {
+            "w": 392,
+            "h": 276
+          },
+          "anchor": {
+            "x": 196,
+            "y": 176
+          }
+        }
+      }
+    },
+    "4": {
+      "image": "archeryRange-4.png",
+      "mask": "archeryRange-4-mask.png",
+      "states": {
+        "idle": {
+          "row": 0,
+          "frames": 1,
+          "cell": {
+            "w": 392,
+            "h": 288
+          },
+          "anchor": {
+            "x": 196,
+            "y": 188
+          }
+        }
+      }
+    },
+    "5": {
+      "image": "archeryRange-5.png",
+      "mask": "archeryRange-5-mask.png",
+      "states": {
+        "idle": {
+          "row": 0,
+          "frames": 1,
+          "cell": {
+            "w": 392,
+            "h": 287
+          },
+          "anchor": {
+            "x": 196,
+            "y": 187
+          }
+        }
+      }
+    }
   }
 }
