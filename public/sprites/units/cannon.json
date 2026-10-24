@@ -14,6 +14,36 @@
     "idle": {
       "row": 0,
       "frames": 1
+    },
+    "walk": {
+      "image": "cannon-walk.png",
+      "mask": "cannon-walk-mask.png",
+      "row": 0,
+      "frames": 6,
+      "fps": 8,
+      "cell": {
+        "w": 156,
+        "h": 95
+      },
+      "anchor": {
+        "x": 78,
+        "y": 89
+      }
+    },
+    "attack": {
+      "image": "cannon-attack.png",
+      "mask": "cannon-attack-mask.png",
+      "row": 0,
+      "frames": 6,
+      "fps": 8,
+      "cell": {
+        "w": 180,
+        "h": 116
+      },
+      "anchor": {
+        "x": 90,
+        "y": 110
+      }
     }
   }
 }

@@ -1681,6 +1681,36 @@
         { "id": "dragoon", "state": "attack" },
         { "id": "dragoon", "state": "attack" }
       ]
+    },
+    {
+      "source": "pack6-unidades/canon-rodar.jpg",
+      "grid": [4, 2],
+      "sharedScale": true,
+      "items": [
+        { "id": "cannon", "state": "walk", "width": 70 },
+        { "id": "cannon", "state": "walk" },
+        { "id": "cannon", "state": "walk" },
+        { "id": "cannon", "state": "walk" },
+        { "id": "cannon", "state": "walk" },
+        { "id": "cannon", "state": "walk" },
+        { "id": "cannon", "state": "walk" },
+        null
+      ]
+    },
+    {
+      "source": "pack6-unidades/canon-disparar.jpg",
+      "grid": [4, 2],
+      "sharedScale": true,
+      "items": [
+        { "id": "cannon", "state": "attack", "width": 70 },
+        { "id": "cannon", "state": "attack" },
+        { "id": "cannon", "state": "attack" },
+        { "id": "cannon", "state": "attack" },
+        { "id": "cannon", "state": "attack" },
+        { "id": "cannon", "state": "attack" },
+        { "id": "cannon", "state": "attack" },
+        null
+      ]
     }
   ]
 }
