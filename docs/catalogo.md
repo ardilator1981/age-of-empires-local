@@ -16,7 +16,7 @@
 | Tipo | Total | ✔ Integrado | ⚠ Sin usar | 🛠 En desarrollo | 🎨 Decorativo |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | 🧍 Unidades | 82 | 81 | 1 | 0 | 0 |
-| 🏛️ Edificios | 69 | 61 | 8 | 0 | 0 |
+| 🏛️ Edificios | 69 | 63 | 6 | 0 | 0 |
 | 📜 Tecnologías | 95 | 94 | 1 | 0 | 0 |
 | 🪙 Recursos | 6 | 6 | 0 | 0 | 0 |
 | 🌲 Nodos del mapa | 12 | 12 | 0 | 0 | 0 |
@@ -24,7 +24,7 @@
 | 🚩 Civilizaciones | 6 | 6 | 0 | 0 | 0 |
 | 🏆 Victorias | 3 | 3 | 0 | 0 | 0 |
 | 🗺️ Terrenos | 9 | 9 | 0 | 0 | 0 |
-| ⚙️ Motor y mods | 46 | 46 | 0 | 0 | 0 |
+| ⚙️ Motor y mods | 47 | 47 | 0 | 0 | 0 |
 
 ## Desarrollos, implicaciones y aplicaciones
 
@@ -66,9 +66,7 @@ Todo lo que no está plenamente integrado, con lo que le falta.
 | Edificios | 🚪 Puerta de empalizada (`palisadeGate`) | ⚠ Sin usar | No entrena, no investiga, no es depósito ni refugio, no aloja, no ataca y nada lo pide como requisito. |
 | Edificios | ⛏️ Zanja (`ditch`) | ⚠ Sin usar | No entrena, no investiga, no es depósito ni refugio, no aloja, no ataca y nada lo pide como requisito. |
 | Edificios | 🌉 Puente (`bridge`) | ⚠ Sin usar | No entrena, no investiga, no es depósito ni refugio, no aloja, no ataca y nada lo pide como requisito. |
-| Edificios | 🧱 Muralla de piedra (`stoneWall`) | ⚠ Sin usar | No entrena, no investiga, no es depósito ni refugio, no aloja, no ataca y nada lo pide como requisito. |
 | Edificios | 🚪 Puerta de piedra (`stoneGate`) | ⚠ Sin usar | No entrena, no investiga, no es depósito ni refugio, no aloja, no ataca y nada lo pide como requisito. |
-| Edificios | 🏰 Muralla fortificada (`fortifiedWall`) | ⚠ Sin usar | No entrena, no investiga, no es depósito ni refugio, no aloja, no ataca y nada lo pide como requisito. |
 | Edificios | 🚪 Puerta fortificada (`fortifiedGate`) | ⚠ Sin usar | No entrena, no investiga, no es depósito ni refugio, no aloja, no ataca y nada lo pide como requisito. |
 | Unidades | 🐪 Caravana (`caravan`) | ⚠ Sin usar | No ataca, no recolecta, no construye y no tiene habilidad: solo ocupa población. |
 | Tecnologías | 🔍 Contraespionaje (`counterespionage`) | ⚠ Sin usar | No tiene efectos. |
@@ -289,10 +287,10 @@ Para revisar las diferencias, el equilibrio estratégico y la jugabilidad. Los r
 | `palisadeGate` | 🚪 Puerta de empalizada | core | Edad Oscura | todas | 30 madera | ⚠ Sin usar | ✔ | procedural | — | — | No entrena, no investiga, no es depósito ni refugio, no aloja, no ataca y nada lo pide como requisito. |
 | `ditch` | ⛏️ Zanja | core | Edad Feudal | todas | 2 madera | ⚠ Sin usar | ✗ | procedural | — | — | No entrena, no investiga, no es depósito ni refugio, no aloja, no ataca y nada lo pide como requisito. · La IA no lo construye. |
 | `bridge` | 🌉 Puente | core | Edad Feudal | todas | 20 madera | ⚠ Sin usar | ✗ | procedural | — | — | No entrena, no investiga, no es depósito ni refugio, no aloja, no ataca y nada lo pide como requisito. · La IA no lo construye. |
-| `stoneWall` | 🧱 Muralla de piedra | core | Edad de los Castillos | todas | 6 piedra | ⚠ Sin usar | ✔ | procedural | — | — | No entrena, no investiga, no es depósito ni refugio, no aloja, no ataca y nada lo pide como requisito. |
+| `stoneWall` | 🧱 Muralla de piedra | core | Edad de los Castillos | todas | 6 piedra | ✔ Integrado | ✔ | procedural | Paso de ronda (2) para tiradores archer/infantry | — | — |
 | `stoneGate` | 🚪 Puerta de piedra | core | Edad de los Castillos | todas | 30 piedra, 20 madera | ⚠ Sin usar | ✔ | procedural | — | — | No entrena, no investiga, no es depósito ni refugio, no aloja, no ataca y nada lo pide como requisito. |
-| `wallTower` | 🗼 Torre de muralla | core | Edad de los Castillos | todas | 100 piedra, 20 madera | ✔ Integrado | ✗ | procedural | Defensa: dispara a los enemigos | — | La IA no lo construye. |
-| `fortifiedWall` | 🏰 Muralla fortificada | core | Edad Imperial | todas | 10 piedra | ⚠ Sin usar | ✔ | procedural | — | — | No entrena, no investiga, no es depósito ni refugio, no aloja, no ataca y nada lo pide como requisito. |
+| `wallTower` | 🗼 Torre de muralla | core | Edad de los Castillos | todas | 100 piedra, 20 madera | ✔ Integrado | ✗ | procedural | Paso de ronda (4) para tiradores archer/infantry · Defensa: dispara a los enemigos | — | La IA no lo construye. |
+| `fortifiedWall` | 🏰 Muralla fortificada | core | Edad Imperial | todas | 10 piedra | ✔ Integrado | ✔ | procedural | Paso de ronda (2) para tiradores archer/infantry | — | — |
 | `fortifiedGate` | 🚪 Puerta fortificada | core | Edad Imperial | todas | 50 piedra, 30 madera | ⚠ Sin usar | ✔ | procedural | — | — | No entrena, no investiga, no es depósito ni refugio, no aloja, no ataca y nada lo pide como requisito. |
 | `gunpowderWorks` | 💥 Fábrica de pólvora | core | Edad de la Pólvora | todas | 100 madera, 150 piedra, 50 oro | ✔ Integrado | ✔ | procedural | Entrena: Mosquetero, Cañón, Cañón Gribeauval · Investiga 1 tecnología · Requisito de: Academia de ingenieros, Fábrica, Arsenal de Jiangnan, Edad Industrial | Sin él no se pueden entrenar: Mosquetero, Cañón, Cañón Gribeauval. · Aquí se investigan 1 mejoras (hasta Edad de la Pólvora). · Para construirlo hace falta Herrería. | — |
 | `fortress` | 🏯 Fortaleza | core | Edad de la Pólvora | todas | 900 piedra | ✔ Integrado | ✔ | procedural | Investiga 1 tecnología · Aloja +20 población · Defensa: dispara a los enemigos · Gran visión (12) · Requisito de: Edad Industrial | Aquí se investigan 1 mejoras (hasta Edad de la Pólvora). · Para construirlo hace falta Castillo. · Sube el límite de población: sin él el ejército y la economía no crecen. | — |
@@ -513,7 +511,7 @@ Para revisar las diferencias, el equilibrio estratégico y la jugabilidad. Los r
 | `snow` | 🗺️ Nieve | core | — | todas | — | ✔ Integrado | — | — | Se puede caminar · Se puede construir | — | — |
 | `rock` | 🗺️ Roca | core | — | todas | — | ✔ Integrado | — | — | Intransitable · No se puede construir | — | — |
 
-## ⚙️ Motor y mods (46)
+## ⚙️ Motor y mods (47)
 
 | Id | Nombre | Mod | Edad | Civilizaciones | Coste | Estado | IA | Arte | Qué hace | Implicaciones | Qué le falta |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -525,6 +523,7 @@ Para revisar las diferencias, el equilibrio estratégico y la jugabilidad. Los r
 | `order-gather` | ⚙️ Orden «gather» | core | — | todas | — | ✔ Integrado | — | — | Orden de unidad | — | — |
 | `order-build` | ⚙️ Orden «build» | core | — | todas | — | ✔ Integrado | — | — | Orden de unidad | — | — |
 | `order-garrison` | ⚙️ Orden «garrison» | core | — | todas | — | ✔ Integrado | — | — | Orden de unidad | — | — |
+| `order-mountWall` | ⚙️ Orden «mountWall» | core | — | todas | — | ✔ Integrado | — | — | Orden de unidad | — | — |
 | `order-retaliate` | ⚙️ Orden «retaliate» | core | — | todas | — | ✔ Integrado | — | — | Orden de unidad | — | — |
 | `order-trade` | ⚙️ Orden «trade» | core | — | todas | — | ✔ Integrado | — | — | Orden de unidad | — | — |
 | `order-spy` | ⚙️ Orden «spy» | core | — | todas | — | ✔ Integrado | — | — | Orden de unidad | — | — |

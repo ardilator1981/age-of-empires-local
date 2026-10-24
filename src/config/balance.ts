@@ -106,6 +106,8 @@ export const BALANCE = {
     aiGates: 4,
     /** Un ataque a un muro con tropas a pie: la IA sigue atacando muros si no tiene asedio, pero prefiere la puerta. */
     wallTargetPenalty: 3,
+    /** Tiradores que la IA sube al paso de ronda de sus murallas, según la dificultad: [easy, normal, hard]. */
+    aiWallShooters: [0, 4, 6] as number[],
   },
 
   /** Caza y ganadería: animales salvajes y ganado. */

@@ -11,6 +11,7 @@ import { prop } from './art/props';
 import { type Deco, drawDecoration, generateDecorations } from './decorations';
 import { QUALITY, type QualityProfile } from './quality';
 import { hiddenFrom } from '../game/espionage';
+import { wallTopPx } from './defenseSprites';
 
 interface Drawn { e: Entity; sx: number; sy: number; hb: number; depth: number }
 
@@ -251,6 +252,16 @@ export class Renderer {
     }
   }
 
+  /** Altura (px a zoom 1) a la que se dibuja una unidad subida al paso de ronda de un tramo (0 si no lo está). */
+  private wallLift(u: Entity): number {
+    const b = this.game.get(u.onWall);
+    if (!b) return 0;
+    const def = this.game.reg.building(b.defId);
+    if (def.sprite !== 'wall') return this.buildingHeight(b) * 0.85; // torre de muralla: su plataforma
+    const s = this.spriteCtx(b, b.defId, 'building', 0, 0, b.owner, { tx: b.tx, ty: b.ty, size: b.size });
+    return wallTopPx(def.spriteParams ?? {}, b.tx, b.ty, s?.link);
+  }
+
   /** Altura aproximada (px a zoom 1) de un edificio sobre su huella, para barras de vida, selección y sombra. */
   private buildingHeight(e: Entity): number {
     const procedural = e.size * 14 + 46;
@@ -350,12 +361,15 @@ export class Renderer {
       const rx = e.px + (e.x - e.px) * alpha, ry = e.py + (e.y - e.py) * alpha;
       const hb = e.kind === 'unit' ? 0 : this.baseHeight(e);
       const p = e.kind === 'unit' ? cam.worldToScreen(rx, ry) : cam.worldToScreen(rx, ry, hb);
+      // En el paso de ronda de una muralla, la unidad se dibuja encima del tramo (y después de él)
+      const lift = e.onWall ? this.wallLift(e) : 0;
+      if (lift) p.y -= lift * z;
       const margin = (e.size * 50 + 100) * z;
       if (p.x < -margin || p.y < -margin * 0.6 || p.x > W + margin || p.y > H + margin * 1.6) continue;
       if (!this.isVisible(e)) continue;
       const d = this.pool[used] ??= { e, sx: 0, sy: 0, hb: 0, depth: 0 };
       used++;
-      d.e = e; d.sx = p.x; d.sy = p.y; d.hb = hb; d.depth = rx + ry;
+      d.e = e; d.sx = p.x; d.sy = p.y; d.hb = hb; d.depth = rx + ry + (lift ? 0.05 : 0);
       if (e.kind === 'building' && game.reg.building(e.defId).walkable) ground.push(d);
       else items.push(d);
     }
@@ -400,11 +414,13 @@ export class Renderer {
       const t = Math.min(1, pr.t);
       const wx = pr.sx + (pr.ex - pr.sx) * t, wy = pr.sy + (pr.ey - pr.sy) * t;
       if (!game.human.visible[Math.floor(wy) * m.w + Math.floor(wx)]) continue;
-      const hgt = pr.sh * (1 - t) + 10 * t + Math.sin(Math.PI * t) * 26;
+      // Los tiradores del paso de ronda disparan desde lo alto del muro
+      const src = game.get(pr.info.attackerId), sh = pr.sh + (src?.onWall ? this.wallLift(src) : 0);
+      const hgt = sh * (1 - t) + 10 * t + Math.sin(Math.PI * t) * 26;
       const p = cam.worldToScreen(wx, wy);
       const t2 = Math.min(1, t + 0.05);
       const p2 = cam.worldToScreen(pr.sx + (pr.ex - pr.sx) * t2, pr.sy + (pr.ey - pr.sy) * t2);
-      const h2 = pr.sh * (1 - t2) + 10 * t2 + Math.sin(Math.PI * t2) * 26;
+      const h2 = sh * (1 - t2) + 10 * t2 + Math.sin(Math.PI * t2) * 26;
       const dx = p2.x - p.x, dy = (p2.y - h2 * z) - (p.y - hgt * z);
       const len = Math.hypot(dx, dy) || 1;
       const img = prop('effects', `projectile-${pr.style}`);

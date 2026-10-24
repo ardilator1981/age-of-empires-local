@@ -461,6 +461,8 @@ export class AIController {
     if (threats.length) {
       for (const a of army) {
         if (a.order?.type === 'attack' && !a.order.auto) continue;
+        // Los de las murallas disparan desde arriba solos; los que van subiendo, también se quedan
+        if (a.onWall || a.order?.type === 'mountWall') continue;
         if (hypot(a.x - this.home.x, a.y - this.home.y) > 35) continue;
         let best = threats[0], bd = Infinity;
         for (const t of threats) { const d = hypot(t.x - a.x, t.y - a.y); if (d < bd) { bd = d; best = t; } }
@@ -469,7 +471,7 @@ export class AIController {
       return;
     }
 
-    const idle = army.filter(a => !a.order);
+    const idle = army.filter(a => !a.order && !a.onWall);
     // Las tropas que ya están en territorio enemigo siguen atacando
     const deep = idle.filter(a => hypot(a.x - this.home.x, a.y - this.home.y) > 25);
     if (deep.length) {

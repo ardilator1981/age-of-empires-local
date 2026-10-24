@@ -1,7 +1,9 @@
 import { BALANCE } from '../../config/balance';
 import type { AIPlugin, BuildingDef, Pt, TechDef } from '../../core/types';
 import type { Entity } from '../../game/Entity';
+import { Commands } from '../../game/commands';
 import { placeSegments } from '../../game/defense';
+import { canMountSomewhere } from '../../game/walkway';
 import { hypot } from '../../game/fmath';
 
 /**
@@ -206,6 +208,15 @@ export const defenseAI: AIPlugin = {
       else if (gateAt.size === Math.min(take, sides.length) || gateAt.size > 0) {
         if (wallNew.length && left > 0) placeSegments(g, p.id, wall, wallNew.slice(0, left), builders);
       }
+    }
+    // Tiradores en el paso de ronda: unos pocos de los que esperan en casa suben a los tramos libres
+    const want = BALANCE.defense.aiWallShooters[Math.max(0, DIFFICULTIES.indexOf(p.difficulty))] ?? 0;
+    const up = ctx.army.filter(u => u.onWall || u.order?.type === 'mountWall').length;
+    if (want > up) {
+      const free = ctx.army
+        .filter(u => !u.order && !u.onWall && canMountSomewhere(g, u) && hypot(u.x - ctx.home.x, u.y - ctx.home.y) < radius + 8)
+        .slice(0, want - up);
+      if (free.length) Commands.mountWall(g, free, null);
     }
     // Mejoras de los muros, cuando ya hay un buen trecho levantado
     if (built >= 12) {
