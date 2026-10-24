@@ -63,7 +63,7 @@ export class DefenseSystem implements System {
     const m = g.map, seconds = every / 20;
     const hit = new Set<number>();
     for (const u of g.units) {
-      if (u.dead || u.inside || u.owner === 0 || g.unitDef(u).flying) continue;
+      if (u.dead || u.inside || u.onWall || u.owner === 0 || g.unitDef(u).flying) continue;
       const ux = Math.floor(u.x), uy = Math.floor(u.y);
       hit.clear();
       let dmg = 0, from: Entity | null = null;

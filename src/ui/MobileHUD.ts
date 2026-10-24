@@ -327,6 +327,7 @@ export class MobileHUD {
       if (set.strategy) out.push(this.btnFromCmd(set.strategy, { keepOpen: true }));
       if (set.explore) out.push(this.btnFromCmd(set.explore));
       if (set.shelter) out.push(this.btnFromCmd(set.shelter));
+      if (set.wall) out.push(this.btnFromCmd(set.wall));
       if (set.stop) out.push(this.btnFromCmd(set.stop));
       out.push(more('actions'));
       return out;
@@ -446,6 +447,7 @@ export class MobileHUD {
       if (set.attackMove) btns.push(this.btnFromCmd(set.attackMove));
       if (set.explore) btns.push(this.btnFromCmd(set.explore));
       if (set.shelter) btns.push(this.btnFromCmd(set.shelter));
+      if (set.wall) btns.push(this.btnFromCmd(set.wall));
       if (set.evacuate) btns.push(this.btnFromCmd(set.evacuate));
       if (set.stop) btns.push(this.btnFromCmd(set.stop));
       btns.push({ icon: '🎯', label: 'Centrar', ok: true, tip: '<b>Centrar la cámara</b> en la selección', run: () => this.s.input.centerOnSelection() });

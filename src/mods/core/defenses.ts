@@ -1,7 +1,9 @@
 import { BALANCE } from '../../config/balance';
 import type { AIPlugin, BuildingDef, Pt, TechDef } from '../../core/types';
 import type { Entity } from '../../game/Entity';
+import { Commands } from '../../game/commands';
 import { placeSegments } from '../../game/defense';
+import { canMountSomewhere } from '../../game/walkway';
 import { hypot } from '../../game/fmath';
 
 /**
@@ -19,6 +21,13 @@ import { hypot } from '../../game/fmath';
  */
 
 const WOOD = '#8a6a3e', STONE = '#a9a398', FORT = '#8c8a86';
+
+/**
+ * Paso de ronda (`walkway`, ver `game/walkway.ts`): los tiradores a pie propios (arqueros, arcabuceros,
+ * mosqueteros...) suben y disparan desde arriba, con la ventaja de altura y armadura extra. La caballería
+ * (también la arquera), el asedio y la aviación no suben. La empalizada no tiene paso de ronda.
+ */
+const SHOOTERS = { classes: ['archer', 'infantry'], exclude: ['cavalry', 'siege', 'air'] };
 
 export const defenseBuildings: BuildingDef[] = [
   {
@@ -51,9 +60,10 @@ export const defenseBuildings: BuildingDef[] = [
   },
   {
     id: 'stoneWall', name: 'Muralla de piedra', icon: '🧱', category: 'defense', line: true,
-    description: 'Tramo de muralla: mucha vida y armadura, casi inmune a las flechas y a las tropas a pie. Solo el asedio la abre. Arrastra para trazar una línea.',
+    description: 'Tramo de muralla: mucha vida y armadura, casi inmune a las flechas y a las tropas a pie. Solo el asedio la abre. Dos tiradores a pie pueden subir a su paso de ronda y disparar desde arriba. Arrastra para trazar una línea.',
     classes: ['building', 'wall', 'barrier'], cost: { stone: 6 }, buildTime: 12, size: 1,
     hp: 1800, armor: { melee: 8, pierce: 10 }, los: 2, age: 2,
+    walkway: { ...SHOOTERS, capacity: 2, height: 1, armor: 2 },
     sprite: 'wall', spriteParams: { link: 'wall', color: STONE, height: 24, thick: 0.22, crenels: true },
   },
   {
@@ -65,17 +75,19 @@ export const defenseBuildings: BuildingDef[] = [
   },
   {
     id: 'wallTower', name: 'Torre de muralla', icon: '🗼', category: 'defense',
-    description: 'Torre que se levanta en la línea de la muralla: dispara flechas desde lo alto y cubre los tramos vecinos.',
+    description: 'Torre que se levanta en la línea de la muralla: dispara flechas desde lo alto y cubre los tramos vecinos. Caben cuatro tiradores a pie en su plataforma.',
     classes: ['building', 'tower', 'fortification'], cost: { stone: 100, wood: 20 }, buildTime: 60, size: 1,
     hp: 1100, armor: { melee: 4, pierce: 9 }, los: 10, age: 2,
+    walkway: { ...SHOOTERS, capacity: 4, height: 2, armor: 3 },
     attack: 6, attackType: 'pierce', range: 8, reloadTime: 2, projectile: 'arrow',
     sprite: 'building', spriteParams: { style: 'tower', inset: 0.08 },
   },
   {
     id: 'fortifiedWall', name: 'Muralla fortificada', icon: '🏰', category: 'defense', line: true,
-    description: 'Muralla de sillería con matacán: aún más vida y armadura. Solo el asedio pesado (trabuquetes, artillería) la derriba. Arrastra para trazar una línea.',
+    description: 'Muralla de sillería con matacán: aún más vida y armadura. Solo el asedio pesado (trabuquetes, artillería) la derriba. Dos tiradores a pie pueden subir a su paso de ronda, más alto que el de piedra. Arrastra para trazar una línea.',
     classes: ['building', 'wall', 'barrier'], cost: { stone: 10 }, buildTime: 16, size: 1,
     hp: 3000, armor: { melee: 12, pierce: 14 }, los: 2, age: 3,
+    walkway: { ...SHOOTERS, capacity: 2, height: 1.5, armor: 3 },
     sprite: 'wall', spriteParams: { link: 'wall', color: FORT, height: 28, thick: 0.25, crenels: true },
   },
   {
@@ -196,6 +208,15 @@ export const defenseAI: AIPlugin = {
       else if (gateAt.size === Math.min(take, sides.length) || gateAt.size > 0) {
         if (wallNew.length && left > 0) placeSegments(g, p.id, wall, wallNew.slice(0, left), builders);
       }
+    }
+    // Tiradores en el paso de ronda: unos pocos de los que esperan en casa suben a los tramos libres
+    const want = BALANCE.defense.aiWallShooters[Math.max(0, DIFFICULTIES.indexOf(p.difficulty))] ?? 0;
+    const up = ctx.army.filter(u => u.onWall || u.order?.type === 'mountWall').length;
+    if (want > up) {
+      const free = ctx.army
+        .filter(u => !u.order && !u.onWall && canMountSomewhere(g, u) && hypot(u.x - ctx.home.x, u.y - ctx.home.y) < radius + 8)
+        .slice(0, want - up);
+      if (free.length) Commands.mountWall(g, free, null);
     }
     // Mejoras de los muros, cuando ya hay un buen trecho levantado
     if (built >= 12) {

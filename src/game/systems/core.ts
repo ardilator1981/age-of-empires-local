@@ -9,6 +9,7 @@ import type { Entity } from '../Entity';
 import type { Game } from '../Game';
 import { hypot } from '../fmath';
 import { leaveShelter } from '../garrison';
+import { leaveWall } from '../walkway';
 import { isHuntable } from '../wildlife';
 import { zoneSpeedFactor } from '../powers';
 import { allAllied, isAllied } from '../diplomacy';
@@ -55,6 +56,8 @@ export class OrderSystem implements System {
       if (u.dead) continue;
       // Una orden nueva (que no sea refugiarse) saca a la unidad del refugio
       if (u.inside && u.order && u.order.type !== 'garrison') leaveShelter(g, u);
+      // Desde el paso de ronda solo se dispara: cualquier otra orden la baja (y la cumple desde el suelo)
+      if (u.onWall && u.order && u.order.type !== 'attack') leaveWall(g, u);
       if (u.cooldown > 0) u.cooldown -= dt;
       if (u.attackAnim > 0) u.attackAnim -= dt;
       if (!u.order) { u.working = false; continue; }
@@ -90,7 +93,7 @@ export class MovementSystem implements System {
     const g = this.game, m = g.map, mv = BALANCE.movement;
     const units: Entity[] = [];
     for (const u of g.units) {
-      if (u.dead || u.inside) continue;
+      if (u.dead || u.inside || u.onWall) continue;
       const flying = g.unitDef(u).flying;
       if (!flying) units.push(u); // los aviones no chocan con las unidades de tierra
       if (!u.path.length) { u.moving = false; continue; }

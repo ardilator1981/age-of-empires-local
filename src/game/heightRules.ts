@@ -2,6 +2,7 @@ import { BALANCE } from '../config/balance';
 import type { AnyDef } from '../core/types';
 import type { Entity } from './Entity';
 import type { Game } from './Game';
+import { walkwayOf } from './walkway';
 
 /**
  * Reglas de altura (valores en BALANCE.highGround):
@@ -10,9 +11,13 @@ import type { Game } from './Game';
  *  - El cuerpo a cuerpo no gana nada por atacar desde arriba (ver docs/decisiones.md).
  */
 
-/** Altura del terreno bajo una entidad (los edificios, la de su base). */
+/** Altura del terreno bajo una entidad (los edificios, la de su base; en un paso de ronda, la del muro más su altura). */
 export function heightOf(game: Game, e: Entity): number {
   if (e.kind === 'building') return game.map.baseHeight(e.tx, e.ty, e.size);
+  if (e.onWall) {
+    const b = game.entities.get(e.onWall), w = b && walkwayOf(game, b);
+    if (b && w) return game.map.baseHeight(b.tx, b.ty, b.size) + w.height * BALANCE.relief.levelStep;
+  }
   return game.map.heightAt(e.x, e.y);
 }
 

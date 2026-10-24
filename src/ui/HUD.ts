@@ -178,6 +178,8 @@ export class HUD {
       out[6] = set.explore;
       out[7] = set.strategy;
       out[8] = set.shelter ?? set.missions[3] ?? null;
+      // Las tropas no construyen: el hueco del menú de defensas queda para la muralla
+      if (set.wall && !out[2]) out[2] = set.wall;
       out[10] = set.stop;
       out[14] = set.del;
       set.powers.slice(0, 3).forEach((c, i) => { out[11 + i] = c; });

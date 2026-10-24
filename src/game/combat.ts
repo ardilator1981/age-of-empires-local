@@ -6,6 +6,7 @@ import { edgeDist, setOrder } from './actions';
 import { advantage, heightDamageFactor, heightOf } from './heightRules';
 import { retaliation } from './army/stances';
 import { cos, hypot, sin } from './fmath';
+import { wallArmor } from './walkway';
 
 export interface DamageInfo {
   attack: number;
@@ -91,7 +92,7 @@ export function auraOf(game: Game, e: Entity): { attackMul: number; armorAdd: nu
 export function computeDamage(game: Game, t: Entity, info: DamageInfo): number {
   const tp = game.players[t.owner];
   const tdef = game.defOf(t);
-  const armor = tp.getStat(tdef, info.type === 'melee' ? 'armorMelee' : 'armorPierce') + auraOf(game, t).armorAdd;
+  const armor = tp.getStat(tdef, info.type === 'melee' ? 'armorMelee' : 'armorPierce') + auraOf(game, t).armorAdd + wallArmor(game, t);
   let dmg = info.ignoreArmor ? info.attack : Math.max(0, info.attack - armor);
   for (const b of info.bonus) if (tdef.classes.includes(b.vs)) dmg += b.amount;
   // Ventaja de altura (valores en BALANCE.highGround)

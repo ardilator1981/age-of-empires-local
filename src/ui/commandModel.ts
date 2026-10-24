@@ -13,6 +13,7 @@ import { ACT_NAMES, spyProblem, spyWait, type SpyAct } from '../game/espionage';
 import { isPost, isTrader } from '../game/trade';
 import { BALANCE } from '../config/balance';
 import { canShelterSomewhere, garrisonOf, nearestShelter } from '../game/garrison';
+import { canMountSomewhere, postedOn } from '../game/walkway';
 
 /**
  * Qué se puede hacer con la selección actual. Lo comparten la interfaz de escritorio (rejilla de 15 botones)
@@ -43,8 +44,10 @@ export interface CommandSet {
   stop: Cmd | null;
   /** Refugiarse en el edificio propio más cercano que admita a la unidad (unidades con refugio disponible). */
   shelter: Cmd | null;
-  /** Sacar a los refugiados de los edificios seleccionados. */
+  /** Sacar a los refugiados de los edificios seleccionados (y bajar a los del paso de ronda de las murallas). */
   evacuate: Cmd | null;
+  /** Subir al paso de ronda de la muralla más cercana (tiradores a pie), o bajar de él si ya están arriba. */
+  wall: Cmd | null;
   /** Pantalla de estrategia (formación, postura y órdenes tácticas) para las tropas. */
   strategy: Cmd | null;
   /** Unidades que entrenar y tecnologías que investigar en los edificios seleccionados. */
@@ -199,7 +202,7 @@ export function selectionCommands(s: Session): CommandSet {
   const sel = ui.selected(g).filter(e => e.owner === p.id);
   const units = sel.filter(e => e.kind === 'unit');
   const blds = sel.filter(e => e.kind === 'building');
-  const set: CommandSet = { units, blds, build: null, attackMove: null, explore: null, stop: null, shelter: null, evacuate: null, strategy: null, train: [], research: [], del: null, powers: powerCommands(s), missions: [] };
+  const set: CommandSet = { units, blds, build: null, attackMove: null, explore: null, stop: null, shelter: null, evacuate: null, wall: null, strategy: null, train: [], research: [], del: null, powers: powerCommands(s), missions: [] };
   if (!sel.length) return set;
   const del: Cmd = {
     icon: '❌', label: 'Eliminar', avail: OK, tip: '<b>Eliminar</b> (Supr)<br>Destruye la selección.',
@@ -270,16 +273,43 @@ export function selectionCommands(s: Session): CommandSet {
         },
       };
     }
+    const onWall = units.filter(u => u.onWall);
+    if (onWall.length) {
+      set.wall = {
+        icon: '🪜', label: 'Bajar de la muralla', avail: OK,
+        tip: '<b>Bajar de la muralla</b><br>Bajan del paso de ronda por el lado por el que subieron. Cualquier otra orden que no sea atacar también los baja.',
+        action: () => s.orders.send({ t: 'dismountWall', ids: ids(onWall) }),
+      };
+    } else {
+      const climbers = units.filter(u => canMountSomewhere(g, u));
+      if (climbers.length) {
+        set.wall = {
+          icon: '🏯', label: 'Subir a la muralla', avail: OK,
+          tip: '<b>Subir a la muralla</b><br>Suben al paso de ronda de los tramos de muralla propios más cercanos (también con clic derecho sobre un tramo) y disparan desde arriba: más alcance y daño por la altura, armadura extra, y solo se les alcanza a distancia. Cualquier orden que no sea atacar los baja.',
+          action: () => s.orders.send({ t: 'mountWall', units: ids(climbers), target: 0 }),
+        };
+      }
+    }
     set.stop = { icon: '✋', label: 'Detener', avail: OK, tip: '<b>Detener</b>', action: () => { s.orders.send({ t: 'stop', units: ids(units) }); } };
     return set;
   }
 
   const inside = blds.flatMap(b => garrisonOf(g, b));
+  const posted = blds.flatMap(b => postedOn(g, b));
   if (inside.length) {
     set.evacuate = {
-      icon: '🚪', label: 'Sacar', avail: OK, badge: String(inside.length),
+      icon: '🚪', label: 'Sacar', avail: OK, badge: String(inside.length + posted.length),
       tip: `<b>Sacar a los refugiados</b><br>${inside.map(u => esc(g.unitDef(u).name)).join(', ')} salen del edificio y quedan a la vista.`,
-      action: () => s.orders.send({ t: 'ungarrison', at: ids(blds) }),
+      action: () => {
+        s.orders.send({ t: 'ungarrison', at: ids(blds) });
+        if (posted.length) s.orders.send({ t: 'dismountWall', ids: ids(blds) });
+      },
+    };
+  } else if (posted.length) {
+    set.evacuate = {
+      icon: '🪜', label: 'Bajar de la muralla', avail: OK, badge: String(posted.length),
+      tip: `<b>Bajar de la muralla</b><br>${posted.map(u => esc(g.unitDef(u).name)).join(', ')} bajan del paso de ronda.`,
+      action: () => s.orders.send({ t: 'dismountWall', ids: ids(blds) }),
     };
   }
   const defId = blds[0].defId;

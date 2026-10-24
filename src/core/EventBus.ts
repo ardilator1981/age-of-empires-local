@@ -13,6 +13,9 @@ export interface GameEventMap {
   /** Una unidad entra en el refugio de un edificio / sale de él. */
   garrisoned: { entity: Entity; building: Entity };
   ungarrisoned: { entity: Entity; building: Entity };
+  /** Una unidad sube al paso de ronda de una muralla / baja de él. */
+  wallMounted: { entity: Entity; building: Entity };
+  wallLeft: { entity: Entity; building: Entity };
   unitTrained: { entity: Entity; building: Entity };
   buildingPlaced: { entity: Entity };
   buildingCompleted: { entity: Entity };

@@ -49,6 +49,8 @@ export class Entity {
   scanAt = 0;
   /** Id del edificio en cuyo refugio está (0 = fuera). Dentro no se ve, no se mueve y no se le puede atacar. */
   inside = 0;
+  /** Id del tramo de muralla a cuyo paso de ronda ha subido (0 = en el suelo). Arriba se ve, no se mueve y dispara. */
+  onWall = 0;
   /** Postura de combate ('aggressive' | 'defensive' | 'hold' | 'passive'; ver army/stances). */
   stance = 'aggressive';
 

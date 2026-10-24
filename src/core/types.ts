@@ -192,6 +192,11 @@ export interface BuildingDef extends BaseDef {
    */
   shelter?: { classes: string[]; capacity: number };
   /**
+   * Paso de ronda (puesto de tiro): las unidades a distancia propias que encajen suben encima (órdenes
+   * `mountWall` y `dismountWall`) y siguen disparando desde lo alto. Ver `game/walkway.ts`.
+   */
+  walkway?: WalkwayDef;
+  /**
    * Se coloca en línea: el jugador arrastra de un punto a otro y se levanta un segmento por casilla
    * (empalizadas, murallas, zanjas). Ver `game/defense.ts`.
    */
@@ -381,6 +386,20 @@ export interface WildlifeSpec {
 // ---------------------------------------------------------------- extensiones del motor
 
 /** Una orden de una unidad. `type` elige el OrderHandler registrado. */
+/** Paso de ronda de un edificio (`BuildingDef.walkway`). */
+export interface WalkwayDef {
+  /** Clases admitidas (la unidad necesita alguna, y además ataque a distancia). */
+  classes: string[];
+  /** Clases que no suben aunque tengan alguna de `classes` (caballería, asedio...). */
+  exclude?: string[];
+  /** Unidades a la vez en el tramo. */
+  capacity: number;
+  /** Altura del paso de ronda sobre el suelo, en niveles de altura (cuenta para las reglas de altura y la visión). */
+  height: number;
+  /** Armadura extra (cuerpo a cuerpo y a distancia) de las unidades subidas. */
+  armor?: number;
+}
+
 export interface Order { type: string; [key: string]: any }
 
 export interface OrderHandler {

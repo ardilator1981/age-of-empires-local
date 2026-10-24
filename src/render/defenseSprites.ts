@@ -178,6 +178,19 @@ function hasTower(tx: number, ty: number, has: boolean[], diagOnly: [number, num
   return true;
 }
 
+/**
+ * Altura (px a zoom 1) de lo alto de un tramo, donde se dibujan los tiradores del paso de ronda
+ * (`game/walkway.ts`): el adarve del lienzo o, si en la casilla hay torre, su plataforma.
+ */
+export function wallTopPx(P: Record<string, any>, tx: number, ty: number, link?: SpriteContext['link']): number {
+  const H = (P.height ?? 22) * HEIGHT_SCALE;
+  if (P.gate || P.stakes) return H;
+  const has = DIRS.map(([dx, dy]) => !!link?.(dx, dy));
+  const diagOnly = ([[-1, -1], [1, -1], [-1, 1], [1, 1]] as [number, number][])
+    .filter(([dx, dy]) => !has[dx < 0 ? 0 : 2] && !has[dy < 0 ? 1 : 3] && !!link?.(dx, dy));
+  return hasTower(tx, ty, has, diagOnly) ? H * 1.35 : H;
+}
+
 /** Empalizada: troncos redondos muy juntos sobre una franja de tierra, con bastiones. */
 function palisade(s: SpriteContext, has: boolean[], diagOnly: [number, number][], H: number, towerHere: boolean) {
   const { ctx, foot, project: pr } = s;
