@@ -55,7 +55,14 @@ function slab(s: SpriteContext, x0: number, y0: number, x1: number, y1: number, 
     paintTextured(ctx, faceTex, side, { x: top2.x - fy * stepY.x, y: top2.y - fy * stepY.y }, stepY, hv);
     ctx.fillStyle = 'rgba(0,0,0,0.24)'; poly(ctx, side); ctx.fill();
   }
-  poly(ctx, [L(A, h1), L(B, h1), L(C, h1), L(D, h1)]); ctx.fillStyle = shade(col, 0.14); ctx.fill();
+  const topFace = [L(A, h1), L(B, h1), L(C, h1), L(D, h1)];
+  poly(ctx, topFace); ctx.fillStyle = shade(col, 0.14); ctx.fill();
+  if (faceTex) {
+    // La tapa se ve desde arriba: la misma textura tendida sobre el suelo, aclarada
+    const o = L(pr(Math.floor(x0), Math.floor(y0)), h1), ex = L(pr(Math.floor(x0) + 1, Math.floor(y0)), h1), ey = L(pr(Math.floor(x0), Math.floor(y0) + 1), h1);
+    paintTextured(ctx, faceTex, topFace, o, { x: ex.x - o.x, y: ex.y - o.y }, { x: ey.x - o.x, y: ey.y - o.y });
+    ctx.fillStyle = 'rgba(255,255,255,0.14)'; poly(ctx, topFace); ctx.fill();
+  }
   // Contorno: solo el borde de arriba y el pie (y las aristas verticales si es un pilar suelto)
   ctx.strokeStyle = EDGE;
   ctx.beginPath(); ctx.moveTo(L(D, h1).x, L(D, h1).y); ctx.lineTo(L(C, h1).x, L(C, h1).y); ctx.lineTo(L(B, h1).x, L(B, h1).y); ctx.stroke();
@@ -85,18 +92,12 @@ function bar(s: SpriteContext, ax: number, ay: number, bx: number, by: number, t
   poly(ctx, [g(0, h), g(1, h), g(2, h), g(3, h)]); ctx.fillStyle = shade(col, 0.14); ctx.fill(); ctx.stroke();
 }
 
-/** Almenas en los dos bordes de un brazo de muro, muy separadas: en medio queda el paso de ronda. */
-function merlons(s: SpriteContext, x0: number, y0: number, x1: number, y1: number, h: number, col: string, th: number) {
-  const alongX = Math.abs(x1 - x0) >= Math.abs(y1 - y0);
-  const len = alongX ? Math.abs(x1 - x0) : Math.abs(y1 - y0);
-  const n = Math.max(1, Math.round(len / 0.5)), w = 0.07, t = 0.045, off = th - t;
-  const [ax, ay] = [Math.min(x0, x1), Math.min(y0, y1)];
-  for (let i = 0; i < n; i++) {
-    const c = (i + 0.5) / n * len;
-    for (const side of [-1, 1]) {
-      if (alongX) slab(s, ax + c - w, y0 + side * off - t, ax + c + w, y0 + side * off + t, h, h + 5, col);
-      else slab(s, x0 + side * off - t, ay + c - w, x0 + side * off + t, ay + c + w, h, h + 5, col);
-    }
+/** Almenas en las cuatro esquinas de un pilar de muro (cambios de dirección, cruces y extremos). */
+function merlons(s: SpriteContext, cx: number, cy: number, pw: number, h: number, col: string) {
+  const w = 0.055;
+  for (const [dx, dy] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
+    const mx = cx + dx * (pw - w), my = cy + dy * (pw - w);
+    slab(s, mx - w, my - w, mx + w, my + w, h, h + 5.5, col);
   }
 }
 
@@ -109,17 +110,22 @@ function log(s: SpriteContext, x: number, y: number, w: number, h: number, k: nu
   const base = '#8a6a3e', tip = lift(pr(x, y), h + 5, z);
   ctx.lineJoin = 'round'; ctx.lineWidth = Math.max(0.5, 0.7 * z); ctx.strokeStyle = 'rgba(25,16,8,0.75)';
   const front = [L(D, 0), L(C, 0), L(C, h), L(D, h)], side = [L(C, 0), L(B, 0), L(B, h), L(C, h)];
+  const tipFront = [L(D, h), L(C, h), tip], tipSide = [L(C, h), L(B, h), tip];
   poly(ctx, front); ctx.fillStyle = shade(base, tint + 0.04); ctx.fill();
-  if (faceTex) {
-    // Un quinto de la imagen (un tronco) por tronco, según su posición
-    const col = Math.floor(hash(x, y, k + 3) * 5);
-    const u = { x: (C.x - D.x) * 5, y: (C.y - D.y) * 5 }, o = L(D, h);
-    paintTextured(ctx, faceTex, front, { x: o.x - col / 5 * u.x, y: o.y - col / 5 * u.y }, u, { x: 0, y: h * z });
-  }
   poly(ctx, side); ctx.fillStyle = shade(base, tint - 0.2); ctx.fill();
-  ctx.fillStyle = 'rgba(0,0,0,0.22)'; poly(ctx, side); ctx.fill();
-  poly(ctx, [L(D, h), L(C, h), tip]); ctx.fillStyle = shade(base, tint + 0.12); ctx.fill();
-  poly(ctx, [L(C, h), L(B, h), tip]); ctx.fillStyle = shade(base, tint - 0.1); ctx.fill();
+  poly(ctx, tipFront); ctx.fillStyle = shade(base, tint + 0.12); ctx.fill();
+  poly(ctx, tipSide); ctx.fillStyle = shade(base, tint - 0.1); ctx.fill();
+  if (faceTex) {
+    // Un quinto de la imagen (un tronco) por tronco, según su posición; la misma imagen cubre el cuerpo y la punta
+    const col = Math.floor(hash(x, y, k + 3) * 5), hh = (h + 5) * z;
+    const uf = { x: (C.x - D.x) * 5, y: (C.y - D.y) * 5 }, of = L(D, h + 5);
+    const us = { x: (B.x - C.x) * 5, y: (B.y - C.y) * 5 }, os = L(C, h + 5);
+    for (const f of [front, tipFront]) paintTextured(ctx, faceTex, f, { x: of.x - col / 5 * uf.x, y: of.y - col / 5 * uf.y }, uf, { x: 0, y: hh });
+    for (const f of [side, tipSide]) paintTextured(ctx, faceTex, f, { x: os.x - col / 5 * us.x, y: os.y - col / 5 * us.y }, us, { x: 0, y: hh });
+    ctx.fillStyle = 'rgba(0,0,0,0.2)'; poly(ctx, side); ctx.fill(); poly(ctx, tipSide); ctx.fill();
+  } else {
+    ctx.fillStyle = 'rgba(0,0,0,0.22)'; poly(ctx, side); ctx.fill();
+  }
   ctx.beginPath(); ctx.moveTo(L(D, 0).x, L(D, 0).y); ctx.lineTo(L(D, h).x, L(D, h).y); ctx.lineTo(tip.x, tip.y); ctx.lineTo(L(C, h).x, L(C, h).y); ctx.lineTo(L(C, 0).x, L(C, 0).y);
   ctx.moveTo(L(C, h).x, L(C, h).y); ctx.lineTo(L(B, h).x, L(B, h).y); ctx.lineTo(tip.x, tip.y); ctx.moveTo(L(B, h).x, L(B, h).y); ctx.lineTo(L(B, 0).x, L(B, 0).y);
   ctx.stroke();
@@ -164,7 +170,6 @@ const wall: SpriteFn = s => {
       const x0 = dx < 0 ? tx : dx > 0 ? cx : cx - th, x1 = dx < 0 ? cx : dx > 0 ? tx + 1 : cx + th;
       const y0 = dy < 0 ? ty : dy > 0 ? cy : cy - th, y1 = dy < 0 ? cy : dy > 0 ? ty + 1 : cy + th;
       slab(s, x0, y0, x1, y1, 0, ah, col);
-      if (P.crenels && !P.gate) merlons(s, dx ? (dx < 0 ? tx : cx) : cx, dy ? (dy < 0 ? ty : cy) : cy, dx ? (dx < 0 ? cx : tx + 1) : cx, dy ? (dy < 0 ? cy : ty + 1) : cy, ah, col, th);
     };
     const diag = (dx: number, dy: number) => {
       // Solo las uniones que de verdad van en oblicuo: si algún lado ortogonal ya está unido, la barra sobra
@@ -195,7 +200,7 @@ const wall: SpriteFn = s => {
       const pw = th + 0.04;
       slab(s, cx - pw, cy - pw, cx + pw, cy + pw, 0, H + 1.5, col, true);
       ctx.fillStyle = top;
-      if (P.crenels) merlons(s, cx - pw + 0.05, cy, cx + pw - 0.05, cy, H + 1.5, col, pw - 0.02);
+      if (P.crenels) merlons(s, cx, cy, pw, H + 1.5, col);
     }
     if (!P.gate) { arm(2); arm(3); }
     // Uniones en diagonal (las líneas trazadas en oblicuo): una barra hasta la esquina compartida
