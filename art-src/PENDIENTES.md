@@ -14,7 +14,7 @@
 | terreno | 9 | 0 | 0 |
 | decoración | 9 | 0 | 0 |
 | efecto | 8 | 0 | 5 |
-| interfaz | 59 | 0 | 53 |
+| interfaz | 106 | 0 | 6 |
 
 ## Siguiente en generar (por prioridad)
 
@@ -326,7 +326,7 @@
 | wallCrews | Tecnología: Cuadrillas de albañiles | ✅ hecho | — | — | — | — |
 | gunpowderAge | Tecnología: Edad de la Pólvora | ✅ hecho | — | — | — | — |
 | printing | Tecnología: Imprenta | ✅ hecho | — | — | — | — |
-| cartography | Tecnología: Cartografía | 🔴 pendiente | imagen | ui/tech/cartography.png | 5 | `ui:tech` |
+| cartography | Tecnología: Cartografía | ✅ hecho | — | — | — | — |
 | ballistics | Tecnología: Balística | ✅ hecho | — | — | — | — |
 | advancedMetallurgy | Tecnología: Metalurgia avanzada | ✅ hecho | — | — | — | — |
 | bayonet | Tecnología: Bayoneta | ✅ hecho | — | — | — | — |
@@ -339,52 +339,52 @@
 | jiaozi | Tecnología: Billete jiaozi | ✅ hecho | — | — | — | — |
 | thunderBomb | Tecnología: Bomba trueno | ✅ hecho | — | — | — | — |
 | mandarinDuck | Tecnología: Pato mandarín | ✅ hecho | — | — | — | — |
-| cantonSystem | Tecnología: Cantón | 🔴 pendiente | imagen | ui/tech/cantonSystem.png | 5 | `ui:tech` |
-| capitularies | Tecnología: Capitulares | 🔴 pendiente | imagen | ui/tech/capitularies.png | 5 | `ui:tech` |
-| townCharter | Tecnología: Carta urbana | 🔴 pendiente | imagen | ui/tech/townCharter.png | 5 | `ui:tech` |
-| taille | Tecnología: Taille | 🔴 pendiente | imagen | ui/tech/taille.png | 5 | `ui:tech` |
-| hireMercenaries | Tecnología: Contratar mercenarios | 🔴 pendiente | imagen | ui/tech/hireMercenaries.png | 5 | `ui:tech` |
-| colbertism | Tecnología: Colbertismo | 🔴 pendiente | imagen | ui/tech/colbertism.png | 5 | `ui:tech` |
-| vaubanDoctrine | Tecnología: Doctrina de Vauban | 🔴 pendiente | imagen | ui/tech/vaubanDoctrine.png | 5 | `ui:tech` |
-| gribeauvalDoctrine | Tecnología: Doctrina de Gribeauval | 🔴 pendiente | imagen | ui/tech/gribeauvalDoctrine.png | 5 | `ui:tech` |
-| alfredReform | Tecnología: Reforma de Alfredo | 🔴 pendiente | imagen | ui/tech/alfredReform.png | 5 | `ui:tech` |
-| domesday | Tecnología: Domesday | 🔴 pendiente | imagen | ui/tech/domesday.png | 5 | `ui:tech` |
-| companyCharter | Tecnología: Carta de compañía | 🔴 pendiente | imagen | ui/tech/companyCharter.png | 5 | `ui:tech` |
-| nationalDebt | Tecnología: Deuda nacional | 🔴 pendiente | imagen | ui/tech/nationalDebt.png | 5 | `ui:tech` |
-| industrialAge | Tecnología: Edad Industrial | 🔴 pendiente | imagen | ui/tech/industrialAge.png | 5 | `ui:tech` |
-| steamEngine | Tecnología: Máquina de vapor | 🔴 pendiente | imagen | ui/tech/steamEngine.png | 5 | `ui:tech` |
-| electricity | Tecnología: Electricidad y telégrafo | 🔴 pendiente | imagen | ui/tech/electricity.png | 5 | `ui:tech` |
-| combustionEngine | Tecnología: Motor de combustión | 🔴 pendiente | imagen | ui/tech/combustionEngine.png | 5 | `ui:tech` |
-| aviation | Tecnología: Aviación | 🔴 pendiente | imagen | ui/tech/aviation.png | 5 | `ui:tech` |
-| rifling | Tecnología: Estriado | 🔴 pendiente | imagen | ui/tech/rifling.png | 5 | `ui:tech` |
-| assemblyLine | Tecnología: Producción en cadena | 🔴 pendiente | imagen | ui/tech/assemblyLine.png | 5 | `ui:tech` |
-| bessemerSteel | Tecnología: Acero Bessemer | 🔴 pendiente | imagen | ui/tech/bessemerSteel.png | 5 | `ui:tech` |
-| railway | Tecnología: Ferrocarril | 🔴 pendiente | imagen | ui/tech/railway.png | 5 | `ui:tech` |
-| selfStrengthening | Tecnología: Autofortalecimiento | 🔴 pendiente | imagen | ui/tech/selfStrengthening.png | 5 | `ui:tech` |
-| corpsSystem | Tecnología: Sistema de cuerpos | 🔴 pendiente | imagen | ui/tech/corpsSystem.png | 5 | `ui:tech` |
-| interchangeableParts | Tecnología: Intercambiabilidad de piezas | 🔴 pendiente | imagen | ui/tech/interchangeableParts.png | 5 | `ui:tech` |
-| irrigation | Tecnología: Regadío | 🔴 pendiente | imagen | ui/tech/irrigation.png | 5 | `ui:tech` |
-| iqta | Tecnología: Iqta | 🔴 pendiente | imagen | ui/tech/iqta.png | 5 | `ui:tech` |
-| astronomy | Tecnología: Astronomía | 🔴 pendiente | imagen | ui/tech/astronomy.png | 5 | `ui:tech` |
-| silkMonopoly | Tecnología: Monopolio de la seda | 🔴 pendiente | imagen | ui/tech/silkMonopoly.png | 5 | `ui:tech` |
-| mobileWarfare | Tecnología: Guerra móvil | 🔴 pendiente | imagen | ui/tech/mobileWarfare.png | 5 | `ui:tech` |
-| nizamJadid | Tecnología: Nizam-i Jadid | 🔴 pendiente | imagen | ui/tech/nizamJadid.png | 5 | `ui:tech` |
-| axumCoinage | Tecnología: Moneda de Axum | 🔴 pendiente | imagen | ui/tech/axumCoinage.png | 5 | `ui:tech` |
-| prestorJohn | Tecnología: Prestes Juan | 🔴 pendiente | imagen | ui/tech/prestorJohn.png | 5 | `ui:tech` |
-| itinerantCourt | Tecnología: Corte itinerante | 🔴 pendiente | imagen | ui/tech/itinerantCourt.png | 5 | `ui:tech` |
-| portugueseAlliance | Tecnología: Alianza portuguesa | 🔴 pendiente | imagen | ui/tech/portugueseAlliance.png | 5 | `ui:tech` |
-| horseBreeding | Tecnología: Cría de caballos | 🔴 pendiente | imagen | ui/tech/horseBreeding.png | 5 | `ui:tech` |
-| armsImport | Tecnología: Importación de armas | 🔴 pendiente | imagen | ui/tech/armsImport.png | 5 | `ui:tech` |
-| up_cappedRam | Tecnología: Ariete cubierto | 🔴 pendiente | imagen | ui/tech/up_cappedRam.png | 5 | `ui:tech` |
-| up_trebuchet | Tecnología: Trabuquete | 🔴 pendiente | imagen | ui/tech/up_trebuchet.png | 5 | `ui:tech` |
-| up_heavyScorpion | Tecnología: Escorpión pesado | 🔴 pendiente | imagen | ui/tech/up_heavyScorpion.png | 5 | `ui:tech` |
-| up_bombard | Tecnología: Bombarda | 🔴 pendiente | imagen | ui/tech/up_bombard.png | 5 | `ui:tech` |
-| up_howitzer | Tecnología: Obús | 🔴 pendiente | imagen | ui/tech/up_howitzer.png | 5 | `ui:tech` |
-| up_fieldGun | Tecnología: Cañón de campaña | 🔴 pendiente | imagen | ui/tech/up_fieldGun.png | 5 | `ui:tech` |
-| caravanserai | Tecnología: Caravasar | 🔴 pendiente | imagen | ui/tech/caravanserai.png | 5 | `ui:tech` |
-| counterespionage | Tecnología: Contraespionaje | 🔴 pendiente | imagen | ui/tech/counterespionage.png | 5 | `ui:tech` |
-| bankingHouses | Tecnología: Casas de cambio | 🔴 pendiente | imagen | ui/tech/bankingHouses.png | 5 | `ui:tech` |
-| ironTusks | Tecnología: Colmillos de hierro | 🔴 pendiente | imagen | ui/tech/ironTusks.png | 5 | `ui:tech` |
+| cantonSystem | Tecnología: Cantón | ✅ hecho | — | — | — | — |
+| capitularies | Tecnología: Capitulares | ✅ hecho | — | — | — | — |
+| townCharter | Tecnología: Carta urbana | ✅ hecho | — | — | — | — |
+| taille | Tecnología: Taille | ✅ hecho | — | — | — | — |
+| hireMercenaries | Tecnología: Contratar mercenarios | ✅ hecho | — | — | — | — |
+| colbertism | Tecnología: Colbertismo | ✅ hecho | — | — | — | — |
+| vaubanDoctrine | Tecnología: Doctrina de Vauban | ✅ hecho | — | — | — | — |
+| gribeauvalDoctrine | Tecnología: Doctrina de Gribeauval | ✅ hecho | — | — | — | — |
+| alfredReform | Tecnología: Reforma de Alfredo | ✅ hecho | — | — | — | — |
+| domesday | Tecnología: Domesday | ✅ hecho | — | — | — | — |
+| companyCharter | Tecnología: Carta de compañía | ✅ hecho | — | — | — | — |
+| nationalDebt | Tecnología: Deuda nacional | ✅ hecho | — | — | — | — |
+| industrialAge | Tecnología: Edad Industrial | ✅ hecho | — | — | — | — |
+| steamEngine | Tecnología: Máquina de vapor | ✅ hecho | — | — | — | — |
+| electricity | Tecnología: Electricidad y telégrafo | ✅ hecho | — | — | — | — |
+| combustionEngine | Tecnología: Motor de combustión | ✅ hecho | — | — | — | — |
+| aviation | Tecnología: Aviación | ✅ hecho | — | — | — | — |
+| rifling | Tecnología: Estriado | ✅ hecho | — | — | — | — |
+| assemblyLine | Tecnología: Producción en cadena | ✅ hecho | — | — | — | — |
+| bessemerSteel | Tecnología: Acero Bessemer | ✅ hecho | — | — | — | — |
+| railway | Tecnología: Ferrocarril | ✅ hecho | — | — | — | — |
+| selfStrengthening | Tecnología: Autofortalecimiento | ✅ hecho | — | — | — | — |
+| corpsSystem | Tecnología: Sistema de cuerpos | ✅ hecho | — | — | — | — |
+| interchangeableParts | Tecnología: Intercambiabilidad de piezas | ✅ hecho | — | — | — | — |
+| irrigation | Tecnología: Regadío | ✅ hecho | — | — | — | — |
+| iqta | Tecnología: Iqta | ✅ hecho | — | — | — | — |
+| astronomy | Tecnología: Astronomía | ✅ hecho | — | — | — | — |
+| silkMonopoly | Tecnología: Monopolio de la seda | ✅ hecho | — | — | — | — |
+| mobileWarfare | Tecnología: Guerra móvil | ✅ hecho | — | — | — | — |
+| nizamJadid | Tecnología: Nizam-i Jadid | ✅ hecho | — | — | — | — |
+| axumCoinage | Tecnología: Moneda de Axum | ✅ hecho | — | — | — | — |
+| prestorJohn | Tecnología: Prestes Juan | ✅ hecho | — | — | — | — |
+| itinerantCourt | Tecnología: Corte itinerante | ✅ hecho | — | — | — | — |
+| portugueseAlliance | Tecnología: Alianza portuguesa | ✅ hecho | — | — | — | — |
+| horseBreeding | Tecnología: Cría de caballos | ✅ hecho | — | — | — | — |
+| armsImport | Tecnología: Importación de armas | ✅ hecho | — | — | — | — |
+| up_cappedRam | Tecnología: Ariete cubierto | ✅ hecho | — | — | — | — |
+| up_trebuchet | Tecnología: Trabuquete | ✅ hecho | — | — | — | — |
+| up_heavyScorpion | Tecnología: Escorpión pesado | ✅ hecho | — | — | — | — |
+| up_bombard | Tecnología: Bombarda | ✅ hecho | — | — | — | — |
+| up_howitzer | Tecnología: Obús | ✅ hecho | — | — | — | — |
+| up_fieldGun | Tecnología: Cañón de campaña | ✅ hecho | — | — | — | — |
+| caravanserai | Tecnología: Caravasar | ✅ hecho | — | — | — | — |
+| counterespionage | Tecnología: Contraespionaje | ✅ hecho | — | — | — | — |
+| bankingHouses | Tecnología: Casas de cambio | ✅ hecho | — | — | — | — |
+| ironTusks | Tecnología: Colmillos de hierro | ✅ hecho | — | — | — | — |
 
 *el motor todavía no usa estas imágenes (se dibuja por código)*
 
@@ -471,12 +471,6 @@ Twelve small square paintings in three rows of four on a plain white background 
 ```
 
 ### `ui:panel`
-
-```text
-Twelve small square paintings in three rows of four on a plain white background with white gaps, each a single object on a dark warm background inside a bevelled grey stone border, easy to recognise when very small, light from the upper left, warm medieval colors. No writing, no letters, no numbers. (See Pack 9.)
-```
-
-### `ui:tech`
 
 ```text
 Twelve small square paintings in three rows of four on a plain white background with white gaps, each a single object on a dark warm background inside a bevelled grey stone border, easy to recognise when very small, light from the upper left, warm medieval colors. No writing, no letters, no numbers. (See Pack 9.)

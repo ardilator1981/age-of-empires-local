@@ -145,6 +145,147 @@
     },
     "mandarinDuck": {
       "shadow": false
+    },
+    "cantonSystem": {
+      "shadow": false
+    },
+    "capitularies": {
+      "shadow": false
+    },
+    "townCharter": {
+      "shadow": false
+    },
+    "taille": {
+      "shadow": false
+    },
+    "hireMercenaries": {
+      "shadow": false
+    },
+    "colbertism": {
+      "shadow": false
+    },
+    "vaubanDoctrine": {
+      "shadow": false
+    },
+    "gribeauvalDoctrine": {
+      "shadow": false
+    },
+    "alfredReform": {
+      "shadow": false
+    },
+    "domesday": {
+      "shadow": false
+    },
+    "companyCharter": {
+      "shadow": false
+    },
+    "nationalDebt": {
+      "shadow": false
+    },
+    "industrialAge": {
+      "shadow": false
+    },
+    "steamEngine": {
+      "shadow": false
+    },
+    "electricity": {
+      "shadow": false
+    },
+    "combustionEngine": {
+      "shadow": false
+    },
+    "aviation": {
+      "shadow": false
+    },
+    "rifling": {
+      "shadow": false
+    },
+    "assemblyLine": {
+      "shadow": false
+    },
+    "bessemerSteel": {
+      "shadow": false
+    },
+    "railway": {
+      "shadow": false
+    },
+    "selfStrengthening": {
+      "shadow": false
+    },
+    "corpsSystem": {
+      "shadow": false
+    },
+    "interchangeableParts": {
+      "shadow": false
+    },
+    "irrigation": {
+      "shadow": false
+    },
+    "iqta": {
+      "shadow": false
+    },
+    "astronomy": {
+      "shadow": false
+    },
+    "silkMonopoly": {
+      "shadow": false
+    },
+    "mobileWarfare": {
+      "shadow": false
+    },
+    "nizamJadid": {
+      "shadow": false
+    },
+    "axumCoinage": {
+      "shadow": false
+    },
+    "prestorJohn": {
+      "shadow": false
+    },
+    "itinerantCourt": {
+      "shadow": false
+    },
+    "portugueseAlliance": {
+      "shadow": false
+    },
+    "horseBreeding": {
+      "shadow": false
+    },
+    "armsImport": {
+      "shadow": false
+    },
+    "cartography": {
+      "shadow": false
+    },
+    "up_cappedRam": {
+      "shadow": false
+    },
+    "up_trebuchet": {
+      "shadow": false
+    },
+    "up_heavyScorpion": {
+      "shadow": false
+    },
+    "up_bombard": {
+      "shadow": false
+    },
+    "up_howitzer": {
+      "shadow": false
+    },
+    "up_fieldGun": {
+      "shadow": false
+    },
+    "caravanserai": {
+      "shadow": false
+    },
+    "counterespionage": {
+      "shadow": false
+    },
+    "bankingHouses": {
+      "shadow": false
+    },
+    "ironTusks": {
+      "shadow": false
     }
   },
   "sources": [
@@ -374,6 +515,231 @@
           "id": "mandarinDuck",
           "height": 48
         }
+      ]
+    },
+    {
+      "source": "pack9-interfaz/tech-5.jpg",
+      "grid": [
+        4,
+        3
+      ],
+      "items": [
+        {
+          "id": "cantonSystem",
+          "height": 48
+        },
+        {
+          "id": "capitularies",
+          "height": 48
+        },
+        {
+          "id": "townCharter",
+          "height": 48
+        },
+        {
+          "id": "taille",
+          "height": 48
+        },
+        {
+          "id": "hireMercenaries",
+          "height": 48
+        },
+        {
+          "id": "colbertism",
+          "height": 48
+        },
+        {
+          "id": "vaubanDoctrine",
+          "height": 48
+        },
+        {
+          "id": "gribeauvalDoctrine",
+          "height": 48
+        },
+        {
+          "id": "alfredReform",
+          "height": 48
+        },
+        {
+          "id": "domesday",
+          "height": 48
+        },
+        {
+          "id": "companyCharter",
+          "height": 48
+        },
+        {
+          "id": "nationalDebt",
+          "height": 48
+        }
+      ]
+    },
+    {
+      "source": "pack9-interfaz/tech-6.jpg",
+      "grid": [
+        4,
+        3
+      ],
+      "items": [
+        {
+          "id": "industrialAge",
+          "height": 48
+        },
+        {
+          "id": "steamEngine",
+          "height": 48
+        },
+        {
+          "id": "electricity",
+          "height": 48
+        },
+        {
+          "id": "combustionEngine",
+          "height": 48
+        },
+        {
+          "id": "aviation",
+          "height": 48
+        },
+        {
+          "id": "rifling",
+          "height": 48
+        },
+        {
+          "id": "assemblyLine",
+          "height": 48
+        },
+        {
+          "id": "bessemerSteel",
+          "height": 48
+        },
+        {
+          "id": "railway",
+          "height": 48
+        },
+        {
+          "id": "selfStrengthening",
+          "height": 48
+        },
+        {
+          "id": "corpsSystem",
+          "height": 48
+        },
+        {
+          "id": "interchangeableParts",
+          "height": 48
+        }
+      ]
+    },
+    {
+      "source": "pack9-interfaz/tech-7.jpg",
+      "grid": [
+        4,
+        3
+      ],
+      "items": [
+        {
+          "id": "irrigation",
+          "height": 48
+        },
+        {
+          "id": "iqta",
+          "height": 48
+        },
+        {
+          "id": "astronomy",
+          "height": 48
+        },
+        {
+          "id": "silkMonopoly",
+          "height": 48
+        },
+        {
+          "id": "mobileWarfare",
+          "height": 48
+        },
+        {
+          "id": "nizamJadid",
+          "height": 48
+        },
+        {
+          "id": "axumCoinage",
+          "height": 48
+        },
+        {
+          "id": "prestorJohn",
+          "height": 48
+        },
+        {
+          "id": "itinerantCourt",
+          "height": 48
+        },
+        {
+          "id": "portugueseAlliance",
+          "height": 48
+        },
+        {
+          "id": "horseBreeding",
+          "height": 48
+        },
+        {
+          "id": "armsImport",
+          "height": 48
+        }
+      ]
+    },
+    {
+      "source": "pack9-interfaz/tech-8.jpg",
+      "grid": [
+        4,
+        3
+      ],
+      "items": [
+        {
+          "id": "cartography",
+          "height": 48
+        },
+        {
+          "id": "up_cappedRam",
+          "height": 48
+        },
+        {
+          "id": "up_trebuchet",
+          "height": 48
+        },
+        {
+          "id": "up_heavyScorpion",
+          "height": 48
+        },
+        {
+          "id": "up_bombard",
+          "height": 48
+        },
+        {
+          "id": "up_howitzer",
+          "height": 48
+        },
+        {
+          "id": "up_fieldGun",
+          "height": 48
+        },
+        {
+          "id": "caravanserai",
+          "height": 48
+        },
+        {
+          "id": "counterespionage",
+          "height": 48
+        },
+        {
+          "id": "bankingHouses",
+          "height": 48
+        },
+        {
+          "id": "ironTusks",
+          "height": 48
+        },
+        null
       ]
     }
   ]
