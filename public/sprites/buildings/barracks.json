@@ -70,6 +70,24 @@
           }
         }
       }
+    },
+    "4": {
+      "image": "barracks-4.png",
+      "mask": "barracks-4-mask.png",
+      "states": {
+        "idle": {
+          "row": 0,
+          "frames": 1,
+          "cell": {
+            "w": 392,
+            "h": 296
+          },
+          "anchor": {
+            "x": 196,
+            "y": 196
+          }
+        }
+      }
     }
   }
 }

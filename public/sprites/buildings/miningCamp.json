@@ -70,6 +70,24 @@
           }
         }
       }
+    },
+    "4": {
+      "image": "miningCamp-4.png",
+      "mask": "miningCamp-4-mask.png",
+      "states": {
+        "idle": {
+          "row": 0,
+          "frames": 1,
+          "cell": {
+            "w": 264,
+            "h": 219
+          },
+          "anchor": {
+            "x": 132,
+            "y": 151
+          }
+        }
+      }
     }
   }
 }

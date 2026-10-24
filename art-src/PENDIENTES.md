@@ -129,13 +129,13 @@
 
 | id | nombre | estado | falta | archivos esperados (en public/sprites/) | prio | prompt |
 | --- | --- | --- | --- | --- | ---: | --- |
-| townCenter | Centro urbano | 🟡 sin animar | Edad de la Pólvora, Edad Industrial | buildings/townCenter-4.png (+ -mask.png)<br>buildings/townCenter-5.png (+ -mask.png) | 4 | `building:age` |
-| house | Casa | 🟡 sin animar | Edad de la Pólvora, Edad Industrial | buildings/house-4.png (+ -mask.png)<br>buildings/house-5.png (+ -mask.png) | 4 | `building:age` |
-| mill | Molino | 🟡 sin animar | Edad de la Pólvora, Edad Industrial | buildings/mill-4.png (+ -mask.png)<br>buildings/mill-5.png (+ -mask.png) | 4 | `building:age` |
-| lumberCamp | Campamento maderero | 🟡 sin animar | Edad de la Pólvora, Edad Industrial | buildings/lumberCamp-4.png (+ -mask.png)<br>buildings/lumberCamp-5.png (+ -mask.png) | 4 | `building:age` |
-| miningCamp | Campamento minero | 🟡 sin animar | Edad de la Pólvora, Edad Industrial | buildings/miningCamp-4.png (+ -mask.png)<br>buildings/miningCamp-5.png (+ -mask.png) | 4 | `building:age` |
+| townCenter | Centro urbano | 🟡 sin animar | Edad Industrial | buildings/townCenter-5.png (+ -mask.png) | 4 | `building:age` |
+| house | Casa | 🟡 sin animar | Edad Industrial | buildings/house-5.png (+ -mask.png) | 4 | `building:age` |
+| mill | Molino | 🟡 sin animar | Edad Industrial | buildings/mill-5.png (+ -mask.png) | 4 | `building:age` |
+| lumberCamp | Campamento maderero | 🟡 sin animar | Edad Industrial | buildings/lumberCamp-5.png (+ -mask.png) | 4 | `building:age` |
+| miningCamp | Campamento minero | 🟡 sin animar | Edad Industrial | buildings/miningCamp-5.png (+ -mask.png) | 4 | `building:age` |
 | farm | Granja | 🔴 pendiente | imagen base (Edad Oscura), Edad Feudal, Edad de los Castillos, Edad Imperial, Edad de la Pólvora, Edad Industrial | buildings/farm.png (+ -mask.png)<br>buildings/farm-1.png (+ -mask.png)<br>buildings/farm-2.png (+ -mask.png)<br>buildings/farm-3.png (+ -mask.png)<br>buildings/farm-4.png (+ -mask.png)<br>buildings/farm-5.png (+ -mask.png) | 3 | `building:base` |
-| barracks | Cuartel | 🟡 sin animar | Edad de la Pólvora, Edad Industrial | buildings/barracks-4.png (+ -mask.png)<br>buildings/barracks-5.png (+ -mask.png) | 4 | `building:age` |
+| barracks | Cuartel | 🟡 sin animar | Edad Industrial | buildings/barracks-5.png (+ -mask.png) | 4 | `building:age` |
 | archeryRange | Galería de tiro con arco | 🟡 sin animar | Edad de los Castillos, Edad Imperial, Edad de la Pólvora, Edad Industrial | buildings/archeryRange-2.png (+ -mask.png)<br>buildings/archeryRange-3.png (+ -mask.png)<br>buildings/archeryRange-4.png (+ -mask.png)<br>buildings/archeryRange-5.png (+ -mask.png) | 4 | `building:age` |
 | stable | Establo | 🟡 sin animar | Edad de los Castillos, Edad Imperial, Edad de la Pólvora, Edad Industrial | buildings/stable-2.png (+ -mask.png)<br>buildings/stable-3.png (+ -mask.png)<br>buildings/stable-4.png (+ -mask.png)<br>buildings/stable-5.png (+ -mask.png) | 4 | `building:age` |
 | blacksmith | Herrería | 🟡 sin animar | Edad de los Castillos, Edad Imperial, Edad de la Pólvora, Edad Industrial | buildings/blacksmith-2.png (+ -mask.png)<br>buildings/blacksmith-3.png (+ -mask.png)<br>buildings/blacksmith-4.png (+ -mask.png)<br>buildings/blacksmith-5.png (+ -mask.png) | 4 | `building:age` |
