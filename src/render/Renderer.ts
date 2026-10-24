@@ -262,6 +262,25 @@ export class Renderer {
     return wallTopPx(def.spriteParams ?? {}, b.tx, b.ty, s?.link);
   }
 
+  /** Desplazamiento (en casillas) de una unidad del paso de ronda dentro de su tramo, a lo largo del muro, para que no se tapen. */
+  private wallSlot(u: Entity): Pt {
+    const g = this.game, b = g.get(u.onWall);
+    if (!b) return { x: 0, y: 0 };
+    let k = 0, n = 0;
+    for (const o of g.units) if (!o.dead && o.onWall === b.id) { n++; if (o.id < u.id) k++; }
+    if (n < 2) return { x: 0, y: 0 };
+    const t = (k / (n - 1) - 0.5) * (n > 2 ? 0.5 : 0.36);
+    if (g.reg.building(b.defId).sprite !== 'wall') return { x: t, y: -t }; // torre: en fila de lado a lado
+    // Dirección del muro: la de sus vecinos
+    const m = g.map, linked = (dx: number, dy: number) => {
+      const x = b.tx + dx, y = b.ty + dy;
+      if (!m.inBounds(x, y)) return false;
+      const o = g.entities.get(m.occupant[y * m.w + x]);
+      return !!o && !o.dead && o.kind === 'building' && !!g.reg.building(o.defId).spriteParams?.link;
+    };
+    return linked(1, 0) || linked(-1, 0) ? { x: t, y: 0 } : linked(0, 1) || linked(0, -1) ? { x: 0, y: t } : { x: t, y: -t };
+  }
+
   /** Altura aproximada (px a zoom 1) de un edificio sobre su huella, para barras de vida, selección y sombra. */
   private buildingHeight(e: Entity): number {
     const procedural = e.size * 14 + 46;
@@ -358,11 +377,13 @@ export class Renderer {
     const minY = Math.min(c0.y, c1.y, c2.y, c3.y) - mg, maxY = Math.max(c0.y, c1.y, c2.y, c3.y) + mg;
     for (const e of game.list) {
       if (e.dead || e.inside || e.x < minX || e.x > maxX || e.y < minY || e.y > maxY) continue;
-      const rx = e.px + (e.x - e.px) * alpha, ry = e.py + (e.y - e.py) * alpha;
+      let rx = e.px + (e.x - e.px) * alpha, ry = e.py + (e.y - e.py) * alpha;
+      // En el paso de ronda de una muralla, la unidad se dibuja encima del tramo (y después de él),
+      // repartida a lo largo del muro si hay varias
+      const lift = e.onWall ? this.wallLift(e) : 0;
+      if (lift) { const o = this.wallSlot(e); rx += o.x; ry += o.y; }
       const hb = e.kind === 'unit' ? 0 : this.baseHeight(e);
       const p = e.kind === 'unit' ? cam.worldToScreen(rx, ry) : cam.worldToScreen(rx, ry, hb);
-      // En el paso de ronda de una muralla, la unidad se dibuja encima del tramo (y después de él)
-      const lift = e.onWall ? this.wallLift(e) : 0;
       if (lift) p.y -= lift * z;
       const margin = (e.size * 50 + 100) * z;
       if (p.x < -margin || p.y < -margin * 0.6 || p.x > W + margin || p.y > H + margin * 1.6) continue;
