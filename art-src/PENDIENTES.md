@@ -14,7 +14,7 @@
 | terreno | 9 | 0 | 0 |
 | decoración | 9 | 0 | 0 |
 | efecto | 8 | 0 | 5 |
-| interfaz | 23 | 0 | 89 |
+| interfaz | 59 | 0 | 53 |
 
 ## Siguiente en generar (por prioridad)
 
@@ -302,43 +302,43 @@
 | heavyPlow | Tecnología: Arado pesado | ✅ hecho | — | — | — | — |
 | goldMining | Tecnología: Minería de oro | ✅ hecho | — | — | — | — |
 | stoneMining | Tecnología: Cantería | ✅ hecho | — | — | — | — |
-| forging | Tecnología: Forja | 🔴 pendiente | imagen | ui/tech/forging.png | 5 | `ui:tech` |
-| ironCasting | Tecnología: Fundición de hierro | 🔴 pendiente | imagen | ui/tech/ironCasting.png | 5 | `ui:tech` |
-| fletching | Tecnología: Emplumado | 🔴 pendiente | imagen | ui/tech/fletching.png | 5 | `ui:tech` |
-| bodkinArrow | Tecnología: Flecha punzante | 🔴 pendiente | imagen | ui/tech/bodkinArrow.png | 5 | `ui:tech` |
-| scaleMail | Tecnología: Cota de escamas | 🔴 pendiente | imagen | ui/tech/scaleMail.png | 5 | `ui:tech` |
-| scaleBarding | Tecnología: Barda de escamas | 🔴 pendiente | imagen | ui/tech/scaleBarding.png | 5 | `ui:tech` |
-| paddedArcherArmor | Tecnología: Armadura acolchada | 🔴 pendiente | imagen | ui/tech/paddedArcherArmor.png | 5 | `ui:tech` |
-| up_manAtArms | Tecnología: Hombre de armas | 🔴 pendiente | imagen | ui/tech/up_manAtArms.png | 5 | `ui:tech` |
-| up_longSwordsman | Tecnología: Espadachín de mandoble | 🔴 pendiente | imagen | ui/tech/up_longSwordsman.png | 5 | `ui:tech` |
-| up_pikeman | Tecnología: Piquero | 🔴 pendiente | imagen | ui/tech/up_pikeman.png | 5 | `ui:tech` |
-| up_crossbowman | Tecnología: Ballestero | 🔴 pendiente | imagen | ui/tech/up_crossbowman.png | 5 | `ui:tech` |
-| up_lightCavalry | Tecnología: Caballería ligera | 🔴 pendiente | imagen | ui/tech/up_lightCavalry.png | 5 | `ui:tech` |
-| up_cavalier | Tecnología: Paladín | 🔴 pendiente | imagen | ui/tech/up_cavalier.png | 5 | `ui:tech` |
-| yeomen | Tecnología: Arqueros ingleses | 🔴 pendiente | imagen | ui/tech/yeomen.png | 5 | `ui:tech` |
-| beardedAxe | Tecnología: Hacha barbada | 🔴 pendiente | imagen | ui/tech/beardedAxe.png | 5 | `ui:tech` |
-| russkayaPravda | Tecnología: Russkaya Pravda | 🔴 pendiente | imagen | ui/tech/russkayaPravda.png | 5 | `ui:tech` |
-| siberianMarch | Tecnología: Marcha a Siberia | 🔴 pendiente | imagen | ui/tech/siberianMarch.png | 5 | `ui:tech` |
-| selectiveBreeding | Tecnología: Cría selectiva | 🔴 pendiente | imagen | ui/tech/selectiveBreeding.png | 5 | `ui:tech` |
-| defenseArchitecture | Tecnología: Arquitectura de defensa | 🔴 pendiente | imagen | ui/tech/defenseArchitecture.png | 5 | `ui:tech` |
-| buttresses | Tecnología: Contrafuertes | 🔴 pendiente | imagen | ui/tech/buttresses.png | 5 | `ui:tech` |
-| boilingOil | Tecnología: Aceite hirviendo | 🔴 pendiente | imagen | ui/tech/boilingOil.png | 5 | `ui:tech` |
-| wallCrews | Tecnología: Cuadrillas de albañiles | 🔴 pendiente | imagen | ui/tech/wallCrews.png | 5 | `ui:tech` |
-| gunpowderAge | Tecnología: Edad de la Pólvora | 🔴 pendiente | imagen | ui/tech/gunpowderAge.png | 5 | `ui:tech` |
-| printing | Tecnología: Imprenta | 🔴 pendiente | imagen | ui/tech/printing.png | 5 | `ui:tech` |
+| forging | Tecnología: Forja | ✅ hecho | — | — | — | — |
+| ironCasting | Tecnología: Fundición de hierro | ✅ hecho | — | — | — | — |
+| fletching | Tecnología: Emplumado | ✅ hecho | — | — | — | — |
+| bodkinArrow | Tecnología: Flecha punzante | ✅ hecho | — | — | — | — |
+| scaleMail | Tecnología: Cota de escamas | ✅ hecho | — | — | — | — |
+| scaleBarding | Tecnología: Barda de escamas | ✅ hecho | — | — | — | — |
+| paddedArcherArmor | Tecnología: Armadura acolchada | ✅ hecho | — | — | — | — |
+| up_manAtArms | Tecnología: Hombre de armas | ✅ hecho | — | — | — | — |
+| up_longSwordsman | Tecnología: Espadachín de mandoble | ✅ hecho | — | — | — | — |
+| up_pikeman | Tecnología: Piquero | ✅ hecho | — | — | — | — |
+| up_crossbowman | Tecnología: Ballestero | ✅ hecho | — | — | — | — |
+| up_lightCavalry | Tecnología: Caballería ligera | ✅ hecho | — | — | — | — |
+| up_cavalier | Tecnología: Paladín | ✅ hecho | — | — | — | — |
+| yeomen | Tecnología: Arqueros ingleses | ✅ hecho | — | — | — | — |
+| beardedAxe | Tecnología: Hacha barbada | ✅ hecho | — | — | — | — |
+| russkayaPravda | Tecnología: Russkaya Pravda | ✅ hecho | — | — | — | — |
+| siberianMarch | Tecnología: Marcha a Siberia | ✅ hecho | — | — | — | — |
+| selectiveBreeding | Tecnología: Cría selectiva | ✅ hecho | — | — | — | — |
+| defenseArchitecture | Tecnología: Arquitectura de defensa | ✅ hecho | — | — | — | — |
+| buttresses | Tecnología: Contrafuertes | ✅ hecho | — | — | — | — |
+| boilingOil | Tecnología: Aceite hirviendo | ✅ hecho | — | — | — | — |
+| wallCrews | Tecnología: Cuadrillas de albañiles | ✅ hecho | — | — | — | — |
+| gunpowderAge | Tecnología: Edad de la Pólvora | ✅ hecho | — | — | — | — |
+| printing | Tecnología: Imprenta | ✅ hecho | — | — | — | — |
 | cartography | Tecnología: Cartografía | 🔴 pendiente | imagen | ui/tech/cartography.png | 5 | `ui:tech` |
-| ballistics | Tecnología: Balística | 🔴 pendiente | imagen | ui/tech/ballistics.png | 5 | `ui:tech` |
-| advancedMetallurgy | Tecnología: Metalurgia avanzada | 🔴 pendiente | imagen | ui/tech/advancedMetallurgy.png | 5 | `ui:tech` |
-| bayonet | Tecnología: Bayoneta | 🔴 pendiente | imagen | ui/tech/bayonet.png | 5 | `ui:tech` |
-| refinedPowder | Tecnología: Pólvora refinada | 🔴 pendiente | imagen | ui/tech/refinedPowder.png | 5 | `ui:tech` |
-| bastionTheory | Tecnología: Fortificación abaluartada | 🔴 pendiente | imagen | ui/tech/bastionTheory.png | 5 | `ui:tech` |
-| deepMining | Tecnología: Mina profunda | 🔴 pendiente | imagen | ui/tech/deepMining.png | 5 | `ui:tech` |
-| mercantilism | Tecnología: Mercantilismo | 🔴 pendiente | imagen | ui/tech/mercantilism.png | 5 | `ui:tech` |
-| imperialExams | Tecnología: Exámenes imperiales | 🔴 pendiente | imagen | ui/tech/imperialExams.png | 5 | `ui:tech` |
-| champaRice | Tecnología: Arroz de Champa | 🔴 pendiente | imagen | ui/tech/champaRice.png | 5 | `ui:tech` |
-| jiaozi | Tecnología: Billete jiaozi | 🔴 pendiente | imagen | ui/tech/jiaozi.png | 5 | `ui:tech` |
-| thunderBomb | Tecnología: Bomba trueno | 🔴 pendiente | imagen | ui/tech/thunderBomb.png | 5 | `ui:tech` |
-| mandarinDuck | Tecnología: Pato mandarín | 🔴 pendiente | imagen | ui/tech/mandarinDuck.png | 5 | `ui:tech` |
+| ballistics | Tecnología: Balística | ✅ hecho | — | — | — | — |
+| advancedMetallurgy | Tecnología: Metalurgia avanzada | ✅ hecho | — | — | — | — |
+| bayonet | Tecnología: Bayoneta | ✅ hecho | — | — | — | — |
+| refinedPowder | Tecnología: Pólvora refinada | ✅ hecho | — | — | — | — |
+| bastionTheory | Tecnología: Fortificación abaluartada | ✅ hecho | — | — | — | — |
+| deepMining | Tecnología: Mina profunda | ✅ hecho | — | — | — | — |
+| mercantilism | Tecnología: Mercantilismo | ✅ hecho | — | — | — | — |
+| imperialExams | Tecnología: Exámenes imperiales | ✅ hecho | — | — | — | — |
+| champaRice | Tecnología: Arroz de Champa | ✅ hecho | — | — | — | — |
+| jiaozi | Tecnología: Billete jiaozi | ✅ hecho | — | — | — | — |
+| thunderBomb | Tecnología: Bomba trueno | ✅ hecho | — | — | — | — |
+| mandarinDuck | Tecnología: Pato mandarín | ✅ hecho | — | — | — | — |
 | cantonSystem | Tecnología: Cantón | 🔴 pendiente | imagen | ui/tech/cantonSystem.png | 5 | `ui:tech` |
 | capitularies | Tecnología: Capitulares | 🔴 pendiente | imagen | ui/tech/capitularies.png | 5 | `ui:tech` |
 | townCharter | Tecnología: Carta urbana | 🔴 pendiente | imagen | ui/tech/townCharter.png | 5 | `ui:tech` |

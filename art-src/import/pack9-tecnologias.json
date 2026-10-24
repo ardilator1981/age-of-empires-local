@@ -37,6 +37,114 @@
     },
     "stoneMining": {
       "shadow": false
+    },
+    "forging": {
+      "shadow": false
+    },
+    "ironCasting": {
+      "shadow": false
+    },
+    "fletching": {
+      "shadow": false
+    },
+    "bodkinArrow": {
+      "shadow": false
+    },
+    "scaleMail": {
+      "shadow": false
+    },
+    "scaleBarding": {
+      "shadow": false
+    },
+    "paddedArcherArmor": {
+      "shadow": false
+    },
+    "up_manAtArms": {
+      "shadow": false
+    },
+    "up_longSwordsman": {
+      "shadow": false
+    },
+    "up_pikeman": {
+      "shadow": false
+    },
+    "up_crossbowman": {
+      "shadow": false
+    },
+    "up_lightCavalry": {
+      "shadow": false
+    },
+    "up_cavalier": {
+      "shadow": false
+    },
+    "yeomen": {
+      "shadow": false
+    },
+    "beardedAxe": {
+      "shadow": false
+    },
+    "russkayaPravda": {
+      "shadow": false
+    },
+    "siberianMarch": {
+      "shadow": false
+    },
+    "selectiveBreeding": {
+      "shadow": false
+    },
+    "defenseArchitecture": {
+      "shadow": false
+    },
+    "buttresses": {
+      "shadow": false
+    },
+    "boilingOil": {
+      "shadow": false
+    },
+    "wallCrews": {
+      "shadow": false
+    },
+    "gunpowderAge": {
+      "shadow": false
+    },
+    "printing": {
+      "shadow": false
+    },
+    "ballistics": {
+      "shadow": false
+    },
+    "advancedMetallurgy": {
+      "shadow": false
+    },
+    "bayonet": {
+      "shadow": false
+    },
+    "refinedPowder": {
+      "shadow": false
+    },
+    "bastionTheory": {
+      "shadow": false
+    },
+    "deepMining": {
+      "shadow": false
+    },
+    "mercantilism": {
+      "shadow": false
+    },
+    "imperialExams": {
+      "shadow": false
+    },
+    "champaRice": {
+      "shadow": false
+    },
+    "jiaozi": {
+      "shadow": false
+    },
+    "thunderBomb": {
+      "shadow": false
+    },
+    "mandarinDuck": {
+      "shadow": false
     }
   },
   "sources": [
@@ -93,6 +201,177 @@
         },
         {
           "id": "stoneMining",
+          "height": 48
+        }
+      ]
+    },
+    {
+      "source": "pack9-interfaz/tech-2.jpg",
+      "grid": [
+        4,
+        3
+      ],
+      "items": [
+        {
+          "id": "forging",
+          "height": 48
+        },
+        {
+          "id": "ironCasting",
+          "height": 48
+        },
+        {
+          "id": "fletching",
+          "height": 48
+        },
+        {
+          "id": "bodkinArrow",
+          "height": 48
+        },
+        {
+          "id": "scaleMail",
+          "height": 48
+        },
+        {
+          "id": "scaleBarding",
+          "height": 48
+        },
+        {
+          "id": "paddedArcherArmor",
+          "height": 48
+        },
+        {
+          "id": "up_manAtArms",
+          "height": 48
+        },
+        {
+          "id": "up_longSwordsman",
+          "height": 48
+        },
+        {
+          "id": "up_pikeman",
+          "height": 48
+        },
+        {
+          "id": "up_crossbowman",
+          "height": 48
+        },
+        {
+          "id": "up_lightCavalry",
+          "height": 48
+        }
+      ]
+    },
+    {
+      "source": "pack9-interfaz/tech-3.jpg",
+      "grid": [
+        4,
+        3
+      ],
+      "items": [
+        {
+          "id": "up_cavalier",
+          "height": 48
+        },
+        {
+          "id": "yeomen",
+          "height": 48
+        },
+        {
+          "id": "beardedAxe",
+          "height": 48
+        },
+        {
+          "id": "russkayaPravda",
+          "height": 48
+        },
+        {
+          "id": "siberianMarch",
+          "height": 48
+        },
+        {
+          "id": "selectiveBreeding",
+          "height": 48
+        },
+        {
+          "id": "defenseArchitecture",
+          "height": 48
+        },
+        {
+          "id": "buttresses",
+          "height": 48
+        },
+        {
+          "id": "boilingOil",
+          "height": 48
+        },
+        {
+          "id": "wallCrews",
+          "height": 48
+        },
+        {
+          "id": "gunpowderAge",
+          "height": 48
+        },
+        {
+          "id": "printing",
+          "height": 48
+        }
+      ]
+    },
+    {
+      "source": "pack9-interfaz/tech-4.jpg",
+      "grid": [
+        4,
+        3
+      ],
+      "items": [
+        {
+          "id": "ballistics",
+          "height": 48
+        },
+        {
+          "id": "advancedMetallurgy",
+          "height": 48
+        },
+        {
+          "id": "bayonet",
+          "height": 48
+        },
+        {
+          "id": "refinedPowder",
+          "height": 48
+        },
+        {
+          "id": "bastionTheory",
+          "height": 48
+        },
+        {
+          "id": "deepMining",
+          "height": 48
+        },
+        {
+          "id": "mercantilism",
+          "height": 48
+        },
+        {
+          "id": "imperialExams",
+          "height": 48
+        },
+        {
+          "id": "champaRice",
+          "height": 48
+        },
+        {
+          "id": "jiaozi",
+          "height": 48
+        },
+        {
+          "id": "thunderBomb",
+          "height": 48
+        },
+        {
+          "id": "mandarinDuck",
           "height": 48
         }
       ]
