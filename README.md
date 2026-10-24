@@ -533,6 +533,13 @@ una imagen de unos 512×512 px en `public/sprites/defense/` (`palisade`, `wood`,
 Las texturas de muro y empalizada se hacen de frente (la cara del muro, no en perspectiva); `ditch` y `bridge` se ven desde
 arriba (suelo de la zanja y tablones). Ver `src/render/art/defenseTextures.ts`.
 
+### Iconos de tecnologías
+
+Cada tecnología puede tener un icono con imagen: `public/sprites/ui/tech/<id>.png` (unos 96×96 px, el fondo ya recortado).
+Se importan con `art-import` (`"kind": "resource", "out": "ui/tech"`, ver `art-src/import/pack9-interfaz.json`), que además
+escribe `public/sprites/ui/tech/index.json` con los iconos que existen: el juego solo pide esos (`src/mods/art/index.ts`) y
+usa el emoji en los demás. El icono llena el botón de comando (`.ti` en `src/styles.css`).
+
 ### 5. Comprobar el resultado
 
 ```bash

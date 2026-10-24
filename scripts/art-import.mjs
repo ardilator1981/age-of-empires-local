@@ -40,7 +40,7 @@
  * Con "sharedScale": true en una imagen, las piezas sin medida usan la escala de la primera
  * (personajes dibujados juntos a la misma escala).
  */
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import sharp from 'sharp';
 
@@ -370,4 +370,11 @@ if (previews.length) {
   const file = join(previewDir, `${name}.png`);
   await sharp({ create: { width: maxW, height: y, channels: 4, background: '#40443a' } }).composite(comps).png().toFile(file);
   console.log(`Vista previa: ${file}`);
+}
+
+// Iconos de tecnologías: lista de los que existen, para que el juego no pida los que faltan (src/mods/art)
+if (cfg.out === 'ui/tech') {
+  const ids = readdirSync(outDir).filter(f => f.endsWith('.png') && !f.endsWith('-mask.png')).map(f => f.replace(/\.png$/, '')).sort();
+  writeFileSync(join(outDir, 'index.json'), JSON.stringify(ids) + '\n');
+  console.log(`Índice de iconos de tecnología: ${ids.length}`);
 }
