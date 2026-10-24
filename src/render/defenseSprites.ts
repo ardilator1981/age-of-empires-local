@@ -25,7 +25,7 @@ const MATERIAL: Record<string, string> = { '#8a6a3e': 'wood', '#a9a398': 'stone'
 
 const EDGE = 'rgba(20,14,8,0.6)';
 /** Las alturas de `spriteParams.height` quedaban bajas junto a las tropas (unos 40 px): se escalan al dibujar. */
-const HEIGHT_SCALE = 1.6;
+const HEIGHT_SCALE = 1.95;
 /** Un color hexadecimal oscurecido (`shade` devuelve `rgb()`, que `slab` no admite como base). */
 const darken = (hex: string, f: number) => '#' + [1, 3, 5].map(i => Math.round(parseInt(hex.slice(i, i + 2), 16) * (1 - f)).toString(16).padStart(2, '0')).join('');
 const frac = (v: number) => v - Math.floor(v);
@@ -85,16 +85,18 @@ function bar(s: SpriteContext, ax: number, ay: number, bx: number, by: number, t
   poly(ctx, [g(0, h), g(1, h), g(2, h), g(3, h)]); ctx.fillStyle = shade(col, 0.14); ctx.fill(); ctx.stroke();
 }
 
-/** Almenas sobre un brazo de muro: bloques regulares con un hueco entre cada uno. */
+/** Almenas en los dos bordes de un brazo de muro, muy separadas: en medio queda el paso de ronda. */
 function merlons(s: SpriteContext, x0: number, y0: number, x1: number, y1: number, h: number, col: string, th: number) {
   const alongX = Math.abs(x1 - x0) >= Math.abs(y1 - y0);
   const len = alongX ? Math.abs(x1 - x0) : Math.abs(y1 - y0);
-  const n = Math.max(1, Math.round(len / 0.5)), w = 0.1, t = th * 0.92;
+  const n = Math.max(1, Math.round(len / 0.5)), w = 0.07, t = 0.045, off = th - t;
   const [ax, ay] = [Math.min(x0, x1), Math.min(y0, y1)];
   for (let i = 0; i < n; i++) {
     const c = (i + 0.5) / n * len;
-    if (alongX) slab(s, ax + c - w, y0 - t, ax + c + w, y0 + t, h, h + 4.5, col);
-    else slab(s, x0 - t, ay + c - w, x0 + t, ay + c + w, h, h + 4.5, col);
+    for (const side of [-1, 1]) {
+      if (alongX) slab(s, ax + c - w, y0 + side * off - t, ax + c + w, y0 + side * off + t, h, h + 5, col);
+      else slab(s, x0 + side * off - t, ay + c - w, x0 + side * off + t, ay + c + w, h, h + 5, col);
+    }
   }
 }
 
@@ -147,7 +149,7 @@ const wall: SpriteFn = s => {
   const complete = !e || e.complete, progress = e ? (e.complete ? 1 : e.progress) : 1;
   const col: string = P.color ?? '#a9a398', top: string = P.top ?? col;
   const H: number = (P.height ?? 22) * HEIGHT_SCALE * (complete ? 1 : 0.25 + 0.75 * progress);
-  const th = (P.thick ?? 0.17) * (P.stakes ? 1 : 0.78);
+  const th = (P.thick ?? 0.17) * (P.stakes ? 1 : 0.95);
   const cx = tx + 0.5, cy = ty + 0.5;
   // Sombra en el suelo
   ctx.fillStyle = 'rgba(0,0,0,0.22)';
@@ -165,6 +167,8 @@ const wall: SpriteFn = s => {
       if (P.crenels && !P.gate) merlons(s, dx ? (dx < 0 ? tx : cx) : cx, dy ? (dy < 0 ? ty : cy) : cy, dx ? (dx < 0 ? cx : tx + 1) : cx, dy ? (dy < 0 ? cy : ty + 1) : cy, ah, col, th);
     };
     const diag = (dx: number, dy: number) => {
+      // Solo las uniones que de verdad van en oblicuo: si algún lado ortogonal ya está unido, la barra sobra
+      if (has[dx < 0 ? 0 : 2] || has[dy < 0 ? 1 : 3]) return;
       if (link?.(dx, dy)) bar(s, cx, cy, cx + dx * 0.5, cy + dy * 0.5, Math.max(0.1, th * 0.8), P.gate ? Math.min(H, 8) : H, col);
     };
     // De atrás hacia delante: los brazos hacia -x y -y primero, los de +x y +y después del pilar
