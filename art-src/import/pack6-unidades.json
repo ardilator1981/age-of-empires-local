@@ -1802,6 +1802,61 @@
         { "id": "throwingAxeman", "state": "death" },
         { "id": "throwingAxeman", "state": "death" }
       ]
+    },
+    {
+      "source": "pack6-unidades/mandoble-andar.jpg",
+      "grid": [6, 2],
+      "sharedScale": true,
+      "items": [
+        { "id": "longSwordsman", "state": "walk", "height": 54 },
+        { "id": "longSwordsman", "state": "walk" },
+        { "id": "longSwordsman", "state": "walk" },
+        { "id": "longSwordsman", "state": "walk" },
+        { "id": "longSwordsman", "state": "walk" },
+        { "id": "longSwordsman", "state": "walk" },
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source": "pack6-unidades/mandoble-atacar.jpg",
+      "grid": [6, 2],
+      "sharedScale": true,
+      "items": [
+        { "id": "longSwordsman", "state": "attack", "height": 54 },
+        { "id": "longSwordsman", "state": "attack" },
+        { "id": "longSwordsman", "state": "attack" },
+        { "id": "longSwordsman", "state": "attack" },
+        { "id": "longSwordsman", "state": "attack" },
+        { "id": "longSwordsman", "state": "attack" },
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source": "pack6-unidades/mandoble-morir.jpg",
+      "grid": [5, 2],
+      "sharedScale": true,
+      "items": [
+        { "id": "longSwordsman", "state": "death", "height": 54 },
+        { "id": "longSwordsman", "state": "death" },
+        { "id": "longSwordsman", "state": "death" },
+        { "id": "longSwordsman", "state": "death" },
+        { "id": "longSwordsman", "state": "death" },
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
     }
   ]
 }
