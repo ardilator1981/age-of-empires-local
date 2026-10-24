@@ -1,0 +1,19 @@
+{
+  "image": "icon-coal.png",
+  "cell": {
+    "w": 98,
+    "h": 104
+  },
+  "anchor": {
+    "x": 49,
+    "y": 98
+  },
+  "scale": 2,
+  "shadow": false,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 1
+    }
+  }
+}

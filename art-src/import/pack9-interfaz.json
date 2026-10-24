@@ -34,6 +34,12 @@
     },
     "icon-rally": {
       "shadow": false
+    },
+    "icon-iron": {
+      "shadow": false
+    },
+    "icon-coal": {
+      "shadow": false
     }
   },
   "sources": [
@@ -87,6 +93,23 @@
         },
         {
           "id": "icon-rally",
+          "height": 48
+        }
+      ]
+    },
+    {
+      "source": "pack9-interfaz/iconos-hierro-carbon.jpg",
+      "grid": [
+        2,
+        1
+      ],
+      "items": [
+        {
+          "id": "icon-iron",
+          "height": 48
+        },
+        {
+          "id": "icon-coal",
           "height": 48
         }
       ]

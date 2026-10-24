@@ -1,0 +1,19 @@
+{
+  "image": "projectile-bullet.png",
+  "cell": {
+    "w": 18,
+    "h": 18
+  },
+  "anchor": {
+    "x": 9,
+    "y": 12
+  },
+  "scale": 2,
+  "shadow": false,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 1
+    }
+  }
+}

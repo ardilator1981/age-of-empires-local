@@ -14,7 +14,7 @@
     "projectile-axe": {
       "shadow": false
     },
-    "projectile-stone": {
+    "projectile-rock": {
       "shadow": false
     },
     "rubble": {
@@ -27,6 +27,12 @@
       "shadow": false
     },
     "smoke": {
+      "shadow": false
+    },
+    "projectile-cannonball": {
+      "shadow": false
+    },
+    "projectile-bullet": {
       "shadow": false
     }
   },
@@ -55,7 +61,7 @@
           "height": 14
         },
         {
-          "id": "projectile-stone",
+          "id": "projectile-rock",
           "height": 9
         }
       ]
@@ -130,6 +136,23 @@
         },
         {
           "id": "smoke"
+        }
+      ]
+    },
+    {
+      "source": "pack7-efectos/balas.jpg",
+      "grid": [
+        2,
+        1
+      ],
+      "items": [
+        {
+          "id": "projectile-cannonball",
+          "height": 8
+        },
+        {
+          "id": "projectile-bullet",
+          "height": 5
         }
       ]
     }

@@ -13,8 +13,8 @@
 | recurso | 6 | 0 | 6 |
 | terreno | 9 | 0 | 0 |
 | decoración | 9 | 0 | 0 |
-| efecto | 8 | 0 | 5 |
-| interfaz | 106 | 0 | 6 |
+| efecto | 11 | 0 | 2 |
+| interfaz | 108 | 0 | 4 |
 
 ## Siguiente en generar (por prioridad)
 
@@ -256,9 +256,9 @@
 | projectile-arrow | Proyectil: arrow | ✅ hecho | — | — | — | — |
 | projectile-javelin | Proyectil: javelin | ✅ hecho | — | — | — | — |
 | projectile-axe | Proyectil: axe | ✅ hecho | — | — | — | — |
-| projectile-bullet | Proyectil: bullet | 🔴 pendiente | imagen | effects/projectile-bullet.png | 5 | `effect` |
-| projectile-cannonball | Proyectil: cannonball | 🔴 pendiente | imagen | effects/projectile-cannonball.png | 5 | `effect` |
-| projectile-rock | Proyectil: rock | 🔴 pendiente | imagen | effects/projectile-rock.png | 5 | `effect` |
+| projectile-bullet | Proyectil: bullet | ✅ hecho | — | — | — | — |
+| projectile-cannonball | Proyectil: cannonball | ✅ hecho | — | — | — | — |
+| projectile-rock | Proyectil: rock | ✅ hecho | — | — | — | — |
 | projectile-bolt | Proyectil: bolt | ✅ hecho | — | — | — | — |
 | rubble | Escombros de edificio | ✅ hecho | — | — | — | — |
 | fire | Llama | ✅ hecho | — | — | — | — |
@@ -277,8 +277,8 @@
 | icon-wood | Icono de Madera | ✅ hecho | — | — | — | — |
 | icon-gold | Icono de Oro | ✅ hecho | — | — | — | — |
 | icon-stone | Icono de Piedra | ✅ hecho | — | — | — | — |
-| icon-iron | Icono de Hierro | 🔴 pendiente | imagen | ui/icon-iron.png | 5 | `ui:icon` |
-| icon-coal | Icono de Carbón | 🔴 pendiente | imagen | ui/icon-coal.png | 5 | `ui:icon` |
+| icon-iron | Icono de Hierro | ✅ hecho | — | — | — | — |
+| icon-coal | Icono de Carbón | ✅ hecho | — | — | — | — |
 | icon-population | Icono de población | ✅ hecho | — | — | — | — |
 | icon-idle-villager | Aldeano inactivo | ✅ hecho | — | — | — | — |
 | icon-attack | Atacar | ✅ hecho | — | — | — | — |
@@ -462,12 +462,6 @@ Same illustration style, bold dark outlines, painterly texture, warm rich colors
 
 ```text
 Same illustration style, bold dark outlines, painterly texture, warm rich colors and sunlight from the upper left as the picture of the characters you drew. Draw the resource, in stages from full to nearly exhausted, on a plain white background with wide gaps, no shadow, no ground, seen from high above at an angle. No writing, no numbers, no frame. (See Pack 2.)
-```
-
-### `ui:icon`
-
-```text
-Twelve small square paintings in three rows of four on a plain white background with white gaps, each a single object on a dark warm background inside a bevelled grey stone border, easy to recognise when very small, light from the upper left, warm medieval colors. No writing, no letters, no numbers. (See Pack 9.)
 ```
 
 ### `ui:panel`

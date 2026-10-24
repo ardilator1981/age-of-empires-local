@@ -1,0 +1,19 @@
+{
+  "image": "projectile-cannonball.png",
+  "cell": {
+    "w": 24,
+    "h": 24
+  },
+  "anchor": {
+    "x": 12,
+    "y": 18
+  },
+  "scale": 2,
+  "shadow": false,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 1
+    }
+  }
+}
