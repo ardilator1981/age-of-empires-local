@@ -1,6 +1,7 @@
 import type { Registry } from '../core/Registry';
 import type { Pt, SpriteContext, SpriteFn } from '../core/types';
 import { lerpPt, poly, shade } from './draw';
+import { defenseTexture, paintTextured } from './art/defenseTextures';
 
 /**
  * Sprites procedurales de las defensas lineales: empalizada y muros (`wall`) y zanja y puente (`ditch`).
@@ -10,6 +11,16 @@ import { lerpPt, poly, shade } from './draw';
 const DIRS: [number, number][] = [[-1, 0], [0, -1], [1, 0], [0, 1]];
 const lift = (p: Pt, h: number, z: number): Pt => ({ x: p.x, y: p.y - h * z });
 
+/** Textura de las caras del tramo que se está dibujando (null: color liso). */
+let faceTex: HTMLImageElement | null = null;
+
+/** Textura de un tramo según su material (`spriteParams.tex`, o por la empalizada y el color). */
+function textureFor(P: Record<string, any>): HTMLImageElement | null {
+  const name: string = P.tex ?? (P.stakes ? 'palisade' : MATERIAL[P.color as string] ?? '');
+  return name ? defenseTexture(name) : null;
+}
+const MATERIAL: Record<string, string> = { '#8a6a3e': 'wood', '#a9a398': 'stone', '#8c8a86': 'fortified' };
+
 /** Prisma de (x0, y0) a (x1, y1) con altura entre h0 y h1: tapa y las dos caras que se ven. */
 function slab(s: SpriteContext, x0: number, y0: number, x1: number, y1: number, h0: number, h1: number, col: string) {
   const { ctx, z, project: pr } = s;
@@ -17,8 +28,22 @@ function slab(s: SpriteContext, x0: number, y0: number, x1: number, y1: number, 
   const L = (p: Pt, h: number) => lift(p, h, z);
   ctx.lineJoin = 'round';
   ctx.strokeStyle = 'rgba(20,14,8,0.85)'; ctx.lineWidth = Math.max(0.5, 0.8 * z);
-  poly(ctx, [L(D, h0), L(C, h0), L(C, h1), L(D, h1)]); ctx.fillStyle = shade(col, 0.02); ctx.fill(); ctx.stroke();
-  poly(ctx, [L(C, h0), L(B, h0), L(B, h1), L(C, h1)]); ctx.fillStyle = shade(col, -0.22); ctx.fill(); ctx.stroke();
+  const front = [L(D, h0), L(C, h0), L(C, h1), L(D, h1)], side = [L(C, h0), L(B, h0), L(B, h1), L(C, h1)];
+  poly(ctx, front); ctx.fillStyle = shade(col, 0.02); ctx.fill();
+  if (faceTex) {
+    // La textura se alinea con el mundo (una repetición por casilla) para que los tramos encajen
+    const ux = pr(x0 + 1, y1), uy = pr(x1, y0 + 1), fx = x0 - Math.floor(x0), fy = y0 - Math.floor(y0);
+    const stepX = { x: ux.x - D.x, y: ux.y - D.y }, stepY = { x: uy.x - B.x, y: uy.y - B.y };
+    const hv = { x: 0, y: (h1 - h0) * z };
+    const top1 = L(D, h1), top2 = L(B, h1);
+    paintTextured(ctx, faceTex, front, { x: top1.x - fx * stepX.x, y: top1.y - fx * stepX.y }, stepX, hv);
+    poly(ctx, side); ctx.fillStyle = shade(col, -0.22); ctx.fill();
+    paintTextured(ctx, faceTex, side, { x: top2.x - fy * stepY.x, y: top2.y - fy * stepY.y }, stepY, hv);
+    ctx.fillStyle = 'rgba(0,0,0,0.24)'; poly(ctx, side); ctx.fill();
+  } else {
+    poly(ctx, side); ctx.fillStyle = shade(col, -0.22); ctx.fill();
+  }
+  poly(ctx, front); ctx.stroke(); poly(ctx, side); ctx.stroke();
   poly(ctx, [L(A, h1), L(B, h1), L(C, h1), L(D, h1)]); ctx.fillStyle = shade(col, 0.14); ctx.fill(); ctx.stroke();
 }
 
@@ -45,6 +70,7 @@ const wall: SpriteFn = s => {
   const { ctx, z, params: P, entity: e, foot, link, project: pr } = s;
   if (!foot) return;
   const { tx, ty } = foot;
+  faceTex = textureFor(P);
   const complete = !e || e.complete, progress = e ? (e.complete ? 1 : e.progress) : 1;
   const col: string = P.color ?? '#a9a398', top: string = P.top ?? col;
   const H: number = (P.height ?? 22) * (complete ? 1 : 0.25 + 0.75 * progress);
@@ -122,13 +148,27 @@ const ditch: SpriteFn = s => {
   poly(ctx, [pr(tx, ty), pr(tx + 1, ty), pr(tx + 1, ty + 1), pr(tx, ty + 1)]); ctx.fill(); // tierra removida
   ctx.fillStyle = complete ? '#2a1e13' : `rgba(42,30,19,${0.35 + 0.5 * progress})`;
   poly(ctx, ring); ctx.fill();
+  const soil = complete ? defenseTexture('ditch') : null;
+  if (soil) {
+    const o = pr(tx, ty), u = pr(tx + 1, ty), v = pr(tx, ty + 1);
+    paintTextured(ctx, soil, ring, o, { x: u.x - o.x, y: u.y - o.y }, { x: v.x - o.x, y: v.y - o.y });
+    ctx.fillStyle = 'rgba(10,6,2,0.35)'; poly(ctx, ring); ctx.fill();
+  }
   if (complete && P.water) {
     ctx.fillStyle = 'rgba(70,96,110,0.55)';
     poly(ctx, [pr(x0 + 0.12, y0 + 0.12), pr(x1 - 0.12, y0 + 0.12), pr(x1 - 0.12, y1 - 0.12), pr(x0 + 0.12, y1 - 0.12)]); ctx.fill();
   }
   ctx.strokeStyle = 'rgba(20,14,8,0.7)'; ctx.lineWidth = Math.max(0.5, 0.8 * z);
   poly(ctx, ring); ctx.stroke();
-  if (P.bridge) {
+  const planks = P.bridge ? defenseTexture('bridge') : null;
+  if (planks) {
+    // Tablones con imagen: sobre toda la casilla, un poco por encima del suelo
+    const lift2 = (p: Pt) => ({ x: p.x, y: p.y - 2.5 * z });
+    const sq = [pr(tx + 0.06, ty + 0.06), pr(tx + 0.94, ty + 0.06), pr(tx + 0.94, ty + 0.94), pr(tx + 0.06, ty + 0.94)].map(lift2);
+    const o = lift2(pr(tx, ty)), u = lift2(pr(tx + 1, ty)), v = lift2(pr(tx, ty + 1));
+    paintTextured(ctx, planks, sq, o, { x: u.x - o.x, y: u.y - o.y }, { x: v.x - o.x, y: v.y - o.y });
+    ctx.strokeStyle = 'rgba(20,14,8,0.7)'; ctx.lineWidth = Math.max(0.5, 0.8 * z); poly(ctx, sq); ctx.stroke();
+  } else if (P.bridge) {
     // Tablones atravesando el surco
     const alongY = d[1] || d[3];
     for (let i = 0; i < 4; i++) {

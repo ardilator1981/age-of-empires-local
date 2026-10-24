@@ -525,6 +525,14 @@ añade la imagen como variante de esa edad al JSON existente. En `art-src/previe
 huella dibujada; si una pieza queda desplazada, se corrige con `fit` (tamaño) y `dx`/`dy` (apoyo) en la
 configuración. Después hay que añadir la hoja a `ART` en `src/mods/art/index.ts`.
 
+### Defensas lineales (texturas)
+
+Empalizada, muros, zanja y puente se dibujan por tramos unidos a sus vecinos, así que su arte son **texturas**, no hojas: deja
+una imagen de unos 512×512 px en `public/sprites/defense/` (`palisade`, `wood`, `stone`, `fortified`, `ditch`, `bridge`;
+`.png`, `.jpg` o `.webp`) y se pinta sobre las caras del muro, una repetición por casilla. Sin imagen queda el color liso.
+Las texturas de muro y empalizada se hacen de frente (la cara del muro, no en perspectiva); `ditch` y `bridge` se ven desde
+arriba (suelo de la zanja y tablones). Ver `src/render/art/defenseTextures.ts`.
+
 ### 5. Comprobar el resultado
 
 ```bash
