@@ -89,6 +89,14 @@ export const BALANCE = {
   defense: {
     /** Máximo de segmentos de una línea trazada de una vez. */
     maxLine: 40,
+    /** Mejora en el sitio (`game/wallUpgrade.ts`): la obra dura este factor del tiempo de construir el tramo nuevo. */
+    upgradeTimeFactor: 0.6,
+    /** Tramos que se mejoran como máximo con una orden. */
+    maxUpgrade: 200,
+    /** Aldeanos que se mandan a la obra si el jugador no da ninguno (también la IA). */
+    upgradeBuilders: 4,
+    /** Tramos que la IA empieza a mejorar como máximo en cada turno de pensar. */
+    aiUpgradePerThink: 8,
     /** El daño «al pie» del muro (aceite hirviendo) se aplica cada tantos ticks (20 = cada segundo). */
     footEveryTicks: 20,
     /** La IA rodea su centro urbano con una empalizada (con puertas) a esta distancia, según la dificultad: [easy, normal, hard]; 0 = no. */

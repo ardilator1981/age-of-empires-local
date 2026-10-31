@@ -209,6 +209,12 @@ export interface BuildingDef extends BaseDef {
   /** Ids de edificios propios (terminados) sobre los que se construye este y a los que sustituye (puente sobre la zanja). */
   replaces?: string[];
   /**
+   * Mejora en el sitio: el edificio se convierte en `to` (misma casilla, orientación, salud proporcional y
+   * unidades encima) pagando `cost` por unidad. Mientras los aldeanos trabajan sigue en pie con sus
+   * estadísticas. Debe coincidir en tamaño, `gate` y `walkable` con `to`. Ver `game/wallUpgrade.ts`.
+   */
+  upgrade?: { to: string; cost: Cost };
+  /**
    * Daño por segundo a los enemigos que están al pie del edificio (aceite hirviendo, abrojos...).
    * Lo suben las tecnologías con el efecto `stat` `footDamage`. Ver `DefenseSystem`.
    */

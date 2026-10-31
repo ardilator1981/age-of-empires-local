@@ -7,6 +7,7 @@ import type { Entity } from '../Entity';
 import type { Game } from '../Game';
 import { buildingAvail, techAvail, unitAvail } from '../rules';
 import { placeLine } from '../defense';
+import { startUpgrade } from '../wallUpgrade';
 
 /**
  * Órdenes de jugador en datos simples (JSON), para enviarlas por la red o guardarlas en una
@@ -32,6 +33,8 @@ export type NetCommand =
   | { t: 'place'; building: string; tx: number; ty: number; builders: number[] }
   /** Una línea de segmentos (empalizada, muralla, zanja): casillas [x, y] en orden. Ver `game/defense.ts`. */
   | { t: 'placeLine'; building: string; tiles: [number, number][]; builders: number[] }
+  /** Mejorar tramos de defensa en el sitio (`game/wallUpgrade.ts`); `connected` = también todos los que se tocan con ellos. Sin `builders`, los aldeanos más cercanos. */
+  | { t: 'upgradeWall'; ids: number[]; connected?: boolean; builders?: number[] }
   | { t: 'train'; at: number; unit: string }
   | { t: 'research'; at: number; tech: string }
   | { t: 'cancel'; at: number; index: number }
@@ -139,6 +142,10 @@ export function applyNetCommand(game: Game, pid: number, c: NetCommand): boolean
         if (a.ok) game.reject(pid, 'placement', 'No se puede construir ahí'); else game.rejectAvail(pid, a);
       }
       return n > 0;
+    }
+    case 'upgradeWall': {
+      if (!Array.isArray(c.ids)) return false;
+      return startUpgrade(game, pid, own(game, pid, c.ids), !!c.connected, own(game, pid, c.builders ?? []).filter(u => u.kind === 'unit')) > 0;
     }
     case 'train': {
       const [b] = own(game, pid, [c.at]);

@@ -295,7 +295,7 @@ export class MobileHUD {
     if (set.build) tabs.push('economy', 'military', ...(set.build.defense.items.length ? ['defense' as const] : []));
     if (set.train.length) tabs.push('units');
     if (set.research.length) tabs.push('techs');
-    if (set.del || set.stop || set.evacuate || set.missions.length) tabs.push('actions');
+    if (set.del || set.stop || set.evacuate || set.missions.length || set.upgrade.length) tabs.push('actions');
     if (set.powers.length) tabs.push('powers');
     return tabs;
   }
@@ -333,7 +333,7 @@ export class MobileHUD {
       return out;
     }
     if (!set.blds.length) return out;
-    const prod = [...set.train, ...set.research];
+    const prod = [...set.upgrade, ...set.train, ...set.research];
     if (set.evacuate) out.push(this.btnFromCmd(set.evacuate));
     if (!prod.length) {
       const d = this.delBtn(set);
@@ -341,7 +341,7 @@ export class MobileHUD {
       return out;
     }
     prod.slice(0, set.evacuate ? 3 : 4).forEach(c => out.push(this.btnFromCmd(c)));
-    out.push(more(set.train.length ? 'units' : 'techs'));
+    out.push(more(set.train.length ? 'units' : set.research.length ? 'techs' : 'actions'));
     return out;
   }
 
@@ -443,6 +443,7 @@ export class MobileHUD {
     else if (tab === 'techs') btns = set.research.map(c => this.btnFromCmd(c));
     else if (tab === 'powers') btns = set.powers.map(c => this.btnFromCmd(c));
     else if (tab === 'actions') {
+      for (const c of set.upgrade) btns.push(this.btnFromCmd(c));
       for (const c of set.missions) btns.push(this.btnFromCmd(c));
       if (set.attackMove) btns.push(this.btnFromCmd(set.attackMove));
       if (set.explore) btns.push(this.btnFromCmd(set.explore));

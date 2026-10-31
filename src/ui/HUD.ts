@@ -185,7 +185,7 @@ export class HUD {
       set.powers.slice(0, 3).forEach((c, i) => { out[11 + i] = c; });
       return out;
     }
-    [...set.train, ...set.research].slice(0, 13 - set.powers.length).forEach((c, i) => { out[i] = c; });
+    [...set.upgrade, ...set.train, ...set.research].slice(0, 13 - set.powers.length).forEach((c, i) => { out[i] = c; });
     out[13] = set.evacuate;
     out[14] = set.del;
     set.powers.forEach((c, i) => { out[13 - set.powers.length + i] = c; });

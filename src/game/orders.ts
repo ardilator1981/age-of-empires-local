@@ -4,6 +4,7 @@ import type { Order, OrderHandler } from '../core/types';
 import {
   ARRIVED, UNREACHABLE, approach, canReach, edgeDist, face, isFarmTaken, moveTo, nearestDrop, nearestNode, pathBudget, setOrder,
 } from './actions';
+import { workUpgrade } from './wallUpgrade';
 import { buildingsOnly, findEnemyNear, performAttack } from './combat';
 import { rangeBonus } from './heightRules';
 import type { Entity } from './Entity';
@@ -287,7 +288,7 @@ function afterBuild(game: Game, u: Entity, b: Entity) {
   }
   let other: Entity | null = null, best = 12;
   for (const e of game.buildings) {
-    if (e.owner !== u.owner || e.complete || e.dead) continue;
+    if (e.owner !== u.owner || (e.complete && !e.data.upg) || e.dead) continue;
     const d = hypot(e.x - u.x, e.y - u.y);
     if (d < best) { best = d; other = e; }
   }
@@ -299,7 +300,7 @@ export const buildOrder: OrderHandler = {
     const b = game.get(o.targetId);
     u.working = false;
     if (!b || b.kind !== 'building' || b.owner !== u.owner) { setOrder(u, null); return; }
-    if (b.complete && b.hp >= b.maxHp) { afterBuild(game, u, b); return; }
+    if (b.complete && b.hp >= b.maxHp && !b.data.upg) { afterBuild(game, u, b); return; }
     const st = approach(game, u, b, BUILD_RANGE);
     if (st === UNREACHABLE) {
       o.fails = (o.fails ?? 0) + 1;
@@ -311,7 +312,8 @@ export const buildOrder: OrderHandler = {
     u.working = true;
     const p = game.players[u.owner];
     const bt = Math.max(1, p.getStat(game.buildingDef(b), 'buildTime'));
-    if (!b.complete) {
+    if (b.data.upg) workUpgrade(game, b, dt);
+    else if (!b.complete) {
       const dp = dt / bt;
       b.progress = Math.min(1, b.progress + dp);
       b.hp = Math.min(b.maxHp, b.hp + b.maxHp * dp);

@@ -4,6 +4,7 @@ import type { Entity } from '../../game/Entity';
 import { Commands } from '../../game/commands';
 import { placeSegments } from '../../game/defense';
 import { canMountSomewhere } from '../../game/walkway';
+import { canUpgrade, startUpgrade, upgradeCost } from '../../game/wallUpgrade';
 import { hypot } from '../../game/fmath';
 
 /**
@@ -14,6 +15,9 @@ import { hypot } from '../../game/fmath';
  *   Feudal     Zanja · Puente
  *   Castillos  Muralla de piedra · Puerta de piedra · Torre de muralla
  *   Imperial   Muralla fortificada · Puerta fortificada
+ *
+ * Mejora en el sitio (`upgrade`): empalizada → muralla de piedra → fortificada, y sus puertas, pagando piedra
+ * (ver `game/wallUpgrade.ts`). La zanja y el puente no tienen versión mejor.
  *
  * Clases: `wall` (empalizada, murallas y puertas: reciben los bonos de PV y el aceite hirviendo),
  * `barrier` (todo lo que solo estorba el paso: no cuenta para la victoria por conquista),
@@ -35,6 +39,7 @@ export const defenseBuildings: BuildingDef[] = [
     description: 'Tramo de estacas de madera: barato y débil, cierra el paso a las tropas a pie. Arrastra para trazar una línea. Los arqueros pueden disparar por encima.',
     classes: ['building', 'wall', 'barrier'], cost: { wood: 4 }, buildTime: 5, size: 1,
     hp: 280, armor: { melee: 2, pierce: 5 }, los: 1, age: 0,
+    upgrade: { to: 'stoneWall', cost: { stone: 4 } },
     sprite: 'wall', spriteParams: { link: 'wall', color: WOOD, height: 17, thick: 0.12, stakes: true },
   },
   {
@@ -42,6 +47,7 @@ export const defenseBuildings: BuildingDef[] = [
     description: 'Hueco en la empalizada: deja pasar a tus unidades y a las de tus aliados y está cerrado a las enemigas.',
     classes: ['building', 'wall', 'barrier', 'gate'], cost: { wood: 30 }, buildTime: 12, size: 1,
     hp: 350, armor: { melee: 1, pierce: 4 }, los: 2, age: 0,
+    upgrade: { to: 'stoneGate', cost: { stone: 20 } },
     sprite: 'wall', spriteParams: { link: 'wall', color: WOOD, height: 20, gate: true },
   },
   {
@@ -64,6 +70,7 @@ export const defenseBuildings: BuildingDef[] = [
     classes: ['building', 'wall', 'barrier'], cost: { stone: 6 }, buildTime: 12, size: 1,
     hp: 1800, armor: { melee: 8, pierce: 10 }, los: 2, age: 2,
     walkway: { ...SHOOTERS, capacity: 2, height: 1, armor: 2 },
+    upgrade: { to: 'fortifiedWall', cost: { stone: 6 } },
     sprite: 'wall', spriteParams: { link: 'wall', color: STONE, height: 24, thick: 0.22, crenels: true },
   },
   {
@@ -71,6 +78,7 @@ export const defenseBuildings: BuildingDef[] = [
     description: 'Puerta de la muralla: deja pasar a tus unidades y a las de tus aliados y está cerrada a las enemigas. El punto débil de un muro.',
     classes: ['building', 'wall', 'barrier', 'gate'], cost: { stone: 30, wood: 20 }, buildTime: 30, size: 1,
     hp: 1400, armor: { melee: 6, pierce: 8 }, los: 3, age: 2,
+    upgrade: { to: 'fortifiedGate', cost: { stone: 20 } },
     sprite: 'wall', spriteParams: { link: 'wall', color: STONE, height: 28, gate: true },
   },
   {
@@ -122,6 +130,11 @@ export const defenseTechs: TechDef[] = [
     effects: [{ type: 'stat', target: WALLS, stat: 'footDamage', op: 'add', value: 8 }],
   },
   {
+    id: 'masonryCraft', name: 'Cantería', icon: '⛏️', description: 'Mejorar empalizadas y murallas a la siguiente era (botón «Mejorar») cuesta un 40% menos de piedra.',
+    cost: { food: 150, stone: 100 }, researchTime: 35, age: 2, researchedAt: 'blacksmith', aiManaged: true, requiresTechs: ['defenseArchitecture'],
+    effects: [{ type: 'cost', target: { classes: ['wallUpgrade'] }, resource: 'stone', op: 'mul', value: 0.6 }],
+  },
+  {
     id: 'wallCrews', name: 'Cuadrillas de albañiles', icon: '🔨', description: 'Los aldeanos levantan y reparan empalizadas, murallas, puertas y zanjas un 40% más rápido.',
     cost: { food: 120, wood: 80 }, researchTime: 30, age: 1, researchedAt: 'townCenter', aiManaged: true,
     effects: [{ type: 'stat', target: { classes: ['barrier'], kind: 'building' }, stat: 'buildTime', op: 'mul', value: 0.6 }],
@@ -152,7 +165,7 @@ export function ringTiles(c: Pt, r: number): { tiles: Pt[]; sides: { x: number; 
  */
 export const defenseAI: AIPlugin = {
   id: 'defense',
-  uses: ['palisade', 'palisadeGate', 'stoneWall', 'stoneGate', 'fortifiedWall', 'fortifiedGate', 'defenseArchitecture', 'buttresses', 'boilingOil', 'wallCrews'],
+  uses: ['palisade', 'palisadeGate', 'stoneWall', 'stoneGate', 'fortifiedWall', 'fortifiedGate', 'defenseArchitecture', 'buttresses', 'boilingOil', 'wallCrews', 'masonryCraft'],
   think(ctx) {
     const { game: g, player: p } = ctx;
     const radius = BALANCE.defense.aiRingRadius[Math.max(0, DIFFICULTIES.indexOf(p.difficulty))] ?? 0;
@@ -209,6 +222,21 @@ export const defenseAI: AIPlugin = {
         if (wallNew.length && left > 0) placeSegments(g, p.id, wall, wallNew.slice(0, left), builders);
       }
     }
+    // Muros de eras pasadas: se mejoran en el sitio (sin dejar huecos) cuando sobra la piedra
+    const doing = ctx.buildings.filter(b => b.data.upg).length;
+    if (doing < BALANCE.defense.aiUpgradePerThink && wallNew.length + gateNew.length === 0) {
+      const pick: Entity[] = [], total: Record<string, number> = {};
+      for (const b of ctx.buildings) {
+        if (pick.length >= BALANCE.defense.aiUpgradePerThink) break;
+        if (!g.reg.building(b.defId).classes.includes('wall') || !canUpgrade(g, b)) continue;
+        const c = upgradeCost(g, p.id, b.defId), next = { ...total };
+        for (const [r, v] of Object.entries(c)) next[r] = (next[r] ?? 0) + (v ?? 0);
+        if (!spare(next)) continue;
+        Object.assign(total, next);
+        pick.push(b);
+      }
+      if (pick.length) startUpgrade(g, p.id, pick, false, []);
+    }
     // Tiradores en el paso de ronda: unos pocos de los que esperan en casa suben a los tramos libres
     const want = BALANCE.defense.aiWallShooters[Math.max(0, DIFFICULTIES.indexOf(p.difficulty))] ?? 0;
     const up = ctx.army.filter(u => u.onWall || u.order?.type === 'mountWall').length;
@@ -220,7 +248,7 @@ export const defenseAI: AIPlugin = {
     }
     // Mejoras de los muros, cuando ya hay un buen trecho levantado
     if (built >= 12) {
-      for (const t of ['wallCrews', 'defenseArchitecture', 'boilingOil', 'buttresses']) {
+      for (const t of ['wallCrews', 'defenseArchitecture', 'masonryCraft', 'boilingOil', 'buttresses']) {
         if (p.researched.has(t)) continue;
         if (spare(p.getCost(g.reg.tech(t)), 150) && ctx.research(t)) return;
       }

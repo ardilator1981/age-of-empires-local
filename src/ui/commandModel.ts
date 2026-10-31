@@ -4,7 +4,7 @@ import { groupOf } from '../game/army/groups';
 import type { Entity } from '../game/Entity';
 import type { Game } from '../game/Game';
 import {
-  buildablesFor, buildingAvail, costText, exploreAvail, researchablesAt, techAvail, trainablesAt, unitAvail, type Avail,
+  buildablesFor, buildingAvail, costText, exploreAvail, missingText, researchablesAt, techAvail, trainablesAt, unitAvail, type Avail,
 } from '../game/rules';
 import type { Session } from '../app/Session';
 import { portrait } from '../render/icons';
@@ -14,6 +14,7 @@ import { isPost, isTrader } from '../game/trade';
 import { BALANCE } from '../config/balance';
 import { canShelterSomewhere, garrisonOf, nearestShelter } from '../game/garrison';
 import { canMountSomewhere, postedOn } from '../game/walkway';
+import { canUpgrade, connectedSegments, upgradeCost } from '../game/wallUpgrade';
 
 /**
  * Qué se puede hacer con la selección actual. Lo comparten la interfaz de escritorio (rejilla de 15 botones)
@@ -50,6 +51,8 @@ export interface CommandSet {
   wall: Cmd | null;
   /** Pantalla de estrategia (formación, postura y órdenes tácticas) para las tropas. */
   strategy: Cmd | null;
+  /** Mejorar en el sitio los tramos de defensa seleccionados / toda la línea que se toca con ellos (`game/wallUpgrade.ts`). */
+  upgrade: Cmd[];
   /** Unidades que entrenar y tecnologías que investigar en los edificios seleccionados. */
   train: Cmd[];
   research: Cmd[];
@@ -196,13 +199,41 @@ function missionCommands(s: Session, units: Entity[]): Cmd[] {
   return out;
 }
 
+/** «Mejorar» y «Mejorar toda la línea» para los tramos de defensa seleccionados. */
+function upgradeCommands(s: Session, blds: Entity[]): Cmd[] {
+  const g = s.game, p = g.human, out: Cmd[] = [];
+  const costOf = (list: Entity[]) => {
+    const total: Record<string, number> = {};
+    for (const e of list) for (const [r, v] of Object.entries(upgradeCost(g, p.id, e.defId))) total[r] = (total[r] ?? 0) + (v ?? 0);
+    return total;
+  };
+  const make = (icon: string, label: string, list: Entity[], connected: boolean, text: string): Cmd => {
+    const total = costOf(list), cost = costText(g, total);
+    const to = g.reg.building(list[0].defId).upgrade!.to;
+    const a: Avail = list.some(e => p.canAfford(upgradeCost(g, p.id, e.defId))) ? OK : { visible: true, ok: false, reason: missingText(g, p, total), code: 'resources' };
+    return {
+      icon, label, avail: a, cost, badge: String(list.length),
+      tip: tipHtml(label, cost, `${text}<br>${list.length} tramo${list.length === 1 ? '' : 's'} → ${esc(g.reg.building(to).name)}${list.some(e => g.reg.building(e.defId).upgrade!.to !== to) ? ' y similares' : ''}. Los tramos siguen en pie durante la obra y conservan su salud proporcional; los aldeanos más cercanos la hacen.`, a),
+      action: () => {
+        if (!a.ok) { g.rejectAvail(p.id, a); return; }
+        s.orders.send({ t: 'upgradeWall', ids: ids(blds), connected });
+      },
+    };
+  };
+  const mine = blds.filter(b => canUpgrade(g, b));
+  if (mine.length) out.push(make('⬆️', 'Mejorar', mine, false, '<b>Mejorar</b><br>Convierte los tramos seleccionados en la defensa de la era actual, en su sitio.'));
+  const line = [...new Map(blds.flatMap(b => connectedSegments(g, b)).map(e => [e.id, e])).values()].filter(b => canUpgrade(g, b));
+  if (line.length > mine.length) out.push(make('🧱', 'Mejorar línea', line, true, '<b>Mejorar toda la línea</b><br>Mejora todos los tramos de muro que se tocan con la selección.'));
+  return out;
+}
+
 /** Calcula los comandos disponibles para la selección actual del jugador humano. */
 export function selectionCommands(s: Session): CommandSet {
   const g = s.game, p = g.human, ui = s.ui;
   const sel = ui.selected(g).filter(e => e.owner === p.id);
   const units = sel.filter(e => e.kind === 'unit');
   const blds = sel.filter(e => e.kind === 'building');
-  const set: CommandSet = { units, blds, build: null, attackMove: null, explore: null, stop: null, shelter: null, evacuate: null, wall: null, strategy: null, train: [], research: [], del: null, powers: powerCommands(s), missions: [] };
+  const set: CommandSet = { units, blds, build: null, attackMove: null, explore: null, stop: null, shelter: null, evacuate: null, wall: null, strategy: null, upgrade: [], train: [], research: [], del: null, powers: powerCommands(s), missions: [] };
   if (!sel.length) return set;
   const del: Cmd = {
     icon: '❌', label: 'Eliminar', avail: OK, tip: '<b>Eliminar</b> (Supr)<br>Destruye la selección.',
@@ -312,6 +343,7 @@ export function selectionCommands(s: Session): CommandSet {
       action: () => s.orders.send({ t: 'dismountWall', ids: ids(blds) }),
     };
   }
+  set.upgrade = upgradeCommands(s, blds);
   const defId = blds[0].defId;
   if (!blds.every(b => b.defId === defId)) return set;
   if (!blds[0].complete) {

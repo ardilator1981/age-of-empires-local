@@ -98,6 +98,14 @@ export function buildingAvail(game: Game, p: Player, id: string): Avail {
   return affordCheck(game, p, p.getCost(def)) ?? OK;
 }
 
+/** ¿Puede el jugador mejorar en el sitio un edificio de este tipo? (edad, requisitos y civilización del destino; no mira el dinero) */
+export function upgradeAvail(game: Game, p: Player, defId: string): Avail {
+  const up = game.reg.buildings.get(defId)?.upgrade;
+  const to = up && game.reg.buildings.get(up.to);
+  if (!up || !to || !civAllowed(to, p)) return HIDDEN;
+  return ageCheck(game, p, to.age) ?? techsCheck(game, p, to.requiresTechs) ?? OK;
+}
+
 /** ¿Pueden estas unidades explorar solas? (`autoExplore` en la definición) */
 export function exploreAvail(game: Game, p: Player, unitId: string): Avail {
   const ae = game.reg.units.get(unitId)?.autoExplore;
