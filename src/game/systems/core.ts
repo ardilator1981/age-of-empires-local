@@ -73,6 +73,18 @@ export class MovementSystem implements System {
   private buckets = new Map<number, Entity[]>();
   constructor(private game: Game) {}
 
+  /** ¿Es este paso en diagonal un colado entre dos tramos de muro que solo se tocan en la esquina? (las defensas en diagonal cierran el paso) */
+  private squeezes(cx: number, cy: number, tx: number, ty: number, owner: number): boolean {
+    if (cx === tx || cy === ty) return false;
+    const m = this.game.map;
+    if (m.walkableFor(tx, cy, owner) || m.walkableFor(cx, ty, owner)) return false;
+    const barrier = (x: number, y: number) => {
+      const e = this.game.entities.get(m.occupant[y * m.w + x]);
+      return !!e && e.kind === 'building' && this.game.buildingDef(e).classes.includes('barrier');
+    };
+    return barrier(tx, cy) && barrier(cx, ty);
+  }
+
   private tryMove(u: Entity, nx: number, ny: number): boolean {
     const m = this.game.map;
     // Los aviones vuelan sobre todo: solo los frena el borde del mapa
@@ -82,8 +94,9 @@ export class MovementSystem implements System {
       return true;
     }
     const o = u.owner;
-    const cur = m.walkableFor(Math.floor(u.x), Math.floor(u.y), o);
-    if (m.walkableFor(Math.floor(nx), Math.floor(ny), o) || !cur) { u.x = nx; u.y = ny; return true; }
+    const cx = Math.floor(u.x), cy = Math.floor(u.y), tx = Math.floor(nx), ty = Math.floor(ny);
+    const cur = m.walkableFor(cx, cy, o);
+    if ((m.walkableFor(tx, ty, o) && !this.squeezes(cx, cy, tx, ty, o)) || !cur) { u.x = nx; u.y = ny; return true; }
     if (m.walkableFor(Math.floor(nx), Math.floor(u.y), o)) { u.x = nx; return true; }
     if (m.walkableFor(Math.floor(u.x), Math.floor(ny), o)) { u.y = ny; return true; }
     return false;

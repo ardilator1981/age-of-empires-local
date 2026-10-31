@@ -87,8 +87,8 @@ export const BALANCE = {
 
   /** Defensas lineales: empalizadas, murallas, puertas y zanjas (`game/defense.ts`, docs/civilizaciones.md «Defensas»). */
   defense: {
-    /** Máximo de segmentos de una línea trazada de una vez. */
-    maxLine: 40,
+    /** Máximo de segmentos de una línea (o poligonal) trazada de una vez. */
+    maxLine: 160,
     /** Mejora en el sitio (`game/wallUpgrade.ts`): la obra dura este factor del tiempo de construir el tramo nuevo. */
     upgradeTimeFactor: 0.6,
     /** Tramos que se mejoran como máximo con una orden. */

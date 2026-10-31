@@ -14,7 +14,7 @@
 | terreno | 9 | 0 | 0 |
 | decoración | 9 | 0 | 0 |
 | efecto | 11 | 0 | 2 |
-| interfaz | 108 | 0 | 4 |
+| interfaz | 108 | 0 | 5 |
 
 ## Siguiente en generar (por prioridad)
 
@@ -323,6 +323,7 @@
 | defenseArchitecture | Tecnología: Arquitectura de defensa | ✅ hecho | — | — | — | — |
 | buttresses | Tecnología: Contrafuertes | ✅ hecho | — | — | — | — |
 | boilingOil | Tecnología: Aceite hirviendo | ✅ hecho | — | — | — | — |
+| masonryCraft | Tecnología: Cantería | 🔴 pendiente | imagen | ui/tech/masonryCraft.png | 5 | `ui:tech` |
 | wallCrews | Tecnología: Cuadrillas de albañiles | ✅ hecho | — | — | — | — |
 | gunpowderAge | Tecnología: Edad de la Pólvora | ✅ hecho | — | — | — | — |
 | printing | Tecnología: Imprenta | ✅ hecho | — | — | — | — |
@@ -459,6 +460,12 @@ Same illustration style, bold dark outlines, painterly texture, warm rich colors
 ```
 
 ### `ui:panel`
+
+```text
+Twelve small square paintings in three rows of four on a plain white background with white gaps, each a single object on a dark warm background inside a bevelled grey stone border, easy to recognise when very small, light from the upper left, warm medieval colors. No writing, no letters, no numbers. (See Pack 9.)
+```
+
+### `ui:tech`
 
 ```text
 Twelve small square paintings in three rows of four on a plain white background with white gaps, each a single object on a dark warm background inside a bevelled grey stone border, easy to recognise when very small, light from the upper left, warm medieval colors. No writing, no letters, no numbers. (See Pack 9.)

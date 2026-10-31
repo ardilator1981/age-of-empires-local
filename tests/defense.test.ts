@@ -3,7 +3,7 @@ import { TICK_DT } from '../src/core/constants';
 import { canReach } from '../src/game/actions';
 import { computeDamage } from '../src/game/combat';
 import { Commands } from '../src/game/commands';
-import { lineTiles } from '../src/game/defense';
+import { lineTiles, traceTiles } from '../src/game/defense';
 import { Game } from '../src/game/Game';
 import { stateHash } from '../src/game/net/hash';
 import { applyNetCommand } from '../src/game/net/netCommands';
@@ -317,5 +317,71 @@ describe('guardado de partidas con defensas', () => {
       expect(R(h, px, py, who) >= 0).toBe(R(g, px, py, who) >= 0);
     }
     expect(R(h, o.x + 4, o.y + 4, 2)).not.toBe(R(h, o.x + 4, o.y + 10, 2));
+  });
+});
+
+describe('trazado oblicuo, poligonal y curvo', () => {
+  const conn = (t: { x: number; y: number }[]) => t.every((c, i) => !i || Math.max(Math.abs(c.x - t[i - 1].x), Math.abs(c.y - t[i - 1].y)) === 1);
+
+  it('las rectas en cualquier ángulo son cadenas de 8 vecinos sin casillas repetidas', () => {
+    for (const [bx, by] of [[9, 3], [3, 9], [7, 7], [-6, 2], [0, -8], [11, -4]]) {
+      const t = traceTiles([{ x: 20, y: 20 }, { x: 20 + bx, y: 20 + by }]);
+      expect(conn(t)).toBe(true);
+      expect(t.length).toBe(Math.max(Math.abs(bx), Math.abs(by)) + 1);
+    }
+  });
+
+  it('una poligonal pasa por todos los vértices y un recinto cerrado no repite la primera casilla', () => {
+    const v = [{ x: 10, y: 10 }, { x: 18, y: 12 }, { x: 14, y: 20 }];
+    const open = traceTiles(v);
+    expect(v.every(p => open.some(t => t.x === p.x && t.y === p.y))).toBe(true);
+    const closed = traceTiles(v, { close: true });
+    // Recinto: ninguna casilla queda suelta
+    const near = (a: { x: number; y: number }) => closed.filter(b => b !== a && Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y)) === 1).length;
+    expect(closed.every(c => near(c) >= 1)).toBe(true);
+    expect(new Set(closed.map(t => `${t.x},${t.y}`)).size).toBe(closed.length);
+  });
+
+  it('la curva pasa por los vértices, es una cadena conectada y no hace escalones de más', () => {
+    const v = [{ x: 10, y: 10 }, { x: 16, y: 14 }, { x: 22, y: 10 }, { x: 28, y: 16 }];
+    const t = traceTiles(v, { curve: true });
+    expect(conn(t)).toBe(true);
+    expect(v.every(p => t.some(c => c.x === p.x && c.y === p.y))).toBe(true);
+    for (let i = 2; i < t.length; i++) {
+      const vert = v.some(p => p.x === t[i - 1].x && p.y === t[i - 1].y);
+      if (!vert) expect(Math.max(Math.abs(t[i].x - t[i - 2].x), Math.abs(t[i].y - t[i - 2].y))).toBe(2);
+    }
+  });
+
+  it('un rombo de tramos que solo se tocan en esquina encierra su interior y separa las regiones', () => {
+    const g = setup(0);
+    const o = freeArea(g, 12);
+    const c = { x: o.x + 6, y: o.y + 6 };
+    const diamond = traceTiles([{ x: c.x, y: c.y - 4 }, { x: c.x + 4, y: c.y }, { x: c.x, y: c.y + 4 }, { x: c.x - 4, y: c.y }], { close: true });
+    for (const t of diamond) g.placeBuilding('palisade', 1, t.x, t.y, true);
+    expect(R(g, c.x + 0.5, c.y + 0.5, 2)).toBeGreaterThanOrEqual(0);
+    expect(R(g, c.x + 0.5, c.y + 0.5, 2)).not.toBe(R(g, c.x + 7.5, c.y + 0.5, 2));
+  });
+
+  it('empujar a una unidad contra la esquina de dos muros en diagonal no la deja cruzar', () => {
+    const g = setup(0);
+    const o = freeArea(g, 8);
+    g.placeBuilding('palisade', 1, o.x, o.y, true);
+    g.placeBuilding('palisade', 1, o.x + 1, o.y + 1, true);
+    const u = unitAt(g, 2, o.x + 1.02, o.y + 0.98); // en (1,0), la esquina justo al lado
+    const sys = g.systems.find(s => (s as any).tryMove) as any;
+    expect(sys.tryMove(u, o.x + 0.96, o.y + 1.04)).toBe(false); // no cruza la esquina
+    expect(Math.floor(u.x) === o.x && Math.floor(u.y) === o.y + 1).toBe(false);
+  });
+
+  it('placeLine admite una poligonal larga y respeta el máximo', () => {
+    const g = setup(2);
+    const o = freeArea(g, 14);
+    const tiles = traceTiles([{ x: o.x, y: o.y }, { x: o.x + 10, y: o.y + 4 }, { x: o.x + 3, y: o.y + 11 }], { close: true }).map(t => [t.x, t.y] as [number, number]);
+    expect(applyNetCommand(g, 1, { t: 'placeLine', building: 'stoneWall', tiles, builders: [] })).toBe(true);
+    expect(g.buildings.filter(b => b.defId === 'stoneWall').length).toBe(tiles.length);
+    // Cerrada: el interior queda separado
+    const inside = R(g, o.x + 5, o.y + 5, 2), outside = R(g, o.x - 2, o.y - 2, 2);
+    expect(inside).not.toBe(outside);
   });
 });
