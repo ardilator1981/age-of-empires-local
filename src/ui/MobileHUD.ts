@@ -96,6 +96,11 @@ export class MobileHUD {
       <div id="m-place">
         <button class="mbtn big cancel" data-a="place-cancel">✖<span>Cancelar</span></button>
         <div class="m-place-info"></div>
+        <div class="m-place-tools">
+          <button class="mbtn" data-a="place-add" data-mt="place-add" aria-label="Añadir punto">＋</button>
+          <button class="mbtn" data-a="place-undo" data-mt="place-undo" aria-label="Deshacer el último punto">↩</button>
+          <button class="mbtn" data-a="place-curve" data-mt="place-curve" aria-label="Recta o curva">〰</button>
+        </div>
         <button class="mbtn big ok" data-a="place-ok">✔<span>Construir</span></button>
       </div>
       <div id="m-sheet-back" data-a="sheet-close"></div>
@@ -474,12 +479,16 @@ export class MobileHUD {
     const g = this.s.game, ui = this.s.ui, pl = ui.placing!;
     const def = g.reg.building(pl.defId);
     this.el['m-place'].classList.toggle('invalid', !pl.valid);
-    // Edificios de línea (muros, zanjas): primero se fija el inicio y luego se arrastra hasta el final
-    const hint = !def.line ? 'Arrastra para moverlo' : !pl.start ? 'Arrastra al inicio y confirma' : `${pl.line?.filter(t => t.ok).length ?? 0} tramos · arrastra al final y confirma`;
-    const total = def.line && pl.line ? costText(g, Object.fromEntries(Object.entries(g.human.getCost(def)).map(([r, v]) => [r, (v ?? 0) * pl.line!.filter(t => t.ok).length]))) : costText(g, g.human.getCost(def));
+    // Edificios de línea (muros, zanjas): se fija el inicio, se arrastra el fantasma, «Punto» añade vértices
+    // (poligonal), «Curva» alterna recta y curva, «↩» quita el último y «Construir» termina en el fantasma
+    this.el['m-place'].classList.toggle('line', !!def.line);
+    const pts = pl.points?.length ?? 0;
+    const hint = !def.line ? 'Arrastra para moverlo' : !pts ? 'Arrastra al inicio y confirma' : `arrastra y pulsa ＋ para un punto, o Construir${pl.curve ? ' · curva' : ''}`;
+    const total = def.line && pl.info ? esc(pl.info) : costText(g, g.human.getCost(def));
     this.setHtml('place', this.el.placeInfo, `<b>${esc(def.name)}</b><span>${total}</span><small>${hint}</small>`);
     const ok = this.root.querySelector('[data-a="place-ok"] span');
-    if (ok) ok.textContent = def.line && !pl.start ? 'Inicio' : 'Construir';
+    if (ok) ok.textContent = def.line && !pts ? 'Inicio' : 'Construir';
+    this.root.querySelector('[data-a="place-curve"]')?.classList.toggle('on', !!pl.curve);
   }
 
   // ------------------------------------------------------------ toques
@@ -562,6 +571,9 @@ export class MobileHUD {
       case 'sheet-close': this.closeSheet(); break;
       case 'cancel-target': input.cancelTargeting(); break;
       case 'place-cancel': input.cancelTargeting(); break;
+      case 'place-add': input.addPoint(); haptic(8); break;
+      case 'place-undo': input.undoPoint(); haptic(8); break;
+      case 'place-curve': input.toggleCurve(); haptic(8); break;
       case 'place-ok':
         if (!ui.placing?.valid) { g.reject(g.humanId, 'placement', 'No se puede construir ahí'); break; }
         input.confirmPlacement();

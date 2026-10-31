@@ -1,8 +1,8 @@
 import { smartKind } from '../game/commands';
-import { lineTiles } from '../game/defense';
+import { traceTiles } from '../game/defense';
 import { ids } from '../game/net/netCommands';
 import type { Entity } from '../game/Entity';
-import { buildingAvail } from '../game/rules';
+import { buildingAvail, costText } from '../game/rules';
 import type { Session } from '../app/Session';
 import { haptic, isMobileLayout, longPressMs, uiPrefs } from './layout';
 
@@ -120,14 +120,24 @@ export class Input {
     this.updateLine();
   }
 
-  /** Recalcula el trazo de un edificio de línea (de `start` al fantasma). */
+  /** Recalcula el trazo de un edificio de línea: por los vértices fijados y el fantasma (rectas o curva; recinto si el fantasma toca el primero). */
   private updateLine() {
     const { ui, game } = this;
     const pl = ui.placing;
     if (!pl) return;
-    if (!pl.start || !game.reg.building(pl.defId).line) { pl.line = undefined; return; }
-    pl.line = lineTiles(pl.start.tx, pl.start.ty, pl.tx, pl.ty).map(t => ({ x: t.x, y: t.y, ok: game.canPlace(pl.defId, t.x, t.y, game.humanId) }));
+    const def = game.reg.building(pl.defId);
+    if (!pl.points?.length || !def.line) { pl.line = undefined; pl.closed = false; pl.info = undefined; return; }
+    const first = pl.points[0];
+    pl.closed = pl.points.length >= 2 && pl.tx === first.tx && pl.ty === first.ty;
+    const verts = [...pl.points, { tx: pl.tx, ty: pl.ty }].map(v => ({ x: v.tx, y: v.ty }));
+    pl.line = traceTiles(verts, { curve: pl.curve, close: pl.closed }).map(t => ({ x: t.x, y: t.y, ok: game.canPlace(pl.defId, t.x, t.y, game.humanId) }));
     pl.valid = pl.line.some(t => t.ok);
+    const n = pl.line.filter(t => t.ok).length;
+    const cost = Object.fromEntries(Object.entries(game.human.getCost(def)).map(([r, v]) => [r, (v ?? 0) * n]));
+    // Tiempo de obra: los tramos entre los constructores seleccionados (al menos uno)
+    const crew = Math.max(1, this.ownSelected().filter(u => u.kind === 'unit' && game.unitDef(u).builder).length);
+    const secs = Math.round(n * game.human.getStat(def, 'buildTime') / crew);
+    pl.info = `${n} tramo${n === 1 ? '' : 's'} · ${costText(game, cost)} · ⏱ ~${secs} s${pl.closed ? ' · recinto cerrado' : ''}`;
   }
 
   /** ¿El edificio que se coloca se traza en línea? */
@@ -140,8 +150,40 @@ export class Input {
   private startLine() {
     const pl = this.ui.placing;
     if (!pl) return;
-    pl.start = { tx: pl.tx, ty: pl.ty };
+    pl.points = [{ tx: pl.tx, ty: pl.ty }];
+    pl.poly = false;
     this.updateLine();
+  }
+
+  /** Añade un vértice al trazo en la casilla del fantasma (si no es el mismo que el último). */
+  addPoint() {
+    const pl = this.ui.placing;
+    if (!pl?.points?.length) return;
+    const last = pl.points[pl.points.length - 1];
+    if (last.tx !== pl.tx || last.ty !== pl.ty) pl.points.push({ tx: pl.tx, ty: pl.ty });
+    this.updateLine();
+  }
+
+  /** Quita el último vértice del trazo (si solo queda el primero, lo quita también y se vuelve a empezar). */
+  undoPoint() {
+    const pl = this.ui.placing;
+    if (!pl?.points?.length) return;
+    pl.points.pop();
+    if (!pl.points.length) { pl.points = undefined; pl.poly = false; }
+    this.updateLine();
+  }
+
+  /** Alterna entre rectas y curva. */
+  toggleCurve() {
+    const pl = this.ui.placing;
+    if (!pl || !this.placingLine()) return;
+    pl.curve = !pl.curve;
+    this.updateLine();
+  }
+
+  /** Termina el trazo en el fantasma y construye la línea (botón «Construir» del móvil, Intro). */
+  finishLine() {
+    if (this.active && this.ui.placing && this.placingLine() && this.ui.placing.points?.length) this.placeBuilding(false);
   }
 
   /** Centro en pantalla del fantasma del edificio que se está colocando. */
@@ -175,7 +217,7 @@ export class Input {
   confirmPlacement() {
     if (!this.active || !this.ui.placing) return;
     // Edificios de línea: el primer «Confirmar» fija el inicio y el segundo coloca la línea hasta el fantasma
-    if (this.placingLine() && !this.ui.placing.start) { this.startLine(); return; }
+    if (this.placingLine() && !this.ui.placing.points?.length) { this.startLine(); return; }
     this.placeBuilding(false);
   }
 
@@ -197,11 +239,11 @@ export class Input {
     if (game.reg.building(defId).line) {
       // Línea: todos los segmentos del trazo que se puedan construir (si no se arrastró, solo uno)
       const tiles = (ui.placing.line ?? [{ x: tx, y: ty, ok: game.canPlace(defId, tx, ty, game.humanId) }]).filter(t => t.ok);
-      if (!tiles.length) { game.reject(game.humanId, 'placement', 'No se puede construir ahí'); ui.placing.start = null; ui.placing.line = undefined; return; }
+      if (!tiles.length) { game.reject(game.humanId, 'placement', 'No se puede construir ahí'); ui.placing.points = undefined; ui.placing.line = undefined; return; }
       if (this.s.orders.send({ t: 'placeLine', building: defId, tiles: tiles.map(t => [t.x, t.y] as [number, number]), builders: ids(builders) }) === false) return;
       for (const t of tiles) this.marker(t.x + 0.5, t.y + 0.5, '#7dff7d');
       haptic(12);
-      ui.placing.start = null; ui.placing.line = undefined;
+      ui.placing.points = undefined; ui.placing.line = undefined; ui.placing.poly = false;
       if (!keep || !buildingAvail(game, game.human, defId).ok) { ui.placing = null; ui.page = 'main'; }
       return;
     }
@@ -287,8 +329,17 @@ export class Input {
 
     if (ui.pickPoint) { ui.pickPoint.onPick(this.s.renderer.cam.screenToWorld(e.clientX, e.clientY)); return; }
     if (ui.placing) {
-      // De línea: se pulsa donde empieza, se arrastra y se suelta donde acaba
-      if (this.placingLine()) { this.setGhost(e.clientX, e.clientY); this.startLine(); return; }
+      if (this.placingLine()) {
+        // De línea: se arrastra de un punto a otro (se construye al soltar) o se hace clic para ir añadiendo vértices
+        this.setGhost(e.clientX, e.clientY);
+        const pl = ui.placing, pts = pl.points;
+        if (!pts?.length) { this.startLine(); return; }
+        const last = pts[pts.length - 1];
+        // Clic en el último vértice (doble clic) o en el primero (cierra el recinto): termina
+        if ((pl.tx === last.tx && pl.ty === last.ty) || pl.closed) { this.placeBuilding(e.shiftKey); return; }
+        this.addPoint();
+        return;
+      }
       this.placeBuilding(e.shiftKey);
       return;
     }
@@ -333,7 +384,13 @@ export class Input {
 
   private onUp(e: MouseEvent) {
     if (e.button === 1) { this.pan = null; return; }
-    if (e.button === 0 && this.ui.placing?.start && this.placingLine()) { this.setGhost(e.clientX, e.clientY); this.placeBuilding(e.shiftKey); return; }
+    if (e.button === 0 && this.ui.placing?.points?.length === 1 && !this.ui.placing.poly && this.placingLine()) {
+      // Se soltó tras arrastrar: construye. Si no se movió de la casilla, es un clic: se sigue trazando por vértices
+      this.setGhost(e.clientX, e.clientY);
+      const pl = this.ui.placing, p0 = pl.points![0];
+      if (pl.tx !== p0.tx || pl.ty !== p0.ty) this.placeBuilding(e.shiftKey); else pl.poly = true;
+      return;
+    }
     if (e.button !== 0 || !this.drag) return;
     const { ui } = this;
     const box = ui.dragBox;
@@ -541,6 +598,12 @@ export class Input {
     this.keys.add(e.key);
     const { ui, game } = this;
 
+    // Trazando una línea: Intro termina, Retroceso o Ctrl+Z quitan el último vértice y C alterna recta y curva
+    if (ui.placing && this.placingLine()) {
+      if (e.key === 'Enter') { e.preventDefault(); this.finishLine(); return; }
+      if (e.key === 'Backspace' || e.key === 'Delete' || ((e.key === 'z' || e.key === 'Z') && (e.ctrlKey || e.metaKey))) { e.preventDefault(); this.undoPoint(); return; }
+      if ((e.key === 'c' || e.key === 'C') && !e.ctrlKey && !e.metaKey) { this.toggleCurve(); return; }
+    }
     if (e.key === 'Escape') {
       if (ui.placing) ui.placing = null;
       else if (ui.pickPoint) ui.pickPoint = null;

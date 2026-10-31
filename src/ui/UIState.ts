@@ -7,10 +7,17 @@ export interface Marker { x: number; y: number; t: number; color: string }
 export class UIState {
   selection: number[] = [];
   /**
-   * Edificio que se está colocando. Los de línea (`BuildingDef.line`) se trazan de `start` (fijado al pulsar o,
-   * en el móvil, con el primer «Confirmar») hasta el fantasma; `line` son las casillas del trazo y si cada una se puede construir.
+   * Edificio que se está colocando. Los de línea (`BuildingDef.line`) se trazan por los vértices `points` (el primero
+   * se fija al pulsar o, en el móvil, con el primer «Confirmar»; cada clic o «Punto» añade otro) hasta el fantasma:
+   * rectas en cualquier ángulo o, con `curve`, una curva. `line` son las casillas del trazo y si cada una se puede
+   * construir; `closed` = el fantasma toca el primer vértice (recinto); `poly` = se está trazando por clics (no arrastrando);
+   * `info` = coste y tiempo para mostrar.
    */
-  placing: { defId: string; tx: number; ty: number; valid: boolean; start?: { tx: number; ty: number } | null; line?: { x: number; y: number; ok: boolean }[] } | null = null;
+  placing: {
+    defId: string; tx: number; ty: number; valid: boolean;
+    points?: { tx: number; ty: number }[]; curve?: boolean; poly?: boolean; closed?: boolean; info?: string;
+    line?: { x: number; y: number; ok: boolean }[];
+  } | null = null;
   targeting: 'attackMove' | 'rally' | null = null;
   /** Elegir un punto del mapa para un mod (p. ej. el punto de batalla). El clic o toque llama a onPick. */
   pickPoint: { owner: string; onPick(p: { x: number; y: number }): void } | null = null;

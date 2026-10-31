@@ -575,6 +575,20 @@ export class Renderer {
       }
     }
 
+    // Coste, tiempo y teclas del trazo de una línea (junto al fantasma)
+    if (ui.placing?.info && ui.placing.line?.length) {
+      const last = ui.placing.line[ui.placing.line.length - 1];
+      const at = cam.worldToScreen(last.x + 0.5, last.y + 0.5, 0);
+      const lines = [ui.placing.info, ui.placing.points?.length ? 'Clic: punto · Intro o doble clic: terminar · Retroceso: deshacer · C: ' + (ui.placing.curve ? 'rectas' : 'curva') : ''].filter(Boolean);
+      ctx.font = `${12}px sans-serif`; ctx.textAlign = 'center';
+      const w = Math.max(...lines.map(l => ctx.measureText(l).width)) + 14, h = lines.length * 16 + 6;
+      const bx = Math.min(Math.max(at.x, w / 2 + 4), cam.viewW - w / 2 - 4), by = Math.min(at.y + 26, cam.viewH - h - 4);
+      ctx.fillStyle = 'rgba(20,14,8,0.78)'; ctx.fillRect(bx - w / 2, by, w, h);
+      ctx.fillStyle = '#f0e2b0';
+      lines.forEach((l, i) => ctx.fillText(l, bx, by + 16 + i * 16));
+      ctx.textAlign = 'left';
+    }
+
     // Marcadores de órdenes
     const now = performance.now() / 1000;
     ui.markers = ui.markers.filter(mk => now - mk.t < 0.6);
