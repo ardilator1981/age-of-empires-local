@@ -370,7 +370,7 @@ Determinismo: los poderes y el comercio deben usar `fmath`, `game.rng()` y datos
 | **3** | **Poderes activos** y `excludes` (doctrinas), porque la era 4–5 los usa (Tierra quemada, levée) | Medio | Funcionan en red |
 | **4** | **Era 5 Industrial** completa: hierro, carbón, ferrocarril, fábrica, aeródromo (aviación básica); Persia y Etiopía entran en eras 0–5 | Alto | Partida a Industrial sin bloqueos |
 | **5** | **Comercio, diplomacia y espionaje** (§8, §8b), porque el árbol de Industrial y Contemporánea ya los necesita (mercado y banco existen en eras anteriores; aquí se activan las rutas) | Alto | Funcionan en red y guardado · **HECHA** (ver `docs/decisiones.md`, 2026-10-23) |
-| **6** | **Era 6 Contemporánea**: petróleo, energía, central nuclear (sin armas todavía), aviación completa, radar; giro político de Rusia y traspaso EE. UU. | Alto (balance) | Partida completa hasta la 6 |
+| **6** | **Era 6 Contemporánea**: petróleo, energía, central nuclear (sin armas todavía), aviación completa, radar; giro político de Rusia y traspaso EE. UU. · **Plan detallado y sub-fases en [`docs/fase-6.md`](fase-6.md)** (§15) | Alto (balance) | Partida completa hasta la 6 |
 | **7** | **Armas nucleares** (prototipo descartable, §8c) | Alto | Decidido tras probar si divierte |
 | **8** | **Era 7 Futuro próximo** (IA, robots, drones, fusión) | Muy alto | Solo si la 6 es estable |
 | **9** | **IA por civilización/era**, victorias alternativas y pulido | Medio | Todas las civilizaciones juegan con la IA |
@@ -542,3 +542,8 @@ Para reparar basta con ordenar a un aldeano que «construya» sobre un tramo da�
 - ⏳ Escalada (escaleras, torres de asedio) para cruzar sin asedio; alcance mínimo de las catapultas contra el pie del muro.
 - 🔶 Muros que mejoran con el relieve (más alcance o daño desde lo alto: ya funciona para torres por `heightRules`).
 - 🔶 Defensas de la era 4 y posteriores (bastiones, trincheras, alambradas, minas) y unidades de ingeniería que las abran.
+
+## 15. Fase 6: era Contemporánea (plan) y evolución de las unidades por era
+
+- **[`docs/fase-6.md`](fase-6.md):** plan detallado de la fase 6 (§10): era 6 Contemporánea con petróleo y energía, blindados (línea de §13 hasta la era 6: carro ligero → medio → pesado, antitanque, infantería mecanizada, artillería autopropulsada y lanzacohetes), aviación completa (cazas, bombarderos, reconocimiento, autonomía y base aérea) con defensa antiaérea y radar, la identidad de cada civilización en el siglo XX (giro URSS/Rusia, traspaso Gran Bretaña → EE. UU.), el árbol común de la era (§2b adaptado), lo que necesita el motor, la IA y la interfaz, y el reparto en **sub-fases** (6-pre, 6a–6g) con orden, riesgo, criterio de «hecho», modelo y esfuerzo, y cuáles van en paralelo. Termina con las preguntas abiertas.
+- **[`docs/evolucion-de-unidades.md`](evolucion-de-unidades.md):** análisis de obsolescencia por era de todas las unidades, edificios y tecnologías: qué líneas deben evolucionar con una investigación (`upgrade`, como el asedio de §13), cuáles terminan a propósito, qué pasa con las unidades viejas, los huecos detectados (los edificios militares básicos se quedan sin contenido desde la era 2–3) y una tabla resumen con prioridades.

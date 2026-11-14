@@ -37,7 +37,8 @@ scripts/       simulate.ts (partida IA contra IA sin gráficos), real-map.mjs, m
                fix-textures.mjs y art-import.mjs (arte con imágenes)
 .github/       Workflows de GitHub Pages y del APK de Android
 docs/          flujo-de-trabajo.md (áreas, modelos y esfuerzo), decisiones.md (decisiones de diseño),
-               riesgos.md, rendimiento.md, multijugador.md
+               riesgos.md, rendimiento.md, multijugador.md, civilizaciones.md (diseño por eras),
+               evolucion-de-unidades.md (obsolescencia por era), fase-6.md (plan de la era Contemporánea)
 ```
 
 ## Qué hay en `main`
