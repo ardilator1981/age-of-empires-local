@@ -48,11 +48,11 @@ Para cada familia: lo que hay, el hueco, la línea propuesta por era, cómo se d
 | 1 | ✔ Hombre de armas (`up_manAtArms`) | — |
 | 2 | ✔ Espadachín de mandoble (`up_longSwordsman`) | — |
 | 3 | **Nada** | ⏳ **Campeón** (`up_champion`, cuartel, 300 ali 100 oro; +2 ataque, +1/+1 armadura) |
-| 4 | Nada (el mosquetero es otra unidad, de la fábrica de pólvora) | ⏳ **Infantería de línea**: el cuartel gana la mejora `up_lineInfantry` (requiere Fábrica de pólvora y Bayoneta) que hace que el **cuartel entrene mosqueteros** (añadir `barracks` a `trainedAt` del mosquetero, sin convertir a los campeones: caso «cambio de arma») |
-| 5 | Nada (el fusilero es de la fábrica) | ⏳ `up_rifleman` (fábrica, 250 hierro 150 oro): mosquetero → fusilero **en el sitio y gratis** (mismo papel: infantería de fuego); con ello el cuartel y la fábrica de pólvora entrenan fusileros |
+| 4 | Nada (el mosquetero es otra unidad, de la fábrica de pólvora) | **Decidido (2026-11-14): se mantienen los edificios por tipo de arma.** La línea del cuartel **termina en el Campeón** ✔ (queda como cuerpo a cuerpo barato y resistente, sin pólvora); la infantería de fuego vive en la fábrica de pólvora. Descartada la «infantería de línea en el cuartel» |
+| 5 | Nada (el fusilero es de la fábrica) | ⏳ `up_rifleman` (fábrica, 250 hierro 150 oro): mosquetero → fusilero **en el sitio y gratis** (mismo papel: infantería de fuego); la fábrica de pólvora pasa a entrenar fusileros (`resolveUnit`) y desaparece el doble botón |
 | 6 | — | ⏳ `up_assaultInfantry`: fusilero → **Infantería de asalto** (fusil semiautomático y granadas: +ataque, cadencia ×0,8, bono contra `machinegun`); ver `fase-6.md` |
 
-Hueco detectado: **la línea se acaba en la era 2**; desde la 3 el cuartel es un edificio inútil salvo para lanceros, y la IA lo sigue usando. Viejas: campeones quedan como cuerpo a cuerpo barato y resistente (sin pólvora), útiles contra caballería ligera y como carne de cañón. Riesgo de balance: medio (el mosquetero en el cuartel adelanta su disponibilidad en número; compensar con que el cuartel no reciba el −15 % de «Producción en cadena»). **Prioridad: alta.**
+Hueco detectado: **la línea se acaba en la era 2**; desde la 3 el cuartel es un edificio inútil salvo para lanceros, y la IA lo sigue usando. Con el Campeón (3) y el Alabardero (3, §2.2) el cuartel tiene contenido hasta la 3; desde la 4 es a propósito un edificio de tropas baratas sin pólvora, y en la 6 recupera papel con la infantería antitanque. Viejas: campeones quedan como cuerpo a cuerpo barato y resistente, útiles contra caballería ligera y como carne de cañón. Riesgo de balance: bajo. **Prioridad: alta** (Campeón y `up_rifleman`).
 
 ### 2.2 Lanceros y antiinfantería / anticaballería (cuartel)
 
@@ -195,8 +195,9 @@ Los poderes (`PowerDef`) tienen `minAge`/`maxAge` ✔ y no evolucionan: cada era
 | Efecto `bonus` en tecnologías (`{ type: 'bonus', target, vs, amount }`) | Pequeño (`Player.getStat` tiene que devolver bonos combinados; `combat.ts` los lee) | Bayoneta anticaballería, munición perforante, defensa antiaérea |
 | `upgrade` de edificios, o bien `replaces` + que la mejora se investigue | Pequeño si se usa `replaces` (ya existe) | Torres, murallas |
 | `CivDef.hides` (ocultar definiciones comunes a una civilización) | Pequeño (`rules.unitAvail`/`buildingAvail` + catálogo) | Coherencia de Persia, China, Etiopía; retirar únicos viejos |
-| `trainedAt` que crece con una tecnología (o `upgrade` que añade un edificio de entrenamiento) | Dato: basta con poner `barracks` en `trainedAt` del mosquetero y que la mejora `up_lineInfantry` sea un `requiresTechs` condicional | Infantería de línea en el cuartel (2.1) — ⚠ hoy `requiresTechs` se aplica a la unidad en todos los edificios, no por edificio: hace falta `trainedAt: [{ building, requiresTechs }]` o una unidad «mosquetero de cuartel» que `upgrade` resuelva |
-| Resiembra automática de granjas; compraventa en el mercado | Pequeño | Economía 3–6 |
+| ~~`trainedAt` condicional por tecnología~~ | — | Ya no hace falta: descartada la infantería de línea en el cuartel (decisión 8, 2026-11-14) |
+| Resiembra automática de granjas | Pequeño | Economía 3–6 |
+| Compraventa en el mercado (`exchange`) | Pequeño | Decidido: dentro de la fase 6a (`fase-6.md` §3.1) |
 
 ## 5. Tabla resumen final
 
@@ -204,7 +205,7 @@ Prioridad: A = antes de la fase 6 o dentro de 6a (poco riesgo, mucho efecto) · 
 
 | Familia | Estado hoy | Termina en | Propuesta de línea (eras) | Desbloqueo | Viejas | Riesgo | Prioridad |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| Infantería de espada | ✔ 0–2 | 2 | Campeón (3) → línea en cuartel = mosquetero (4) → fusilero (5) → asalto (6) | `up_*` en cuartel/fábrica | Gratis dentro del papel; campeones quedan al pasar a fuego | Medio | **A** (3–5), B (6) |
+| Infantería de espada | ✔ 0–2 | 2 | Campeón (3) y termina ✔ (decidido: el cuartel no entrena armas de fuego) | `up_champion` en el cuartel | Gratis; campeones quedan como tropa barata | Bajo | **A** |
 | Lanceros | ✔ 1–2 | 2 | Alabardero (3); bayoneta anticaballería (4); infantería antitanque (6) | `up_halberdier`, efecto `bonus` | Gratis | Bajo | A (3), B (6) |
 | Arqueros | ✔ 1–2 | 2 | Arbalestero (3) → Cazador (4) → Tirador escogido (5) → Francotirador (6) | `up_*` en galería | Gratis (mismo papel) | Medio | **A** (3–4), C (6) |
 | Hostigador | ✔ 1 | 1 | Élite (2) y termina ✔ | `up_eliteSkirmisher` | Gratis | Bajo | A |
@@ -229,4 +230,4 @@ Prioridad: A = antes de la fase 6 o dentro de 6a (poco riesgo, mucho efecto) · 
 | Barcos | aplazado | — | Nada hasta el paquete «mar» | — | — | — | — |
 | Únicos por civilización | ✔ 0–5 | 5 | Uno por era; sin cadena (por diseño); `hides` opcional | `fase-6.md` para la 6 | Quedan | Medio | B |
 
-**Recomendación de orden:** las filas **A** son datos puros (un archivo `src/mods/core/lines.ts` con las mejoras `up_*` nuevas, más dos técnicas de herrería y tres económicas) y las puede hacer una sesión de *Contenido del juego* (Sonnet 5.5, medio) antes o en paralelo a la fase 6a, con un test que compruebe que cada edificio militar tiene algo de su edad en las eras 3–5 y que la IA (semilla fija, 20 min) entrena unidades de edad ≥ 3 en el cuartel. Lo que toca el motor (efecto `bonus`, `hides`, `trainedAt` condicional) va con la fase 6a.
+**Decidido (2026-11-14): las filas A se hacen antes de la fase 6** (sub-fase «6-pre» de `fase-6.md` §9). Son datos puros (un archivo `src/mods/core/lines.ts` con las mejoras `up_*` nuevas, más dos técnicas de herrería y tres económicas) y las puede hacer una sesión de *Contenido del juego* (Sonnet 5.5, medio), en paralelo a la fase 6a si se quiere (no comparten archivos), con un test que compruebe que cada edificio militar tiene algo de su edad en las eras 3–5 y que la IA (semilla fija, 20 min) entrena unidades de edad ≥ 3 en el cuartel. Lo que toca el motor (efecto `bonus`, `hides`, `trainedAt` condicional) va con la fase 6a.

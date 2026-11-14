@@ -386,7 +386,7 @@ Cada fase se hace en su propia rama (`feat/...`) y pasa `npm run build`, `npm ru
 1. ~~Cuántas eras~~ **Decidido: llegar a la Contemporánea (7 eras).** Queda por ver si la Contemporánea se parte en dos (guerras mundiales / contemporánea) y los nombres.
 2. **Lista de civilizaciones:** Rus, China, Francia, Persia, Etiopía y Británicos → EE. UU. (decidido). ¿Se añade Japón o Turcos como séptima?
 3. ~~Civilizaciones actuales~~ **Decidido:** Británicos → línea británica/EE. UU., Francos → Francia, Godos y Mongoles se eliminan. **Las partidas guardadas con civilizaciones antiguas se descartan (decidido):** basta subir `SAVE_VERSION` sin escribir migración.
-3b. **Traspaso británico → EE. UU.:** ¿automático al llegar a la Contemporánea, o el jugador elige en la era 5 entre seguir como Reino Unido o dar el salto a EE. UU.? (Por defecto, automático.)
+3b. ~~Traspaso británico → EE. UU.~~ **Decidido (2026-11-14): automático al llegar a la Contemporánea.** El resto de decisiones de la fase 6 (energía, mantenimiento, doctrina rusa, aviación, nombres históricos, 6-pre antes de la 6) están en `docs/fase-6.md` §11.
 4. ~~Giro de la era Contemporánea~~ **Decidido: el giro político está bien** (URSS / Rusia posterior a 1991, y los equivalentes de otras civilizaciones). Se modela como mecánicas, sin juicios.
 5. ~~Armas nucleares, aviación~~ **Decidido: se incluirán más adelante (fase 7, tras aviación, espionaje y diplomacia) con la propuesta híbrida de §8c.**
 6. **Carreras de eras:** ¿doctrinas excluyentes, mantenimiento, era global «Cronología»? ¿Cuál de ellas?

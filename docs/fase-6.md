@@ -34,7 +34,7 @@ Plan detallado de la fase 6 de `docs/civilizaciones.md` §10. Diseño, no implem
 - Colocación: `setup.baseResources` añade `{ node: 'oilField', count: 3, minDist: 15, maxDist: 22 }` por jugador y los generadores `scatter` 1–2 campos por jugador lejos de las bases (como hierro y carbón hoy). **Riesgo:** los mapas reales (`mods/real-maps`) y los de mods (`oasis`, `treasure-hunt`) deben colocarlos también; un test recorre todos los mapas y comprueba que hay ≥ 2 pozos alcanzables por jugador (como `tests/relief.test.ts` hace con la conectividad).
 - Depósito: **Refinería** (edificio de la era, `dropSite: ['oil']`, también hierro y carbón) y el centro urbano / estación (`ALL` crece con `oil`). El campamento minero **no** acepta petróleo (incentiva construir la refinería).
 - Lo consume: vehículos, blindados y aviones (coste de entrenamiento), artillería autopropulsada, algunas técnicas, y el camión/tractor de la economía (`evolucion-de-unidades.md` 2.8). **Sin consumo por tick** (ver 3.3).
-- Compraventa 🔶: una orden de red `exchange` en el mercado (vender 100 de X por oro a precio con deslizamiento, determinista) ayudaría a quien no tiene pozos. No es imprescindible para la 6a; se deja como mejora del comercio.
+- **Compraventa (decidido: dentro de 6a):** orden de red `exchange { resource, amount, buy }` en el mercado (y en la compañía comercial y el banco, que son `tradePost`): vender o comprar 100 de un recurso por oro a un precio por recurso con deslizamiento (`BALANCE.trade.exchange`: precio base, +/−3 % por operación, que vuelve al base poco a poco; todo entero y determinista). Permite conseguir petróleo a quien no tiene pozos y da salida a los excedentes. Interfaz: botones en el mercado por `commandModel` (escritorio y móvil). La IA compra petróleo si tiene oro de sobra y le faltan pozos (`tradeAI`).
 
 ### 3.2 Energía (capacidad producida, no recolectada)
 
@@ -123,7 +123,16 @@ Plan detallado de la fase 6 de `docs/civilizaciones.md` §10. Diseño, no implem
 | Transporte aéreo 🔶 | — | — | — | **No en la 6**: cargar unidades en una unidad exige un refugio móvil (el refugio es de edificios); fase posterior |
 | Helicóptero 🔶 | — | — | — | Fuera: se solapa con el caza y el reconocimiento |
 
-Únicos de civilización en el aire (🔶 a elegir en 6d): un caza o bombardero mejor por civilización en lugar de más unidades (p. ej. EE. UU. «Fortaleza volante» como bombardero con +PV; URSS «Shturmovik» como caza de ataque a tierra; Francia nada aéreo y sí carro; China y Etiopía sin aviación única; Persia nada).
+**Únicos de civilización en el aire (decidido: todas las civilizaciones tienen uno).** Es una variante mejor de caza, bombardero o reconocimiento, no un tipo nuevo, para no multiplicar reglas. Nombres históricos (decisión 12); los marcados 🔶 hay que contrastar antes de implementarlos:
+
+| Civilización | Unidad aérea única | Tipo | Rasgo | Base histórica |
+| --- | --- | --- | --- | --- |
+| Rusia | **Il-2 Shturmovik** | Caza de ataque a tierra | Ataca tierra con `splash` pequeño y +bono contra `armored`; blindado (armadura alta); peor contra aviones | Avión de ataque soviético más producido (1941–45) |
+| China | **J-10** 🔶 | Caza | Barato y rápido (taller del mundo); menos vida | Caza de fabricación china (primer vuelo 1998); alternativa menos moderna: **Chengdu J-7** |
+| Francia | **SPAD XIII** | Caza | +ataque y +velocidad; caro | Caza francés de la Primera Guerra Mundial (1917) |
+| Persia / Irán | **F-14 Tomcat** | Caza | Alcance y detección (`detects`) mayores; `maxAlive: 2`; requiere Importación 🔶 | Irán adquirió F-14 en 1976 y los opera desde entonces |
+| Etiopía | **Potez 25** 🔶 | Reconocimiento armado | Reconocimiento que además puede atacar tierra levemente; barato | Biplanos importados por Etiopía en los años 30 (contrastar modelos exactos) |
+| Gran Bretaña → EE. UU. | **B-17 Fortaleza volante** | Bombardero | +PV, +1 bomba por salida, se defiende de cazas (ataca aire con poco daño) | Bombardero pesado estadounidense (1935–45) |
 
 ### 5.2 Reglas de combate (datos en vez de `airRule`)
 
@@ -182,7 +191,7 @@ Todas ganan `eras[6]` (identidad, bonos, texto), una unidad única (en el castil
 | **Etiopía** | «Etiopía del siglo XX» (resistencia y diplomacia) | **Resistencia** ✔ (ya existe como poder: ampliar a la 6); aliados: `tradeYield` ×1,3; unidades +armadura en terreno alto (ya `heightRules`) | U: **Patriota (arbegnoch)**: infantería `stealth` con fusil (guerrilla: invisible lejos de vigilancia, como el espía; ataca y se revela 10 s), **Carro ligero** (comprado: requiere Importación de armas, −25 %). E: **Sede diplomática** (propuestas de paz/alianza aceptadas por la IA con +buena voluntad; `maxAlive: 1`). T: **Organización de la Unidad Africana** (alianzas: visión compartida ya ✔; +oro por aliado) | Nagarit ✔ |
 | **Gran Bretaña → Estados Unidos** | **«Estados Unidos»** (traspaso automático al entrar en la era; decisión §11.3b por defecto; la capa 6 `replaces: [4]` quita el crédito y mantiene la logística) | Producción en masa: vehículos y aviones −15 %; petróleo propio: pozos +1 por jugador 🔶 (colocación dependiente de civilización: no existe; sustituir por petróleo ×1,2) | U: **Sherman** (carro medio único: más barato y rápido), **Marine** (infantería de asalto única con bono contra `wall`/`bunker`), **Ranger** 🔶 (si sobra presupuesto). E: **Arsenal** (fábrica + fábrica de automóviles en uno, `trainTime` ×0,85), **Base avanzada** 🔶 (base aérea con más refugio). T: **Préstamo y arriendo** (Lend-Lease) | Poder **Ayuda a aliados**: envía 300 de cada recurso a un aliado (tributo ✔ sin comisión) y el aliado gana +10 % de velocidad de entrenamiento 90 s |
 
-Notas: (a) los nombres reales de modelos (T-34, Sherman, Renault FT, Katiusha) son históricos y aparecen en §5; el resto («Carro ligero chino») se mantiene genérico para no inventar; (b) la identidad de Rusia por doctrina es lo único que exige un dato nuevo en `CivEraDef` (🔶 `variants`); si se quiere evitar, la identidad se llama «Rusia del siglo XX» y la doctrina solo cambia bonos (más simple: **recomendado para la primera entrega**).
+Notas: (a) **nombres históricos en todo** (decisión 12): los únicos ya los tienen (T-34, Sherman, Renault FT, Katiusha); el «Carro ligero chino» pasa a **Tipo 59** 🔶 (carro medio de producción china desde 1959; contrastar) y las unidades comunes llevan el nombre de un modelo muy difundido de la época (§12); (b) **decidido:** la identidad de Rusia se llama «Rusia del siglo XX» y la doctrina (Unión Soviética / Federación Rusa) solo cambia bonos y unidades, sin dato nuevo en `CivEraDef`; (c) cada civilización suma además su **unidad aérea única** (§5.1).
 
 ## 7. Interfaz (escritorio y móvil), guardado y red
 
@@ -220,12 +229,12 @@ Orden, tamaño (S/M/L/XL en sesiones de trabajo), riesgo, criterio de «hecho»,
 
 | Sub-fase | Contenido | Tamaño | Riesgo | Depende de | Hecho cuando | Modelo / esfuerzo | Archivos propios |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| **6-pre** (opcional, puede ir antes y en paralelo a todo) | Líneas que terminan en la era 2–3 (`evolucion-de-unidades.md` §5, prioridad A): campeón, alabardero, arbalestero, cazador, húsar, coracero, carabinero, `up_rifleman`, herrería 2–3, economía 3–4 | M | Bajo | — | Cada edificio militar tiene algo de su edad en las eras 3–5; test de IA con cuartel de edad ≥ 3; `simulate` y `catalog` | Contenido · **Sonnet 5.5, medio** | `mods/core/lines.ts` (nuevo), `techs.ts` (solo añadir), `catalogo-notas.json` |
-| **6a** Era, petróleo, energía y edificios comunes | `addAge(6)`, `contemporaryAge`, recurso `oil` + nodo + colocación en todos los mapas, energía (motor #1), efecto `bonus` (#2), `hides` (#3), refinería, central eléctrica y nuclear, radar (sin detección aérea todavía: solo `detects` de espías si #4 se adelanta), fábrica de automóviles **vacía**, base aérea (`replaces`) vacía, búnker, técnicas económicas de la 6, HUD de energía, `ratios`/`villagersForAge`, `gunpowderAI.WANTS` | L | Medio | — | Las 6 IAs llegan a la era 6 con semilla fija (`tests/contemporary.test.ts`) y construyen refinería y central; guardado idéntico; `civIncomplete` marca a todas | Motor y reglas para #1–#3 · **Opus 5.5, medio**; el resto es contenido (misma sesión, o una de **Sonnet 5.5, alto** tras los puntos del motor) | `mods/core/contemporary.ts` (nuevo), `world.ts`, `maps.ts`, `real-maps`, `game/Player.ts`, `rules.ts`, `types.ts`, `HUD.ts`/`MobileHUD.ts` (celda de energía), `balance.ts` |
+| **6-pre** (**decidido: se hace antes de la 6**; puede ir en paralelo a 6a porque no comparte archivos) | Líneas que terminan en la era 2–3 (`evolucion-de-unidades.md` §5, prioridad A): campeón, alabardero, arbalestero, cazador, húsar, coracero, carabinero, `up_rifleman`, herrería 2–3, economía 3–4 | M | Bajo | — | Cada edificio militar tiene algo de su edad en las eras 3–5; test de IA con cuartel de edad ≥ 3; `simulate` y `catalog` | Contenido · **Sonnet 5.5, medio** | `mods/core/lines.ts` (nuevo), `techs.ts` (solo añadir), `catalogo-notas.json` |
+| **6a** Era, petróleo, energía y edificios comunes | `addAge(6)`, `contemporaryAge`, recurso `oil` + nodo + colocación en todos los mapas, energía (motor #1), efecto `bonus` (#2), `hides` (#3), **compraventa `exchange` en el mercado** (§3.1), refinería, central eléctrica y nuclear, radar (sin detección aérea todavía: solo `detects` de espías si #4 se adelanta), fábrica de automóviles **vacía**, base aérea (`replaces`) vacía, búnker, técnicas económicas de la 6, HUD de energía, `ratios`/`villagersForAge`, `gunpowderAI.WANTS` | L | Medio | 6-pre (decidido: antes) | Las 6 IAs llegan a la era 6 con semilla fija (`tests/contemporary.test.ts`) y construyen refinería y central; guardado idéntico; `civIncomplete` marca a todas | Motor y reglas para #1–#3 · **Opus 5.5, medio**; el resto es contenido (misma sesión, o una de **Sonnet 5.5, alto** tras los puntos del motor) | `mods/core/contemporary.ts` (nuevo), `world.ts`, `maps.ts`, `real-maps`, `game/Player.ts`, `rules.ts`, `types.ts`, `HUD.ts`/`MobileHUD.ts` (celda de energía), `balance.ts` |
 | **6b** Blindados y artillería moderna | Carro ligero/medio/pesado, mecanizada, antitanque (infantería y cañón), obús autopropulsado, lanzacohetes, explorador motorizado, Blindaje, Munición perforante, Cartucho sin humo, Motor diésel; `siegeAI` con `armored`; sprites procedurales; sonidos | L | Medio-alto (balance) | 6a | `tests/armor.test.ts`: antitanque vence a carros, carros rompen murallas, fusileros no rascan; IA entrena carros y los usa contra edificios; `simulate` 30 min sin bloqueo | Contenido · **Sonnet 5.5, alto** (el balance exige pensar; no toca el motor si #2 está hecho) | `mods/core/armor.ts` (nuevo), `siege.ts` (plugin: añadir línea), `render/sprites` (vehículos), `sfx.ts` |
 | **6c1** Motor del aire | #4–#8, #10: `targets`/`antiAir`/`preferClasses`, `AirSystem`, `attackGround`, `detects`, render con altura, minimapa; `airRule` por datos; biplano adaptado | L | **Alto** (toca `orders.ts`, `combat.ts`, determinismo) | 6a (solo por la era; podría empezar sobre `main` con el biplano de la 5 y fusionarse después) | `tests/air.test.ts` (1)–(4), (6), (7) con unidades de prueba del test; `lockstep` y `engines` verdes; render verificado en el navegador | Motor y reglas · **Opus 5.5, alto** | `game/air.ts` (nuevo), `systems/AirSystem.ts` (nuevo), `orders.ts`, `combat.ts`, `espionage.ts` (detección), `types.ts`, `render/Renderer.ts`, `Minimap.ts`, `Input.ts` (pick) |
 | **6c2** Contenido del aire y antiaérea | Caza, bombardero, reconocimiento, `up_fighter`, torre AA, AA móvil, Radar/Electrónica/Cohetería/Defensa antiaérea, plugin `airAI`, comandos en `commandModel`, sprites y sonidos | M | Medio | 6c1, 6a (y 6b para el AA móvil: si no está, va a la fábrica) | `tests/air.test.ts` (5); IA con aviones gana a IA sin AA y pierde contra AA en escenario fijo; móvil a 30 FPS con 20 aviones | Contenido + IA · **Sonnet 5.5, alto** | `mods/core/air.ts` (nuevo), `commandModel.ts`, `sprites`, `sfx.ts` |
-| **6d** Identidades de civilización | `eras[6]` de las seis, únicos (§6), doctrina rusa, traspaso a EE. UU., poderes Embargo y Ayuda a aliados, Legión Extranjera y Resistencia a la 6 | M | Medio | 6a (bonos y edificios); 6b y 6c2 para los únicos de vehículos y aviones (se pueden añadir en dos commits) | Las seis civilizaciones dejan de ser «incompletas»; catálogo sin huérfanos; `tests/civEras.test.ts` ampliado; `simulate --civs` por pares | Contenido · **Sonnet 5.5, medio** | `mods/core/civ-contemporary.ts` (nuevo), `civs.ts`/`civ-*.ts` (solo añadir `eras[6]`), `powers.ts` |
+| **6d** Identidades de civilización | `eras[6]` de las seis, únicos (§6) incluida la **unidad aérea única de cada una** (§5.1), doctrina rusa (solo bonos), traspaso automático a EE. UU., poderes Embargo y Ayuda a aliados, Legión Extranjera y Resistencia a la 6 | M | Medio | 6a (bonos y edificios); 6b y 6c2 para los únicos de vehículos y aviones (se pueden añadir en dos commits) | Las seis civilizaciones dejan de ser «incompletas»; catálogo sin huérfanos; `tests/civEras.test.ts` ampliado; `simulate --civs` por pares | Contenido · **Sonnet 5.5, medio** | `mods/core/civ-contemporary.ts` (nuevo), `civs.ts`/`civ-*.ts` (solo añadir `eras[6]`), `powers.ts` |
 | **6e** IA, balance y pulido | IA que usa todo lo de la era (únicos, energía, petróleo, aviación con escoltas), `defenseAI` con torre AA, balance con `simulate` largas y `bench`, catálogo, decisiones.md, `art-src/PENDIENTES.md`, prompts de arte | M | Medio | 6a–6d | 4 IAs en Arabia 40 min: todas en la 6, con vehículos y aviones, sin atascos; `bench` dentro de `docs/rendimiento.md`; `npm test` verde; comparativa del catálogo razonable | IA rival · **Sonnet 5.5, alto** (Opus alto si hay atascos raros) | `AISystem.ts` (ajustes), plugins, `balance.ts`, docs |
 | **6f** Arte y sonido con imágenes | Hojas de imagen de vehículos, aviones y edificios de la 6; `ART` | M | Bajo | 6b, 6c2 | `arttodo` verde; lista en `PENDIENTES.md` | Gráficos y arte · **Sonnet 5.5, medio** | `mods/art/`, `public/sprites/`, `docs/prompts-nano-banana.md` |
 | **6g** Revisión | Pasar `npm test`, `simulate`, `lockstep`, `engines`, revisar diffs y fusionar | S | Bajo | cada sub-fase | Verde | Revisión · **Haiku 5.5, bajo** | — |
@@ -250,17 +259,41 @@ Orden, tamaño (S/M/L/XL en sesiones de trabajo), riesgo, criterio de «hecho»,
 | Arte: cada edificio con hoja necesita la imagen de la era 6 (`arttodo` falla) | Fallback explícito a la hoja de la 5 declarado en `ART` hasta 6f |
 | Sensibilidad política (URSS/Rusia, EE. UU., Irán) | Solo mecánicas y fechas (§1.3 de `civilizaciones.md`); textos revisados en 6d; nada de juicios ni banderas actuales en el arte 🔶 |
 
-## 11. Preguntas abiertas para el usuario
+## 11. Decisiones del usuario (2026-11-14)
 
-1. **Energía como capacidad (como la población) o como flujo por tick** (§3.2)? Propuesto: capacidad.
-2. **¿Mantenimiento de petróleo por minuto** para vehículos y aviones, o solo coste de entrenamiento + autonomía (§3.3)? Propuesto: sin mantenimiento en la 6.
-3. **Rusia:** ¿basta con que la doctrina (URSS / Federación) cambie bonos y unidades, o quiere que cambie también el **nombre de la identidad** (exige `CivEraDef.variants`)? Propuesto: solo bonos en la primera entrega.
-4. **Traspaso Gran Bretaña → EE. UU.:** automático al entrar en la era 6 (por defecto en §11.3b) o elección en la 5. Propuesto: automático.
-5. **Aviones sin base:** ¿caen al agotar la autonomía, o aterrizan en cualquier sitio y quedan inmóviles hasta tener base? Propuesto: caen.
-6. **Fusileros y torres contra aviones:** ¿daño a la mitad (propuesto) o nada en absoluto hasta tener AA?
-7. **Líneas de la era 2–3** (`evolucion-de-unidades.md` §5, prioridad A): ¿se hacen **antes** de la fase 6 (6-pre) o se dejan para después? Afectan al balance de toda partida larga, no solo a la 6.
-8. **Infantería de línea en el cuartel** (mosquetero/fusilero entrenables en el cuartel desde la era 4) o mantener los edificios por «tecnología de arma» como hoy.
-9. **Únicos aéreos** por civilización (EE. UU. y URSS solamente, §5.1) o ninguno en la 6.
-10. **Compraventa en el mercado** (`exchange`) como parte de 6a para repartir el petróleo, o más adelante.
-11. **Era 7 y nucleares:** ¿confirma que la fase 7 (nucleares) va antes que la era 7, y que la central nuclear de la 6 es solo energía?
-12. **Nombres genéricos frente a históricos** para los vehículos comunes («Carro medio» frente a «Panzer IV»): propuesto genérico en lo común y histórico solo en los únicos de §5.
+Las doce preguntas abiertas de la primera versión quedaron resueltas así (también en `docs/decisiones.md`):
+
+1. **Energía como capacidad** (como la población), no como flujo por tick (§3.2).
+2. **Sin mantenimiento** de petróleo por minuto: solo coste de entrenamiento y autonomía de los aviones (§3.3).
+3. **Rusia:** la doctrina (Unión Soviética / Federación Rusa) solo cambia bonos y unidades; la identidad se llama «Rusia del siglo XX» (§6).
+4. **Traspaso Gran Bretaña → EE. UU. automático** al entrar en la era 6 (cierra §11.3b de `civilizaciones.md`).
+5. **Los aviones sin base caen** al agotar la autonomía (§5.3).
+6. **Fusileros, ametralladoras y torres** hacen **la mitad de daño** a los aviones hasta tener antiaérea (§5.2).
+7. **Las líneas que terminan en la era 2–3 se hacen antes de la fase 6** (sub-fase 6-pre, §9).
+8. **Se mantienen los edificios por tipo de arma**: el cuartel termina en el Campeón; la infantería de fuego vive en la fábrica de pólvora y la fábrica (sin «infantería de línea en el cuartel»).
+9. **Todas las civilizaciones tienen una unidad aérea única** (§5.1).
+10. **La compraventa en el mercado (`exchange`) va dentro de 6a** (§3.1).
+11. **Confirmado:** la fase 7 (armas nucleares) va antes que la era 7, y la central nuclear de la 6 es solo energía.
+12. **Nombres históricos** también en lo común (§12).
+
+## 12. Nombres históricos de las unidades comunes (decisión 12)
+
+Lo común lo tienen todas las civilizaciones, así que no puede llevar el modelo de una sola de ellas. Criterio: **el modelo más difundido o exportado de su tipo en la época**, con el tipo genérico en la descripción («Carro ligero: Vickers 6-Ton…»). Todos 🔶 hasta contrastarlos en 6b/6c2; si alguno no convence, se cae al tipo genérico:
+
+| Unidad común | Nombre propuesto | Por qué |
+| --- | --- | --- |
+| Carro ligero | **Vickers 6-Ton** | Carro ligero británico (1928) exportado a una docena de países y copiado (T-26, 7TP) |
+| Carro medio | **Panzer IV** 🔶 | El carro medio más producido de Alemania (no jugable), presente en todos los frentes; alternativa neutra: «Carro medio» |
+| Carro pesado | **Tiger I** 🔶 | El carro pesado más conocido; alternativa: «Carro pesado» |
+| Infantería mecanizada | **Semioruga M3** | Transporte estadounidense producido en masa y cedido por *Lend-Lease* a muchos ejércitos |
+| Infantería antitanque | **Bazuca** | Nombre común del lanzacohetes de infantería (M1, 1942) |
+| Cañón antitanque | **Pak 40** 🔶 o «Cañón antitanque de 75 mm» | El antitanque remolcado más extendido |
+| Obús autopropulsado | **M7 Priest** | Obús autopropulsado estadounidense de uso aliado generalizado |
+| Lanzacohetes múltiple | **Lanzacohetes múltiple** (la Katiusha es el único ruso) | Sin modelo común neutro |
+| Antiaéreo móvil | **Bofors de 40 mm** | Cañón AA sueco usado por casi todos los ejércitos del siglo XX |
+| Explorador motorizado | **Jeep** | Vehículo ligero de reconocimiento producido en masa y exportado |
+| Caza | **Caza monoplano** 🔶 (o **Hawker Hurricane**) | Difícil elegir un modelo común; el Hurricane se exportó mucho pero es británico |
+| Bombardero | **Bombardero bimotor** 🔶 | Idem |
+| Avión de reconocimiento | **Avión de reconocimiento** | Idem |
+| Torre antiaérea | **Torre antiaérea** | Edificio |
+| Ametralladora pesada (era 6) | **Ametralladora Maxim** | La ametralladora refrigerada por agua más difundida (1884–1945) |
