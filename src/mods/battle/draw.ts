@@ -31,17 +31,20 @@ export function drawBattle(o: OverlayContext) {
   const st = battleState(game);
   if (!st) return;
   const me = game.humanId, vis = game.human.visible, w = game.map.w;
-  const bw = 36 * z, bh = Math.max(3, 5 * z);
+  const bw = 48 * z, bh = Math.max(4, 6 * z);
   ctx.save();
   ctx.textAlign = 'center';
   ctx.textBaseline = 'bottom';
-  ctx.font = `${Math.max(10, Math.round(13 * z))}px sans-serif`;
+  ctx.font = `${Math.max(12, Math.round(16 * z))}px sans-serif`;
   for (const r of Object.values(st.regs)) {
     const cx = r.center.x, cy = r.center.y;
     if (r.owner !== me && !vis[Math.floor(cy) * w + Math.floor(cx)]) continue;
     const p = o.project(cx, cy);
-    const x = p.x - bw / 2, y = p.y - 38 * z;
-    ctx.fillStyle = 'rgba(0,0,0,0.65)';
+    // Por encima de las cabezas de las tropas (y de sus barras de vida)
+    const x = p.x - bw / 2, y = p.y - 68 * z;
+    ctx.fillStyle = r.owner === me ? 'rgba(236,224,180,0.9)' : 'rgba(255,120,100,0.9)';
+    ctx.fillRect(x - 2, y - 2, bw + 4, bh + 4 + (r.fatigue > 0 ? bh * 0.7 : 0));
+    ctx.fillStyle = 'rgba(20,16,10,0.9)';
     ctx.fillRect(x - 1, y - 1, bw + 2, bh + 2 + (r.fatigue > 0 ? bh * 0.7 : 0));
     ctx.fillStyle = moraleColor(r);
     ctx.fillRect(x, y, bw * Math.max(0, Math.min(1, r.morale / 100)), bh);

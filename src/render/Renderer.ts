@@ -477,6 +477,12 @@ export class Renderer {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
 
+    // Dibujos de los mods sobre las unidades (iconos de estado, barras)
+    if (game.reg.topOverlays.length) {
+      const o = { ctx, game, ui, zoom: z, project: (x: number, y: number) => this.project(x, y), unproject: (x: number, y: number) => cam.screenToWorld(x, y) };
+      for (const fn of game.reg.topOverlays) fn(o);
+    }
+
     this.drawOverlays(sel);
   }
 

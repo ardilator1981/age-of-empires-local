@@ -37,6 +37,8 @@ export class Registry {
   powers = new Map<string, PowerDef>();
   /** Dibujos de mods sobre el suelo del mapa y sobre el minimapa. */
   worldOverlays: OverlayFn[] = [];
+  /** Dibujos de mods sobre las unidades (barras, iconos de estado): se pintan después de las entidades. */
+  topOverlays: OverlayFn[] = [];
   minimapOverlays: OverlayFn[] = [];
   setup: SetupConfig = { townCenter: 'townCenter', startingUnits: [], baseResources: [] };
   private _upgradeTargets: Set<string> | null = null;
@@ -76,6 +78,7 @@ export class Registry {
   addAIPlugin(p: AIPlugin) { this.aiPlugins = this.aiPlugins.filter(x => x.id !== p.id); this.aiPlugins.push(p); }
   addHudPanel(p: HudPanelDef) { this.hudPanels = this.hudPanels.filter(x => x.id !== p.id); this.hudPanels.push(p); }
   addWorldOverlay(fn: OverlayFn) { this.worldOverlays.push(fn); }
+  addTopOverlay(fn: OverlayFn) { this.topOverlays.push(fn); }
   addMinimapOverlay(fn: OverlayFn) { this.minimapOverlays.push(fn); }
 
   /** Modifica una definición ya registrada (útil para mods de balance). */
