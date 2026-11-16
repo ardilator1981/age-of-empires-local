@@ -446,3 +446,72 @@ Respuestas del usuario (14 de noviembre de 2026) a las preguntas de la primera v
 - Si la IA de campaña de un combatiente debe seguir pensando mientras lucha (propuesta: no).
 - El valor del tope de tiempo (20 o 30 min) y de la cámara lenta (×0,33 o ×0,5): lo fija la fase 0 y la prueba en móvil.
 - Si la batalla de asedio bajo las murallas (plantilla `asedio`) entra en la primera versión del mapa aparte o en el pulido (propuesta: pulido).
+
+---
+
+## Resultados de la fase 0
+
+Prototipo descartable en `scripts/battle-proto.ts` (`npm run battle-proto`, sin tocar `src/`; no se fusiona). Dos ejércitos parejos en Arabia en la Edad de los Castillos: 4 regimientos de infantería de 10 (uno de lanceros), 2 de ballesteros de 12, 2 de caballeros de 8 y un General por bando. Moral, flanco y retaguardia, carga, contagio y General caído van encima de los grupos en formación del motor. 20 semillas por variante, tope de 25 min. El lado del campo alterna por semilla para quitar el sesgo del relieve. Tabla completa por semilla en el resultado del script.
+
+### Resultados
+
+| Variante | Gana Azul | Final: rotura / aniquilación / tiempo | Duración media | Entre 10 y 20 min | Bajas A/R |
+| --- | --- | --- | --- | --- | --- |
+| a. Espejo | 50 % | 45 / 50 / 5 % | 11,9 min | 70 % | 62 / 57 |
+| b. Azul carga de frente (Rojo flanquea) | 30 % | 55 / 45 / 0 % | 10,7 min | 50 % | 65 / 54 |
+| c. Azul flanquea, Rojo carga de frente | **85 %** | 75 / 20 / 5 % | 12,6 min | 50 % | 54 / 69 |
+| d. Azul sin General | **35 %** | 35 / 50 / 15 % | 12,3 min | 60 % | 62 / 53 |
+| e. Rojo con el doble de lanceros | 60 % | 65 / 35 / 0 % | 11,3 min | 40 % | 54 / 61 |
+| f. Azul carga de frente contra el doble de lanceros | **30 %** | 65 / 30 / 5 % | 10,1 min | 35 % | 66 / 50 |
+| g. Azul flanquea, Rojo guarda la caballería en reserva | 45 % | 50 / 25 / 25 % | 13,2 min | 70 % | 60 / 61 |
+| h. Cae el General azul a los 3 min | **35 %** | 40 / 60 / 0 % | 11,5 min | 40 % | 61 / 54 |
+
+En el espejo hay una media de 11–12 huidas y 10–11 recuperaciones por bando y unos 2 choques por batalla (huida, reagrupamiento, vuelta). El 95 % acaba por rotura o aniquilación.
+
+### Criterio de «hecho»
+
+- **Batallas parejas de 10–20 min con varias fases, final claro:** cumplido en lo esencial. Media de 11–13 min, 95 % sin llegar al tope de tiempo en el espejo, huidas y recuperaciones en cadena. El 30–50 % de las batallas dura menos de 10 min (rotura temprana en 5–9 min), que es la cola corta de la distribución, no el caso típico.
+- **Flanquear gana, cargar de frente contra lanceros pierde:** cumplido (c: 85 %; f: 30 %). Una reserva de caballería bien colocada neutraliza el flanqueo (g: 45 %), que es lo deseable.
+- **Perder al General empeora sin decidir:** cumplido. Sin General o perdiéndolo a mitad, el bando gana el 35 % de las veces.
+
+### Hallazgos que cambian el diseño
+
+1. **Las cifras de moral por sí solas no alargan la batalla. Hay que ablandar el combate.** Con el daño del motor, un regimiento de 10 muere en unos 30 s de contacto y todo acaba en 1–5 min sin que la moral actúe. El prototipo usa un factor de daño ×0,16 (en el motor, vida ×6 o daño ×0,16 solo en batalla). Hay que decidir en la fase 1 cómo se hace: factor de daño de la batalla, vida de las unidades o tiempo entre golpes. Un factor menor de ×0,12 atasca batallas hasta el tope.
+2. **El tiempo lo da la recuperación.** La zona de huida debe estar lejos (30 casillas del frente en el prototipo; con 5 se abandonaba el campo antes de recuperarse y todo acababa en 4–6 min). Recuperación a 45 de moral tras 6 s sin enemigos. Para el mapa de batalla esto significa una **zona de huida profunda** (el prototipo usa un campo de 46 casillas con 30 más hasta el borde de cada bando), o que quien llega al borde no desaparezca de golpe. El tope de tiempo y la cámara lenta no se han medido aquí.
+3. **El aura del General del juego decide la batalla sola** (×1,2 de ataque y +1 de armadura; sin General se pierde casi siempre). En batalla debe bajar a ×1,05 y +0,25 y apoyarse más en moral. No se cambia el General actual del modo; es parte de `BALANCE.battle`.
+4. **El ángulo se mide desde el centro del regimiento golpeado**, no desde la unidad, y el regimiento parado **gira hacia donde le pegan** (60°/s). Sin giro la línea no se deja flanquear nunca; con giro instantáneo, tampoco. La sangría de moral por flanco y retaguardia es solo de golpes cuerpo a cuerpo.
+5. **Contra lanceros hace falta contragolpe explícito:** 50 de daño a cada jinete que llega de frente (con 12 la carga de frente salía rentable). Los bonos de clase se atenúan menos que el daño general (×0,6), si no el lanza-contra-caballería no vale nada.
+6. **La inferioridad numérica solo cuenta enemigos cuerpo a cuerpo** y a 0,5/s. Contando a los arqueros y a 1,5/s, la caballería que flanquea huía entera nada más llegar.
+7. **La IA necesita cohesión:** infantería y arqueros en postura defensiva (en agresiva la línea se deshace persiguiendo) y la caballería que flanquea espera a que la infantería propia trabe.
+
+### Propuesta de `BALANCE.battle`
+
+| Concepto | Cifra |
+| --- | --- |
+| Tamaño de regimiento (infantería, lanceros, arqueros, caballería, General) | 10 · 10 · 12 · 8 · 1 |
+| Moral base (infantería, lanceros, arqueros, caballería, General) | 60 · 55 · 50 · 80 · 100 |
+| Moral perdida por bajas | 2 por cada 5 % de efectivos que cae |
+| Flanco / retaguardia, moral por segundo (cuerpo a cuerpo, dura 1,5 s tras el golpe) | −2 · −5 |
+| Daño por ángulo (frente ±60° / flanco 60–120° / retaguardia) | ×1 · ×1,3 · ×1,6 |
+| Giro de un regimiento parado hacia sus atacantes | 60°/s (memoria de golpes de 2 s; los disparos pesan 0,3) |
+| Carga | ímpetu tras 2 s a ≥ 80 % de la velocidad del grupo; primer golpe ×2,5; −10 de moral al regimiento golpeado; dura 3 s |
+| Carga contra lanceros de frente | anulada, 50 de daño a cada jinete |
+| Contagio (vecino que huye a ≤ 8 casillas) / ver huir al enemigo (≤ 12) | −5 / +5 |
+| Inferioridad numérica (enemigos cuerpo a cuerpo ≥ 2× a ≤ 8 casillas) | −0,5 por segundo |
+| General cerca (≤ 7 casillas) / lejos del enemigo (> 12) / en reserva (> 8) | +0,1 · +2 · +1 por segundo |
+| General caído | −30 a todos, techo de 50 de moral, órdenes con 4 s de retraso |
+| Aura del General en batalla | ×1,05 de ataque, +0,25 de armadura |
+| Vacilante (< 25) | −15 % de daño |
+| Huida | a 0; recuperación tras 6 s sin enemigos a ≤ 6 casillas y a más de 12, vuelve a 45; los que huyen reciben ×1,2 |
+| Zona de huida | a 30 casillas del frente (borde del campo) |
+| Rotura del ejército | ≥ 85 % de las unidades huyendo o fuera del campo durante 30 s |
+| Factor de daño en batalla | ×0,16 (bono de clase ×0,6) |
+| IA: retirar / volver a la línea | moral < 25 / ≥ 50 |
+| Tope de tiempo | 25 min (casi nunca se alcanza: 0–5 % en parejas) |
+
+### Lo que el prototipo no resuelve
+
+- No hay cansancio, munición, terreno ni artillería: todo eso se calibra en la fase 1 y la 6 con estas cifras de partida.
+- La IA es mínima. Los resultados (por ejemplo el 85 % del flanqueo) dependen de ella, y una reserva de caballería la neutraliza.
+- El mapa es una llanura limpia de Arabia, y la duración depende del tamaño del campo y de la distancia a la zona de huida.
+- Con 20 semillas el error de cada porcentaje es de unos ±10 puntos.

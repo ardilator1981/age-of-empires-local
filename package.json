@@ -9,6 +9,7 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "simulate": "vite build --ssr scripts/simulate.ts --outDir .sim --emptyOutDir --logLevel warn && node .sim/simulate.js",
+    "battle-proto": "vite build --ssr scripts/battle-proto.ts --outDir .sim-battle --emptyOutDir --logLevel warn && node .sim-battle/battle-proto.js",
     "real-map": "node scripts/real-map.mjs",
     "shots:movil": "node scripts/mobile-shots.mjs",
     "bench": "vite build --ssr scripts/bench.ts --outDir .sim --emptyOutDir --logLevel warn && node .sim/bench.js",
