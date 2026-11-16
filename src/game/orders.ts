@@ -37,7 +37,7 @@ export function attackStep(game: Game, u: Entity, o: Order, t: Entity): boolean 
   if (!game.canAttack(u, t, false)) return false;
   const p = game.players[u.owner];
   const def = game.unitDef(u);
-  const range = p.getStat(def, 'range');
+  const range = game.rangeOf(u);
   // Desde lo alto, las unidades a distancia alcanzan más lejos
   let r = range >= 1 ? range + rangeBonus(game, u, t, range) : MELEE_RANGE + (t.kind === 'unit' ? 0 : 0.25);
   // Si una regla de los mods no le deja golpear desde donde está (p. ej. fuera de la zona de batalla), se acerca más
@@ -67,7 +67,7 @@ export function attackStep(game: Game, u: Entity, o: Order, t: Entity): boolean 
 function nextTarget(game: Game, u: Entity, radius: number, skip = 0): Entity | null {
   const siege = buildingsOnly(game.unitDef(u));
   // Los que disparan alcanzan lo que hay tras un muro o una zanja; el resto, solo lo que pueden pisar
-  const range = game.players[u.owner].getStat(game.unitDef(u), 'range');
+  const range = game.rangeOf(u);
   return findEnemyNear(game, u, radius, true, siege, e => e.id !== skip && (canReach(game, u, e) || (range >= 1 && edgeDist(u, e) <= range)));
 }
 

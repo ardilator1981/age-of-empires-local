@@ -1,5 +1,5 @@
 import { BALANCE } from '../../config/balance';
-import type { NetCommandHandler } from '../../core/types';
+import type { CommandFilter, NetCommandHandler } from '../../core/types';
 import type { Entity } from '../../game/Entity';
 import type { Game } from '../../game/Game';
 import { Commands } from '../../game/commands';
@@ -58,6 +58,25 @@ export function harangueState(game: Game, pid: number): OrderState {
   const wait = Math.ceil((st.harangued[pid] ?? -Infinity) + B.harangueCooldown - game.time);
   return wait > 0 ? { ok: false, reason: `Podrás arengar de nuevo en ${wait} s`, wait } : { ok: true };
 }
+
+/** Órdenes de movimiento y ataque de las tropas, que se retrasan cuando el General ha caído. */
+const DELAYED = new Set(['smart', 'move', 'attackMove', 'attack', 'army', 'stop']);
+
+/**
+ * Mando limitado (§3.9): sin General no se pueden cambiar las formaciones, y las órdenes de las
+ * tropas tardan `noGeneralDelay` s en cumplirse. Las de la economía (construir, entrenar...) no.
+ */
+export const battleCommandFilter: CommandFilter = (game, pid, c) => {
+  const st = battleState(game);
+  if (!st || !st.generalDead[pid]) return;
+  if (c.t === 'formation') return 'Sin General no se pueden cambiar las formaciones';
+  if (!DELAYED.has(c.t)) return;
+  const units: unknown[] = Array.isArray(c.units) ? c.units : [];
+  if (!units.some(id => { const u = typeof id === 'number' ? game.get(id) : undefined; return !!u && u.owner === pid && !!regimentOf(game, u); })) return;
+  st.queue.push({ at: game.time + B.noGeneralDelay, pid, c: JSON.parse(JSON.stringify(c)) });
+  game.warn(game.players[pid], 'cmdDelay', `🎖️ Sin General las órdenes tardan ${B.noGeneralDelay} s en cumplirse`, 8);
+  return true;
+};
 
 export const battleOrder: NetCommandHandler = (game, pid, args) => {
   const st = battleState(game);

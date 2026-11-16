@@ -1,6 +1,6 @@
 import type { Game } from '../game/Game';
 import type {
-  AgeDef, AIPlugin, BuildingDef, CivDef, CombatRule, DamageModifier, FriendlyFireRule, GameMod, HudPanelDef, MapTypeDef, NetCommandHandler, PowerDef, OrderHandler, OverlayFn,
+  AgeDef, AIPlugin, BuildingDef, CivDef, CombatRule, CommandFilter, DamageModifier, FriendlyFireRule, GameMod, HudPanelDef, MapTypeDef, NetCommandHandler, PowerDef, OrderHandler, OverlayFn,
   ResourceDef, ResourceNodeDef, SetupConfig, SpriteFn, SystemFactory, TechDef, TerrainDef, UnitDef, VictoryDef,
 } from './types';
 
@@ -29,6 +29,8 @@ export class Registry {
   /** Modificadores del daño (flanco, carga...) y reglas de fuego amigo del daño de área. */
   damageModifiers: DamageModifier[] = [];
   friendlyFire: FriendlyFireRule[] = [];
+  /** Filtros de las órdenes de jugador: pueden rechazarlas o retrasarlas (mando limitado). */
+  commandFilters: CommandFilter[] = [];
   aiPlugins: AIPlugin[] = [];
   hudPanels: HudPanelDef[] = [];
   /** Órdenes de jugador propias de los mods (ver `NetCommandHandler`). */
@@ -73,6 +75,7 @@ export class Registry {
   addCombatRule(rule: CombatRule) { this.combatRules.push(rule); }
   addDamageModifier(fn: DamageModifier) { this.damageModifiers.push(fn); }
   addFriendlyFire(fn: FriendlyFireRule) { this.friendlyFire.push(fn); }
+  addCommandFilter(fn: CommandFilter) { this.commandFilters.push(fn); }
   addNetCommand(id: string, handler: NetCommandHandler) { this.netCommands.set(id, handler); }
   addPower(d: PowerDef) { this.powers.set(d.id, d); }
   addAIPlugin(p: AIPlugin) { this.aiPlugins = this.aiPlugins.filter(x => x.id !== p.id); this.aiPlugins.push(p); }

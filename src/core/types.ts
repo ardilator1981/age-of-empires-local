@@ -474,6 +474,13 @@ export type DamageModifier = (game: Game, target: Entity, info: import('../game/
 export type FriendlyFireRule = (game: Game, attacker: Entity) => boolean;
 
 /**
+ * Filtro de las órdenes de jugador (`reg.addCommandFilter`), antes de ejecutarlas. Devuelve un texto
+ * para rechazarla (se le avisa al jugador), `true` si el mod se encarga (p. ej. la retrasa y la
+ * ejecuta más tarde) o nada para dejarla pasar.
+ */
+export type CommandFilter = (game: Game, playerId: number, command: { t: string; [k: string]: any }) => string | boolean | void;
+
+/**
  * Orden propia de un mod (p. ej. declarar la guerra). En una partida en red viaja por la cola de
  * turnos y se ejecuta en el mismo tick en todos los clientes; contra la IA, al momento.
  * `args` son datos simples (JSON). Devuelve si se ha podido hacer.

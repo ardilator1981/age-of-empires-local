@@ -64,6 +64,8 @@ export interface BattleState {
   acc: number;
   /** Cuándo arengó por última vez cada jugador. */
   harangued: Record<number, number>;
+  /** Órdenes retrasadas por el mando limitado (sin General), en orden de llegada. */
+  queue: { at: number; pid: number; c: any }[];
 }
 
 export function battleState(game: Game): BattleState | undefined { return game.data.battle; }
@@ -85,6 +87,29 @@ export function kindOf(game: Game, u: Entity): { cls: string; size: number; mora
   if (d.gatherer || !(d.attack ?? 0) || d.classes.includes('siege') || d.classes.includes('king')) return null;
   for (const k of BALANCE.battle.kinds) if (d.classes.includes(k.cls)) return k;
   return null;
+}
+
+/** Municiones de una unidad a distancia, o null si no gasta (cuerpo a cuerpo, aviación, asedio que no es artillería). */
+export function ammoMax(game: Game, u: Entity): number | null {
+  const d = game.unitDef(u), c = d.classes;
+  if (game.players[u.owner].getStat(d, 'range') < 1 || c.includes('air') || (c.includes('siege') && !c.includes('artillery'))) return null;
+  const byId = BALANCE.battle.ammoById[d.id];
+  if (byId !== undefined) return byId;
+  for (const k of BALANCE.battle.ammo) if (c.includes(k.cls)) return k.ammo;
+  return BALANCE.battle.ammoDefault;
+}
+
+/** Fracción de munición que le queda a un regimiento (null si no dispara). */
+export function ammoFraction(game: Game, r: Regiment): { frac: number; dry: boolean } | null {
+  let sum = 0, n = 0, dry = 0;
+  for (const u of aliveMembers(game, r)) {
+    const max = ammoMax(game, u);
+    if (max === null) continue;
+    n++;
+    sum += (u.data.ammo ?? max) / max;
+    if (u.data.noAmmo) dry++;
+  }
+  return n ? { frac: sum / n, dry: dry * 2 >= n } : null;
 }
 
 export type Zone = 'front' | 'flank' | 'rear';

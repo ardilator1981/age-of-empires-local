@@ -53,7 +53,7 @@ export function performAttack(game: Game, a: Entity, t: Entity) {
     owner: a.owner,
     attackerId: a.id,
     fromHeight: heightOf(game, a),
-    ranged: p.getStat(def, 'range') >= 1,
+    ranged: game.rangeOf(a) >= 1,
   };
   a.attackAnim = 0.35;
   // Marca visible de ventaja de altura (la interfaz la muestra sobre la unidad)
@@ -61,6 +61,7 @@ export function performAttack(game: Game, a: Entity, t: Entity) {
   if (adv.range > 0 || adv.damage !== 0) a.data.heightAdv = { ...adv, until: game.time + 2.5 };
   else delete a.data.heightAdv;
   if (info.ranged) {
+    if (a.kind === 'unit') game.events.emit('shot', { attacker: a, target: t });
     // Área: cae donde estaba el objetivo, con el error de puntería de la unidad
     let ex = t.x, ey = t.y;
     if (def.splash) {

@@ -9,7 +9,8 @@ import { stateHash } from '../src/game/net/hash';
 import { snapshot, upgradeSave, type SaveData } from '../src/game/save';
 import { drawBattle, statusIcons } from '../src/mods/battle/draw';
 import { battleOrder, generalOf, harangueState } from '../src/mods/battle/orders';
-import { battleState, regimentOf, regiments, type Regiment } from '../src/mods/battle/state';
+import { applyNetCommand } from '../src/game/net/netCommands';
+import { ammoMax, battleState, regimentOf, regiments, type Regiment } from '../src/mods/battle/state';
 import { battleReg, options, reg } from './helpers';
 
 const B = BALANCE.battle;
@@ -384,5 +385,91 @@ describe('órdenes de la capa táctica', () => {
     expect(statusIcons(r, g.time)).toEqual(['🏃', '↔️', '⚠️', '😓']);
     r.routed = true;
     expect(statusIcons(r, g.time)).toEqual(['🏳️']);
+  });
+});
+
+describe('munición y mando limitado', () => {
+  it('cada tipo de tirador tiene sus andanadas y lo que no dispara no gasta', async () => {
+    const g = await flat();
+    const m = (id: string) => ammoMax(g, g.spawnUnit(id, 1, 40, 40));
+    expect(m('archer')).toBe(25);
+    expect(m('crossbowman')).toBe(18);
+    expect(m('musketeer')).toBe(20);
+    expect(m('rifleman')).toBe(40);
+    expect(m('cannon')).toBe(20);
+    expect(m('militia')).toBeNull();
+    expect(m('catapult')).toBeNull();
+  });
+
+  it('disparar gasta munición; sin ella se pelea cuerpo a cuerpo con menos daño, y descansando se recupera', async () => {
+    const g = await flat();
+    const archer = g.spawnUnit('archer', 1, 40, 40);
+    const foe = g.spawnUnit('longSwordsman', 2, 43, 40);
+    foe.stance = 'hold';
+    run(g, 1.1);
+    const reach = () => g.rangeOf(archer);
+    expect(reach()).toBeGreaterThanOrEqual(1);
+    run(g, 6);
+    expect(archer.data.ammo).toBeLessThan(25);
+    // Se queda sin munición: alcance 0 y daño a la mitad
+    archer.data.ammo = 1;
+    run(g, 6);
+    expect(archer.data.noAmmo).toBe(true);
+    expect(reach()).toBe(0);
+    const target = spawn(g, 'militia', 2, 60, 60, 10);
+    run(g, 1.1);
+    regimentAt(g, target[0], 60, 60, { x: 1, y: 0 });
+    archer.x = 63; archer.y = 60;
+    expect(hit(g, target[0], archer)).toBeCloseTo(10 * B.damageMul * B.noAmmoDamage, 1);
+    // Lejos del combate recupera
+    g.kill(foe);
+    archer.x = 10; archer.y = 10;
+    run(g, B.ammoRest + (B.ammoBack + 1) / B.ammoRefillPerSec + 1);
+    expect(archer.data.noAmmo).toBeUndefined();
+    expect(reach()).toBeGreaterThanOrEqual(1);
+  });
+
+  it('sin General no se cambian formaciones y las órdenes de las tropas tardan en cumplirse', async () => {
+    const g = await flat();
+    const us = spawn(g, 'militia', 1, 40, 40, 6);
+    const hero = spawn(g, 'testHero', 1, 41, 44)[0];
+    run(g, 1.1);
+    const move = { t: 'move' as const, units: us.map(u => u.id), x: 60, y: 40 };
+    // Con General, al momento
+    expect(applyNetCommand(g, 1, move)).toBe(true);
+    expect(us[0].order).not.toBeNull();
+    for (const u of us) u.order = null;
+    g.kill(hero);
+    expect(applyNetCommand(g, 1, { t: 'formation', units: us.map(u => u.id), formation: 'box' })).toBe(false);
+    expect(applyNetCommand(g, 1, move)).toBe(true);
+    expect(us.every(u => u.order === null)).toBe(true);
+    expect(battleState(g)!.queue.length).toBe(1);
+    run(g, B.noGeneralDelay - 1);
+    expect(us.every(u => u.order === null)).toBe(true);
+    run(g, 1.5);
+    expect(us.some(u => u.order !== null)).toBe(true);
+    expect(battleState(g)!.queue.length).toBe(0);
+    // Las órdenes de la economía no se retrasan, ni las de quien no tiene regimientos
+    const v = g.spawnUnit('villager', 1, 20, 20);
+    expect(applyNetCommand(g, 1, { t: 'move', units: [v.id], x: 25, y: 25 })).toBe(true);
+    expect(battleState(g)!.queue.length).toBe(0);
+  });
+
+  it('una orden retrasada se guarda con la partida y se cumple igual al cargar', async () => {
+    const g = await flat(13);
+    const us = spawn(g, 'militia', 1, 40, 40, 6);
+    const hero = spawn(g, 'testHero', 1, 41, 44)[0];
+    run(g, 1.1);
+    g.kill(hero);
+    applyNetCommand(g, 1, { t: 'move', units: us.map(u => u.id), x: 60, y: 40 });
+    run(g, 1);
+    const save: SaveData = JSON.parse(JSON.stringify(snapshot(g)));
+    const up = upgradeSave(save);
+    if (typeof up === 'string') throw new Error(up);
+    const h = new Game(battleReg, up.opts, up);
+    expect(h.data.battle.queue.length).toBe(1);
+    expect(stateHash(h)).toBe(stateHash(g));
+    run(g, 6); run(h, 6);
+    expect(stateHash(h)).toBe(stateHash(g));
   });
 });

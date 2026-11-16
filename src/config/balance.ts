@@ -303,6 +303,23 @@ export const BALANCE = {
     harangue: 20,
     harangueRadius: 14,
     harangueCooldown: 60,
+    /** Munición (andanadas por unidad a distancia): la primera clase que coincida, o la de `ammoById`; sin ella pelean cuerpo a cuerpo con `noAmmoDamage` (el asedio, `noAmmoSiegeDamage`). */
+    ammo: [
+      { cls: 'machinegun', ammo: 150 },
+      { cls: 'artillery', ammo: 20 },
+      { cls: 'firearm', ammo: 20 },
+      { cls: 'archer', ammo: 25 },
+    ] as { cls: string; ammo: number }[],
+    ammoById: { crossbowman: 18, repeatingCrossbowman: 40, rifleman: 40, guardRifleman: 40, regionalRifleman: 40, shewanRifleman: 40, enfieldRifleman: 40, sharpshooter: 40 } as Record<string, number>,
+    ammoDefault: 25,
+    noAmmoDamage: 0.5,
+    noAmmoSiegeDamage: 0.1,
+    /** Se recupera munición tras ammoRest s sin disparar (ammoRefillPerSec por segundo); con ammoBack o más vuelve a disparar. */
+    ammoRest: 10,
+    ammoRefillPerSec: 0.4,
+    ammoBack: 3,
+    /** Sin General las órdenes de movimiento y ataque de las tropas tardan estos segundos en cumplirse. */
+    noGeneralDelay: 4,
   },
 
   /** Poderes activos de las civilizaciones (docs/civilizaciones.md §5, `game/powers.ts`). Valores indicativos. */

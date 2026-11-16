@@ -4,7 +4,8 @@ import type { Entity } from '../../game/Entity';
 import type { Game } from '../../game/Game';
 import { createGroup } from '../../game/army/groups';
 import { cos, hypot, sin } from '../../game/fmath';
-import { aliveMembers, battleState, hitZone, kindOf, moraleCap, regimentOf, regiments, type BattleState, type Regiment } from './state';
+import { applyNetCommand } from '../../game/net/netCommands';
+import { aliveMembers, ammoMax, battleState, hitZone, kindOf, moraleCap, regimentOf, regiments, type BattleState, type Regiment } from './state';
 
 const B = BALANCE.battle;
 
@@ -20,12 +21,14 @@ function isMelee(game: Game, u: Entity): boolean {
  * los eventos `damaged` y `entityDied`.
  */
 export const battleDamage: DamageModifier = (game, t, info) => {
-  if (t.kind !== 'unit') return 1;
-  const tr = regimentOf(game, t);
-  if (!tr) return 1;
   const a = game.get(info.attackerId);
+  // Sin munición se pelea cuerpo a cuerpo con un arma que no es para eso (la artillería, casi inútil)
+  const dry = a && a.kind === 'unit' && a.data.noAmmo ? (game.unitDef(a).classes.includes('siege') ? B.noAmmoSiegeDamage : B.noAmmoDamage) : 1;
+  if (t.kind !== 'unit') return dry;
+  const tr = regimentOf(game, t);
+  if (!tr) return dry;
   const hasBonus = !!a && a.kind === 'unit' && game.unitDef(a).bonus?.some(b => game.unitDef(t).classes.includes(b.vs));
-  let mul = hasBonus ? B.bonusMul : B.damageMul;
+  let mul = (hasBonus ? B.bonusMul : B.damageMul) * dry;
   if (!a || a.kind !== 'unit') return mul;
   const zone = hitZone(tr, a);
   if (tr.routed) mul *= B.routedDamage;
@@ -49,10 +52,13 @@ export class BattleSystem implements System {
   constructor(private game: Game) {
     game.events.on('damaged', ev => this.onDamaged(ev.target, ev.attacker));
     game.events.on('entityDied', ev => this.onDied(ev.entity));
+    game.events.on('shot', ev => this.onShot(ev.attacker));
   }
 
   private state(): BattleState {
-    return (this.game.data.battle ??= { regs: {}, next: 1, generalDead: {}, acc: 0, harangued: {} });
+    const st = (this.game.data.battle ??= { regs: {}, next: 1, generalDead: {}, acc: 0, harangued: {}, queue: [] });
+    st.queue ??= [];
+    return st;
   }
 
   // ------------------------------------------------------------------ eventos
@@ -90,6 +96,16 @@ export class BattleSystem implements System {
     }
   }
 
+  /** Cada disparo gasta una andanada; sin ellas la unidad pelea cuerpo a cuerpo hasta recuperar munición. */
+  private onShot(a: Entity) {
+    if (!battleState(this.game)) return;
+    const max = ammoMax(this.game, a);
+    if (max === null) return;
+    a.data.ammo = Math.max(0, (a.data.ammo ?? max) - 1);
+    a.data.lastShot = this.game.time;
+    if (a.data.ammo < 1) a.data.noAmmo = true;
+  }
+
   private onDied(e: Entity) {
     const g = this.game, st = battleState(g);
     if (!st || e.kind !== 'unit') return;
@@ -107,6 +123,8 @@ export class BattleSystem implements System {
   // ------------------------------------------------------------------ sistema
   update(dt: number) {
     const g = this.game, st = this.state();
+    // Órdenes retrasadas por el mando limitado: ya les toca
+    while (st.queue.length && st.queue[0].at <= g.time) { const q = st.queue.shift()!; applyNetCommand(g, q.pid, q.c, true); }
     if (g.tick % 20 === 0) this.assign(st);
     this.refresh(st);
     st.acc += dt;
@@ -176,6 +194,7 @@ export class BattleSystem implements System {
       const pid = Number(k);
       if (st.generalDead[pid] && g.units.some(u => !u.dead && u.owner === pid && g.unitDef(u).classes.includes('hero') && g.unitDef(u).aura)) delete st.generalDead[pid];
     }
+    this.resupply(step);
     const regs = Object.values(st.regs);
     for (const r of regs) {
       const c = r.center, cap = moraleCap(st, r);
@@ -208,6 +227,18 @@ export class BattleSystem implements System {
         if (aliveMembers(g, r).some(u => u.order?.type !== 'formation')) this.flee(r, nearest);
         if (now - r.lastEnemyNear >= B.recoverAfter && dEnemy > B.farRadius) this.recover(r, cap);
       }
+    }
+  }
+
+  /** Descansando (sin disparar), las unidades recuperan munición poco a poco. */
+  private resupply(step: number) {
+    const g = this.game;
+    for (const u of g.units) {
+      if (u.dead || u.data.ammo === undefined || g.time - (u.data.lastShot ?? 0) < B.ammoRest) continue;
+      const max = ammoMax(g, u) ?? 0;
+      if (u.data.ammo >= max) continue;
+      u.data.ammo = Math.min(max, u.data.ammo + B.ammoRefillPerSec * step);
+      if (u.data.noAmmo && u.data.ammo >= B.ammoBack) delete u.data.noAmmo;
     }
   }
 

@@ -1,11 +1,11 @@
 import { BALANCE } from '../../config/balance';
 import type { OverlayContext } from '../../core/types';
-import { battleState, type Regiment } from './state';
+import { ammoFraction, battleState, type Regiment } from './state';
 
 const B = BALANCE.battle;
 
 /** Iconos de estado de un regimiento (los activos ahora), de más a menos importante. */
-export function statusIcons(r: Regiment, now: number): string[] {
+export function statusIcons(r: Regiment, now: number, dry = false): string[] {
   const out: string[] = [];
   if (r.routed) return ['🏳️'];
   if (r.charging) out.push('🐎');
@@ -14,6 +14,7 @@ export function statusIcons(r: Regiment, now: number): string[] {
   else if (now < r.flankUntil) out.push('↔️');
   if (r.morale < B.wavering) out.push('⚠️');
   if (r.fatigue > B.tired) out.push('😓');
+  if (dry) out.push('🪫');
   return out;
 }
 
@@ -42,17 +43,25 @@ export function drawBattle(o: OverlayContext) {
     const p = o.project(cx, cy);
     // Por encima de las cabezas de las tropas (y de sus barras de vida)
     const x = p.x - bw / 2, y = p.y - 68 * z;
+    const ammo = ammoFraction(game, r);
+    const extra = (r.fatigue > 0 ? bh * 0.6 : 0) + (ammo ? bh * 0.6 : 0);
     ctx.fillStyle = r.owner === me ? 'rgba(236,224,180,0.9)' : 'rgba(255,120,100,0.9)';
-    ctx.fillRect(x - 2, y - 2, bw + 4, bh + 4 + (r.fatigue > 0 ? bh * 0.7 : 0));
+    ctx.fillRect(x - 2, y - 2, bw + 4, bh + 4 + extra);
     ctx.fillStyle = 'rgba(20,16,10,0.9)';
-    ctx.fillRect(x - 1, y - 1, bw + 2, bh + 2 + (r.fatigue > 0 ? bh * 0.7 : 0));
+    ctx.fillRect(x - 1, y - 1, bw + 2, bh + 2 + extra);
     ctx.fillStyle = moraleColor(r);
     ctx.fillRect(x, y, bw * Math.max(0, Math.min(1, r.morale / 100)), bh);
+    let yy = y + bh;
     if (r.fatigue > 0) {
       ctx.fillStyle = '#5a9ad9';
-      ctx.fillRect(x, y + bh, bw * Math.min(1, r.fatigue / 100), bh * 0.5);
+      ctx.fillRect(x, yy, bw * Math.min(1, r.fatigue / 100), bh * 0.5);
+      yy += bh * 0.6;
     }
-    const icons = statusIcons(r, game.time);
+    if (ammo) {
+      ctx.fillStyle = '#d9a441';
+      ctx.fillRect(x, yy, bw * Math.max(0, Math.min(1, ammo.frac)), bh * 0.5);
+    }
+    const icons = statusIcons(r, game.time, !!ammo?.dry);
     if (icons.length) ctx.fillText(icons.join(''), p.x, y - 2 * z);
   }
   ctx.restore();

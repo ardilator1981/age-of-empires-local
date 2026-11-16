@@ -32,7 +32,7 @@ export function stanceOf(u: Entity): Stance {
 
 /** Alcance de ataque de una unidad contra un objetivo (con la ventaja de altura). */
 export function reachOf(game: Game, u: Entity, t: Entity): number {
-  const range = game.players[u.owner].getStat(game.unitDef(u), 'range');
+  const range = game.rangeOf(u);
   return range >= 1 ? range + rangeBonus(game, u, t, range) : MELEE_RANGE + (t.kind === 'unit' ? 0 : 0.25);
 }
 

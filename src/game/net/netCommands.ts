@@ -72,7 +72,8 @@ function own(game: Game, pid: number, ids: number[]): Entity[] {
 export const ids = (es: Entity[]): number[] => es.map(e => e.id);
 
 /** Ejecuta una orden de red del jugador `pid`. Devuelve si se ha podido ejecutar. */
-export function applyNetCommand(game: Game, pid: number, c: NetCommand): boolean {
+/** `bypass`: salta los filtros de los mods (órdenes que un filtro retrasó y ya toca ejecutar). */
+export function applyNetCommand(game: Game, pid: number, c: NetCommand, bypass = false): boolean {
   const p = game.players[pid];
   if (!p) return false;
   // Lo de la partida vale aunque el jugador haya caído (puede quitar la pausa, por ejemplo)
@@ -99,6 +100,13 @@ export function applyNetCommand(game: Game, pid: number, c: NetCommand): boolean
     }
   }
   if (p.defeated) return false;
+  if (!bypass) {
+    for (const f of game.reg.commandFilters) {
+      const r = f(game, pid, c);
+      if (typeof r === 'string') { game.reject(pid, 'other', r); return false; }
+      if (r === true) return true;
+    }
+  }
   switch (c.t) {
     case 'smart': {
       const units = own(game, pid, c.units);

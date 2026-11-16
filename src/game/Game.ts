@@ -207,6 +207,12 @@ export class Game {
     return true;
   }
 
+  /** Alcance de ataque de una entidad (0 si es a distancia y se ha quedado sin munición: pelea cuerpo a cuerpo). */
+  rangeOf(e: Entity): number {
+    const r = this.players[e.owner].getStat(this.defOf(e), 'range');
+    return r >= 1 && e.data.noAmmo ? 0 : r;
+  }
+
   notify(text: string, playerId?: number, tone: 'info' | 'warn' | 'good' = 'info', at?: Pt) {
     this.events.emit('notify', { text, playerId, tone, at });
   }
