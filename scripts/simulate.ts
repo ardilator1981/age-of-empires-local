@@ -1,7 +1,7 @@
 /**
  * Simulación sin gráficos (IA contra IA) para probar reglas y mods rápidamente.
  * Uso: npm run simulate -- [minutos] [mapa] [semilla] [dificultad roja] [--guerra] [--prep=min] [--jugadores=N] [--edad=N] [--civs=a,b,...]
- * Con --guerra se juega en modo Guerra declarada, y con --rey en Matar al rey (por defecto ningún modo está activo).
+ * Con --guerra se juega en modo Guerra declarada, con --rey en Matar al rey y con --batalla con la capa táctica (por defecto ningún modo está activo).
  */
 import { buildRegistry } from '../src/core/Registry';
 import { TICK_DT } from '../src/core/constants';
@@ -20,7 +20,9 @@ const startAge = Number(process.argv.find(a => a.startsWith('--edad='))?.slice(7
 const civsArg = process.argv.find(a => a.startsWith('--civs='))?.slice(7).split(',') ?? ['france', 'britain'];
 // --jugadores=4: más IAs (los demás ciclan por --civs)
 const nPlayers = Number(process.argv.find(a => a.startsWith('--jugadores='))?.slice(12) ?? 2);
-const mods = ALL_MODS.filter(m => (war || m.id !== 'declared-war') && (king || m.id !== 'regicide'));
+// Con --batalla se activa la capa táctica (mod battle: regimientos, moral, flancos y cargas)
+const battle = process.argv.includes('--batalla');
+const mods = ALL_MODS.filter(m => (war || m.id !== 'declared-war') && (king || m.id !== 'regicide') && (battle || m.id !== 'battle'));
 const reg = buildRegistry(mods);
 await reg.mapTypes.get(mapType)?.load?.();
 const game = new Game(reg, {

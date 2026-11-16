@@ -515,3 +515,9 @@ En el espejo hay una media de 11–12 huidas y 10–11 recuperaciones por bando 
 - La IA es mínima. Los resultados (por ejemplo el 85 % del flanqueo) dependen de ella, y una reserva de caballería la neutraliza.
 - El mapa es una llanura limpia de Arabia, y la duración depende del tamaño del campo y de la distancia a la zona de huida.
 - Con 20 semillas el error de cada porcentaje es de unos ±10 puntos.
+
+### Estado de la fase 1 (16 de noviembre de 2026)
+
+Hecho en el mod `battle` (`src/mods/battle/`, cifras en `BALANCE.battle`, tests en `tests/battle.test.ts`): regimientos automáticos por tipo, moral con huida y recuperación, daño por flanco y retaguardia con orientación que gira hacia los atacantes, carga con ímpetu anulada por lanceros, contagio, golpe de moral y techo por General caído, y fuego amigo de la artillería y el asedio. Dos puntos de extensión en el motor: `addDamageModifier` y `addFriendlyFire`. El coste medido con unos 300 soldados es de 0,5 ms por tick de media (4,7 ms de pico). `npm run simulate -- 20 arabia 1 --batalla` corre sin errores.
+
+Pendiente de la fase 1: cansancio, munición, órdenes de correr, cargar y arengar en `commandModel.ts`, iconos de estado sobre las tropas, mando limitado sin General (órdenes con retardo) y activar la capa solo dentro del círculo de Guerra declarada. La IA aún no retira regimientos con la moral baja: sus ejércitos huyen por la regla común y vuelven a la lucha al recuperarse.

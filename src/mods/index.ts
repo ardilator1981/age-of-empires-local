@@ -1,5 +1,6 @@
 import type { GameMod } from '../core/types';
 import { artMod } from './art';
+import { battleMod } from './battle';
 import { coreMod } from './core';
 import { declaredWarMod } from './declared-war';
 import { extraContentMod } from './extra-content';
@@ -22,5 +23,6 @@ export const ALL_MODS: GameMod[] = [
   realMapsMod,
   declaredWarMod,
   regicideMod,
+  battleMod,
   artMod,
 ];

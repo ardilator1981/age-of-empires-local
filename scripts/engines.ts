@@ -11,7 +11,8 @@
  * (imprime la partida recién creada como JSON) y `sim <min> <semilla> <mapa> <archivo>` (parte de
  * esa partida guardada: todos los motores empiezan del mismo estado, como al unirse a una partida).
  * Un sexto argumento (`sim <min> <semilla> <mapa> - <edad>`) empieza en esa edad: con la 4, las IA
- * usan los poderes activos de sus civilizaciones; un séptimo (`... - 3 persia,china,france,britain`) elige las civilizaciones.
+ * usan los poderes activos de sus civilizaciones; un séptimo (`... - 3 persia,china,france,britain`) elige las civilizaciones;
+ * un octavo, `batalla`, activa la capa táctica (mod battle).
  *
  * No usa nada de Node: en el `jsc` de macOS no hay `console` ni `process`.
  */
@@ -51,7 +52,8 @@ if (mode === 'math') {
   for (const [name, fn] of tests) for (let i = 0; i < N; i++) out(`math ${name} ${i} ${bits(fn())}`);
 } else {
   // Partida de 4 IA en un mapa aleatorio
-  const mods = ALL_MODS.filter(m => m.id !== 'declared-war' && m.id !== 'regicide');
+  // Un octavo argumento `batalla` activa la capa táctica (mod battle)
+  const mods = ALL_MODS.filter(m => m.id !== 'declared-war' && m.id !== 'regicide' && (args[7] === 'batalla' || m.id !== 'battle'));
   const reg = buildRegistry(mods);
   // Séptimo argumento (opcional): civilizaciones de las IA separadas por comas
 const civs = args[6]?.split(',') ?? ['france', 'britain', 'rus', 'france'];

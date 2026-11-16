@@ -101,7 +101,13 @@ export function computeDamage(game: Game, t: Entity, info: DamageInfo): number {
     dmg *= heightDamageFactor(diff, !!info.ranged);
   }
   if (info.mul !== undefined) dmg *= info.mul;
-  return Math.max(1, Math.round(dmg * 10) / 10);
+  const base = Math.max(1, Math.round(dmg * 10) / 10);
+  // Modificadores de los mods (capa táctica): se aplican al daño final, después del mínimo de 1
+  const mods = game.reg.damageModifiers;
+  if (!mods.length) return base;
+  let out = base;
+  for (const m of mods) out *= m(game, t, info);
+  return Math.max(0.1, Math.round(out * 10) / 10);
 }
 
 export function dealDamage(game: Game, t: Entity, info: DamageInfo) {
@@ -159,9 +165,14 @@ function splashDamage(game: Game, pr: Projectile) {
   const attacker = game.get(pr.info.attackerId);
   // Se recoge antes de dañar: matar a uno cambia las listas
   const hit: { e: Entity; mul: number }[] = [];
+  // Fuego amigo (lo activan los mods, p. ej. la artillería en la batalla táctica): también las tropas propias
+  const friendly = !!attacker && game.reg.friendlyFire.some(f => f(game, attacker));
   for (const e of game.actors) {
-    if (e.dead || e.kind === 'resource' || !game.isEnemy(pr.info.owner, e.owner)) continue;
-    if (attacker && game.reg.combatRules.length && !game.canAttack(attacker, e, true)) continue;
+    if (e.dead || e.kind === 'resource') continue;
+    const enemy = game.isEnemy(pr.info.owner, e.owner);
+    if (!enemy && !(friendly && e.kind === 'unit' && e.owner === pr.info.owner && e.id !== pr.info.attackerId)) continue;
+    // Las reglas de combate de los mods (tregua, zona de batalla) hablan de enemigos: no valen para el fuego amigo
+    if (enemy && attacker && game.reg.combatRules.length && !game.canAttack(attacker, e, true)) continue;
     const d = Math.max(0, hypot(e.x - pr.ex, e.y - pr.ey) - (e.kind === 'building' ? e.size / 2 : 0));
     if (d > radius) continue;
     hit.push({ e, mul: 1 - falloff * (d / radius) });

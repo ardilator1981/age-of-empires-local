@@ -16,7 +16,7 @@ import { NET_CASES, runNetGame } from '../tests/net/netbench';
 const minutes = Number(process.argv[2] ?? 10);
 const seed = Number(process.argv[3] ?? 3);
 const startAge = Number(process.argv[4] ?? 0);
-const mods = ALL_MODS.filter(m => m.id !== 'declared-war' && m.id !== 'regicide');
+const mods = ALL_MODS.filter(m => m.id !== 'declared-war' && m.id !== 'regicide' && m.id !== 'battle');
 const reg = buildRegistry(mods);
 
 function opts(humans: number, ais: number): GameOptions {

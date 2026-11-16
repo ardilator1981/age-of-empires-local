@@ -209,6 +209,84 @@ export const BALANCE = {
     aiMaxWait: 420,
   },
 
+  /**
+   * Capa táctica (mod battle, docs/batalla-tactica.md). Cifras de la fase 0 (`scripts/battle-proto.ts`,
+   * sección «Resultados de la fase 0» del documento).
+   */
+  battle: {
+    /** Factor del daño entre tropas con regimiento (ablanda el combate para que la moral actúe) y para los golpes con bono de clase (lanza contra caballería). */
+    damageMul: 0.16,
+    bonusMul: 0.6,
+    /** Tamaño de regimiento por clase (la primera clase que coincida) y moral base. `hero` = el General (regimiento de 1). */
+    kinds: [
+      { cls: 'hero', size: 1, morale: 100 },
+      { cls: 'cavalry', size: 8, morale: 80 },
+      { cls: 'spear', size: 10, morale: 55 },
+      { cls: 'archer', size: 12, morale: 50 },
+      { cls: 'infantry', size: 10, morale: 60 },
+    ] as { cls: string; size: number; morale: number }[],
+    /** Un soldado sin regimiento se une a uno del mismo tipo con hueco a menos de esta distancia (casillas). */
+    joinRadius: 6,
+    /** Cada cuántos segundos se actualiza la moral (la regla de huida y recuperación se evalúa a ese ritmo). */
+    step: 0.25,
+    /** Moral perdida por cada 5 % de efectivos que cae. */
+    perLoss: 2,
+    /** Moral por segundo perdida por golpes cuerpo a cuerpo de flanco / retaguardia (dura `hitLingers` s tras el golpe). */
+    flankPerSec: 2,
+    rearPerSec: 5,
+    hitLingers: 1.5,
+    /** Daño por ángulo: frente si el golpe llega dentro de ±60° (cos 0,5), retaguardia pasados 120° (cos −0,5). */
+    flankMul: 1.3,
+    rearMul: 1.6,
+    /** Giro de un regimiento parado hacia sus atacantes (grados por segundo), memoria de golpes (s) y peso de los disparos. */
+    turnRate: 60,
+    /** Velocidad del centro (casillas por segundo) por encima de la cual el regimiento «marcha» y mira hacia donde va; el giro en marcha es el doble de rápido. */
+    marchSpeed: 0.5,
+    turnMemory: 2,
+    rangedWeight: 0.3,
+    /** Carga: segundos a ≥ speedFraction de la velocidad hacia un regimiento enemigo a menos de chargeRange para tener ímpetu; primer golpe ×chargeMul; golpe de moral; duración. */
+    chargeBuildUp: 2,
+    chargeSpeedFraction: 0.8,
+    chargeRange: 14,
+    chargeMul: 2.5,
+    chargeHit: 10,
+    chargeLasts: 3,
+    /** Contra lanceros de frente la carga se anula y cada jinete recibe este daño. */
+    spearCounter: 50,
+    /** Contagio (vecino propio que huye a ≤ contagionRadius), ver huir al enemigo (≤ sightRadius). */
+    contagion: 5,
+    contagionRadius: 8,
+    enemyRouts: 5,
+    sightRadius: 12,
+    /** Inferioridad numérica: enemigos cuerpo a cuerpo ≥ outnumbered × propios a ≤ nearRadius: −outnumberedPerSec por segundo. */
+    outnumbered: 2,
+    outnumberedPerSec: 0.5,
+    nearRadius: 8,
+    /** General caído: golpe de moral, techo de moral y daño del aura propio de la batalla. */
+    generalDead: 30,
+    generalDeadCap: 50,
+    auraAttackMul: 1.05,
+    auraArmorAdd: 0.25,
+    /** Subidas por segundo: General a ≤ auraRadius, lejos del enemigo (> farRadius), en reserva (> reserveRadius). */
+    generalPerSec: 0.1,
+    auraRadius: 7,
+    farPerSec: 2,
+    farRadius: 12,
+    reservePerSec: 1,
+    reserveRadius: 8,
+    /** Vacilante (< wavering): daño ×waveringDamage. Los que huyen reciben ×routedDamage. */
+    wavering: 25,
+    waveringDamage: 0.85,
+    routedDamage: 1.2,
+    /** Huida: recuperación tras recoverAfter s sin enemigos a ≤ pursuitRadius y a > farRadius; vuelve a recoverTo. Distancia a la que corre. */
+    recoverAfter: 6,
+    recoverTo: 45,
+    pursuitRadius: 6,
+    fleeDistance: 30,
+    /** Fuego amigo de la artillería y el asedio: moral perdida por impacto propio. */
+    friendlyFireMorale: 3,
+  },
+
   /** Poderes activos de las civilizaciones (docs/civilizaciones.md §5, `game/powers.ts`). Valores indicativos. */
   powers: {
     /** Tributo a la Horda: tregua mutua con todos los enemigos (segundos) y su oro. */

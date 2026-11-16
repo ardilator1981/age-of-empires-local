@@ -464,6 +464,16 @@ export interface SpriteFn {
 export type CombatRule = (game: Game, attacker: Entity, target: Entity, hitting: boolean) => boolean;
 
 /**
+ * Modificador del daño (`reg.addDamageModifier`): devuelve un factor (1 = sin cambio) que se aplica
+ * al daño ya calculado de un golpe a una unidad o edificio. Debe ser puro: no cambia el estado
+ * (para eso están los eventos, p. ej. `damaged`). Lo usa la capa táctica (flanco, carga, moral).
+ */
+export type DamageModifier = (game: Game, target: Entity, info: import('../game/combat').DamageInfo) => number;
+
+/** Regla de fuego amigo (`reg.addFriendlyFire`): ¿el daño de área de este atacante también daña a las tropas propias? */
+export type FriendlyFireRule = (game: Game, attacker: Entity) => boolean;
+
+/**
  * Orden propia de un mod (p. ej. declarar la guerra). En una partida en red viaja por la cola de
  * turnos y se ejecuta en el mismo tick en todos los clientes; contra la IA, al momento.
  * `args` son datos simples (JSON). Devuelve si se ha podido hacer.

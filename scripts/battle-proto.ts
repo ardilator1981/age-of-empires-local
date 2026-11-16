@@ -273,9 +273,9 @@ class Battle {
 
   async setup() {
     // Registro base + el General del mod Guerra declarada (sin el mod: su regla de paz impediría luchar)
-    const withWar = buildRegistry(ALL_MODS);
+    const withWar = buildRegistry(ALL_MODS.filter(m => m.id !== 'battle'));
     const general = withWar.units.get('general')!;
-    const mods = ALL_MODS.filter(m => m.id !== 'declared-war' && m.id !== 'regicide');
+    const mods = ALL_MODS.filter(m => m.id !== 'declared-war' && m.id !== 'regicide' && m.id !== 'battle');
     const reg = buildRegistry(mods);
     reg.addUnit({ ...general, aura: { ...general.aura!, attackMul: PROTO.generalAura.attackMul, armorAdd: PROTO.generalAura.armorAdd } });
     await reg.mapTypes.get('arabia')?.load?.();

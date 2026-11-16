@@ -31,7 +31,7 @@ src/
   mods/real-maps/  Mapas a partir de relieve y datos reales (JSON en data/)
   app/         App (ciclo menú → partida, guardado automático, partidas en red), Session (todo lo de una partida),
                saves (ranuras en IndexedDB), orders (adónde van las órdenes del jugador)
-  mods/        core/ (contenido base: datos), extra-content/, treasure-hunt/, declared-war/ (modo Guerra declarada), regicide/ (modo Matar al rey),
+  mods/        core/ (contenido base: datos), extra-content/, treasure-hunt/, declared-war/ (modo Guerra declarada), regicide/ (modo Matar al rey), battle/ (capa táctica: regimientos, moral, flancos, cargas),
                art/ (qué definiciones se dibujan con imágenes)
 scripts/       simulate.ts (partida IA contra IA sin gráficos), real-map.mjs, make-icons.mjs,
                fix-textures.mjs y art-import.mjs (arte con imágenes)
@@ -62,7 +62,8 @@ Ver **`docs/flujo-de-trabajo.md`**: qué área es cada tipo de tarea, con qué m
 | Jugar / desarrollo | `npm run dev` → http://localhost:5173 (o doble clic en `Jugar.command`) |
 | Comprobar tipos | `npm run typecheck` |
 | Build | `npm run build` (incluye la comprobación de tipos) |
-| Prueba de humo | `npm run simulate -- <minutos> <mapa> <semilla> [dificultad]`: partida IA contra IA sin gráficos; debe terminar sin errores, y las IAs deben avanzar de edad y combatir |
+| Prueba de humo | `npm run simulate -- <minutos> <mapa> <semilla> [dificultad]`: partida IA contra IA sin gráficos; debe terminar sin errores, y las IAs deben avanzar de edad y combatir. `--batalla` activa la capa táctica |
+| Prototipo táctico | `npm run battle-proto`: simulación descartable de la fase 0 de la batalla táctica (tablas por variante); las cifras que salieron están en `BALANCE.battle` |
 | Tests | `npm test` (Vitest, carpeta `tests/`): conectividad de todos los mapas, reglas de altura, visión, caminos, órdenes y Guerra declarada. Los modos de juego (`declared-war`, `regicide`) solo se activan en las pruebas que los piden (`newGame(map, { war: true })`, `newGame(map, { regicide: true })`) |
 | Determinismo entre navegadores | `npm run engines -- [minutos]`: la misma partida en Node (V8) y en el `jsc` de macOS (JavaScriptCore, el de Safari); compara la huella del estado cada segundo |
 | Multijugador | `npm run lockstep -- [minutos]`: dos clientes por red simulada; determinismo, retardo de las órdenes y paradas, y al final la partida en red completa (NetGame) de la misma wifi a lejos con paquetes tardíos: debe ir al ~100 % del tiempo real |
@@ -78,6 +79,7 @@ Depuración en el navegador: `window.app` y `window.game` están accesibles desd
 
 - `reg.addCombatRule(fn)`: quién puede atacar a quién (`game.canAttack`). La usa Guerra declarada para la paz y el círculo de batalla.
 - `reg.addNetCommand(id, fn)`: una orden de jugador propia del mod (en red viaja por la cola de turnos). La interfaz la da con `session.orders.send({ t: 'mod', id, args })`. La usa Guerra declarada para declarar la guerra.
+- `reg.addDamageModifier(fn)`: factor (puro) del daño de cada golpe, sobre el daño ya calculado y el mínimo de 1 (`combat.ts`). `reg.addFriendlyFire(fn)`: si el daño de área de ese atacante también hiere a las tropas propias. Los usa el mod `battle` (`docs/batalla-tactica.md`; cifras en `BALANCE.battle`).
 - `reg.addAIPlugin(p)`: la IA le pregunta cada turno; puede pedir edificios y unidades, reservar recursos, frenar el entrenamiento o encargarse del ejército.
 - `reg.addHudPanel(def)`, `reg.addWorldOverlay(fn)`, `reg.addMinimapOverlay(fn)`: paneles HTML y dibujos sobre el mapa y el minimapa. `ui.pickPoint` sirve para pedir un punto del mapa.
 - Refugio: un edificio con `shelter: { classes, capacity }` admite unidades propias de esas clases (`game/garrison.ts`, órdenes de red `garrison` y `ungarrison`); dentro no se ven ni se les puede atacar, y si el edificio cae, salen. `UnitDef.undeletable` impide «Eliminar».
