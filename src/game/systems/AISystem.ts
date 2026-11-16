@@ -449,6 +449,8 @@ export class AIController {
 
   private controlArmy(army: Entity[], blds: Entity[]) {
     const g = this.game, p = this.p;
+    // Las tropas que un mod retiene (`data.aiHold`: en retirada o huyendo) no reciben órdenes de la IA
+    army = army.filter(a => !a.data.aiHold);
     if (!army.length) return;
     // Amenazas cerca de la base
     const threats: Entity[] = [];

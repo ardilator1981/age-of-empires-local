@@ -316,7 +316,9 @@ export class BattleSystem implements System {
     const g = this.game;
     r.routed = true; r.morale = 0; r.charging = false; r.chargeT = 0; r.running = false; r.lastEnemyNear = g.time;
     const us = aliveMembers(g, r);
-    if (us.length) r.prevStance = us[0].stance;
+    // Si ya se estaba replegando por orden de la IA, conserva la postura de antes
+    if (us.length) r.prevStance = r.regroup ? r.regroupStance ?? us[0].stance : us[0].stance;
+    r.regroup = false;
     this.flee(r, nearest);
     // Contagio a los vecinos propios; ánimo a los enemigos que lo ven
     for (const o of regs) {
@@ -335,13 +337,14 @@ export class BattleSystem implements System {
     const tx = Math.max(2, Math.min(g.map.w - 3, r.center.x + away.x * B.fleeDistance));
     const ty = Math.max(2, Math.min(g.map.h - 3, r.center.y + away.y * B.fleeDistance));
     const to = g.findFreeTile(tx, ty, 12) ?? { x: r.center.x, y: r.center.y };
-    for (const u of us) u.stance = 'passive';
+    // `aiHold`: la IA no les da órdenes mientras huyen
+    for (const u of us) { u.stance = 'passive'; u.data.aiHold = true; }
     createGroup(g, us, { type: 'loose', mode: 'retreat', route: [to] });
   }
 
   private recover(r: Regiment, cap: number) {
     r.routed = false;
     r.morale = Math.min(cap, B.recoverTo);
-    for (const u of aliveMembers(this.game, r)) u.stance = r.prevStance;
+    for (const u of aliveMembers(this.game, r)) { u.stance = r.prevStance; delete u.data.aiHold; }
   }
 }

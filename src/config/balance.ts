@@ -318,6 +318,13 @@ export const BALANCE = {
     ammoRest: 10,
     ammoRefillPerSec: 0.4,
     ammoBack: 3,
+    /** IA: retira un regimiento por debajo de aiRetreatBelow de moral (a aiRegroupDistance casillas del enemigo) y lo devuelve a la línea al llegar a aiRejoinAbove. */
+    aiRetreatBelow: 25,
+    aiRejoinAbove: 50,
+    aiRegroupDistance: 12,
+    /** IA: solo se repliega si el enemigo está a más de aiDisengage casillas (con él encima la retirada es una matanza por la espalda); si le alcanzan, vuelve a luchar. */
+    aiDisengage: 5,
+    aiCaught: 3,
     /** Sin General las órdenes de movimiento y ataque de las tropas tardan estos segundos en cumplirse. */
     noGeneralDelay: 4,
   },

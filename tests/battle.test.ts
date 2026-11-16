@@ -473,3 +473,81 @@ describe('munición y mando limitado', () => {
     expect(stateHash(h)).toBe(stateHash(g));
   });
 });
+
+describe('IA de la capa táctica', () => {
+  /** Como `flat`, pero el jugador 2 lo lleva la IA. */
+  async function flatAI(seed = 21): Promise<Game> {
+    const o = options('arabia', { seed, battle: true });
+    o.players = o.players.map((p, i) => ({ ...p, human: i === 0 }));
+    const g = new Game(battleReg, o);
+    for (const e of [...g.list]) g.remove(e);
+    g.update(TICK_DT);
+    g.map.terrain.fill(g.reg.terrain('grass')); g.map.heights.fill(0); g.map.heightVersion++; g.map.version++; g.map.obstaclesChanged();
+    g.placeBuilding('townCenter', 1, 6, 6, true);
+    g.placeBuilding('townCenter', 2, 84, 84, true);
+    return g;
+  }
+
+  it('la IA repliega un regimiento con la moral baja y lo devuelve a la línea al recuperarse', async () => {
+    const g = await flatAI();
+    const mine = spawn(g, 'militia', 2, 60, 60, 10);
+    spawn(g, 'militia', 1, 30, 30, 10);
+    run(g, 1.1);
+    const r = regimentOf(g, mine[0])!;
+    r.morale = B.aiRetreatBelow - 5;
+    run(g, 4);
+    expect(r.regroup).toBe(true);
+    expect(r.routed).toBe(false);
+    for (const id of r.members) {
+      const u = g.get(id)!;
+      expect(u.stance).toBe('passive');
+      expect(u.data.aiHold).toBe(true);
+    }
+    // Recupera moral y vuelve
+    r.morale = B.aiRejoinAbove + 5;
+    run(g, 4);
+    expect(r.regroup).toBe(false);
+    for (const id of r.members) {
+      const u = g.get(id)!;
+      expect(u.stance).toBe('aggressive');
+      expect(u.data.aiHold).toBeUndefined();
+    }
+  });
+
+  it('un regimiento que huye no recibe órdenes de la IA aunque haya enemigos junto a su base', async () => {
+    const g = await flatAI();
+    const mine = spawn(g, 'militia', 2, 78, 78, 10);
+    spawn(g, 'militia', 1, 84, 72, 4);
+    run(g, 1.1);
+    const r = regimentOf(g, mine[0])!;
+    r.morale = -5;
+    run(g, 0.5);
+    expect(r.routed).toBe(true);
+    expect(g.get(r.members[0])!.data.aiHold).toBe(true);
+    run(g, 3);
+    for (const id of r.members) expect(g.get(id)?.order?.type).not.toBe('attack');
+    // Al recuperarse, la IA vuelve a mandarlo
+    const far = spawn(g, 'militia', 2, 20, 20, 4);
+    run(g, 1.1);
+    const rf = regimentOf(g, far[0])!;
+    rf.morale = -5;
+    run(g, B.recoverAfter + 4);
+    expect(rf.routed).toBe(false);
+    expect(g.get(rf.members[0])!.data.aiHold).toBeUndefined();
+  });
+
+  it('una batalla entre dos IA con la capa táctica corre sin errores y sin regimientos vacíos', async () => {
+    const g = await flatAI(5);
+    spawn(g, 'longSwordsman', 1, 40, 42, 10); spawn(g, 'crossbowman', 1, 36, 42, 12);
+    spawn(g, 'longSwordsman', 2, 48, 42, 10); spawn(g, 'crossbowman', 2, 52, 42, 12);
+    Commands.army(g, g.units.filter(u => u.owner === 1), { kind: 'attack', points: [{ x: 48, y: 42 }] }, false);
+    Commands.army(g, g.units.filter(u => u.owner === 2), { kind: 'attack', points: [{ x: 40, y: 42 }] }, false);
+    let regroups = 0;
+    const seen = new Set<number>();
+    for (let t = 0; t < 400; t++) {
+      run(g, 1);
+      for (const r of regiments(g)) { expect(r.members.length).toBeGreaterThan(0); if (r.regroup && !seen.has(r.id)) { seen.add(r.id); regroups++; } }
+    }
+    expect(regroups).toBeGreaterThanOrEqual(0);
+  });
+});

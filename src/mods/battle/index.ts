@@ -1,5 +1,6 @@
 import { BALANCE } from '../../config/balance';
 import type { GameMod } from '../../core/types';
+import { battleAI } from './ai';
 import { drawBattle } from './draw';
 import { battleCommandFilter, battleOrder } from './orders';
 import { battleDamage, BattleSystem } from './system';
@@ -27,6 +28,7 @@ export const battleMod: GameMod = {
     // Correr, cargar y arengar son órdenes de jugador (en red, por la cola de turnos); los iconos de estado se dibujan sobre el mapa
     reg.addNetCommand('battle', battleOrder);
     reg.addCommandFilter(battleCommandFilter);
+    reg.addAIPlugin(battleAI);
     reg.addTopOverlay(drawBattle);
     // 45: después del combate (40) y la defensa (41)
     reg.addSystem('battle', game => new BattleSystem(game), 45);

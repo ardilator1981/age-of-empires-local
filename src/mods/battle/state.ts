@@ -49,6 +49,9 @@ export interface Regiment {
   chargeHit: number[];
   /** Último tick en que el fuego propio le bajó la moral (una vez por tick). */
   ffTick: number;
+  /** Replegado por orden de la IA para recuperar moral, y la postura que tenía. */
+  regroup?: boolean;
+  regroupStance?: string;
   /** Cansancio 0–100, si corre, y segundos seguidos sin moverse. */
   fatigue: number;
   running: boolean;
