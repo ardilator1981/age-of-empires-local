@@ -210,7 +210,7 @@ export const BALANCE = {
   },
 
   /**
-   * Capa táctica (mod battle, docs/batalla-tactica.md). Cifras de la fase 0 (`scripts/battle-proto.ts`,
+   * Capa táctica (mod battle, docs/batalla-tactica.md). Cifras de la fase 0 (prototipo descartable, ya borrado: `git show 585060c:scripts/battle-proto.ts`,
    * sección «Resultados de la fase 0» del documento).
    */
   battle: {

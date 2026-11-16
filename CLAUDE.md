@@ -63,7 +63,6 @@ Ver **`docs/flujo-de-trabajo.md`**: qué área es cada tipo de tarea, con qué m
 | Comprobar tipos | `npm run typecheck` |
 | Build | `npm run build` (incluye la comprobación de tipos) |
 | Prueba de humo | `npm run simulate -- <minutos> <mapa> <semilla> [dificultad]`: partida IA contra IA sin gráficos; debe terminar sin errores, y las IAs deben avanzar de edad y combatir. `--batalla` activa la capa táctica |
-| Prototipo táctico | `npm run battle-proto`: simulación descartable de la fase 0 de la batalla táctica (tablas por variante); las cifras que salieron están en `BALANCE.battle` |
 | Tests | `npm test` (Vitest, carpeta `tests/`): conectividad de todos los mapas, reglas de altura, visión, caminos, órdenes y Guerra declarada. Los modos de juego (`declared-war`, `regicide`) solo se activan en las pruebas que los piden (`newGame(map, { war: true })`, `newGame(map, { regicide: true })`) |
 | Determinismo entre navegadores | `npm run engines -- [minutos]`: la misma partida en Node (V8) y en el `jsc` de macOS (JavaScriptCore, el de Safari); compara la huella del estado cada segundo |
 | Multijugador | `npm run lockstep -- [minutos]`: dos clientes por red simulada; determinismo, retardo de las órdenes y paradas, y al final la partida en red completa (NetGame) de la misma wifi a lejos con paquetes tardíos: debe ir al ~100 % del tiempo real |
