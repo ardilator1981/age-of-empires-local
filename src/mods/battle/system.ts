@@ -5,7 +5,7 @@ import type { Game } from '../../game/Game';
 import { createGroup } from '../../game/army/groups';
 import { cos, hypot, sin } from '../../game/fmath';
 import { applyNetCommand } from '../../game/net/netCommands';
-import { aliveMembers, ammoMax, battleState, hitZone, kindOf, moraleCap, regimentOf, regiments, type BattleState, type Regiment } from './state';
+import { aliveMembers, ammoMax, battleActive, battleState, hitZone, kindOf, moraleCap, regimentOf, regiments, type BattleState, type Regiment } from './state';
 
 const B = BALANCE.battle;
 
@@ -21,6 +21,7 @@ function isMelee(game: Game, u: Entity): boolean {
  * los eventos `damaged` y `entityDied`.
  */
 export const battleDamage: DamageModifier = (game, t, info) => {
+  if (!battleActive(game, t)) return 1;
   const a = game.get(info.attackerId);
   // Sin munición se pelea cuerpo a cuerpo con un arma que no es para eso (la artillería, casi inútil)
   const dry = a && a.kind === 'unit' && a.data.noAmmo ? (game.unitDef(a).classes.includes('siege') ? B.noAmmoSiegeDamage : B.noAmmoDamage) : 1;
@@ -98,7 +99,7 @@ export class BattleSystem implements System {
 
   /** Cada disparo gasta una andanada; sin ellas la unidad pelea cuerpo a cuerpo hasta recuperar munición. */
   private onShot(a: Entity) {
-    if (!battleState(this.game)) return;
+    if (!battleState(this.game) || !battleActive(this.game, a)) return;
     const max = ammoMax(this.game, a);
     if (max === null) return;
     a.data.ammo = Math.max(0, (a.data.ammo ?? max) - 1);
@@ -112,7 +113,7 @@ export class BattleSystem implements System {
     const r = regimentOf(g, e);
     if (r) r.morale -= (100 / r.initial) / 5 * B.perLoss;
     const d = g.unitDef(e);
-    if (d.classes.includes('hero') && d.aura) {
+    if (d.classes.includes('hero') && d.aura && battleActive(g, e)) {
       st.generalDead[e.owner] = true;
       for (const x of regiments(g)) if (x.owner === e.owner) x.morale -= B.generalDead;
       const p = g.players[e.owner];
@@ -138,7 +139,7 @@ export class BattleSystem implements System {
   private assign(st: BattleState) {
     const g = this.game;
     for (const u of g.units) {
-      if (u.dead || u.inside || u.onWall || regimentOf(g, u)) continue;
+      if (u.dead || u.inside || u.onWall || regimentOf(g, u) || !battleActive(g, u)) continue;
       const k = kindOf(g, u);
       if (!k) continue;
       let best: Regiment | undefined, bd = B.joinRadius;
@@ -163,6 +164,13 @@ export class BattleSystem implements System {
     }
   }
 
+  /** Una unidad deja la capa táctica: se le quita todo lo que esta le puso (y, si huía o se replegaba, recupera su postura). */
+  private release(r: Regiment, u: Entity) {
+    if (r.routed) u.stance = r.prevStance;
+    else if (r.regroup) u.stance = r.regroupStance ?? 'aggressive';
+    for (const k of ['reg', 'speedMul', 'aiHold', 'ammo', 'lastShot', 'noAmmo']) delete u.data[k];
+  }
+
   /** Mira hacia el enemigo más cercano (o hacia el centro del mapa). */
   private defaultFacing(u: Entity): Pt {
     const g = this.game;
@@ -179,7 +187,14 @@ export class BattleSystem implements System {
   private refresh(st: BattleState) {
     const g = this.game;
     for (const r of Object.values(st.regs)) {
-      r.members = r.members.filter(id => !!g.get(id));
+      // Fuera de la zona táctica (acabó la batalla o salió del círculo) deja de ser del regimiento
+      const keep: number[] = [];
+      for (const id of r.members) {
+        const u = g.get(id);
+        if (!u) continue;
+        if (battleActive(g, u)) keep.push(id); else this.release(r, u);
+      }
+      r.members = keep;
       if (!r.members.length) { delete st.regs[r.id]; continue; }
       let x = 0, y = 0;
       for (const id of r.members) { const u = g.get(id)!; x += u.x; y += u.y; }
@@ -192,6 +207,8 @@ export class BattleSystem implements System {
     // Un General nuevo levanta el techo de moral
     for (const k of Object.keys(st.generalDead)) {
       const pid = Number(k);
+      // Acabada la batalla (ya no hay regimientos suyos) el techo de moral y el mando limitado se acaban
+      if (st.generalDead[pid] && !Object.values(st.regs).some(r => r.owner === pid)) { delete st.generalDead[pid]; continue; }
       if (st.generalDead[pid] && g.units.some(u => !u.dead && u.owner === pid && g.unitDef(u).classes.includes('hero') && g.unitDef(u).aura)) delete st.generalDead[pid];
     }
     this.resupply(step);
@@ -234,7 +251,10 @@ export class BattleSystem implements System {
   private resupply(step: number) {
     const g = this.game;
     for (const u of g.units) {
-      if (u.dead || u.data.ammo === undefined || g.time - (u.data.lastShot ?? 0) < B.ammoRest) continue;
+      if (u.dead || u.data.ammo === undefined) continue;
+      // Fuera de la zona táctica no se lleva la cuenta: munición nueva
+      if (!battleActive(g, u)) { for (const k of ['ammo', 'lastShot', 'noAmmo']) delete u.data[k]; continue; }
+      if (g.time - (u.data.lastShot ?? 0) < B.ammoRest) continue;
       const max = ammoMax(g, u) ?? 0;
       if (u.data.ammo >= max) continue;
       u.data.ammo = Math.min(max, u.data.ammo + B.ammoRefillPerSec * step);

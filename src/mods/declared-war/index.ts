@@ -3,7 +3,7 @@ import type { GameMod, UnitDef } from '../../core/types';
 import { warAI } from './ai';
 import { drawWarMinimap, drawWarWorld } from './draw';
 import { warPanel } from './panel';
-import { declareWar, GENERAL, initWar, updateWar, warCombatRule } from './war';
+import { declareWar, GENERAL, inCircle, initWar, updateWar, warCombatRule, warState } from './war';
 
 const G = BALANCE.war.general;
 
@@ -32,6 +32,8 @@ export const declaredWarMod: GameMod = {
   register(reg) {
     reg.addUnit(general);
     reg.addCombatRule(warCombatRule);
+    // La capa táctica (mod battle, si está activo) rige solo dentro del círculo mientras dura la batalla
+    reg.addTacticalZone((game, e) => !!warState(game)?.wars.some(w => w.phase === 'battle' && inCircle(w, e, 2)));
     reg.addAIPlugin(warAI);
     reg.onGameStart(initWar);
     reg.addSystem('declared-war', game => ({ update: dt => updateWar(game, dt) }), 55);

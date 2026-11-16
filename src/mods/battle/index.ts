@@ -3,6 +3,7 @@ import type { GameMod } from '../../core/types';
 import { battleAI } from './ai';
 import { drawBattle } from './draw';
 import { battleCommandFilter, battleOrder } from './orders';
+import { battleActive } from './state';
 import { battleDamage, BattleSystem } from './system';
 
 /** Clases de las unidades cuyo daño de área también alcanza a las propias (artillería y asedio, §3.7). */
@@ -24,7 +25,7 @@ export const battleMod: GameMod = {
   defaultEnabled: false,
   register(reg) {
     reg.addDamageModifier(battleDamage);
-    reg.addFriendlyFire((game, attacker) => game.unitDef(attacker).classes.some(c => FRIENDLY_FIRE_CLASSES.includes(c)));
+    reg.addFriendlyFire((game, attacker) => game.unitDef(attacker).classes.some(c => FRIENDLY_FIRE_CLASSES.includes(c)) && battleActive(game, attacker));
     // Correr, cargar y arengar son órdenes de jugador (en red, por la cola de turnos); los iconos de estado se dibujan sobre el mapa
     reg.addNetCommand('battle', battleOrder);
     reg.addCommandFilter(battleCommandFilter);
@@ -34,7 +35,9 @@ export const battleMod: GameMod = {
     reg.addSystem('battle', game => new BattleSystem(game), 45);
     // El General de Guerra declarada, con el aura propia de la batalla (la del juego decide la batalla sola)
     if (reg.units.has('general')) {
-      reg.patchUnit('general', d => { d.aura = { ...d.aura!, attackMul: BALANCE.battle.auraAttackMul, armorAdd: BALANCE.battle.auraArmorAdd }; });
+      // Una copia: la definición es un objeto del módulo del otro mod y la comparten todos los registros
+      const g = reg.unit('general');
+      reg.addUnit({ ...g, aura: { ...g.aura!, attackMul: BALANCE.battle.auraAttackMul, armorAdd: BALANCE.battle.auraArmorAdd } });
     }
   },
 };

@@ -11,7 +11,8 @@ import { drawBattle, statusIcons } from '../src/mods/battle/draw';
 import { battleOrder, generalOf, harangueState } from '../src/mods/battle/orders';
 import { applyNetCommand } from '../src/game/net/netCommands';
 import { ammoMax, battleState, regimentOf, regiments, type Regiment } from '../src/mods/battle/state';
-import { battleReg, options, reg } from './helpers';
+import { battleReg, options, reg, warBattleReg } from './helpers';
+import { activeWar, declareWar, GENERAL, warState } from '../src/mods/declared-war/war';
 
 const B = BALANCE.battle;
 
@@ -549,5 +550,73 @@ describe('IA de la capa táctica', () => {
       for (const r of regiments(g)) { expect(r.members.length).toBeGreaterThan(0); if (r.regroup && !seen.has(r.id)) { seen.add(r.id); regroups++; } }
     }
     expect(regroups).toBeGreaterThanOrEqual(0);
+  });
+});
+
+describe('capa táctica con Guerra declarada', () => {
+  /** Partida llana con las dos cosas y los dos jugadores humanos (sin IA). */
+  async function warGame(): Promise<Game> {
+    const o = options('arabia', { seed: 5, war: true, battle: true, warPrepMinutes: 1 });
+    o.players = o.players.map(p => ({ ...p, human: true }));
+    const g = new Game(warBattleReg, o);
+    for (const e of [...g.list]) g.remove(e);
+    g.update(TICK_DT);
+    g.map.terrain.fill(g.reg.terrain('grass')); g.map.heights.fill(0); g.map.heightVersion++; g.map.version++; g.map.obstaclesChanged();
+    g.placeBuilding('townCenter', 1, 6, 6, true);
+    g.placeBuilding('townCenter', 2, 84, 84, true);
+    const p = g.players[1];
+    for (let y = 30; y < 60; y++) for (let x = 30; x < 60; x++) p.explored[y * g.map.w + x] = 1;
+    return g;
+  }
+  const ready = (g: Game, pid: number, at: { x: number; y: number }) => {
+    g.players[pid].age = BALANCE.war.requiredAge;
+    const gen = g.spawnUnit(GENERAL, pid, at.x, at.y);
+    run(g, 1.2);
+    return gen;
+  };
+
+  it('el General de Guerra declarada lleva el aura de la batalla táctica', () => {
+    const a = warBattleReg.unit(GENERAL).aura!;
+    expect(a.attackMul).toBe(B.auraAttackMul);
+    expect(a.armorAdd).toBe(B.auraArmorAdd);
+  });
+
+  it('en paz no hay regimientos ni ablandamiento; en la batalla, solo dentro del círculo; al acabar se libera todo', async () => {
+    const g = await warGame();
+    const inA = spawn(g, 'militia', 1, 40, 40, 10), inB = spawn(g, 'militia', 2, 50, 50, 10);
+    const out = spawn(g, 'militia', 1, 70, 20, 3), outB = spawn(g, 'militia', 2, 71, 22, 3);
+    const gen1 = ready(g, 1, { x: 38, y: 40 }), gen2 = ready(g, 2, { x: 52, y: 50 });
+    g.spawnUnit('scoutCavalry', 1, 81, 81); // descubre el pueblo rival
+    run(g, 1.2);
+    // Paz: nada de la capa
+    expect(regiments(g).length).toBe(0);
+    expect(hit(g, inB[0], inA[0])).toBeGreaterThan(9);
+    expect(typeof declareWar(g, 1, 2, 45, 45)).toBe('object');
+    run(g, 61);
+    expect(activeWar(g, 1)?.phase).toBe('battle');
+    run(g, 1.2);
+    // Dentro del círculo: regimientos y daño ablandado
+    expect(regimentOf(g, inA[0])).toBeDefined();
+    expect(regimentOf(g, inB[0])).toBeDefined();
+    expect(hit(g, inB[0], inA[0])).toBeLessThan(10 * B.damageMul * B.rearMul + 0.2);
+    // Fuera, nada
+    expect(regimentOf(g, out[0])).toBeUndefined();
+    expect(regimentOf(g, outB[0])).toBeUndefined();
+    expect(hit(g, outB[0], out[0])).toBeGreaterThan(9);
+    // Un regimiento huyendo queda pasivo; al terminar la batalla recupera su postura y todo se libera
+    const r = regimentOf(g, inA[0])!;
+    r.morale = -5;
+    run(g, 0.5);
+    expect(r.routed).toBe(true);
+    expect(g.get(r.members[0])!.stance).toBe('passive');
+    g.kill(gen2, gen1);
+    run(g, 3);
+    expect(warState(g)!.wars[0].phase).toBe('conquest');
+    expect(regiments(g).length).toBe(0);
+    expect(inA[0].stance).toBe('aggressive');
+    expect(inA[0].data.reg).toBeUndefined();
+    expect(inA[0].data.aiHold).toBeUndefined();
+    expect(battleState(g)!.generalDead[2]).toBeUndefined();
+    expect(hit(g, inB[0], inA[0])).toBeGreaterThan(9);
   });
 });

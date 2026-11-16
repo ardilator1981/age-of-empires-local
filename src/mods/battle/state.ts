@@ -115,6 +115,14 @@ export function ammoFraction(game: Game, r: Regiment): { frac: number; dry: bool
   return n ? { frac: sum / n, dry: dry * 2 >= n } : null;
 }
 
+/** ¿Rige la capa táctica donde está esta entidad? (`reg.addTacticalZone`; sin zonas registradas, en todas partes.) */
+export function battleActive(game: Game, e: Entity): boolean {
+  const z = game.reg.tacticalZones;
+  if (!z.length) return true;
+  for (const f of z) if (f(game, e)) return true;
+  return false;
+}
+
 export type Zone = 'front' | 'flank' | 'rear';
 
 /**

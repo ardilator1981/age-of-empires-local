@@ -474,6 +474,13 @@ export type DamageModifier = (game: Game, target: Entity, info: import('../game/
 export type FriendlyFireRule = (game: Game, attacker: Entity) => boolean;
 
 /**
+ * Zona táctica (`reg.addTacticalZone`): ¿rige la capa táctica (regimientos, moral, munición) donde
+ * está esta entidad? Si ningún mod registra una zona, rige en todas partes; si hay alguna, solo donde
+ * alguna diga que sí (Guerra declarada: dentro del círculo de batalla).
+ */
+export type TacticalZone = (game: Game, e: Entity) => boolean;
+
+/**
  * Filtro de las órdenes de jugador (`reg.addCommandFilter`), antes de ejecutarlas. Devuelve un texto
  * para rechazarla (se le avisa al jugador), `true` si el mod se encarga (p. ej. la retrasa y la
  * ejecuta más tarde) o nada para dejarla pasar.
