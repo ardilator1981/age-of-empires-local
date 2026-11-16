@@ -7,6 +7,8 @@ import type { Entity } from '../src/game/Entity';
 import { Game } from '../src/game/Game';
 import { stateHash } from '../src/game/net/hash';
 import { snapshot, upgradeSave, type SaveData } from '../src/game/save';
+import { drawBattle, statusIcons } from '../src/mods/battle/draw';
+import { battleOrder, generalOf, harangueState } from '../src/mods/battle/orders';
 import { battleState, regimentOf, regiments, type Regiment } from '../src/mods/battle/state';
 import { battleReg, options, reg } from './helpers';
 
@@ -259,5 +261,128 @@ describe('capa táctica (mod battle)', () => {
     run(g, 30);
     run(h, 30);
     expect(stateHash(h)).toBe(stateHash(g));
+  });
+});
+
+describe('órdenes de la capa táctica', () => {
+  const idsOf = (us: Entity[]) => us.map(u => u.id);
+
+  /** Hasta dónde llega un regimiento marchando 10 s, caminando o corriendo. */
+  async function marched(fast: boolean) {
+    const g = await flat();
+    const us = spawn(g, 'militia', 1, 20, 40, 10);
+    run(g, 1.1);
+    Commands.army(g, us, { kind: 'move', points: [{ x: 80, y: 40 }] }, false);
+    if (fast) expect(battleOrder(g, 1, { op: 'run', units: idsOf(us) })).toBe(true);
+    run(g, 10);
+    return regimentOf(g, us[0])!.center.x - 20;
+  }
+
+  it('correr aumenta la velocidad de la marcha del regimiento entero', async () => {
+    const walk = await marched(false), fast = await marched(true);
+    expect(fast / walk).toBeGreaterThan(1.25);
+  });
+
+  it('correr cansa; cansado se pierde daño y velocidad, y se descansa caminando', async () => {
+    const g = await flat();
+    const us = spawn(g, 'militia', 1, 15, 40, 10);
+    run(g, 1.1);
+    Commands.army(g, us, { kind: 'move', points: [{ x: 90, y: 40 }] }, false);
+    battleOrder(g, 1, { op: 'run', units: idsOf(us) });
+    run(g, 20);
+    const r = regimentOf(g, us[0])!;
+    expect(r.fatigue).toBeGreaterThan(B.tired);
+    expect(g.get(r.members[0])!.data.speedMul).toBeCloseTo(B.runMul * B.tiredSpeed, 5);
+    // Pasa a caminar: sigue lento (cansado) y se recupera
+    battleOrder(g, 1, { op: 'run', units: idsOf(us) });
+    expect(r.running).toBe(false);
+    const before = r.fatigue;
+    run(g, 10);
+    expect(r.fatigue).toBeLessThan(before);
+    // Un regimiento cansado hace menos daño
+    const target = spawn(g, 'militia', 2, 60, 60, 10);
+    run(g, 1.1);
+    regimentAt(g, target[0], 60, 60, { x: 1, y: 0 });
+    const foe = r.members.length ? g.get(r.members[0])! : us[0];
+    foe.x = 63; foe.y = 60;
+    r.fatigue = 80;
+    expect(hit(g, target[0], foe)).toBeCloseTo(10 * B.damageMul * B.tiredDamage, 1);
+  });
+
+  it('el cansancio máximo impide correr y correr se cancela al parar', async () => {
+    const g = await flat();
+    const us = spawn(g, 'militia', 1, 40, 40, 10);
+    run(g, 1.1);
+    const r = regimentOf(g, us[0])!;
+    battleOrder(g, 1, { op: 'run', units: idsOf(us) });
+    expect(r.running).toBe(true);
+    run(g, B.runStill + 1);
+    expect(r.running).toBe(false);
+    r.fatigue = 100;
+    battleOrder(g, 1, { op: 'run', units: idsOf(us) });
+    expect(r.running).toBe(false);
+  });
+
+  it('arengar sube la moral cerca del General, con enfriamiento, y no se puede sin General', async () => {
+    const g = await flat();
+    const inf = spawn(g, 'militia', 1, 40, 40, 10);
+    const hero = spawn(g, 'testHero', 1, 42, 44)[0];
+    run(g, 1.1);
+    const r = regimentOf(g, inf[0])!;
+    r.morale = 30;
+    expect(harangueState(g, 1).ok).toBe(true);
+    expect(battleOrder(g, 1, { op: 'harangue' })).toBe(true);
+    expect(r.morale).toBeCloseTo(30 + B.harangue, 5);
+    expect(battleOrder(g, 1, { op: 'harangue' })).toBe(false);
+    expect(harangueState(g, 1).wait).toBeGreaterThan(B.harangueCooldown - 3);
+    run(g, B.harangueCooldown + 1);
+    expect(harangueState(g, 1).ok).toBe(true);
+    // Sin General, ni arengar ni cargar
+    g.kill(hero);
+    expect(generalOf(g, 1)).toBeUndefined();
+    expect(battleOrder(g, 1, { op: 'harangue' })).toBe(false);
+    const kn = spawn(g, 'knight', 1, 20, 50, 4);
+    run(g, 1.1);
+    expect(battleOrder(g, 1, { op: 'charge', units: idsOf(kn), x: 60, y: 50 })).toBe(false);
+  });
+
+  it('cargar manda a la caballería a correr hacia el punto y consigue ímpetu', async () => {
+    const g = await flat();
+    const kn = spawn(g, 'knight', 1, 15, 40, 8);
+    spawn(g, 'militia', 2, 45, 40, 10);
+    run(g, 1.1);
+    expect(battleOrder(g, 1, { op: 'charge', units: idsOf(kn), x: 45, y: 40 })).toBe(true);
+    const kr = regimentOf(g, kn[0])!;
+    expect(kr.running).toBe(true);
+    let charged = false;
+    for (let t = 0; t < 70 && !charged; t++) { run(g, 0.25); charged = kr.charging; }
+    expect(charged).toBe(true);
+  });
+
+  it('las órdenes ajenas, vacías o mal formadas se rechazan', async () => {
+    const g = await flat();
+    const mine = spawn(g, 'militia', 1, 40, 40, 5);
+    run(g, 1.1);
+    expect(battleOrder(g, 2, { op: 'run', units: idsOf(mine) })).toBe(false);
+    expect(battleOrder(g, 1, { op: 'run', units: [] })).toBe(false);
+    expect(battleOrder(g, 1, { op: 'charge', units: idsOf(mine), x: NaN, y: 3 })).toBe(false);
+    expect(battleOrder(g, 1, { op: 'nada' })).toBe(false);
+    expect(battleOrder(g, 1, undefined)).toBe(false);
+  });
+
+  it('el overlay de estado dibuja sin fallar y los iconos reflejan el estado', async () => {
+    const g = await flat();
+    const us = spawn(g, 'militia', 1, 40, 40, 10);
+    spawn(g, 'militia', 2, 44, 40, 10);
+    run(g, 1.1);
+    const r = regimentOf(g, us[0])!;
+    const ctx = new Proxy({}, { get: () => () => {}, set: () => true }) as any;
+    const o = { ctx, game: g, ui: {}, zoom: 1, project: (x: number, y: number) => ({ x, y }), unproject: (x: number, y: number) => ({ x, y }) };
+    expect(() => drawBattle(o as any)).not.toThrow();
+    expect(statusIcons(r, g.time)).toEqual([]);
+    r.running = true; r.fatigue = 90; r.morale = 10; r.flankUntil = g.time + 1;
+    expect(statusIcons(r, g.time)).toEqual(['🏃', '↔️', '⚠️', '😓']);
+    r.routed = true;
+    expect(statusIcons(r, g.time)).toEqual(['🏳️']);
   });
 });

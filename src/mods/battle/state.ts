@@ -49,6 +49,10 @@ export interface Regiment {
   chargeHit: number[];
   /** Último tick en que el fuego propio le bajó la moral (una vez por tick). */
   ffTick: number;
+  /** Cansancio 0–100, si corre, y segundos seguidos sin moverse. */
+  fatigue: number;
+  running: boolean;
+  stillFor: number;
 }
 
 export interface BattleState {
@@ -58,6 +62,8 @@ export interface BattleState {
   generalDead: Record<number, boolean>;
   /** Tiempo acumulado desde la última actualización de moral. */
   acc: number;
+  /** Cuándo arengó por última vez cada jugador. */
+  harangued: Record<number, number>;
 }
 
 export function battleState(game: Game): BattleState | undefined { return game.data.battle; }

@@ -15,6 +15,8 @@ import { BALANCE } from '../config/balance';
 import { canShelterSomewhere, garrisonOf, nearestShelter } from '../game/garrison';
 import { canMountSomewhere, postedOn } from '../game/walkway';
 import { canUpgrade, connectedSegments, upgradeCost } from '../game/wallUpgrade';
+import { commandState, generalOf, harangueState } from '../mods/battle/orders';
+import { regimentOf } from '../mods/battle/state';
 
 /**
  * Qué se puede hacer con la selección actual. Lo comparten la interfaz de escritorio (rejilla de 15 botones)
@@ -62,6 +64,8 @@ export interface CommandSet {
   powers: Cmd[];
   /** Misiones de las unidades de comercio y espionaje seleccionadas (comerciar, informe, robar, sabotear, sobornar). */
   missions: Cmd[];
+  /** Órdenes de la capa táctica (mod battle): correr o caminar, cargar y arengar. */
+  battle: Cmd[];
 }
 
 export const OK: Avail = { visible: true, ok: true };
@@ -199,6 +203,52 @@ function missionCommands(s: Session, units: Entity[]): Cmd[] {
   return out;
 }
 
+/** Órdenes de la capa táctica para los soldados seleccionados: correr, cargar (caballería) y arengar (con General). */
+function battleCommands(s: Session, units: Entity[]): Cmd[] {
+  const g = s.game, p = g.human, ui = s.ui, out: Cmd[] = [];
+  if (!g.reg.netCommands.has('battle')) return out;
+  const men = units.filter(u => { const r = regimentOf(g, u); return !!r && !r.routed; });
+  if (!men.length) return out;
+  const send = (args: Record<string, unknown>) => s.orders.send({ t: 'mod', id: 'battle', args: { ...args, units: ids(men) } });
+  const regs = [...new Map(men.map(u => [regimentOf(g, u)!.id, regimentOf(g, u)!])).values()];
+  const running = regs.every(r => r.running);
+  const tired = Math.max(...regs.map(r => r.fatigue));
+  const runA: Avail = !running && tired >= 100 ? { visible: true, ok: false, reason: 'Demasiado cansados para correr', code: 'requirement' } : OK;
+  out.push({
+    icon: '🏃', label: running ? 'Caminar' : 'Correr', avail: runA, badge: tired > 0 ? `${Math.round(tired)}%` : undefined,
+    tip: tipHtml(running ? 'Caminar' : 'Correr', '', `Las tropas corren ×${BALANCE.battle.runMul} de velocidad, pero se cansan: cansadas luchan peor, van más lentas y pierden moral. Descansan caminando o quietas.`, runA, `😓 Cansancio ${Math.round(tired)} %`),
+    action: () => { if (!runA.ok) { g.rejectAvail(p.id, runA); return; } send({ op: 'run' }); },
+  });
+  if (regs.some(r => r.cavalry)) {
+    const a: Avail = commandState(g, p.id).ok ? OK : { visible: true, ok: false, reason: commandState(g, p.id).reason, code: 'requirement' };
+    out.push({
+      icon: '🐎', label: 'Cargar', avail: a,
+      tip: tipHtml('Cargar', '', 'Corren hacia un punto del mapa atacando. La caballería que llega a toda velocidad golpea la primera vez con mucha más fuerza; contra lanceros de frente la carga se anula. Cansa.', a),
+      action: () => {
+        if (!a.ok) { g.rejectAvail(p.id, a); return; }
+        g.notify('🐎 Toca el mapa: la carga irá hacia ese punto', p.id, 'info');
+        ui.placing = null; ui.targeting = null;
+        ui.pickPoint = { owner: 'charge', onPick: pt => { ui.pickPoint = null; send({ op: 'charge', x: pt.x, y: pt.y }); } };
+      },
+    });
+  }
+  if (generalOf(g, p.id) || battleHasGeneralTrouble(g, p.id)) {
+    const h = harangueState(g, p.id);
+    const a: Avail = h.ok ? OK : { visible: true, ok: false, reason: h.reason, code: 'requirement' };
+    out.push({
+      icon: '📣', label: 'Arengar', avail: a, badge: h.wait ? String(h.wait) : undefined,
+      tip: tipHtml('Arengar', '', `El General sube la moral (+${BALANCE.battle.harangue}) de las tropas propias cercanas a él. Enfriamiento ${BALANCE.battle.harangueCooldown} s.`, a),
+      action: () => { if (!a.ok) { g.rejectAvail(p.id, a); return; } send({ op: 'harangue' }); },
+    });
+  }
+  return out;
+}
+
+/** ¿Ha caído el General de este jugador (para mostrar «Arengar» desactivado en vez de ocultarlo)? */
+function battleHasGeneralTrouble(g: Game, pid: number): boolean {
+  return !commandState(g, pid).ok;
+}
+
 /** «Mejorar» y «Mejorar toda la línea» para los tramos de defensa seleccionados. */
 function upgradeCommands(s: Session, blds: Entity[]): Cmd[] {
   const g = s.game, p = g.human, out: Cmd[] = [];
@@ -233,7 +283,7 @@ export function selectionCommands(s: Session): CommandSet {
   const sel = ui.selected(g).filter(e => e.owner === p.id);
   const units = sel.filter(e => e.kind === 'unit');
   const blds = sel.filter(e => e.kind === 'building');
-  const set: CommandSet = { units, blds, build: null, attackMove: null, explore: null, stop: null, shelter: null, evacuate: null, wall: null, strategy: null, upgrade: [], train: [], research: [], del: null, powers: powerCommands(s), missions: [] };
+  const set: CommandSet = { units, blds, build: null, attackMove: null, explore: null, stop: null, shelter: null, evacuate: null, wall: null, strategy: null, upgrade: [], train: [], research: [], del: null, powers: powerCommands(s), missions: [], battle: [] };
   if (!sel.length) return set;
   const del: Cmd = {
     icon: '❌', label: 'Eliminar', avail: OK, tip: '<b>Eliminar</b> (Supr)<br>Destruye la selección.',
@@ -278,6 +328,7 @@ export function selectionCommands(s: Session): CommandSet {
       };
     }
     set.missions = missionCommands(s, units);
+    set.battle = battleCommands(s, units);
     const scouts = units.filter(u => g.unitDef(u).autoExplore);
     if (scouts.length) {
       const a = exploreAvail(g, p, scouts[0].defId);

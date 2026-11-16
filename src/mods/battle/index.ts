@@ -1,5 +1,7 @@
 import { BALANCE } from '../../config/balance';
 import type { GameMod } from '../../core/types';
+import { drawBattle } from './draw';
+import { battleOrder } from './orders';
 import { battleDamage, BattleSystem } from './system';
 
 /** Clases de las unidades cuyo daño de área también alcanza a las propias (artillería y asedio, §3.7). */
@@ -22,6 +24,9 @@ export const battleMod: GameMod = {
   register(reg) {
     reg.addDamageModifier(battleDamage);
     reg.addFriendlyFire((game, attacker) => game.unitDef(attacker).classes.some(c => FRIENDLY_FIRE_CLASSES.includes(c)));
+    // Correr, cargar y arengar son órdenes de jugador (en red, por la cola de turnos); los iconos de estado se dibujan sobre el mapa
+    reg.addNetCommand('battle', battleOrder);
+    reg.addWorldOverlay(drawBattle);
     // 45: después del combate (40) y la defensa (41)
     reg.addSystem('battle', game => new BattleSystem(game), 45);
     // El General de Guerra declarada, con el aura propia de la batalla (la del juego decide la batalla sola)

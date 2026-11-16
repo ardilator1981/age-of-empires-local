@@ -300,7 +300,7 @@ export class MobileHUD {
     if (set.build) tabs.push('economy', 'military', ...(set.build.defense.items.length ? ['defense' as const] : []));
     if (set.train.length) tabs.push('units');
     if (set.research.length) tabs.push('techs');
-    if (set.del || set.stop || set.evacuate || set.missions.length || set.upgrade.length) tabs.push('actions');
+    if (set.del || set.stop || set.evacuate || set.missions.length || set.upgrade.length || set.battle.length) tabs.push('actions');
     if (set.powers.length) tabs.push('powers');
     return tabs;
   }
@@ -328,6 +328,7 @@ export class MobileHUD {
         });
       }
       for (const c of set.missions) out.push(this.btnFromCmd(c));
+      for (const c of set.battle) out.push(this.btnFromCmd(c));
       if (set.attackMove) out.push(this.btnFromCmd(set.attackMove));
       if (set.strategy) out.push(this.btnFromCmd(set.strategy, { keepOpen: true }));
       if (set.explore) out.push(this.btnFromCmd(set.explore));
@@ -450,6 +451,7 @@ export class MobileHUD {
     else if (tab === 'actions') {
       for (const c of set.upgrade) btns.push(this.btnFromCmd(c));
       for (const c of set.missions) btns.push(this.btnFromCmd(c));
+      for (const c of set.battle) btns.push(this.btnFromCmd(c));
       if (set.attackMove) btns.push(this.btnFromCmd(set.attackMove));
       if (set.explore) btns.push(this.btnFromCmd(set.explore));
       if (set.shelter) btns.push(this.btnFromCmd(set.shelter));

@@ -114,6 +114,7 @@ export class MovementSystem implements System {
       // En formación, las que ya están en su hueco van al paso de la más lenta
       if (u.order?.type === 'formation' && u.data.speedCap) speed = Math.min(speed, u.data.speedCap);
       speed *= zoneSpeedFactor(g, u); // tierra quemada enemiga
+      speed *= u.data.speedMul ?? 1; // correr o ir cansado (capa táctica)
       // Cuesta arriba se avanza más despacio (BALANCE.movement)
       const t0 = u.path[0], dd = hypot(t0.x - u.x, t0.y - u.y);
       if (dd > 0.01) {

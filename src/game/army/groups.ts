@@ -71,7 +71,7 @@ export function groupOf(game: Game, u: Entity): Group | undefined {
 
 export function groups(game: Game): Group[] { return [...store(game).list.values()]; }
 
-function speedOf(game: Game, u: Entity) { return game.players[u.owner].getStat(game.unitDef(u), 'speed'); }
+function speedOf(game: Game, u: Entity) { return game.players[u.owner].getStat(game.unitDef(u), 'speed') * (u.data.speedMul ?? 1); }
 
 function norm(v: Pt): Pt { const d = hypot(v.x, v.y) || 1; return { x: v.x / d, y: v.y / d }; }
 

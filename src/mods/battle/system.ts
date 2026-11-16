@@ -34,6 +34,7 @@ export const battleDamage: DamageModifier = (game, t, info) => {
   const ar = regimentOf(game, a);
   if (ar) {
     if (!ar.routed && ar.morale < B.wavering) mul *= B.waveringDamage;
+    if (ar.fatigue > B.tired) mul *= B.tiredDamage;
     // Primer golpe de cada jinete de una carga; de frente contra lanceros, anulada
     if (ar.charging && !ar.struck.includes(a.id) && !(tr.lance && !tr.routed && zone === 'front')) mul *= B.chargeMul;
   }
@@ -51,7 +52,7 @@ export class BattleSystem implements System {
   }
 
   private state(): BattleState {
-    return (this.game.data.battle ??= { regs: {}, next: 1, generalDead: {}, acc: 0 });
+    return (this.game.data.battle ??= { regs: {}, next: 1, generalDead: {}, acc: 0, harangued: {} });
   }
 
   // ------------------------------------------------------------------ eventos
@@ -134,7 +135,7 @@ export class BattleSystem implements System {
           id, owner: u.owner, defId: u.defId, cls: k.cls, members: [], initial: 0, size: k.size, morale: k.morale, base: k.morale,
           routed: false, prevStance: 'aggressive', lance: g.unitDef(u).classes.includes('spear'), cavalry: k.cls === 'cavalry', hero: k.cls === 'hero',
           center: { x: u.x, y: u.y }, facing: this.defaultFacing(u), vx: 0, vy: 0, threat: { x: 0, y: 0 }, lastPos: null, lastEnemyNear: -99,
-          flankUntil: 0, rearUntil: 0, chargeT: 0, charging: false, chargeUntil: -1, struck: [], chargeHit: [], ffTick: -1,
+          flankUntil: 0, rearUntil: 0, chargeT: 0, charging: false, chargeUntil: -1, struck: [], chargeHit: [], ffTick: -1, fatigue: 0, running: false, stillFor: 0,
         };
         st.regs[id] = best;
       }
@@ -190,6 +191,7 @@ export class BattleSystem implements System {
       }
       if (dEnemy <= B.pursuitRadius) r.lastEnemyNear = now;
       this.orient(r, step);
+      this.tire(r, step, dEnemy);
       this.charge(r, step, regs);
 
       if (!r.routed) {
@@ -239,6 +241,23 @@ export class BattleSystem implements System {
     r.facing = norm({ x: f.x * c - sg * f.y * s, y: sg * f.x * s + f.y * c });
   }
 
+  /** Cansancio y velocidad: correr cansa, el cuerpo a cuerpo también; se recupera caminando o quieto. */
+  private tire(r: Regiment, step: number, dEnemy: number) {
+    const v = hypot(r.vx, r.vy), moving = v > B.marchSpeed;
+    r.stillFor = moving ? 0 : r.stillFor + step;
+    if (r.running && (r.stillFor >= B.runStill || r.routed)) r.running = false;
+    let d = 0;
+    if (r.running && moving) d += B.fatigueRun * (r.cavalry ? B.fatigueCavMul : 1);
+    if (dEnemy <= 2.5 && r.cls !== 'archer') d += B.fatigueMelee;
+    if (d === 0) d = -(moving ? B.fatigueWalkRest : B.fatigueRest);
+    r.fatigue = Math.max(0, Math.min(100, r.fatigue + d * step));
+    if (r.fatigue >= 100) r.running = false;
+    const tired = r.fatigue > B.tired;
+    if (tired && !r.routed) r.morale -= B.tiredMorale * step;
+    const mul = (r.running ? B.runMul : 1) * (tired ? B.tiredSpeed : 1);
+    for (const u of aliveMembers(this.game, r)) { if (mul === 1) delete u.data.speedMul; else u.data.speedMul = mul; }
+  }
+
   /** Ímpetu de la caballería: avanzar a toda velocidad hacia un regimiento enemigo cercano. */
   private charge(r: Regiment, step: number, regs: Regiment[]) {
     if (!r.cavalry) return;
@@ -264,7 +283,7 @@ export class BattleSystem implements System {
   // ------------------------------------------------------------------ huida y recuperación
   private rout(regs: Regiment[], st: BattleState, r: Regiment, nearest: Entity | null) {
     const g = this.game;
-    r.routed = true; r.morale = 0; r.charging = false; r.chargeT = 0; r.lastEnemyNear = g.time;
+    r.routed = true; r.morale = 0; r.charging = false; r.chargeT = 0; r.running = false; r.lastEnemyNear = g.time;
     const us = aliveMembers(g, r);
     if (us.length) r.prevStance = us[0].stance;
     this.flee(r, nearest);

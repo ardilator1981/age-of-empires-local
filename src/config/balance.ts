@@ -285,6 +285,24 @@ export const BALANCE = {
     fleeDistance: 30,
     /** Fuego amigo de la artillería y el asedio: moral perdida por impacto propio. */
     friendlyFireMorale: 3,
+    /** Correr: velocidad ×runMul; se cancela tras runStill s parado. */
+    runMul: 1.4,
+    runStill: 1.5,
+    /** Cansancio (0–100 por regimiento) por segundo: correr (×fatigueCavMul la caballería), cuerpo a cuerpo; se recupera caminando o quieto. */
+    fatigueRun: 4,
+    fatigueCavMul: 1.5,
+    fatigueMelee: 1,
+    fatigueWalkRest: 3,
+    fatigueRest: 5,
+    /** Cansado (> tired): daño ×tiredDamage, velocidad ×tiredSpeed, moral −tiredMorale por segundo. A 100 no puede correr. */
+    tired: 70,
+    tiredDamage: 0.8,
+    tiredSpeed: 0.85,
+    tiredMorale: 0.5,
+    /** Arengar (orden del General): moral que da a los regimientos propios a ≤ harangueRadius del General, y enfriamiento (s). */
+    harangue: 20,
+    harangueRadius: 14,
+    harangueCooldown: 60,
   },
 
   /** Poderes activos de las civilizaciones (docs/civilizaciones.md §5, `game/powers.ts`). Valores indicativos. */

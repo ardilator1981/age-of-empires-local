@@ -174,6 +174,9 @@ export class HUD {
       }
       if (set.build) { out[0] = set.build.economy.cmd; out[1] = set.build.military.cmd; if (set.build.defense.items.length) out[2] = set.build.defense.cmd; }
       [3, 4, 9].forEach((slot, i) => { out[slot] = set.missions[i] ?? null; });
+      // Órdenes de la capa táctica: en los huecos libres (los soldados no construyen ni tienen misiones)
+      const free = [3, 4, 9, 0, 1].filter(i => !out[i]);
+      set.battle.forEach((c, i) => { if (free[i] !== undefined) out[free[i]] = c; });
       out[5] = set.attackMove;
       out[6] = set.explore;
       out[7] = set.strategy;
